@@ -66,7 +66,7 @@ def read_new(path, cursor):
         offset = 0
     seq = cursor.get("seq", 0)
     items = []
-    with path.open("r", encoding="utf-8", errors="replace") as fh:
+    with path.open("r", encoding="utf-8", errors="replace", newline="") as fh:
         fh.seek(offset)
         for line in fh:
             if not line.endswith("\n"):

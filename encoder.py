@@ -66,6 +66,15 @@ def flatten_content(msg):
                 parts.append("tool_result %s" % str(body)[:MAX_TOOL])
     return "\n".join(p for p in parts if p), tools
 
+def has_tool_result(msg):
+    """A tool result is a block type, not a phrase. Scanning the rendered text
+    mislabels a human message that merely mentions the words, and misses a real
+    result that follows a text block."""
+    body = msg.get("content")
+    if not isinstance(body, list):
+        return False
+    return any(isinstance(b, dict) and b.get("type") == "tool_result" for b in body)
+
 def event_from_line(rec, seq):
     kind = rec.get("type")
     if kind not in ("user", "assistant"):
@@ -84,7 +93,7 @@ def event_from_line(rec, seq):
     usage = msg.get("usage") or {}
     tokens = sum(int(usage.get(k, 0) or 0) for k in ("input_tokens", "output_tokens", "cache_creation_input_tokens", "cache_read_input_tokens"))
     etype = "user_message" if kind == "user" else ("tool_call" if tools else "agent_response")
-    if kind == "user" and "tool_result" in text[:40]:
+    if kind == "user" and has_tool_result(msg):
         etype = "tool_result"
     return {
         "session_id": rec.get("sessionId") or rec.get("session_id") or "",
@@ -110,7 +119,7 @@ def read_new_events(path, cursor):
         offset = 0
     seq = cursor.get("seq", 0)
     events = []
-    with path.open("r", encoding="utf-8", errors="replace") as fh:
+    with path.open("r", encoding="utf-8", errors="replace", newline="") as fh:
         fh.seek(offset)
         for line in fh:
             if not line.endswith("\n"):
@@ -172,15 +181,24 @@ def run_once(args):
         if not events:
             state["files"][key] = new_cursor or cursor
             continue
+        stopped = False
         for i in range(0, len(events), BATCH_EVENTS):
+            if args.max_batches and total_batches >= args.max_batches:
+                stopped = True
+                break
             batch = events[i:i + BATCH_EVENTS]
             text = render_batch(batch)
-            if args.max_batches and total_batches >= args.max_batches:
-                break
             result = send(text, args.dry_run)
             total_batches += 1
             if args.verbose:
                 print("%s: %d events -> %s" % (path.name, len(batch), result))
+        # Cursor moves only when the whole file went out. Otherwise the events
+        # we never sent would be marked as handled and lost for good. The price
+        # is re-sending the batches already sent from this file on the next run,
+        # the same trade save.py makes: a duplicate beats a silent loss.
+        if stopped:
+            save_state(state)
+            break
         total_events += len(events)
         state["files"][key] = new_cursor
         save_state(state)
