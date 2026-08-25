@@ -20,6 +20,10 @@ SECRETS = [
     (re.compile(r"\beyJ[A-Za-z0-9_\-]{10,}\.[A-Za-z0-9_\-]{10,}\.[A-Za-z0-9_\-]+"), "<jwt>"),
     (re.compile(r"(?i)\b(authorization|bearer|private-token|api[_-]?key|token|password|passwd|secret)\b\s*[:=]\s*\S+"), r"\1: <redacted>"),
     (re.compile(r"(?i)machine\s+\S+\s+login\s+\S+\s+password\s+\S+"), "<netrc-entry>"),
+    # Учётные данные внутри адреса: scheme://user:secret@host. Так их отдаёт
+    # git remote -v, и ни одна из проверок выше их не видит: префикса нет,
+    # слова "token" рядом нет. Реальная утечка боевого ключа пришла отсюда.
+    (re.compile(r"(?i)\b([a-z][a-z0-9+.\-]*://)([^:/?#\s@]+):([^@/\s]+)@"), r"\1\2:<redacted>@"),
     (re.compile(r"-----BEGIN [A-Z ]*PRIVATE KEY-----[\s\S]*?-----END [A-Z ]*PRIVATE KEY-----"), "<private-key>"),
     (re.compile(r"\bhvs\.[A-Za-z0-9_\-]{10,}"), "<vault-token>"),
     (re.compile(r"-----(BEGIN|END) [A-Z ]*PRIVATE KEY-----"), "<private-key-marker>"),
