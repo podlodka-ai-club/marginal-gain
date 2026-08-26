@@ -13,7 +13,15 @@
 внешние адреса, связи между фактами одного эпизода и обстановку эпизода.
 Отдельно кладутся случаи, где память обязана промолчать.
 
-Запуск: python3 goldenset.py --out eval-cases.json --fixture eval-fixture.json
+У набора две половины, они работают в разных прогонах:
+
+  сценарий  реплики человека из тех эпизодов, откуда взяты факты. Первый
+            прогон отыгрывает их обычным разговором. Запишется что-нибудь
+            или нет — не задаётся, это и есть предмет замера.
+  случаи    вопросы с ожидаемым ответом. Второй прогон задаёт их с чистой
+            сессии и смотрит, помогла память или нет.
+
+Запуск: python3 goldenset.py
 """
 import argparse, hashlib, json, re
 from collections import defaultdict
@@ -84,6 +92,11 @@ def file_of(content):
     return content.split("правился файл ")[-1].split(" ради")[0]
 
 
+def sources(rec):
+    """Эпизоды, из которых факт взят. По ним собирается сценарий разговора."""
+    return [list(i["eid"]) for i in rec["items"]]
+
+
 def case_fact(key, rec):
     """Спрашиваем про проект, ждём путь файла, который в нём правили."""
     fact = rec["items"][-1]["fact"]
@@ -98,6 +111,7 @@ def case_fact(key, rec):
         "forbid": [],
         "repeated": rec["repeated"],
         "occurrences": rec["n"],
+        "source": sources(rec),
     }
 
 
@@ -111,6 +125,7 @@ def case_pref(key, rec):
         "forbid": [],
         "repeated": rec["repeated"],
         "occurrences": rec["n"],
+        "source": sources(rec),
     }
 
 
@@ -128,6 +143,7 @@ def case_url(key, rec):
         "forbid": [],
         "repeated": rec["repeated"],
         "occurrences": rec["n"],
+        "source": sources(rec),
     }
 
 
@@ -147,6 +163,7 @@ def case_link(eid, ep, marked):
         "forbid": [],
         "repeated": True,
         "occurrences": len(facts),
+        "source": [list(eid)],
     }
 
 
@@ -163,6 +180,7 @@ def case_context(eid, ep):
         "forbid": [],
         "repeated": True,
         "occurrences": 1,
+        "source": [list(eid)],
     }
 
 
@@ -185,7 +203,48 @@ def case_absent(i, query, token):
         "forbid": [token],
         "repeated": False,
         "occurrences": 0,
+        "source": [],
     }
+
+
+def script(cases, episodes):
+    """Первая половина набора: реплики человека для первого прогона.
+
+    Берутся из тех же эпизодов, откуда пришли факты, поэтому сценарий и мишень
+    сходятся: второй прогон спрашивает ровно про то, что первый мог записать.
+    Порядок — по времени, иначе разговор про файл случается раньше, чем файл
+    в нём появился, и связи внутри задачи не складываются.
+    """
+    want = []
+    for case in cases:
+        for eid in case["source"]:
+            want.append((tuple(eid), case["id"]))
+
+    by_ep = defaultdict(list)
+    for eid, cid in want:
+        by_ep[eid].append(cid)
+
+    turns = []
+    for eid in sorted(by_ep, key=lambda e: (episodes[e]["started_at"] or "", e)):
+        ep = episodes[eid]
+        request = anonymize(" ".join(ep["request"].split()))
+        if not request:
+            continue
+        turns.append({
+            "turn": len(turns) + 1,
+            "session": eid[0],
+            "episode": eid[1],
+            "project": anonymize(Path(ep["cwd"]).name if ep["cwd"] else "unknown"),
+            "working_directory": anonymize(ep["cwd"] or ""),
+            "git_branch": anonymize(ep["branch"] or ""),
+            "started_at": ep["started_at"] or "",
+            "request": request[:1500],
+            "files": [anonymize(f) for f in ep["files"][:15]],
+            "commands": [anonymize(c) for c in ep["commands"][:10]],
+            "outcome": u.outcome_of(ep),
+            "feeds": sorted(set(by_ep[eid])),
+        })
+    return turns
 
 
 def fixture(marked, episodes):
@@ -254,6 +313,7 @@ def main():
     ap.add_argument("--target", type=int, default=TARGET)
     ap.add_argument("--out", default="eval-cases.json")
     ap.add_argument("--fixture", default="eval-fixture.json")
+    ap.add_argument("--script", default="eval-script.json")
     args = ap.parse_args()
 
     cases, marked, episodes = build(args.split, args.target)
@@ -264,12 +324,20 @@ def main():
     Path(args.fixture).write_text(json.dumps(rows, ensure_ascii=False, indent=2) + "\n",
                                   encoding="utf-8")
 
+    turns = script(cases, episodes)
+    Path(args.script).write_text(json.dumps(turns, ensure_ascii=False, indent=2) + "\n",
+                                 encoding="utf-8")
+
     from collections import Counter
     kinds = Counter(c["kind"] for c in cases)
     pos = sum(1 for c in cases if c["repeated"])
     print("случаев %d, из них положительных по разметке %d" % (len(cases), pos))
     print("по видам:", ", ".join("%s %d" % kv for kv in sorted(kinds.items())))
-    print("записей в наполнении: %d -> %s" % (len(rows), args.fixture))
+    fed = {c for t in turns for c in t["feeds"]}
+    print("реплик в сценарии: %d -> %s" % (len(turns), args.script))
+    print("случаев, которые сценарий может наполнить: %d из %d"
+          % (len(fed), sum(1 for c in cases if c["kind"] != "absence")))
+    print("записей в запасном наполнении: %d -> %s" % (len(rows), args.fixture))
 
 
 if __name__ == "__main__":

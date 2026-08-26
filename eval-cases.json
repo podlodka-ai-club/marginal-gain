@@ -8,7 +8,61 @@
     ],
     "forbid": [],
     "repeated": true,
-    "occurrences": 13
+    "occurrences": 13,
+    "source": [
+      [
+        "0793ffe5-bba5-4e53-a958-0441d623cc92",
+        8
+      ],
+      [
+        "708fe7a1-9655-49f6-8fd5-87afd900ad48",
+        6
+      ],
+      [
+        "99b23e19-5b1d-4cff-8654-296db299a42c",
+        6
+      ],
+      [
+        "99b23e19-5b1d-4cff-8654-296db299a42c",
+        7
+      ],
+      [
+        "99b23e19-5b1d-4cff-8654-296db299a42c",
+        10
+      ],
+      [
+        "99b23e19-5b1d-4cff-8654-296db299a42c",
+        11
+      ],
+      [
+        "bd85fb51-3304-4bb0-84aa-52e7f4b64731",
+        16
+      ],
+      [
+        "cf29fec6-76be-4f73-853a-4c17309fe021",
+        6
+      ],
+      [
+        "d89c0d47-8424-4293-a02b-a04cf79b6954",
+        4
+      ],
+      [
+        "e04e2c52-f1a4-4f5f-9399-1566112d287b",
+        2
+      ],
+      [
+        "e04e2c52-f1a4-4f5f-9399-1566112d287b",
+        6
+      ],
+      [
+        "ef617449-d86f-4a54-a3ce-81997cd7cb09",
+        5
+      ],
+      [
+        "ef617449-d86f-4a54-a3ce-81997cd7cb09",
+        10
+      ]
+    ]
   },
   {
     "id": "fact-6539782b",
@@ -19,7 +73,53 @@
     ],
     "forbid": [],
     "repeated": true,
-    "occurrences": 11
+    "occurrences": 11,
+    "source": [
+      [
+        "0793ffe5-bba5-4e53-a958-0441d623cc92",
+        8
+      ],
+      [
+        "708fe7a1-9655-49f6-8fd5-87afd900ad48",
+        6
+      ],
+      [
+        "99b23e19-5b1d-4cff-8654-296db299a42c",
+        7
+      ],
+      [
+        "bd85fb51-3304-4bb0-84aa-52e7f4b64731",
+        16
+      ],
+      [
+        "bd85fb51-3304-4bb0-84aa-52e7f4b64731",
+        19
+      ],
+      [
+        "cf29fec6-76be-4f73-853a-4c17309fe021",
+        3
+      ],
+      [
+        "cf29fec6-76be-4f73-853a-4c17309fe021",
+        4
+      ],
+      [
+        "d89c0d47-8424-4293-a02b-a04cf79b6954",
+        3
+      ],
+      [
+        "d89c0d47-8424-4293-a02b-a04cf79b6954",
+        4
+      ],
+      [
+        "e04e2c52-f1a4-4f5f-9399-1566112d287b",
+        6
+      ],
+      [
+        "ef617449-d86f-4a54-a3ce-81997cd7cb09",
+        5
+      ]
+    ]
   },
   {
     "id": "fact-6eb4a480",
@@ -30,7 +130,37 @@
     ],
     "forbid": [],
     "repeated": true,
-    "occurrences": 7
+    "occurrences": 7,
+    "source": [
+      [
+        "0793ffe5-bba5-4e53-a958-0441d623cc92",
+        8
+      ],
+      [
+        "0793ffe5-bba5-4e53-a958-0441d623cc92",
+        14
+      ],
+      [
+        "bd85fb51-3304-4bb0-84aa-52e7f4b64731",
+        4
+      ],
+      [
+        "bd85fb51-3304-4bb0-84aa-52e7f4b64731",
+        16
+      ],
+      [
+        "bd85fb51-3304-4bb0-84aa-52e7f4b64731",
+        18
+      ],
+      [
+        "bd85fb51-3304-4bb0-84aa-52e7f4b64731",
+        19
+      ],
+      [
+        "e04e2c52-f1a4-4f5f-9399-1566112d287b",
+        11
+      ]
+    ]
   },
   {
     "id": "fact-1d610bb2",
@@ -41,7 +171,21 @@
     ],
     "forbid": [],
     "repeated": true,
-    "occurrences": 3
+    "occurrences": 3,
+    "source": [
+      [
+        "bd85fb51-3304-4bb0-84aa-52e7f4b64731",
+        16
+      ],
+      [
+        "d04342e7-0051-4a5e-b5e5-5d4956010983",
+        12
+      ],
+      [
+        "e04e2c52-f1a4-4f5f-9399-1566112d287b",
+        6
+      ]
+    ]
   },
   {
     "id": "fact-0b36f11f",
@@ -52,7 +196,21 @@
     ],
     "forbid": [],
     "repeated": true,
-    "occurrences": 3
+    "occurrences": 3,
+    "source": [
+      [
+        "bd85fb51-3304-4bb0-84aa-52e7f4b64731",
+        19
+      ],
+      [
+        "e04e2c52-f1a4-4f5f-9399-1566112d287b",
+        6
+      ],
+      [
+        "e04e2c52-f1a4-4f5f-9399-1566112d287b",
+        14
+      ]
+    ]
   },
   {
     "id": "fact-e37e0672",
@@ -63,7 +221,17 @@
     ],
     "forbid": [],
     "repeated": true,
-    "occurrences": 2
+    "occurrences": 2,
+    "source": [
+      [
+        "bd85fb51-3304-4bb0-84aa-52e7f4b64731",
+        16
+      ],
+      [
+        "bd85fb51-3304-4bb0-84aa-52e7f4b64731",
+        19
+      ]
+    ]
   },
   {
     "id": "fact-662109c9",
@@ -74,7 +242,17 @@
     ],
     "forbid": [],
     "repeated": true,
-    "occurrences": 2
+    "occurrences": 2,
+    "source": [
+      [
+        "bd85fb51-3304-4bb0-84aa-52e7f4b64731",
+        19
+      ],
+      [
+        "e04e2c52-f1a4-4f5f-9399-1566112d287b",
+        6
+      ]
+    ]
   },
   {
     "id": "fact-f5f94801",
@@ -85,7 +263,17 @@
     ],
     "forbid": [],
     "repeated": true,
-    "occurrences": 2
+    "occurrences": 2,
+    "source": [
+      [
+        "e04e2c52-f1a4-4f5f-9399-1566112d287b",
+        6
+      ],
+      [
+        "e04e2c52-f1a4-4f5f-9399-1566112d287b",
+        14
+      ]
+    ]
   },
   {
     "id": "fact-7c404a9a",
@@ -96,7 +284,13 @@
     ],
     "forbid": [],
     "repeated": true,
-    "occurrences": 1
+    "occurrences": 1,
+    "source": [
+      [
+        "e04e2c52-f1a4-4f5f-9399-1566112d287b",
+        6
+      ]
+    ]
   },
   {
     "id": "fact-090bffa5",
@@ -107,7 +301,13 @@
     ],
     "forbid": [],
     "repeated": true,
-    "occurrences": 1
+    "occurrences": 1,
+    "source": [
+      [
+        "e04e2c52-f1a4-4f5f-9399-1566112d287b",
+        6
+      ]
+    ]
   },
   {
     "id": "fact-ec852691",
@@ -118,7 +318,13 @@
     ],
     "forbid": [],
     "repeated": true,
-    "occurrences": 1
+    "occurrences": 1,
+    "source": [
+      [
+        "ef617449-d86f-4a54-a3ce-81997cd7cb09",
+        20
+      ]
+    ]
   },
   {
     "id": "fact-14e57062",
@@ -129,7 +335,13 @@
     ],
     "forbid": [],
     "repeated": true,
-    "occurrences": 1
+    "occurrences": 1,
+    "source": [
+      [
+        "d04342e7-0051-4a5e-b5e5-5d4956010983",
+        12
+      ]
+    ]
   },
   {
     "id": "fact-464e7993",
@@ -140,7 +352,13 @@
     ],
     "forbid": [],
     "repeated": true,
-    "occurrences": 1
+    "occurrences": 1,
+    "source": [
+      [
+        "bd85fb51-3304-4bb0-84aa-52e7f4b64731",
+        16
+      ]
+    ]
   },
   {
     "id": "fact-ada14712",
@@ -151,7 +369,13 @@
     ],
     "forbid": [],
     "repeated": true,
-    "occurrences": 1
+    "occurrences": 1,
+    "source": [
+      [
+        "bd85fb51-3304-4bb0-84aa-52e7f4b64731",
+        19
+      ]
+    ]
   },
   {
     "id": "fact-d186b277",
@@ -162,7 +386,13 @@
     ],
     "forbid": [],
     "repeated": true,
-    "occurrences": 1
+    "occurrences": 1,
+    "source": [
+      [
+        "ef617449-d86f-4a54-a3ce-81997cd7cb09",
+        20
+      ]
+    ]
   },
   {
     "id": "fact-3e7d16ef",
@@ -173,7 +403,49 @@
     ],
     "forbid": [],
     "repeated": false,
-    "occurrences": 10
+    "occurrences": 10,
+    "source": [
+      [
+        "c1a7ff50-11b2-4869-98b9-2661ce41a74e",
+        4
+      ],
+      [
+        "c1a7ff50-11b2-4869-98b9-2661ce41a74e",
+        5
+      ],
+      [
+        "c1a7ff50-11b2-4869-98b9-2661ce41a74e",
+        6
+      ],
+      [
+        "c1a7ff50-11b2-4869-98b9-2661ce41a74e",
+        7
+      ],
+      [
+        "c1a7ff50-11b2-4869-98b9-2661ce41a74e",
+        8
+      ],
+      [
+        "c1a7ff50-11b2-4869-98b9-2661ce41a74e",
+        9
+      ],
+      [
+        "c1a7ff50-11b2-4869-98b9-2661ce41a74e",
+        10
+      ],
+      [
+        "c1a7ff50-11b2-4869-98b9-2661ce41a74e",
+        15
+      ],
+      [
+        "c1a7ff50-11b2-4869-98b9-2661ce41a74e",
+        16
+      ],
+      [
+        "c1a7ff50-11b2-4869-98b9-2661ce41a74e",
+        17
+      ]
+    ]
   },
   {
     "id": "fact-c206c169",
@@ -184,7 +456,45 @@
     ],
     "forbid": [],
     "repeated": false,
-    "occurrences": 9
+    "occurrences": 9,
+    "source": [
+      [
+        "0793ffe5-bba5-4e53-a958-0441d623cc92",
+        8
+      ],
+      [
+        "bd85fb51-3304-4bb0-84aa-52e7f4b64731",
+        3
+      ],
+      [
+        "bd85fb51-3304-4bb0-84aa-52e7f4b64731",
+        4
+      ],
+      [
+        "bd85fb51-3304-4bb0-84aa-52e7f4b64731",
+        18
+      ],
+      [
+        "d89c0d47-8424-4293-a02b-a04cf79b6954",
+        4
+      ],
+      [
+        "e04e2c52-f1a4-4f5f-9399-1566112d287b",
+        17
+      ],
+      [
+        "ef617449-d86f-4a54-a3ce-81997cd7cb09",
+        3
+      ],
+      [
+        "ef617449-d86f-4a54-a3ce-81997cd7cb09",
+        4
+      ],
+      [
+        "ef617449-d86f-4a54-a3ce-81997cd7cb09",
+        5
+      ]
+    ]
   },
   {
     "id": "fact-6dfc017b",
@@ -195,7 +505,33 @@
     ],
     "forbid": [],
     "repeated": false,
-    "occurrences": 6
+    "occurrences": 6,
+    "source": [
+      [
+        "1bf5dc9d-839c-4d52-a980-a0da4aa3392f",
+        5
+      ],
+      [
+        "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
+        2
+      ],
+      [
+        "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
+        8
+      ],
+      [
+        "0bf3ba2a-8784-4889-8c97-a9d553c1d2f6",
+        2
+      ],
+      [
+        "0bf3ba2a-8784-4889-8c97-a9d553c1d2f6",
+        3
+      ],
+      [
+        "6011cf1e-80d0-4979-93f5-658b3ec89037",
+        7
+      ]
+    ]
   },
   {
     "id": "fact-888aaa51",
@@ -206,7 +542,33 @@
     ],
     "forbid": [],
     "repeated": false,
-    "occurrences": 6
+    "occurrences": 6,
+    "source": [
+      [
+        "1bf5dc9d-839c-4d52-a980-a0da4aa3392f",
+        3
+      ],
+      [
+        "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
+        2
+      ],
+      [
+        "0bf3ba2a-8784-4889-8c97-a9d553c1d2f6",
+        1
+      ],
+      [
+        "6011cf1e-80d0-4979-93f5-658b3ec89037",
+        3
+      ],
+      [
+        "6011cf1e-80d0-4979-93f5-658b3ec89037",
+        7
+      ],
+      [
+        "6ec2778b-40a2-456f-aed7-02136355e1db",
+        2
+      ]
+    ]
   },
   {
     "id": "fact-fe0124f4",
@@ -217,7 +579,29 @@
     ],
     "forbid": [],
     "repeated": false,
-    "occurrences": 5
+    "occurrences": 5,
+    "source": [
+      [
+        "1bf5dc9d-839c-4d52-a980-a0da4aa3392f",
+        3
+      ],
+      [
+        "1bf5dc9d-839c-4d52-a980-a0da4aa3392f",
+        5
+      ],
+      [
+        "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
+        8
+      ],
+      [
+        "0bf3ba2a-8784-4889-8c97-a9d553c1d2f6",
+        3
+      ],
+      [
+        "fe3b9dc3-6d54-4c39-bdca-d70e1b6bef88",
+        1
+      ]
+    ]
   },
   {
     "id": "fact-81a4c974",
@@ -228,7 +612,29 @@
     ],
     "forbid": [],
     "repeated": false,
-    "occurrences": 5
+    "occurrences": 5,
+    "source": [
+      [
+        "1bf5dc9d-839c-4d52-a980-a0da4aa3392f",
+        3
+      ],
+      [
+        "1bf5dc9d-839c-4d52-a980-a0da4aa3392f",
+        5
+      ],
+      [
+        "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
+        8
+      ],
+      [
+        "0bf3ba2a-8784-4889-8c97-a9d553c1d2f6",
+        3
+      ],
+      [
+        "6011cf1e-80d0-4979-93f5-658b3ec89037",
+        7
+      ]
+    ]
   },
   {
     "id": "fact-7d75e6a0",
@@ -239,7 +645,25 @@
     ],
     "forbid": [],
     "repeated": false,
-    "occurrences": 4
+    "occurrences": 4,
+    "source": [
+      [
+        "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
+        1
+      ],
+      [
+        "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
+        3
+      ],
+      [
+        "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
+        5
+      ],
+      [
+        "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
+        7
+      ]
+    ]
   },
   {
     "id": "fact-83db9d53",
@@ -250,7 +674,25 @@
     ],
     "forbid": [],
     "repeated": false,
-    "occurrences": 4
+    "occurrences": 4,
+    "source": [
+      [
+        "1bf5dc9d-839c-4d52-a980-a0da4aa3392f",
+        3
+      ],
+      [
+        "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
+        8
+      ],
+      [
+        "0bf3ba2a-8784-4889-8c97-a9d553c1d2f6",
+        3
+      ],
+      [
+        "6011cf1e-80d0-4979-93f5-658b3ec89037",
+        2
+      ]
+    ]
   },
   {
     "id": "fact-a9237373",
@@ -261,7 +703,25 @@
     ],
     "forbid": [],
     "repeated": false,
-    "occurrences": 4
+    "occurrences": 4,
+    "source": [
+      [
+        "e04e2c52-f1a4-4f5f-9399-1566112d287b",
+        2
+      ],
+      [
+        "e04e2c52-f1a4-4f5f-9399-1566112d287b",
+        7
+      ],
+      [
+        "ef617449-d86f-4a54-a3ce-81997cd7cb09",
+        9
+      ],
+      [
+        "ef617449-d86f-4a54-a3ce-81997cd7cb09",
+        20
+      ]
+    ]
   },
   {
     "id": "fact-8d6974ea",
@@ -272,7 +732,25 @@
     ],
     "forbid": [],
     "repeated": false,
-    "occurrences": 4
+    "occurrences": 4,
+    "source": [
+      [
+        "bd85fb51-3304-4bb0-84aa-52e7f4b64731",
+        3
+      ],
+      [
+        "cf29fec6-76be-4f73-853a-4c17309fe021",
+        5
+      ],
+      [
+        "e04e2c52-f1a4-4f5f-9399-1566112d287b",
+        14
+      ],
+      [
+        "e04e2c52-f1a4-4f5f-9399-1566112d287b",
+        17
+      ]
+    ]
   },
   {
     "id": "fact-38cf1010",
@@ -283,7 +761,25 @@
     ],
     "forbid": [],
     "repeated": false,
-    "occurrences": 4
+    "occurrences": 4,
+    "source": [
+      [
+        "708fe7a1-9655-49f6-8fd5-87afd900ad48",
+        5
+      ],
+      [
+        "708fe7a1-9655-49f6-8fd5-87afd900ad48",
+        6
+      ],
+      [
+        "e04e2c52-f1a4-4f5f-9399-1566112d287b",
+        2
+      ],
+      [
+        "e04e2c52-f1a4-4f5f-9399-1566112d287b",
+        7
+      ]
+    ]
   },
   {
     "id": "fact-d94c3657",
@@ -294,7 +790,21 @@
     ],
     "forbid": [],
     "repeated": false,
-    "occurrences": 3
+    "occurrences": 3,
+    "source": [
+      [
+        "f7b80743-cb61-405e-93d4-982beb215148",
+        5
+      ],
+      [
+        "f7b80743-cb61-405e-93d4-982beb215148",
+        6
+      ],
+      [
+        "f7b80743-cb61-405e-93d4-982beb215148",
+        8
+      ]
+    ]
   },
   {
     "id": "fact-1c995274",
@@ -305,7 +815,21 @@
     ],
     "forbid": [],
     "repeated": false,
-    "occurrences": 3
+    "occurrences": 3,
+    "source": [
+      [
+        "f7b80743-cb61-405e-93d4-982beb215148",
+        5
+      ],
+      [
+        "f7b80743-cb61-405e-93d4-982beb215148",
+        6
+      ],
+      [
+        "f7b80743-cb61-405e-93d4-982beb215148",
+        8
+      ]
+    ]
   },
   {
     "id": "fact-df723652",
@@ -316,7 +840,21 @@
     ],
     "forbid": [],
     "repeated": false,
-    "occurrences": 3
+    "occurrences": 3,
+    "source": [
+      [
+        "f7b80743-cb61-405e-93d4-982beb215148",
+        5
+      ],
+      [
+        "f7b80743-cb61-405e-93d4-982beb215148",
+        6
+      ],
+      [
+        "f7b80743-cb61-405e-93d4-982beb215148",
+        8
+      ]
+    ]
   },
   {
     "id": "fact-ee26ad45",
@@ -327,7 +865,21 @@
     ],
     "forbid": [],
     "repeated": false,
-    "occurrences": 3
+    "occurrences": 3,
+    "source": [
+      [
+        "d654bd7e-41d8-451d-898a-e945b0ec9bcf",
+        13
+      ],
+      [
+        "d654bd7e-41d8-451d-898a-e945b0ec9bcf",
+        14
+      ],
+      [
+        "d654bd7e-41d8-451d-898a-e945b0ec9bcf",
+        15
+      ]
+    ]
   },
   {
     "id": "fact-5d3886db",
@@ -338,7 +890,21 @@
     ],
     "forbid": [],
     "repeated": false,
-    "occurrences": 3
+    "occurrences": 3,
+    "source": [
+      [
+        "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
+        1
+      ],
+      [
+        "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
+        3
+      ],
+      [
+        "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
+        5
+      ]
+    ]
   },
   {
     "id": "fact-b114ac15",
@@ -349,7 +915,21 @@
     ],
     "forbid": [],
     "repeated": false,
-    "occurrences": 3
+    "occurrences": 3,
+    "source": [
+      [
+        "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
+        1
+      ],
+      [
+        "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
+        3
+      ],
+      [
+        "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
+        5
+      ]
+    ]
   },
   {
     "id": "fact-9a015fae",
@@ -360,7 +940,21 @@
     ],
     "forbid": [],
     "repeated": false,
-    "occurrences": 3
+    "occurrences": 3,
+    "source": [
+      [
+        "0bf3ba2a-8784-4889-8c97-a9d553c1d2f6",
+        1
+      ],
+      [
+        "0bf3ba2a-8784-4889-8c97-a9d553c1d2f6",
+        2
+      ],
+      [
+        "6011cf1e-80d0-4979-93f5-658b3ec89037",
+        7
+      ]
+    ]
   },
   {
     "id": "fact-9818680f",
@@ -371,7 +965,21 @@
     ],
     "forbid": [],
     "repeated": false,
-    "occurrences": 3
+    "occurrences": 3,
+    "source": [
+      [
+        "1bf5dc9d-839c-4d52-a980-a0da4aa3392f",
+        3
+      ],
+      [
+        "1bf5dc9d-839c-4d52-a980-a0da4aa3392f",
+        5
+      ],
+      [
+        "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
+        8
+      ]
+    ]
   },
   {
     "id": "fact-70af81ed",
@@ -382,7 +990,21 @@
     ],
     "forbid": [],
     "repeated": false,
-    "occurrences": 3
+    "occurrences": 3,
+    "source": [
+      [
+        "1bf5dc9d-839c-4d52-a980-a0da4aa3392f",
+        3
+      ],
+      [
+        "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
+        2
+      ],
+      [
+        "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
+        4
+      ]
+    ]
   },
   {
     "id": "fact-33788714",
@@ -393,7 +1015,21 @@
     ],
     "forbid": [],
     "repeated": false,
-    "occurrences": 3
+    "occurrences": 3,
+    "source": [
+      [
+        "0bf3ba2a-8784-4889-8c97-a9d553c1d2f6",
+        1
+      ],
+      [
+        "0bf3ba2a-8784-4889-8c97-a9d553c1d2f6",
+        2
+      ],
+      [
+        "6011cf1e-80d0-4979-93f5-658b3ec89037",
+        7
+      ]
+    ]
   },
   {
     "id": "fact-748cd5d3",
@@ -404,7 +1040,21 @@
     ],
     "forbid": [],
     "repeated": false,
-    "occurrences": 3
+    "occurrences": 3,
+    "source": [
+      [
+        "1bf5dc9d-839c-4d52-a980-a0da4aa3392f",
+        3
+      ],
+      [
+        "6ec2778b-40a2-456f-aed7-02136355e1db",
+        2
+      ],
+      [
+        "fe3b9dc3-6d54-4c39-bdca-d70e1b6bef88",
+        1
+      ]
+    ]
   },
   {
     "id": "fact-29d919ed",
@@ -415,7 +1065,21 @@
     ],
     "forbid": [],
     "repeated": false,
-    "occurrences": 3
+    "occurrences": 3,
+    "source": [
+      [
+        "d89c0d47-8424-4293-a02b-a04cf79b6954",
+        3
+      ],
+      [
+        "d89c0d47-8424-4293-a02b-a04cf79b6954",
+        4
+      ],
+      [
+        "ef617449-d86f-4a54-a3ce-81997cd7cb09",
+        5
+      ]
+    ]
   },
   {
     "id": "fact-14f64d02",
@@ -426,7 +1090,21 @@
     ],
     "forbid": [],
     "repeated": false,
-    "occurrences": 3
+    "occurrences": 3,
+    "source": [
+      [
+        "0793ffe5-bba5-4e53-a958-0441d623cc92",
+        8
+      ],
+      [
+        "99b23e19-5b1d-4cff-8654-296db299a42c",
+        6
+      ],
+      [
+        "99b23e19-5b1d-4cff-8654-296db299a42c",
+        7
+      ]
+    ]
   },
   {
     "id": "fact-5b023ec1",
@@ -437,7 +1115,21 @@
     ],
     "forbid": [],
     "repeated": false,
-    "occurrences": 3
+    "occurrences": 3,
+    "source": [
+      [
+        "6da422ef-baa9-4a01-bfb5-9dd3f631871c",
+        2
+      ],
+      [
+        "e04e2c52-f1a4-4f5f-9399-1566112d287b",
+        2
+      ],
+      [
+        "e04e2c52-f1a4-4f5f-9399-1566112d287b",
+        7
+      ]
+    ]
   },
   {
     "id": "pref-b4fecc8b",
@@ -448,7 +1140,109 @@
     ],
     "forbid": [],
     "repeated": true,
-    "occurrences": 25
+    "occurrences": 25,
+    "source": [
+      [
+        "7a3b5040-a4c0-4e0e-8467-bbaf1dfff627",
+        10
+      ],
+      [
+        "a614735d-0203-4573-83dc-0e8c2b89e74d",
+        25
+      ],
+      [
+        "e2e3ea09-917e-43db-89fa-23faf5268fa8",
+        8
+      ],
+      [
+        "e4e1b55b-dc6a-4e07-b8ac-eabdb9e4fdeb",
+        1
+      ],
+      [
+        "9780a4d1-5eae-4444-8e87-d3aac02e258d",
+        1
+      ],
+      [
+        "d654bd7e-41d8-451d-898a-e945b0ec9bcf",
+        6
+      ],
+      [
+        "6e9b5133-a4e2-436f-a058-227d5bad6091",
+        3
+      ],
+      [
+        "6e9b5133-a4e2-436f-a058-227d5bad6091",
+        6
+      ],
+      [
+        "c1a7ff50-11b2-4869-98b9-2661ce41a74e",
+        6
+      ],
+      [
+        "c1a7ff50-11b2-4869-98b9-2661ce41a74e",
+        7
+      ],
+      [
+        "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
+        1
+      ],
+      [
+        "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
+        1
+      ],
+      [
+        "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
+        1
+      ],
+      [
+        "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
+        1
+      ],
+      [
+        "f7b80743-cb61-405e-93d4-982beb215148",
+        1
+      ],
+      [
+        "f7b80743-cb61-405e-93d4-982beb215148",
+        9
+      ],
+      [
+        "77f69361-ad5c-4d1e-949c-ae6a02c507b2",
+        1
+      ],
+      [
+        "bd85fb51-3304-4bb0-84aa-52e7f4b64731",
+        3
+      ],
+      [
+        "bd85fb51-3304-4bb0-84aa-52e7f4b64731",
+        7
+      ],
+      [
+        "d04342e7-0051-4a5e-b5e5-5d4956010983",
+        4
+      ],
+      [
+        "e04e2c52-f1a4-4f5f-9399-1566112d287b",
+        1
+      ],
+      [
+        "ef617449-d86f-4a54-a3ce-81997cd7cb09",
+        12
+      ],
+      [
+        "ef617449-d86f-4a54-a3ce-81997cd7cb09",
+        14
+      ],
+      [
+        "ef617449-d86f-4a54-a3ce-81997cd7cb09",
+        15
+      ],
+      [
+        "ef617449-d86f-4a54-a3ce-81997cd7cb09",
+        16
+      ]
+    ]
   },
   {
     "id": "pref-90270f60",
@@ -459,7 +1253,65 @@
     ],
     "forbid": [],
     "repeated": true,
-    "occurrences": 14
+    "occurrences": 14,
+    "source": [
+      [
+        "e6abdf31-fa4f-4960-880f-10fd7a4216bd",
+        10
+      ],
+      [
+        "6768f8dc-a363-4751-a39c-45203b274588",
+        3
+      ],
+      [
+        "f2a66fdd-5253-4f43-9ef0-9a17be0d8a17",
+        4
+      ],
+      [
+        "c7864fdd-5ab9-4174-9bbc-0baaec5bdedf",
+        2
+      ],
+      [
+        "443261a2-4bd1-475b-ac40-a68480bb1021",
+        5
+      ],
+      [
+        "557de9de-327d-44d4-a346-fde6ef3f694f",
+        6
+      ],
+      [
+        "557de9de-327d-44d4-a346-fde6ef3f694f",
+        8
+      ],
+      [
+        "77f69361-ad5c-4d1e-949c-ae6a02c507b2",
+        1
+      ],
+      [
+        "feb24791-a870-480f-b3eb-4ed4707e276d",
+        2
+      ],
+      [
+        "99b23e19-5b1d-4cff-8654-296db299a42c",
+        6
+      ],
+      [
+        "bd85fb51-3304-4bb0-84aa-52e7f4b64731",
+        3
+      ],
+      [
+        "d04342e7-0051-4a5e-b5e5-5d4956010983",
+        2
+      ],
+      [
+        "e04e2c52-f1a4-4f5f-9399-1566112d287b",
+        1
+      ],
+      [
+        "ef617449-d86f-4a54-a3ce-81997cd7cb09",
+        18
+      ]
+    ]
   },
   {
     "id": "pref-1b881221",
@@ -470,7 +1322,37 @@
     ],
     "forbid": [],
     "repeated": true,
-    "occurrences": 7
+    "occurrences": 7,
+    "source": [
+      [
+        "443261a2-4bd1-475b-ac40-a68480bb1021",
+        6
+      ],
+      [
+        "6011cf1e-80d0-4979-93f5-658b3ec89037",
+        6
+      ],
+      [
+        "77f69361-ad5c-4d1e-949c-ae6a02c507b2",
+        1
+      ],
+      [
+        "77f69361-ad5c-4d1e-949c-ae6a02c507b2",
+        6
+      ],
+      [
+        "77f69361-ad5c-4d1e-949c-ae6a02c507b2",
+        8
+      ],
+      [
+        "bd85fb51-3304-4bb0-84aa-52e7f4b64731",
+        16
+      ],
+      [
+        "e04e2c52-f1a4-4f5f-9399-1566112d287b",
+        1
+      ]
+    ]
   },
   {
     "id": "pref-79b4bbda",
@@ -481,7 +1363,21 @@
     ],
     "forbid": [],
     "repeated": true,
-    "occurrences": 3
+    "occurrences": 3,
+    "source": [
+      [
+        "6768f8dc-a363-4751-a39c-45203b274588",
+        1
+      ],
+      [
+        "f7b80743-cb61-405e-93d4-982beb215148",
+        3
+      ],
+      [
+        "6011cf1e-80d0-4979-93f5-658b3ec89037",
+        1
+      ]
+    ]
   },
   {
     "id": "pref-c447f4c7",
@@ -492,7 +1388,17 @@
     ],
     "forbid": [],
     "repeated": true,
-    "occurrences": 2
+    "occurrences": 2,
+    "source": [
+      [
+        "6c857447-0ba0-4709-951f-7204b0b6b1a0",
+        11
+      ],
+      [
+        "c1a7ff50-11b2-4869-98b9-2661ce41a74e",
+        10
+      ]
+    ]
   },
   {
     "id": "url-33591d7e",
@@ -503,7 +1409,17 @@
     ],
     "forbid": [],
     "repeated": true,
-    "occurrences": 2
+    "occurrences": 2,
+    "source": [
+      [
+        "6c857447-0ba0-4709-951f-7204b0b6b1a0",
+        12
+      ],
+      [
+        "e2e3ea09-917e-43db-89fa-23faf5268fa8",
+        31
+      ]
+    ]
   },
   {
     "id": "url-f3f0ef94",
@@ -514,7 +1430,13 @@
     ],
     "forbid": [],
     "repeated": true,
-    "occurrences": 1
+    "occurrences": 1,
+    "source": [
+      [
+        "443261a2-4bd1-475b-ac40-a68480bb1021",
+        12
+      ]
+    ]
   },
   {
     "id": "url-a4fb4590",
@@ -525,7 +1447,13 @@
     ],
     "forbid": [],
     "repeated": true,
-    "occurrences": 1
+    "occurrences": 1,
+    "source": [
+      [
+        "d654bd7e-41d8-451d-898a-e945b0ec9bcf",
+        12
+      ]
+    ]
   },
   {
     "id": "url-6f6a0273",
@@ -536,7 +1464,13 @@
     ],
     "forbid": [],
     "repeated": true,
-    "occurrences": 1
+    "occurrences": 1,
+    "source": [
+      [
+        "23ece2e2-1b3d-47cf-bc46-5dc0d8cb67dd",
+        20
+      ]
+    ]
   },
   {
     "id": "url-60e2e77a",
@@ -547,7 +1481,21 @@
     ],
     "forbid": [],
     "repeated": false,
-    "occurrences": 3
+    "occurrences": 3,
+    "source": [
+      [
+        "7a3b5040-a4c0-4e0e-8467-bbaf1dfff627",
+        7
+      ],
+      [
+        "7a3b5040-a4c0-4e0e-8467-bbaf1dfff627",
+        8
+      ],
+      [
+        "7a3b5040-a4c0-4e0e-8467-bbaf1dfff627",
+        9
+      ]
+    ]
   },
   {
     "id": "url-c0b7bafb",
@@ -558,7 +1506,21 @@
     ],
     "forbid": [],
     "repeated": false,
-    "occurrences": 3
+    "occurrences": 3,
+    "source": [
+      [
+        "f2a66fdd-5253-4f43-9ef0-9a17be0d8a17",
+        5
+      ],
+      [
+        "f2a66fdd-5253-4f43-9ef0-9a17be0d8a17",
+        6
+      ],
+      [
+        "f2a66fdd-5253-4f43-9ef0-9a17be0d8a17",
+        7
+      ]
+    ]
   },
   {
     "id": "url-b12348a0",
@@ -569,7 +1531,17 @@
     ],
     "forbid": [],
     "repeated": false,
-    "occurrences": 2
+    "occurrences": 2,
+    "source": [
+      [
+        "a614735d-0203-4573-83dc-0e8c2b89e74d",
+        23
+      ],
+      [
+        "a614735d-0203-4573-83dc-0e8c2b89e74d",
+        25
+      ]
+    ]
   },
   {
     "id": "url-2b0a1441",
@@ -580,7 +1552,17 @@
     ],
     "forbid": [],
     "repeated": false,
-    "occurrences": 2
+    "occurrences": 2,
+    "source": [
+      [
+        "ef617449-d86f-4a54-a3ce-81997cd7cb09",
+        20
+      ],
+      [
+        "ef617449-d86f-4a54-a3ce-81997cd7cb09",
+        20
+      ]
+    ]
   },
   {
     "id": "url-567ca716",
@@ -591,7 +1573,17 @@
     ],
     "forbid": [],
     "repeated": false,
-    "occurrences": 2
+    "occurrences": 2,
+    "source": [
+      [
+        "a614735d-0203-4573-83dc-0e8c2b89e74d",
+        20
+      ],
+      [
+        "a614735d-0203-4573-83dc-0e8c2b89e74d",
+        22
+      ]
+    ]
   },
   {
     "id": "url-e5606f41",
@@ -602,7 +1594,17 @@
     ],
     "forbid": [],
     "repeated": false,
-    "occurrences": 2
+    "occurrences": 2,
+    "source": [
+      [
+        "e2e3ea09-917e-43db-89fa-23faf5268fa8",
+        1
+      ],
+      [
+        "e2e3ea09-917e-43db-89fa-23faf5268fa8",
+        22
+      ]
+    ]
   },
   {
     "id": "url-39735638",
@@ -613,7 +1615,17 @@
     ],
     "forbid": [],
     "repeated": false,
-    "occurrences": 2
+    "occurrences": 2,
+    "source": [
+      [
+        "e2e3ea09-917e-43db-89fa-23faf5268fa8",
+        1
+      ],
+      [
+        "e2e3ea09-917e-43db-89fa-23faf5268fa8",
+        18
+      ]
+    ]
   },
   {
     "id": "url-045b425a",
@@ -624,7 +1636,17 @@
     ],
     "forbid": [],
     "repeated": false,
-    "occurrences": 2
+    "occurrences": 2,
+    "source": [
+      [
+        "f7b80743-cb61-405e-93d4-982beb215148",
+        9
+      ],
+      [
+        "f7b80743-cb61-405e-93d4-982beb215148",
+        16
+      ]
+    ]
   },
   {
     "id": "url-570781f1",
@@ -635,7 +1657,13 @@
     ],
     "forbid": [],
     "repeated": false,
-    "occurrences": 1
+    "occurrences": 1,
+    "source": [
+      [
+        "443261a2-4bd1-475b-ac40-a68480bb1021",
+        5
+      ]
+    ]
   },
   {
     "id": "url-ef015e7a",
@@ -646,7 +1674,13 @@
     ],
     "forbid": [],
     "repeated": false,
-    "occurrences": 1
+    "occurrences": 1,
+    "source": [
+      [
+        "77f69361-ad5c-4d1e-949c-ae6a02c507b2",
+        2
+      ]
+    ]
   },
   {
     "id": "url-9e1cc2a0",
@@ -657,7 +1691,13 @@
     ],
     "forbid": [],
     "repeated": false,
-    "occurrences": 1
+    "occurrences": 1,
+    "source": [
+      [
+        "e4e1b55b-dc6a-4e07-b8ac-eabdb9e4fdeb",
+        1
+      ]
+    ]
   },
   {
     "id": "link-b1bbf99f",
@@ -669,7 +1709,13 @@
     ],
     "forbid": [],
     "repeated": true,
-    "occurrences": 15
+    "occurrences": 15,
+    "source": [
+      [
+        "0793ffe5-bba5-4e53-a958-0441d623cc92",
+        8
+      ]
+    ]
   },
   {
     "id": "link-ff75c89d",
@@ -681,7 +1727,13 @@
     ],
     "forbid": [],
     "repeated": true,
-    "occurrences": 3
+    "occurrences": 3,
+    "source": [
+      [
+        "0793ffe5-bba5-4e53-a958-0441d623cc92",
+        14
+      ]
+    ]
   },
   {
     "id": "link-0fed9697",
@@ -693,7 +1745,13 @@
     ],
     "forbid": [],
     "repeated": true,
-    "occurrences": 7
+    "occurrences": 7,
+    "source": [
+      [
+        "0bf3ba2a-8784-4889-8c97-a9d553c1d2f6",
+        1
+      ]
+    ]
   },
   {
     "id": "link-83d5dcc0",
@@ -705,7 +1763,13 @@
     ],
     "forbid": [],
     "repeated": true,
-    "occurrences": 4
+    "occurrences": 4,
+    "source": [
+      [
+        "0bf3ba2a-8784-4889-8c97-a9d553c1d2f6",
+        2
+      ]
+    ]
   },
   {
     "id": "link-bdf3ffae",
@@ -717,7 +1781,13 @@
     ],
     "forbid": [],
     "repeated": true,
-    "occurrences": 14
+    "occurrences": 14,
+    "source": [
+      [
+        "0bf3ba2a-8784-4889-8c97-a9d553c1d2f6",
+        3
+      ]
+    ]
   },
   {
     "id": "link-e774810c",
@@ -729,7 +1799,13 @@
     ],
     "forbid": [],
     "repeated": true,
-    "occurrences": 7
+    "occurrences": 7,
+    "source": [
+      [
+        "1506b41b-daae-400c-a834-2ff3880a5d58",
+        1
+      ]
+    ]
   },
   {
     "id": "link-2be7763e",
@@ -741,7 +1817,13 @@
     ],
     "forbid": [],
     "repeated": true,
-    "occurrences": 13
+    "occurrences": 13,
+    "source": [
+      [
+        "1bf5dc9d-839c-4d52-a980-a0da4aa3392f",
+        3
+      ]
+    ]
   },
   {
     "id": "link-91a2b3d8",
@@ -753,7 +1835,13 @@
     ],
     "forbid": [],
     "repeated": true,
-    "occurrences": 7
+    "occurrences": 7,
+    "source": [
+      [
+        "1bf5dc9d-839c-4d52-a980-a0da4aa3392f",
+        5
+      ]
+    ]
   },
   {
     "id": "link-8dab4e0c",
@@ -765,7 +1853,13 @@
     ],
     "forbid": [],
     "repeated": true,
-    "occurrences": 2
+    "occurrences": 2,
+    "source": [
+      [
+        "23ece2e2-1b3d-47cf-bc46-5dc0d8cb67dd",
+        5
+      ]
+    ]
   },
   {
     "id": "link-c446be02",
@@ -777,7 +1871,13 @@
     ],
     "forbid": [],
     "repeated": true,
-    "occurrences": 4
+    "occurrences": 4,
+    "source": [
+      [
+        "23ece2e2-1b3d-47cf-bc46-5dc0d8cb67dd",
+        6
+      ]
+    ]
   },
   {
     "id": "link-06a5d7b6",
@@ -789,7 +1889,13 @@
     ],
     "forbid": [],
     "repeated": true,
-    "occurrences": 2
+    "occurrences": 2,
+    "source": [
+      [
+        "23ece2e2-1b3d-47cf-bc46-5dc0d8cb67dd",
+        7
+      ]
+    ]
   },
   {
     "id": "link-fa32deb1",
@@ -801,7 +1907,13 @@
     ],
     "forbid": [],
     "repeated": true,
-    "occurrences": 6
+    "occurrences": 6,
+    "source": [
+      [
+        "443261a2-4bd1-475b-ac40-a68480bb1021",
+        1
+      ]
+    ]
   },
   {
     "id": "link-592ad730",
@@ -813,7 +1925,13 @@
     ],
     "forbid": [],
     "repeated": true,
-    "occurrences": 2
+    "occurrences": 2,
+    "source": [
+      [
+        "443261a2-4bd1-475b-ac40-a68480bb1021",
+        2
+      ]
+    ]
   },
   {
     "id": "link-cbf333cb",
@@ -825,7 +1943,13 @@
     ],
     "forbid": [],
     "repeated": true,
-    "occurrences": 3
+    "occurrences": 3,
+    "source": [
+      [
+        "443261a2-4bd1-475b-ac40-a68480bb1021",
+        10
+      ]
+    ]
   },
   {
     "id": "link-33f18e0d",
@@ -837,7 +1961,13 @@
     ],
     "forbid": [],
     "repeated": true,
-    "occurrences": 4
+    "occurrences": 4,
+    "source": [
+      [
+        "443261a2-4bd1-475b-ac40-a68480bb1021",
+        12
+      ]
+    ]
   },
   {
     "id": "ctx-1f6a2369",
@@ -848,7 +1978,13 @@
     ],
     "forbid": [],
     "repeated": true,
-    "occurrences": 1
+    "occurrences": 1,
+    "source": [
+      [
+        "030b861c-4790-4b32-a0dd-40b2793fbadb",
+        1
+      ]
+    ]
   },
   {
     "id": "ctx-5383c5c1",
@@ -859,7 +1995,13 @@
     ],
     "forbid": [],
     "repeated": true,
-    "occurrences": 1
+    "occurrences": 1,
+    "source": [
+      [
+        "03442ee4-e8c5-4fb1-bfe1-0b173d024208",
+        1
+      ]
+    ]
   },
   {
     "id": "ctx-de6aecb5",
@@ -870,7 +2012,13 @@
     ],
     "forbid": [],
     "repeated": true,
-    "occurrences": 1
+    "occurrences": 1,
+    "source": [
+      [
+        "03442ee4-e8c5-4fb1-bfe1-0b173d024208",
+        2
+      ]
+    ]
   },
   {
     "id": "ctx-f4a2d7c1",
@@ -881,7 +2029,13 @@
     ],
     "forbid": [],
     "repeated": true,
-    "occurrences": 1
+    "occurrences": 1,
+    "source": [
+      [
+        "03442ee4-e8c5-4fb1-bfe1-0b173d024208",
+        3
+      ]
+    ]
   },
   {
     "id": "ctx-fb678ab1",
@@ -892,7 +2046,13 @@
     ],
     "forbid": [],
     "repeated": true,
-    "occurrences": 1
+    "occurrences": 1,
+    "source": [
+      [
+        "03442ee4-e8c5-4fb1-bfe1-0b173d024208",
+        4
+      ]
+    ]
   },
   {
     "id": "ctx-6619cbed",
@@ -903,7 +2063,13 @@
     ],
     "forbid": [],
     "repeated": true,
-    "occurrences": 1
+    "occurrences": 1,
+    "source": [
+      [
+        "03442ee4-e8c5-4fb1-bfe1-0b173d024208",
+        5
+      ]
+    ]
   },
   {
     "id": "ctx-95bb2992",
@@ -914,7 +2080,13 @@
     ],
     "forbid": [],
     "repeated": true,
-    "occurrences": 1
+    "occurrences": 1,
+    "source": [
+      [
+        "03442ee4-e8c5-4fb1-bfe1-0b173d024208",
+        6
+      ]
+    ]
   },
   {
     "id": "ctx-4d3166b2",
@@ -925,7 +2097,13 @@
     ],
     "forbid": [],
     "repeated": true,
-    "occurrences": 1
+    "occurrences": 1,
+    "source": [
+      [
+        "03442ee4-e8c5-4fb1-bfe1-0b173d024208",
+        7
+      ]
+    ]
   },
   {
     "id": "ctx-a585e301",
@@ -936,7 +2114,13 @@
     ],
     "forbid": [],
     "repeated": true,
-    "occurrences": 1
+    "occurrences": 1,
+    "source": [
+      [
+        "03442ee4-e8c5-4fb1-bfe1-0b173d024208",
+        8
+      ]
+    ]
   },
   {
     "id": "ctx-c09e634f",
@@ -947,7 +2131,13 @@
     ],
     "forbid": [],
     "repeated": true,
-    "occurrences": 1
+    "occurrences": 1,
+    "source": [
+      [
+        "03cbaa9e-cb8d-42a2-9fdf-e47fb5f253f8",
+        1
+      ]
+    ]
   },
   {
     "id": "absent-1",
@@ -958,7 +2148,8 @@
       "sirius-quantum-ledger"
     ],
     "repeated": false,
-    "occurrences": 0
+    "occurrences": 0,
+    "source": []
   },
   {
     "id": "absent-2",
@@ -969,7 +2160,8 @@
       "helios-payments"
     ],
     "repeated": false,
-    "occurrences": 0
+    "occurrences": 0,
+    "source": []
   },
   {
     "id": "absent-3",
@@ -980,7 +2172,8 @@
       "камер"
     ],
     "repeated": false,
-    "occurrences": 0
+    "occurrences": 0,
+    "source": []
   },
   {
     "id": "absent-4",
@@ -991,7 +2184,8 @@
       "tundra-crm"
     ],
     "repeated": false,
-    "occurrences": 0
+    "occurrences": 0,
+    "source": []
   },
   {
     "id": "absent-5",
@@ -1002,7 +2196,8 @@
       "obsidian-mill"
     ],
     "repeated": false,
-    "occurrences": 0
+    "occurrences": 0,
+    "source": []
   },
   {
     "id": "fact-f496427d",
@@ -1013,7 +2208,21 @@
     ],
     "forbid": [],
     "repeated": false,
-    "occurrences": 3
+    "occurrences": 3,
+    "source": [
+      [
+        "0793ffe5-bba5-4e53-a958-0441d623cc92",
+        7
+      ],
+      [
+        "0793ffe5-bba5-4e53-a958-0441d623cc92",
+        8
+      ],
+      [
+        "99b23e19-5b1d-4cff-8654-296db299a42c",
+        6
+      ]
+    ]
   },
   {
     "id": "fact-86cdb7b7",
@@ -1024,7 +2233,21 @@
     ],
     "forbid": [],
     "repeated": false,
-    "occurrences": 3
+    "occurrences": 3,
+    "source": [
+      [
+        "99b23e19-5b1d-4cff-8654-296db299a42c",
+        13
+      ],
+      [
+        "bd85fb51-3304-4bb0-84aa-52e7f4b64731",
+        18
+      ],
+      [
+        "ef617449-d86f-4a54-a3ce-81997cd7cb09",
+        5
+      ]
+    ]
   },
   {
     "id": "fact-68b3962c",
@@ -1035,7 +2258,21 @@
     ],
     "forbid": [],
     "repeated": false,
-    "occurrences": 3
+    "occurrences": 3,
+    "source": [
+      [
+        "0793ffe5-bba5-4e53-a958-0441d623cc92",
+        8
+      ],
+      [
+        "99b23e19-5b1d-4cff-8654-296db299a42c",
+        6
+      ],
+      [
+        "d04342e7-0051-4a5e-b5e5-5d4956010983",
+        12
+      ]
+    ]
   },
   {
     "id": "fact-1bc292ff",
@@ -1046,7 +2283,21 @@
     ],
     "forbid": [],
     "repeated": false,
-    "occurrences": 3
+    "occurrences": 3,
+    "source": [
+      [
+        "d89c0d47-8424-4293-a02b-a04cf79b6954",
+        3
+      ],
+      [
+        "d89c0d47-8424-4293-a02b-a04cf79b6954",
+        4
+      ],
+      [
+        "ef617449-d86f-4a54-a3ce-81997cd7cb09",
+        5
+      ]
+    ]
   },
   {
     "id": "fact-6621ce95",
@@ -1057,7 +2308,21 @@
     ],
     "forbid": [],
     "repeated": false,
-    "occurrences": 3
+    "occurrences": 3,
+    "source": [
+      [
+        "6da422ef-baa9-4a01-bfb5-9dd3f631871c",
+        2
+      ],
+      [
+        "e04e2c52-f1a4-4f5f-9399-1566112d287b",
+        2
+      ],
+      [
+        "e04e2c52-f1a4-4f5f-9399-1566112d287b",
+        7
+      ]
+    ]
   },
   {
     "id": "fact-34d2f2fe",
@@ -1068,7 +2333,21 @@
     ],
     "forbid": [],
     "repeated": false,
-    "occurrences": 3
+    "occurrences": 3,
+    "source": [
+      [
+        "d04342e7-0051-4a5e-b5e5-5d4956010983",
+        12
+      ],
+      [
+        "e04e2c52-f1a4-4f5f-9399-1566112d287b",
+        7
+      ],
+      [
+        "e04e2c52-f1a4-4f5f-9399-1566112d287b",
+        14
+      ]
+    ]
   },
   {
     "id": "fact-219a9eb3",
@@ -1079,7 +2358,21 @@
     ],
     "forbid": [],
     "repeated": false,
-    "occurrences": 3
+    "occurrences": 3,
+    "source": [
+      [
+        "d04342e7-0051-4a5e-b5e5-5d4956010983",
+        12
+      ],
+      [
+        "e04e2c52-f1a4-4f5f-9399-1566112d287b",
+        7
+      ],
+      [
+        "e04e2c52-f1a4-4f5f-9399-1566112d287b",
+        14
+      ]
+    ]
   },
   {
     "id": "fact-50c260a4",
@@ -1090,7 +2383,21 @@
     ],
     "forbid": [],
     "repeated": false,
-    "occurrences": 3
+    "occurrences": 3,
+    "source": [
+      [
+        "0793ffe5-bba5-4e53-a958-0441d623cc92",
+        8
+      ],
+      [
+        "6da422ef-baa9-4a01-bfb5-9dd3f631871c",
+        1
+      ],
+      [
+        "6da422ef-baa9-4a01-bfb5-9dd3f631871c",
+        2
+      ]
+    ]
   },
   {
     "id": "fact-4016a898",
@@ -1101,7 +2408,21 @@
     ],
     "forbid": [],
     "repeated": false,
-    "occurrences": 3
+    "occurrences": 3,
+    "source": [
+      [
+        "0793ffe5-bba5-4e53-a958-0441d623cc92",
+        8
+      ],
+      [
+        "6da422ef-baa9-4a01-bfb5-9dd3f631871c",
+        1
+      ],
+      [
+        "6da422ef-baa9-4a01-bfb5-9dd3f631871c",
+        2
+      ]
+    ]
   },
   {
     "id": "fact-9dd99d66",
@@ -1112,6 +2433,20 @@
     ],
     "forbid": [],
     "repeated": false,
-    "occurrences": 3
+    "occurrences": 3,
+    "source": [
+      [
+        "bd85fb51-3304-4bb0-84aa-52e7f4b64731",
+        3
+      ],
+      [
+        "bd85fb51-3304-4bb0-84aa-52e7f4b64731",
+        18
+      ],
+      [
+        "e04e2c52-f1a4-4f5f-9399-1566112d287b",
+        17
+      ]
+    ]
   }
 ]

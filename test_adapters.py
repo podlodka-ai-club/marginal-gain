@@ -174,6 +174,25 @@ class TestGoldenSet(unittest.TestCase):
         text = "%s/dev/проект" % os.path.expanduser("~")
         self.assertEqual(goldenset.anonymize(text), goldenset.anonymize(text))
 
+    def test_script_turns_carry_what_they_feed(self):
+        """Реплика без привязки к случаю бесполезна: нечем проверить результат."""
+        turns = json.load(open("eval-script.json", encoding="utf-8"))
+        self.assertTrue(turns)
+        self.assertTrue(all(t["feeds"] for t in turns))
+
+    def test_script_is_ordered_by_time(self):
+        """Иначе разговор про файл случается раньше, чем файл в нём появился."""
+        turns = json.load(open("eval-script.json", encoding="utf-8"))
+        stamps = [t["started_at"] for t in turns]
+        self.assertEqual(stamps, sorted(stamps))
+
+    def test_every_case_is_reachable_from_script(self):
+        cases = json.load(open("eval-cases.json", encoding="utf-8"))
+        turns = json.load(open("eval-script.json", encoding="utf-8"))
+        fed = {c for t in turns for c in t["feeds"]}
+        need = {c["id"] for c in cases if c["kind"] != "absence"}
+        self.assertEqual(need - fed, set())
+
     def test_absence_cases_have_forbid(self):
         case = goldenset.case_absent(1, *goldenset.ABSENT[0])
         self.assertEqual(case["expect"], [])
