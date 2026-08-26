@@ -115,6 +115,11 @@ def gate(items, min_score=MIN_SCORE, max_items=MAX_ITEMS, max_chars=MAX_CHARS):
     порог требовал маркер, он возвращал пустоту при любом содержимом базы —
     и выбрасывал в том числе единственный ответ, где нужное нашлось.
     Отсутствие оценки это не отказ, это отсутствие оценки.
+
+    Кусок, не влезающий в потолок, пропускается, а не обрывает выдачу. На
+    настоящей базе первым куском приходило событие на тысячи символов, и
+    порог отдавал пустоту, имея за спиной пятьдесят пять тысяч символов
+    найденного.
     """
     rows = [(i[0], i[1], i[2] if len(i) > 2 else False) for i in items]
     scored = sorted(((s, t) for s, t, _ in rows if s is not None and s >= min_score),
@@ -128,7 +133,7 @@ def gate(items, min_score=MIN_SCORE, max_items=MAX_ITEMS, max_chars=MAX_CHARS):
         if not clean:
             continue
         if size + len(clean) > max_chars:
-            break
+            continue     # длинный кусок пропускаем, а не обрываем на нём выдачу
         out.append((score, clean))
         size += len(clean)
     return out

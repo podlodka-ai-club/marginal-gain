@@ -224,6 +224,19 @@ class TestThreshold(unittest.TestCase):
         kept = suggest.gate(suggest.pieces(answer))
         self.assertEqual([s for s, _ in kept], [0.9, None])
 
+    def test_one_long_piece_does_not_starve_the_rest(self):
+        """Длинный кусок пропускаем, а не обрываем на нём всю выдачу.
+
+        На настоящей базе первым приходило событие на тысячи символов, и порог
+        отдавал пустоту, имея за спиной пятьдесят пять тысяч символов найденного.
+        """
+        answer = json.dumps({"answer": json.dumps([
+            {"content": "х" * 5000},
+            {"content": "короткий нужный факт"},
+        ], ensure_ascii=False)}, ensure_ascii=False)
+        self.assertIn("короткий нужный факт",
+                      suggest.render(suggest.gate(suggest.pieces(answer))))
+
     def test_unscored_line_has_no_confidence_tail(self):
         """Не приписываем уверенность там, где её не измеряли."""
         self.assertNotIn("уверенность", suggest.render([(None, "факт")]))
@@ -314,6 +327,17 @@ class TestLocalStore(unittest.TestCase):
             content="Правился файл suggest.py ради порога.").mutation()])
         got = self.repo.search("Какие файлы правились в проекте marginal-gain?")
         self.assertTrue(got)
+        self.assertEqual(got[0]["object_type"], "Fact")
+
+    def test_fact_outranks_conversation_metadata(self):
+        """Факт это знание, строка разговора — метаданные. Порядок не случаен."""
+        self.repo.apply([models.Fact(
+            fact_type="project_state", subject="job-hunt", scope="project",
+            content="В проекте job-hunt правился файл db.py").mutation()])
+        self.repo.apply([models.Session(session_id="s1", project="job-hunt",
+                                        working_directory="/dev/job-hunt",
+                                        git_branch="job-hunt").mutation()])
+        got = self.repo.search("файлы job-hunt")
         self.assertEqual(got[0]["object_type"], "Fact")
 
     def test_search_stays_silent_without_a_hit(self):

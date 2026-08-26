@@ -38,6 +38,12 @@ SEARCH = {
 # таблицы: событий в архиве десятки тысяч, а чтение стоит в горячем пути.
 CANDIDATES = 300
 
+# Вес объекта. Факт это добытое знание, эпизод — рассказ о работе, событие и
+# разговор — сырьё и метаданные. Без этого веса на вопрос «какие файлы
+# правились» первыми шли строки разговоров: у них попаданий больше, а пользы
+# меньше.
+PRIORITY = {"Fact": 4, "Episode": 3, "Event": 2, "Session": 1}
+
 WORD = re.compile(r"[\w./:-]{3,}", re.UNICODE)
 
 # Служебные слова вопроса. Без отсева «какие» и «проект» тянут половину базы.
@@ -241,7 +247,8 @@ class Repository:
                         continue
                     score += weight * sum(1 for t in terms if t in value)
                 if score:
-                    found.append((score, object_type, dict(row)))
+                    found.append((score * PRIORITY.get(object_type, 1),
+                                  object_type, dict(row)))
         found.sort(key=lambda item: item[0], reverse=True)
         out = []
         for score, object_type, row in found[:limit]:
