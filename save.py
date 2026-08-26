@@ -244,8 +244,14 @@ def ingest(files, limit=None, dry=True, reset=False, verbose=False):
         batch = []
         # Отметку о прочитанном двигаем только если файл дочитан до конца.
         # Иначе непосланные записи пропали бы молча.
-        state["files"][str(path)] = cursor if done == len(items) else before
-        save_state(state)
+        #
+        # И только если это была запись. Холостой прогон помечал архив
+        # прочитанным, ничего не записав: после него настоящая запись находила
+        # 132 новые строки вместо сорока двух тысяч, а разница выглядела как
+        # пустой архив, а не как съеденная отметка.
+        if not dry:
+            state["files"][str(path)] = cursor if done == len(items) else before
+            save_state(state)
         if stopped:
             break
     return sent

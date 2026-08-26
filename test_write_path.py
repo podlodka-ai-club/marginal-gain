@@ -264,6 +264,17 @@ class TestWritePathReachesTheStore(unittest.TestCase):
         self.assertTrue(found, "сохранённый разговор не находится")
         self.assertIn("Event", {row["object_type"] for row in found})
 
+    def test_dry_run_does_not_eat_the_archive(self):
+        """Холостой прогон не имеет права метить архив прочитанным.
+
+        Пометив, он делает следующую настоящую запись пустой: файлы уже
+        «прочитаны», и разница выглядит как пустой архив, а не как потеря.
+        """
+        self.run_module(save, ["save.py"])           # без --send
+        self.run_module(save, ["save.py", "--send"])
+        self.assertGreater(self.counts()["Event"], 0,
+                           "холостой прогон съел архив")
+
     def test_session_row_appears(self):
         """Разговор целиком тоже запись схемы, и её не пишет никто."""
         self.run_module(save, ["save.py", "--send"])
