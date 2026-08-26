@@ -6,7 +6,7 @@
 бесполезен, он засоряет контекст агента и уводит его в сторону. Молчание это
 нормальный и частый исход.
 """
-import argparse, json, re, sys
+import argparse, ast, json, re, sys
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -21,39 +21,112 @@ MAX_CHARS = 1200     # потолок на весь кусок, который �
 
 SCORE = re.compile(r"Оценка уверенности:\s*([0-9]+(?:\.[0-9]+)?)")
 
+# Служебные поля записи: агенту не говорят ничего, а потолок съедают.
+NOISE = ("first_seen_at", "observed_at", "created_at", "updated_at", "id")
+
+
+def _parse(text):
+    """Строка приходит и как JSON, и как питонье представление. Пробуем оба."""
+    for reader in (json.loads, ast.literal_eval):
+        try:
+            return reader(text)
+        except (ValueError, SyntaxError):
+            continue
+    return None
+
+
+def _unwrap(answer):
+    """Разворачиваем ответ до содержимого.
+
+    Хранилище отдаёт `{"answer": "<строка>"}`, и в этой строке лежит ещё один
+    список или запись. Пока не развернуть, шесть фактов остаются одним куском:
+    порог видит один кусок без оценки и выбрасывает разом всё.
+    """
+    body = answer
+    for _ in range(4):
+        if isinstance(body, dict) and "answer" in body:
+            body = body["answer"]
+            continue
+        if not isinstance(body, str):
+            break
+        text = body.strip()
+        if not text or text[0] not in "[{":
+            break
+        parsed = _parse(text)
+        if parsed is None:
+            break
+        body = parsed
+    return body
+
+
+def _text(chunk):
+    """Запись превращаем в строку, не теряя полей.
+
+    Раньше брали только `content`, и запись без него схлопывалась в `str(dict)`.
+    Вместе с ней пропадали поля вроде `git_branch` — то самое, о чём спрашивал
+    вопрос.
+    """
+    if not isinstance(chunk, dict):
+        return str(chunk)
+    parts = []
+    if chunk.get("content"):
+        parts.append(str(chunk["content"]))
+    for key, value in chunk.items():
+        if key == "content" or key in NOISE:
+            continue
+        if value is None or value == "" or value == [] or value == {}:
+            continue
+        parts.append("%s: %s" % (key, value))
+    return ". ".join(parts) if parts else str(chunk)
+
 
 @telemetry.traced("parse_answer", lambda arg, out: {
     "answer_chars": len(arg["answer"] or ""), "out": len(out),
-    "scored": sum(1 for s, _ in out if s is not None)})
+    "scored": sum(1 for row in out if row[0] is not None)})
 def pieces(answer):
     """Ответ памяти разбираем на куски и достаём оценку каждого."""
-    try:
-        data = json.loads(answer)
-        body = data.get("answer", answer)
-    except (json.JSONDecodeError, AttributeError):
-        body = answer
+    body = _unwrap(answer)
+    # Признак «это запись, а не слова читателя» ставится каждому куску отдельно.
+    # На контейнер его ставить нельзя: список голых строк тоже список, и тогда
+    # «no matching files» внутри списка проходит порог как факт.
     if isinstance(body, list):
-        chunks = [c.get("content", str(c)) if isinstance(c, dict) else str(c) for c in body]
+        chunks = [(_text(c), isinstance(c, dict)) for c in body]
+    elif isinstance(body, dict):
+        chunks = [(_text(body), True)]
     else:
-        chunks = re.split(r"\n\s*\n", str(body))
+        chunks = [(c, False) for c in re.split(r"\n\s*\n", str(body))]
     out = []
-    for chunk in chunks:
+    for chunk, structured in chunks:
         text = chunk.strip()
         if not text:
             continue
         found = SCORE.search(text)
-        out.append((float(found.group(1)) if found else None, text))
+        out.append((float(found.group(1)) if found else None, text, structured))
     return out
 
 
 @telemetry.traced("threshold_filter", lambda arg, out: {
     "in": len(arg["items"]), "out": len(out), "min_score": arg["min_score"]})
 def gate(items, min_score=MIN_SCORE, max_items=MAX_ITEMS, max_chars=MAX_CHARS):
-    """Порог. Кусок без оценки не пропускаем: неизвестное не лучше слабого."""
-    kept = sorted(((s, t) for s, t in items if s is not None and s >= min_score), reverse=True)
+    """Порог. Кусок без оценки пропускаем, но ставим после оценённых.
+
+    Маркер уверенности дописывает одна функция, `understand.render_fact`, и в
+    хранилище ноль его вхождений: всё, что там лежит, записано мимо неё. Пока
+    порог требовал маркер, он возвращал пустоту при любом содержимом базы —
+    и выбрасывал в том числе единственный ответ, где нужное нашлось.
+    Отсутствие оценки это не отказ, это отсутствие оценки.
+    """
+    rows = [(i[0], i[1], i[2] if len(i) > 2 else False) for i in items]
+    scored = sorted(((s, t) for s, t, _ in rows if s is not None and s >= min_score),
+                    reverse=True)
+    # Проза читателя без оценки это не факт, а его собственные слова: так
+    # приходит и «no matching files». Пропускаем только структурные записи.
+    plain = [(None, t) for s, t, struct in rows if s is None and struct]
     out, size = [], 0
-    for score, text in kept[:max_items]:
+    for score, text in (scored + plain)[:max_items]:
         clean = SCORE.sub("", text).strip()
+        if not clean:
+            continue
         if size + len(clean) > max_chars:
             break
         out.append((score, clean))
@@ -65,7 +138,9 @@ def render(kept):
     """Формат под агента: сжатые утверждения, без обращений и предисловий."""
     lines = ["Из памяти прошлых разговоров:"]
     for score, text in kept:
-        lines.append("- %s (уверенность %.2f)" % (" ".join(text.split()), score))
+        one = " ".join(text.split())
+        lines.append("- %s (уверенность %.2f)" % (one, score) if score is not None
+                     else "- %s" % one)
     return "\n".join(lines)
 
 

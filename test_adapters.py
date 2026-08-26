@@ -153,6 +153,79 @@ class TestSuggestSurvivesAdapterAnswer(unittest.TestCase):
         self.assertGreaterEqual(got[0][0], 0.9)
 
 
+class TestThreshold(unittest.TestCase):
+    """Порог на настоящих ответах хранилища, снятых прогоном 26.08.
+
+    Красный до правки: порог требовал маркер «Оценка уверенности», который
+    дописывает только `understand.render_fact`. В хранилище его ноль вхождений,
+    поэтому порог отдавал пустоту при любом содержимом базы.
+    """
+
+    FACTS = json.dumps({"answer": json.dumps([
+        {"content": "Список компаний, которые нанимают без whiteboard-собеседований: "
+                    "https://github.com/poteto/hiring-without-whiteboards .",
+         "fact_type": "external_resource", "project": "job-hunt", "scope": "global"},
+        {"content": "Вакансии тянутся через api.hh.ru .",
+         "fact_type": "external_resource", "project": "job-hunt", "scope": "global"},
+    ], ensure_ascii=False)}, ensure_ascii=False)
+
+    RECORD = json.dumps({"answer": str(
+        {"content": "Отвечать коротко.", "fact_type": "preference",
+         "scope": "global", "subject": "стиль ответа"})}, ensure_ascii=False)
+
+    SILENT = json.dumps({"answer": "no matching files"}, ensure_ascii=False)
+
+    def test_list_of_facts_splits_into_pieces(self):
+        """Вложенная строка разбирается: два факта, а не один слипшийся кусок."""
+        got = suggest.pieces(self.FACTS)
+        self.assertEqual(len(got), 2)
+
+    def test_record_in_python_repr_is_parsed(self):
+        """Одиночная запись приходит с одинарными кавычками, json её не берёт."""
+        got = suggest.pieces(self.RECORD)
+        self.assertEqual(len(got), 1)
+        self.assertIn("Отвечать коротко", got[0][1])
+
+    def test_unscored_record_passes_threshold(self):
+        """Запись без маркера доходит до агента: оценки нет, а факт есть."""
+        kept = suggest.gate(suggest.pieces(self.FACTS))
+        self.assertEqual(len(kept), 2)
+        self.assertIn("github.com", suggest.render(kept))
+
+    def test_reader_prose_stays_silent(self):
+        """«no matching files» это слова читателя, а не факт. Молчим."""
+        self.assertEqual(suggest.gate(suggest.pieces(self.SILENT)), [])
+
+    def test_prose_inside_list_stays_silent(self):
+        """Та же проза, обёрнутая в список, остаётся прозой.
+
+        Ревью нашло исполнением: признак «структурная запись» стоял на
+        контейнере, и список голых строк пропускал «no matching files» в
+        контекст агента как запомненный факт.
+        """
+        answer = json.dumps({"answer": json.dumps(["no matching files"])})
+        self.assertEqual(suggest.gate(suggest.pieces(answer)), [])
+
+    def test_fields_beyond_content_survive(self):
+        """Запись без `content` не должна схлопываться: ветка лежит в поле."""
+        answer = json.dumps({"answer": json.dumps([{"git_branch": "HEAD",
+                                                    "project": "job-hunt"}])})
+        self.assertIn("HEAD", suggest.render(suggest.gate(suggest.pieces(answer))))
+
+    def test_scored_outrank_unscored(self):
+        """Оценённое идёт первым: известная уверенность сильнее её отсутствия."""
+        answer = json.dumps({"answer": json.dumps([
+            {"content": "без оценки"},
+            {"content": "с оценкой. Оценка уверенности: 0.90."},
+        ], ensure_ascii=False)}, ensure_ascii=False)
+        kept = suggest.gate(suggest.pieces(answer))
+        self.assertEqual([s for s, _ in kept], [0.9, None])
+
+    def test_unscored_line_has_no_confidence_tail(self):
+        """Не приписываем уверенность там, где её не измеряли."""
+        self.assertNotIn("уверенность", suggest.render([(None, "факт")]))
+
+
 class TestGoldenSet(unittest.TestCase):
     """Набор уезжает в репозиторий, поэтому личное в нём — не мелочь."""
 
