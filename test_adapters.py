@@ -10,6 +10,7 @@ from unittest import mock
 
 os.environ.setdefault("XMEM_INSTANCE_ID", "test-instance")
 
+import goldenset
 import models
 import suggest
 import xmem
@@ -147,6 +148,36 @@ class TestSuggestSurvivesAdapterAnswer(unittest.TestCase):
         got = suggest.pieces(answer)
         self.assertTrue(got)
         self.assertGreaterEqual(got[0][0], 0.9)
+
+
+class TestGoldenSet(unittest.TestCase):
+    """Набор уезжает в репозиторий, поэтому личное в нём — не мелочь."""
+
+    def test_home_path_replaced(self):
+        got = goldenset.anonymize("правился файл %s/dev/x/y.py" % os.path.expanduser("~"))
+        self.assertNotIn(os.path.expanduser("~"), got)
+        self.assertIn("/home/person", got)
+
+    def test_mail_replaced(self):
+        self.assertNotIn("ivan.petrov@bank.ru",
+                         goldenset.anonymize("писал на ivan.petrov@bank.ru вчера"))
+
+    def test_address_password_replaced(self):
+        got = goldenset.anonymize("https://oauth2:glpat-abcdefghijkl@git.example/x")
+        self.assertNotIn("glpat-abcdefghijkl", got)
+
+    def test_ip_replaced(self):
+        self.assertNotIn("192.168.11.42", goldenset.anonymize("хост 192.168.11.42 упал"))
+
+    def test_anonymize_is_stable(self):
+        """Подмена детерминирована, иначе связи между записями рвутся."""
+        text = "%s/dev/проект" % os.path.expanduser("~")
+        self.assertEqual(goldenset.anonymize(text), goldenset.anonymize(text))
+
+    def test_absence_cases_have_forbid(self):
+        case = goldenset.case_absent(1, *goldenset.ABSENT[0])
+        self.assertEqual(case["expect"], [])
+        self.assertTrue(case["forbid"])
 
 
 if __name__ == "__main__":

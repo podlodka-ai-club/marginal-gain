@@ -1,0 +1,5792 @@
+[
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "3e45437580b845d1be65184f68038a65",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте 3e45437580b845d1be65184f68038a65 правился файл /home/person/dev/job-hunt/CLAUDE.md ради задачи: делай все три и отрахзи задчи в throne"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "3e45437580b845d1be65184f68038a65",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте 3e45437580b845d1be65184f68038a65 правился файл /home/person/dev/job-hunt/docs/adr/0002-taxonomy-verdicts-delivery.md ради задачи: подтягивай клон и закрывай 17/18 как дубликаты"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "3f7007322eef470086a1fc3e35f517a6",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте 3f7007322eef470086a1fc3e35f517a6 правился файл /home/person/scripts/job-hunt/core/suspicious_phrases.yml ради задачи: # Code Review Agent Ты — Code Reviewer. Твоя задача — провести ревью изменений в текущем проекте. ## Входные данные Аргумент команды: `Изменения H.28 (job-hunt-144) в /home/person/scripts/j"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "3f7007322eef470086a1fc3e35f517a6",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте 3f7007322eef470086a1fc3e35f517a6 правился файл /home/person/scripts/job-hunt/tests/fixtures/scam_golden.README.md ради задачи: # Code Review Agent Ты — Code Reviewer. Твоя задача — провести ревью изменений в текущем проекте. ## Входные данные Аргумент команды: `Изменения H.28 (job-hunt-144) в /home/person/scripts/j"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "3f7007322eef470086a1fc3e35f517a6",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте 3f7007322eef470086a1fc3e35f517a6 правился файл /home/person/scripts/job-hunt/tests/test_golden_eval.py ради задачи: начинай работу"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "3f7007322eef470086a1fc3e35f517a6",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте 3f7007322eef470086a1fc3e35f517a6 правился файл /home/person/scripts/job-hunt/tests/test_suspicion_corpus.py ради задачи: # Code Review Agent Ты — Code Reviewer. Твоя задача — провести ревью изменений в текущем проекте. ## Входные данные Аргумент команды: `Изменения H.28 (job-hunt-144) в /home/person/scripts/j"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "3xui-shop",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте 3xui-shop правился файл /home/person/dev/3xui-shop/.github/workflows/ci.yml ради задачи: надо делать все так что напчинай по своему усмотрению и заканчивай все задачи которые нужны толкько после того как закончишь вске вернись ко мне"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "3xui-shop",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте 3xui-shop правился файл /home/person/dev/3xui-shop/.github/workflows/deploy-dev.yml ради задачи: ПОМОГ ЗАПУСК ОТ АДМИНА продолжай рабоут у"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "3xui-shop",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте 3xui-shop правился файл /home/person/dev/3xui-shop/.github/workflows/live-smoke.yml ради задачи: надо делать все так что напчинай по своему усмотрению и заканчивай все задачи которые нужны толкько после того как закончишь вске вернись ко мне"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "3xui-shop",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте 3xui-shop правился файл /home/person/dev/3xui-shop/app/bot/services/server_pool.py ради задачи: надо делать все так что напчинай по своему усмотрению и заканчивай все задачи которые нужны толкько после того как закончишь вске вернись ко мне"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "3xui-shop",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте 3xui-shop правился файл /home/person/dev/3xui-shop/app/bot/services/vpn.py ради задачи: надо делать все так что напчинай по своему усмотрению и заканчивай все задачи которые нужны толкько после того как закончишь вске вернись ко мне"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "3xui-shop",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте 3xui-shop правился файл /home/person/dev/3xui-shop/app/bot/utils/CONTEXT.md ради задачи: 1 - да 2 - да 3 - отдельный коомпоз"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "3xui-shop",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте 3xui-shop правился файл /home/person/dev/3xui-shop/app/bot/utils/network.py ради задачи: надо делать все так что напчинай по своему усмотрению и заканчивай все задачи которые нужны толкько после того как закончишь вске вернись ко мне"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "3xui-shop",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте 3xui-shop правился файл /home/person/dev/3xui-shop/app/bot/utils/subscription_link.py ради задачи: надо делать все так что напчинай по своему усмотрению и заканчивай все задачи которые нужны толкько после того как закончишь вске вернись ко мне"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "3xui-shop",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте 3xui-shop правился файл /home/person/dev/3xui-shop/app/db/migration/versions/f5a6b7c8d9e0_add_subscription_url_to_servers.py ради задачи: надо делать все так что напчинай по своему усмотрению и заканчивай все задачи которые нужны толкько после того как закончишь вске вернись ко мне"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "3xui-shop",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте 3xui-shop правился файл /home/person/dev/3xui-shop/docker-compose.dev.yml ради задачи: ПОМОГ ЗАПУСК ОТ АДМИНА продолжай рабоут у"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "3xui-shop",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте 3xui-shop правился файл /home/person/dev/3xui-shop/docker-compose.test.yml ради задачи: надо делать все так что напчинай по своему усмотрению и заканчивай все задачи которые нужны толкько после того как закончишь вске вернись ко мне"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "3xui-shop",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте 3xui-shop правился файл /home/person/dev/3xui-shop/docs/sdd/test_matrix.md ради задачи: тесты по карте"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "3xui-shop",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте 3xui-shop правился файл /home/person/dev/3xui-shop/pyproject.toml ради задачи: надо делать все так что напчинай по своему усмотрению и заканчивай все задачи которые нужны толкько после того как закончишь вске вернись ко мне"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "3xui-shop",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте 3xui-shop правился файл /home/person/dev/3xui-shop/scripts/check_subscription_links.py ради задачи: надо делать все так что напчинай по своему усмотрению и заканчивай все задачи которые нужны толкько после того как закончишь вске вернись ко мне"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "3xui-shop",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте 3xui-shop правился файл /home/person/dev/3xui-shop/scripts/seed_test_panel.py ради задачи: надо делать все так что напчинай по своему усмотрению и заканчивай все задачи которые нужны толкько после того как закончишь вске вернись ко мне"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "3xui-shop",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте 3xui-shop правился файл /home/person/dev/3xui-shop/tests/conftest.py ради задачи: тесты по карте"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "3xui-shop",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте 3xui-shop правился файл /home/person/dev/3xui-shop/tests/test_docker_panel.py ради задачи: ПОМОГ ЗАПУСК ОТ АДМИНА продолжай рабоут у"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "3xui-shop",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте 3xui-shop правился файл /home/person/dev/3xui-shop/tests/test_get_key_integration.py ради задачи: надо делать все так что напчинай по своему усмотрению и заканчивай все задачи которые нужны толкько после того как закончишь вске вернись ко мне"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "3xui-shop",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте 3xui-shop правился файл /home/person/dev/3xui-shop/tests/test_harness_smoke.py ради задачи: тесты по карте"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "3xui-shop",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте 3xui-shop правился файл /home/person/dev/3xui-shop/tests/test_locale_messages.py ради задачи: 1 - паочему сукществующие не испольщзуешь? 2 - включи 3 - ок"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "3xui-shop",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте 3xui-shop правился файл /home/person/dev/3xui-shop/tests/test_server_subscription_url.py ради задачи: надо делать все так что напчинай по своему усмотрению и заканчивай все задачи которые нужны толкько после того как закончишь вске вернись ко мне"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "3xui-shop",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте 3xui-shop правился файл /home/person/dev/3xui-shop/tests/test_subscription_link.py ради задачи: надо делать все так что напчинай по своему усмотрению и заканчивай все задачи которые нужны толкько после того как закончишь вске вернись ко мне"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "3xui-shop",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте 3xui-shop правился файл /home/person/dev/3xui-shop/tests/test_subscription_link_pbt.py ради задачи: надо делать все так что напчинай по своему усмотрению и заканчивай все задачи которые нужны толкько после того как закончишь вске вернись ко мне"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "3xui-shop",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте 3xui-shop правился файл /home/person/dev/3xui-shop/tests/test_trial_integration.py ради задачи: тесты по карте"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "AI_1",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте AI_1 правился файл /home/person/PyCharmMiscProject/Решение.ipynb ради задачи: продолжай"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "AI_1",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте AI_1 правился файл /home/person/PyCharmMiscProject/Решение.ipынb ради задачи: делай все"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "c356e50b09864d5d84ec53b3403a15ed",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте c356e50b09864d5d84ec53b3403a15ed правился файл /home/person/.throne/workspaces/intents/c356e50b09864d5d84ec53b3403a15ed/job-hunt/consumers/ownership.py ради задачи: === Карта workspace === Корень workspace: /home/person/.throne/workspaces/intents/c356e50b09864d5d84ec53b3403a15ed Репозитории: не смонтированы. Остальное в корне workspace — session-метада"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "c356e50b09864d5d84ec53b3403a15ed",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте c356e50b09864d5d84ec53b3403a15ed правился файл /home/person/.throne/workspaces/intents/c356e50b09864d5d84ec53b3403a15ed/job-hunt/core/db.py ради задачи: === Карта workspace === Корень workspace: /home/person/.throne/workspaces/intents/c356e50b09864d5d84ec53b3403a15ed Репозитории: не смонтированы. Остальное в корне workspace — session-метада"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "c356e50b09864d5d84ec53b3403a15ed",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте c356e50b09864d5d84ec53b3403a15ed правился файл /home/person/.throne/workspaces/intents/c356e50b09864d5d84ec53b3403a15ed/job-hunt/core/embeddings.py ради задачи: === Карта workspace === Корень workspace: /home/person/.throne/workspaces/intents/c356e50b09864d5d84ec53b3403a15ed Репозитории: не смонтированы. Остальное в корне workspace — session-метада"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "c356e50b09864d5d84ec53b3403a15ed",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте c356e50b09864d5d84ec53b3403a15ed правился файл /home/person/.throne/workspaces/intents/c356e50b09864d5d84ec53b3403a15ed/job-hunt/core/suspicion.py ради задачи: === Карта workspace === Корень workspace: /home/person/.throne/workspaces/intents/c356e50b09864d5d84ec53b3403a15ed Репозитории: не смонтированы. Остальное в корне workspace — session-метада"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "c356e50b09864d5d84ec53b3403a15ed",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте c356e50b09864d5d84ec53b3403a15ed правился файл /home/person/.throne/workspaces/intents/c356e50b09864d5d84ec53b3403a15ed/job-hunt/run.py ради задачи: === Карта workspace === Корень workspace: /home/person/.throne/workspaces/intents/c356e50b09864d5d84ec53b3403a15ed Репозитории: не смонтированы. Остальное в корне workspace — session-метада"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "c356e50b09864d5d84ec53b3403a15ed",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте c356e50b09864d5d84ec53b3403a15ed правился файл /home/person/.throne/workspaces/intents/c356e50b09864d5d84ec53b3403a15ed/job-hunt/tests/test_embeddings.py ради задачи: === Карта workspace === Корень workspace: /home/person/.throne/workspaces/intents/c356e50b09864d5d84ec53b3403a15ed Репозитории: не смонтированы. Остальное в корне workspace — session-метада"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "c356e50b09864d5d84ec53b3403a15ed",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте c356e50b09864d5d84ec53b3403a15ed правился файл /home/person/.throne/workspaces/intents/c356e50b09864d5d84ec53b3403a15ed/job-hunt/tests/test_score_stage.py ради задачи: === Карта workspace === Корень workspace: /home/person/.throne/workspaces/intents/c356e50b09864d5d84ec53b3403a15ed Репозитории: не смонтированы. Остальное в корне workspace — session-метада"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "c356e50b09864d5d84ec53b3403a15ed",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте c356e50b09864d5d84ec53b3403a15ed правился файл /home/person/.throne/workspaces/intents/c356e50b09864d5d84ec53b3403a15ed/job-hunt/tests/test_suspicion.py ради задачи: === Карта workspace === Корень workspace: /home/person/.throne/workspaces/intents/c356e50b09864d5d84ec53b3403a15ed Репозитории: не смонтированы. Остальное в корне workspace — session-метада"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "cdaf2aeede844bff9fecf9229d7e25e8",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте cdaf2aeede844bff9fecf9229d7e25e8 правился файл /home/person/.throne/workspaces/intents/cdaf2aeede844bff9fecf9229d7e25e8/Tarasusrus__lesson-ledger/RESEARCH.md ради задачи: закоммить RESEARCH.md а ьак же по правилма хакатона мы иможемеи споьльзлавьб приложение xmemory найцджи его вв гите и лзнакомся"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "cdaf2aeede844bff9fecf9229d7e25e8",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте cdaf2aeede844bff9fecf9229d7e25e8 правился файл /home/person/.throne/workspaces/intents/cdaf2aeede844bff9fecf9229d7e25e8/Tarasusrus__lesson-ledger/lesson_ledger/db.py ради задачи: начинай схему и миграции"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "cdaf2aeede844bff9fecf9229d7e25e8",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте cdaf2aeede844bff9fecf9229d7e25e8 правился файл /home/person/.throne/workspaces/intents/cdaf2aeede844bff9fecf9229d7e25e8/Tarasusrus__lesson-ledger/lesson_ledger/migrations/0001_initial.sql ради задачи: начинай схему и миграции"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "clickhouse-datasource",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте clickhouse-datasource правился файл /home/person/GolandProjects/opensource/clickhouse-datasource/pkg/plugin/driver.go ради задачи: да, давай ребейз"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "clickhouse-datasource",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте clickhouse-datasource правился файл /home/person/GolandProjects/opensource/clickhouse-datasource/pkg/plugin/settings_test.go ради задачи: да, давай ребейз"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "dev",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте dev правился файл /home/person/dev/job-hunt/.gitignore ради задачи: Задача: построить ядро unified job aggregator в репо `job-hunt` (github.com/Tarasusrus/job-hunt, приватный). Сначала найди репо: проверь `~/dev/job-hunt`, `~/job-hunt`, если нет — склонируй `git clone"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "dev",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте dev правился файл /home/person/dev/job-hunt/CONTEXT.md ради задачи: Сделай 2 цикла code review с фокусом на расширяемость, поддерживаемость и SOLID. Цикл 1 — найти нарушения: - Single Responsibility: каждый модуль/класс делает одно? - Open/Closed: можно добавить новый"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "dev",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте dev правился файл /home/person/dev/job-hunt/consumers/__init__.py ради задачи: Задача: построить ядро unified job aggregator в репо `job-hunt` (github.com/Tarasusrus/job-hunt, приватный). Сначала найди репо: проверь `~/dev/job-hunt`, `~/job-hunt`, если нет — склонируй `git clone"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "dev",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте dev правился файл /home/person/dev/job-hunt/core/__init__.py ради задачи: Задача: построить ядро unified job aggregator в репо `job-hunt` (github.com/Tarasusrus/job-hunt, приватный). Сначала найди репо: проверь `~/dev/job-hunt`, `~/job-hunt`, если нет — склонируй `git clone"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "dev",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте dev правился файл /home/person/dev/job-hunt/core/db.py ради задачи: Сделай 2 цикла code review с фокусом на расширяемость, поддерживаемость и SOLID. Цикл 1 — найти нарушения: - Single Responsibility: каждый модуль/класс делает одно? - Open/Closed: можно добавить новый"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "dev",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте dev правился файл /home/person/dev/job-hunt/core/gateway.py ради задачи: Сделай 2 цикла code review с фокусом на расширяемость, поддерживаемость и SOLID. Цикл 1 — найти нарушения: - Single Responsibility: каждый модуль/класс делает одно? - Open/Closed: можно добавить новый"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "dev",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте dev правился файл /home/person/dev/job-hunt/core/models.py ради задачи: СТОП — не пиши код пока не скажу. Жди инструкций по модели данных. Обновлённая спецификация — пиши по ней: ## Схема vacancies (финальная, без score и status) ```sql CREATE TABLE vacancies ( url TEXT P"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "dev",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте dev правился файл /home/person/dev/job-hunt/core/url.py ради задачи: Сделай 2 цикла code review с фокусом на расширяемость, поддерживаемость и SOLID. Цикл 1 — найти нарушения: - Single Responsibility: каждый модуль/класс делает одно? - Open/Closed: можно добавить новый"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "dev",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте dev правился файл /home/person/dev/job-hunt/requirements.txt ради задачи: Сделай 2 цикла code review с фокусом на расширяемость, поддерживаемость и SOLID. Цикл 1 — найти нарушения: - Single Responsibility: каждый модуль/класс делает одно? - Open/Closed: можно добавить новый"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "dev",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте dev правился файл /home/person/dev/job-hunt/run.py ради задачи: Два улучшения: ## 1. OCP — core готов к изменениям без правки кода Цель: добавить новый тип источника (RSS, GraphQL API, новый формат) — только новый файл в `sources/`, никаких правок в `core/`. Что н"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "dev",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте dev правился файл /home/person/dev/job-hunt/sources/__init__.py ради задачи: Два улучшения: ## 1. OCP — core готов к изменениям без правки кода Цель: добавить новый тип источника (RSS, GraphQL API, новый формат) — только новый файл в `sources/`, никаких правок в `core/`. Что н"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "dev",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте dev правился файл /home/person/dev/job-hunt/sources/config.py ради задачи: Сделай 2 цикла code review с фокусом на расширяемость, поддерживаемость и SOLID. Цикл 1 — найти нарушения: - Single Responsibility: каждый модуль/класс делает одно? - Open/Closed: можно добавить новый"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "dev",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте dev правился файл /home/person/dev/job-hunt/sources/config.yml ради задачи: Два улучшения: ## 1. OCP — core готов к изменениям без правки кода Цель: добавить новый тип источника (RSS, GraphQL API, новый формат) — только новый файл в `sources/`, никаких правок в `core/`. Что н"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "dev",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте dev правился файл /home/person/dev/job-hunt/sources/loader.py ради задачи: Два улучшения: ## 1. OCP — core готов к изменениям без правки кода Цель: добавить новый тип источника (RSS, GraphQL API, новый формат) — только новый файл в `sources/`, никаких правок в `core/`. Что н"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "dev",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте dev правился файл /home/person/dev/job-hunt/sources/rss.py ради задачи: Два улучшения: ## 1. OCP — core готов к изменениям без правки кода Цель: добавить новый тип источника (RSS, GraphQL API, новый формат) — только новый файл в `sources/`, никаких правок в `core/`. Что н"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "dev",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте dev правился файл /home/person/dev/job-hunt/tests/__init__.py ради задачи: Задача: построить ядро unified job aggregator в репо `job-hunt` (github.com/Tarasusrus/job-hunt, приватный). Сначала найди репо: проверь `~/dev/job-hunt`, `~/job-hunt`, если нет — склонируй `git clone"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "dev",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте dev правился файл /home/person/dev/job-hunt/tests/test_config.py ради задачи: Два улучшения: ## 1. OCP — core готов к изменениям без правки кода Цель: добавить новый тип источника (RSS, GraphQL API, новый формат) — только новый файл в `sources/`, никаких правок в `core/`. Что н"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "dev",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте dev правился файл /home/person/dev/job-hunt/tests/test_db.py ради задачи: Сделай 2 цикла code review с фокусом на расширяемость, поддерживаемость и SOLID. Цикл 1 — найти нарушения: - Single Responsibility: каждый модуль/класс делает одно? - Open/Closed: можно добавить новый"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "dev",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте dev правился файл /home/person/dev/job-hunt/tests/test_gateway.py ради задачи: Сделай 2 цикла code review с фокусом на расширяемость, поддерживаемость и SOLID. Цикл 1 — найти нарушения: - Single Responsibility: каждый модуль/класс делает одно? - Open/Closed: можно добавить новый"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "dev",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте dev правился файл /home/person/dev/job-hunt/tests/test_loader.py ради задачи: Два улучшения: ## 1. OCP — core готов к изменениям без правки кода Цель: добавить новый тип источника (RSS, GraphQL API, новый формат) — только новый файл в `sources/`, никаких правок в `core/`. Что н"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "dev",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте dev правился файл /home/person/dev/job-hunt/tests/test_rss.py ради задачи: Два улучшения: ## 1. OCP — core готов к изменениям без правки кода Цель: добавить новый тип источника (RSS, GraphQL API, новый формат) — только новый файл в `sources/`, никаких правок в `core/`. Что н"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "docs",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте docs правился файл /home/person/scripts/job-hunt/docs/adr/0009-identity-as-a-stage.md ради задачи: [Image: original 3671x1632, displayed at 2000x889. Multiply coordinates by 1.84 to map to original image.]"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "docs",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте docs правился файл /home/person/scripts/job-hunt/docs/architecture.puml ради задачи: [Image: original 3495x1388, displayed at 2000x794. Multiply coordinates by 1.75 to map to original image.]"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "docs",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте docs правился файл /home/person/scripts/job-hunt/docs/pipeline.puml ради задачи: [Image: original 4096x1890, displayed at 2000x923. Multiply coordinates by 2.05 to map to original image.]"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "e51aabbac0ef49999f31dd05075ef791",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте e51aabbac0ef49999f31dd05075ef791 правился файл /home/person/scripts/job-hunt/run.py ради задачи: # Code Review Agent Ты — Code Reviewer. Твоя задача — провести ревью изменений в текущем проекте. ## Входные данные Аргумент команды: `Изменения по job-hunt-143 (H.35): sources/probe.py, sources/loade"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "e51aabbac0ef49999f31dd05075ef791",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте e51aabbac0ef49999f31dd05075ef791 правился файл /home/person/scripts/job-hunt/sources/config.yml ради задачи: === Карта workspace === Корень workspace: /home/person/.throne/workspaces/intents/e51aabbac0ef49999f31dd05075ef791 Репозитории: не смонтированы. Остальное в корне workspace — session-метада"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "e51aabbac0ef49999f31dd05075ef791",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте e51aabbac0ef49999f31dd05075ef791 правился файл /home/person/scripts/job-hunt/sources/loader.py ради задачи: === Карта workspace === Корень workspace: /home/person/.throne/workspaces/intents/e51aabbac0ef49999f31dd05075ef791 Репозитории: не смонтированы. Остальное в корне workspace — session-метада"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "e51aabbac0ef49999f31dd05075ef791",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте e51aabbac0ef49999f31dd05075ef791 правился файл /home/person/scripts/job-hunt/sources/probe.py ради задачи: === Карта workspace === Корень workspace: /home/person/.throne/workspaces/intents/e51aabbac0ef49999f31dd05075ef791 Репозитории: не смонтированы. Остальное в корне workspace — session-метада"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "e51aabbac0ef49999f31dd05075ef791",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте e51aabbac0ef49999f31dd05075ef791 правился файл /home/person/scripts/job-hunt/tests/test_loader.py ради задачи: === Карта workspace === Корень workspace: /home/person/.throne/workspaces/intents/e51aabbac0ef49999f31dd05075ef791 Репозитории: не смонтированы. Остальное в корне workspace — session-метада"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "e51aabbac0ef49999f31dd05075ef791",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте e51aabbac0ef49999f31dd05075ef791 правился файл /home/person/scripts/job-hunt/tests/test_source_probe.py ради задачи: # Code Review Agent Ты — Code Reviewer. Твоя задача — провести ревью изменений в текущем проекте. ## Входные данные Аргумент команды: `Изменения по job-hunt-143 (H.35): sources/probe.py, sources/loade"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/.throne/workspaces/intents/c356e50b09864d5d84ec53b3403a15ed/job-hunt/CONTEXT.md ради задачи: какой дальше флоу по контексту сессии?"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/.throne/workspaces/intents/c356e50b09864d5d84ec53b3403a15ed/job-hunt/core/suspicion.py ради задачи: # Code Review Agent Ты — Code Reviewer. Твоя задача — провести ревью изменений в текущем проекте. ## Входные данные Аргумент команды: `` - Если пусто — ревью всех незакоммиченных изменений - Если указ"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/.throne/workspaces/intents/c356e50b09864d5d84ec53b3403a15ed/job-hunt/tests/test_suspicion.py ради задачи: # Code Review Agent Ты — Code Reviewer. Твоя задача — провести ревью изменений в текущем проекте. ## Входные данные Аргумент команды: `` - Если пусто — ревью всех незакоммиченных изменений - Если указ"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/Library/Mobile Documents/iCloud~md~obsidian/Documents/my_synk/Domains/Career/STATE.md ради задачи: # Code Review Agent Ты — Code Reviewer. Твоя задача — провести ревью изменений в текущем проекте. ## Входные данные Аргумент команды: `~/dev/job-hunt — изменения Epic A (job-hunt-9): git diff + новые "
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/Library/Mobile Documents/iCloud~md~obsidian/Documents/my_synk/Domains/Infra/Рабочий ноут Ubuntu — SSH и SOCKS.md ради задачи: сохрани контекст и на сегодня все"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/Library/Mobile Documents/iCloud~md~obsidian/Documents/my_synk/Domains/Work/STATE.md ради задачи: окей можно только нужно проэьто не забыть сохрани это в волте как важную задачу для провкерки или может хук какой но нам нужнро защититься от этой ситуации я забыл про твой триггер ты тоже контектс уш"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/Library/Mobile Documents/iCloud~md~obsidian/Documents/my_synk/Domains/Work/ssh-work-cert.md ради задачи: окей можно только нужно проэьто не забыть сохрани это в волте как важную задачу для провкерки или может хук какой но нам нужнро защититься от этой ситуации я забыл про твой триггер ты тоже контектс уш"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/dev/job-hunt/.git/info/exclude ради задачи: # Code Review Agent Ты — Code Reviewer. Твоя задача — провести ревью изменений в текущем проекте. ## Входные данные Аргумент команды: `` - Если пусто — ревью всех незакоммиченных изменений - Если указ"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/dev/job-hunt/.gitignore ради задачи: Skill /review is already loaded above; instructions unchanged."
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/dev/job-hunt/CONTEXT.md ради задачи: <task-notification> <task-id>a491de31b2856aef0</task-id> <tool-use-id>toolu_01FbXRf7jLgriPjYojJAtGiL</tool-use-id> <output-file>/private/tmp/claude-501/-Users-person-dev-job-hunt/6011cf1e-80"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/dev/job-hunt/core/db.py ради задачи: Не задавай вопросов — действуй по спеке из промпта. Пиши тесты, гоняй, репортируй находки. пиши в файл"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/dev/job-hunt/core/dedup.py ради задачи: <task-notification> <task-id>a491de31b2856aef0</task-id> <tool-use-id>toolu_01FbXRf7jLgriPjYojJAtGiL</tool-use-id> <output-file>/private/tmp/claude-501/-Users-person-dev-job-hunt/6011cf1e-80"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/dev/job-hunt/core/embeddings.py ради задачи: # Code Review Agent Ты — Code Reviewer. Твоя задача — провести ревью изменений в текущем проекте. ## Входные данные Аргумент команды: `` - Если пусто — ревью всех незакоммиченных изменений - Если указ"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/dev/job-hunt/core/gateway.py ради задачи: Без вопросов. Пиши код сразу. Задача: property-based + adversarial тесты для `core/` в этом репо. Шаг 1: `pip install hypothesis --break-system-packages` Шаг 2: создай `tests/test_property.py`: ```pyt"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/dev/job-hunt/core/models.py ради задачи: Читай CONTEXT.md и начинай Epic B. Сначала пиши ADR-0001, потом реализуй. АРХИТЕКТУРНАЯ ЦЕЛЬ (от пользователя): - core = классификатор + хранилище. Принимает всё, нормализует, дедуплицирует, кладёт в "
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/dev/job-hunt/core/redact.py ради задачи: # Code Review Agent Ты — Code Reviewer. Твоя задача — провести ревью изменений в текущем проекте. ## Входные данные Аргумент команды: `~/dev/job-hunt — core-слой перед коммитом: core/{models,db,url,ga"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/dev/job-hunt/core/risk.py ради задачи: <task-notification> <task-id>ae8979f9b5dcdc15d</task-id> <tool-use-id>toolu_01Kz2Cvsu981XeqwPbREG6Lq</tool-use-id> <output-file>/private/tmp/claude-501/-Users-person-dev-job-hunt/6011cf1e-80"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/dev/job-hunt/core/runlog.py ради задачи: Skill /review is already loaded above; instructions unchanged."
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/dev/job-hunt/core/url.py ради задачи: Без вопросов. Пиши код сразу. Задача: property-based + adversarial тесты для `core/` в этом репо. Шаг 1: `pip install hypothesis --break-system-packages` Шаг 2: создай `tests/test_property.py`: ```pyt"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/dev/job-hunt/docs/adr/0001-identity-facts-verdicts.md ради задачи: <task-notification> <task-id>a491de31b2856aef0</task-id> <tool-use-id>toolu_01FbXRf7jLgriPjYojJAtGiL</tool-use-id> <output-file>/private/tmp/claude-501/-Users-person-dev-job-hunt/6011cf1e-80"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/dev/job-hunt/docs/architecture.puml ради задачи: # Code Review Agent Ты — Code Reviewer. Твоя задача — провести ревью изменений в текущем проекте. ## Входные данные Аргумент команды: `~/dev/job-hunt — core-слой перед коммитом: core/{models,db,url,ga"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/dev/job-hunt/docs/dataflow.puml ради задачи: # Code Review Agent Ты — Code Reviewer. Твоя задача — провести ревью изменений в текущем проекте. ## Входные данные Аргумент команды: `~/dev/job-hunt — core-слой перед коммитом: core/{models,db,url,ga"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/dev/job-hunt/requirements.txt ради задачи: Пуш `2bfe733` и сразу продолжай — job-hunt-11 (Telegram source adapter). Не останавливайся между эпиками, работай автономно до конца Epic B и C. После каждого коммита сразу бери следующую задачу из be"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/dev/job-hunt/run.py ради задачи: <task-notification> <task-id>a491de31b2856aef0</task-id> <tool-use-id>toolu_01FbXRf7jLgriPjYojJAtGiL</tool-use-id> <output-file>/private/tmp/claude-501/-Users-person-dev-job-hunt/6011cf1e-80"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/dev/job-hunt/sources/config.yml ради задачи: Пуш `2bfe733` и сразу продолжай — job-hunt-11 (Telegram source adapter). Не останавливайся между эпиками, работай автономно до конца Epic B и C. После каждого коммита сразу бери следующую задачу из be"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/dev/job-hunt/sources/loader.py ради задачи: Пуш `2bfe733` и сразу продолжай — job-hunt-11 (Telegram source adapter). Не останавливайся между эпиками, работай автономно до конца Epic B и C. После каждого коммита сразу бери следующую задачу из be"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/dev/job-hunt/sources/parsing.py ради задачи: Пуш `2bfe733` и сразу продолжай — job-hunt-11 (Telegram source adapter). Не останавливайся между эпиками, работай автономно до конца Epic B и C. После каждого коммита сразу бери следующую задачу из be"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/dev/job-hunt/sources/rss.py ради задачи: Skill /review is already loaded above; instructions unchanged."
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/dev/job-hunt/sources/telegram.py ради задачи: Пуш `2bfe733` и сразу продолжай — job-hunt-11 (Telegram source adapter). Не останавливайся между эпиками, работай автономно до конца Epic B и C. После каждого коммита сразу бери следующую задачу из be"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/dev/job-hunt/tests/fixtures/telegram_godevjob.html ради задачи: Пуш `2bfe733` и сразу продолжай — job-hunt-11 (Telegram source adapter). Не останавливайся между эпиками, работай автономно до конца Epic B и C. После каждого коммита сразу бери следующую задачу из be"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/dev/job-hunt/tests/test_adversarial.py ради задачи: Без вопросов. Пиши код сразу. Задача: property-based + adversarial тесты для `core/` в этом репо. Шаг 1: `pip install hypothesis --break-system-packages` Шаг 2: создай `tests/test_property.py`: ```pyt"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/dev/job-hunt/tests/test_db.py ради задачи: Skill /review is already loaded above; instructions unchanged."
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/dev/job-hunt/tests/test_dedup.py ради задачи: <task-notification> <task-id>a491de31b2856aef0</task-id> <tool-use-id>toolu_01FbXRf7jLgriPjYojJAtGiL</tool-use-id> <output-file>/private/tmp/claude-501/-Users-person-dev-job-hunt/6011cf1e-80"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/dev/job-hunt/tests/test_embeddings.py ради задачи: Читай CONTEXT.md и начинай Epic B. Сначала пиши ADR-0001, потом реализуй. АРХИТЕКТУРНАЯ ЦЕЛЬ (от пользователя): - core = классификатор + хранилище. Принимает всё, нормализует, дедуплицирует, кладёт в "
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/dev/job-hunt/tests/test_gateway.py ради задачи: <task-notification> <task-id>ad4cbc57b265a0d26</task-id> <tool-use-id>toolu_013yKquPabvS6UhC9oJUnqGs</tool-use-id> <output-file>/private/tmp/claude-501/-Users-person-dev-job-hunt/6011cf1e-80"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/dev/job-hunt/tests/test_identity_schema.py ради задачи: Читай CONTEXT.md и начинай Epic B. Сначала пиши ADR-0001, потом реализуй. АРХИТЕКТУРНАЯ ЦЕЛЬ (от пользователя): - core = классификатор + хранилище. Принимает всё, нормализует, дедуплицирует, кладёт в "
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/dev/job-hunt/tests/test_loader.py ради задачи: Пуш `2bfe733` и сразу продолжай — job-hunt-11 (Telegram source adapter). Не останавливайся между эпиками, работай автономно до конца Epic B и C. После каждого коммита сразу бери следующую задачу из be"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/dev/job-hunt/tests/test_parsing.py ради задачи: Пуш `2bfe733` и сразу продолжай — job-hunt-11 (Telegram source adapter). Не останавливайся между эпиками, работай автономно до конца Epic B и C. После каждого коммита сразу бери следующую задачу из be"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/dev/job-hunt/tests/test_property.py ради задачи: Без вопросов. Пиши код сразу. Задача: property-based + adversarial тесты для `core/` в этом репо. Шаг 1: `pip install hypothesis --break-system-packages` Шаг 2: создай `tests/test_property.py`: ```pyt"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/dev/job-hunt/tests/test_redact.py ради задачи: Пуш `2bfe733` и сразу продолжай — job-hunt-11 (Telegram source adapter). Не останавливайся между эпиками, работай автономно до конца Epic B и C. После каждого коммита сразу бери следующую задачу из be"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/dev/job-hunt/tests/test_risk.py ради задачи: <task-notification> <task-id>ae8979f9b5dcdc15d</task-id> <tool-use-id>toolu_01Kz2Cvsu981XeqwPbREG6Lq</tool-use-id> <output-file>/private/tmp/claude-501/-Users-person-dev-job-hunt/6011cf1e-80"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/dev/job-hunt/tests/test_rss.py ради задачи: Skill /review is already loaded above; instructions unchanged."
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/dev/job-hunt/tests/test_runlog.py ради задачи: Skill /review is already loaded above; instructions unchanged."
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/dev/job-hunt/tests/test_telegram.py ради задачи: Пуш `2bfe733` и сразу продолжай — job-hunt-11 (Telegram source adapter). Не останавливайся между эпиками, работай автономно до конца Epic B и C. После каждого коммита сразу бери следующую задачу из be"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/autonomous-session-prompt.md ради задачи: привет напиши мне промт который юуджет брать все задачи из бидс если нужно заводить новые брать задачи в работу по одной проводить ревью все как по нашгему флдоу можно коммитить и пушить тестировать о"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/.beads/config.yaml ради задачи: декомпозируй scripts-37 через architect и запусти автономную сессию а также заведи бидс в этом проекте перенеси задачи из одно го вдругой чтобы не было путнициы"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/CONTEXT.md ради задачи: <task-notification> <task-id>b1fr0i9r3</task-id> <tool-use-id>toolu_01PreQRZ8FHjMqpvMJih8ttu</tool-use-id> <output-file>/private/tmp/claude-501/-Users-person-scripts-job-hunt/e04e2c52-f1a4-4"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/collect_hourly.sh ради задачи: наполнение бд джолжно проходить по хрону ежечасно"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/com.person.job-hunt-collect.plist ради задачи: наполнение бд джолжно проходить по хрону ежечасно"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/consumers/bot_onboarding.py ради задачи: продолжай"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/consumers/delivery.py ради задачи: делай"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/consumers/digest.py ради задачи: продолжай"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/consumers/location.py ради задачи: смотри зная контекст ты сможешь наверное мне помочь, я хочу чтобы ты работал автономно и не прерывался спросить то что я тебе уже говорил autonomous-prompt.md давже в э"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/consumers/ownership.py ради задачи: окей делаем приступай к смеансу автономной работы как закнчиваешь задачу пбери следующую фиксиру изменения сегодня нужно создать топик и начать лить туджа вакансчии хочу видеть в живую как каждый час "
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/consumers/predicate.py ради задачи: смотри зная контекст ты сможешь наверное мне помочь, я хочу чтобы ты работал автономно и не прерывался спросить то что я тебе уже говорил autonomous-prompt.md давже в э"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/consumers/profile.py ради задачи: смотри зная контекст ты сможешь наверное мне помочь, я хочу чтобы ты работал автономно и не прерывался спросить то что я тебе уже говорил autonomous-prompt.md давже в э"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/consumers/routing.py ради задачи: да бери K.2b и работай автономнор дальше по оставшимся такскам и эпикам и сторям по всем флоу"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/consumers/selection.py ради задачи: смотри зная контекст ты сможешь наверное мне помочь, я хочу чтобы ты работал автономно и не прерывался спросить то что я тебе уже говорил autonomous-prompt.md давже в э"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/consumers/telegram_targets.py ради задачи: окей делаем приступай к смеансу автономной работы как закнчиваешь задачу пбери следующую фиксиру изменения сегодня нужно создать топик и начать лить туджа вакансчии хочу видеть в живую как каждый час "
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/consumers/telegram_targets.yml ради задачи: окей делаем приступай к смеансу автономной работы как закнчиваешь задачу пбери следующую фиксиру изменения сегодня нужно создать топик и начать лить туджа вакансчии хочу видеть в живую как каждый час "
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/consumers/topic_posts.py ради задачи: окей делаем приступай к смеансу автономной работы как закнчиваешь задачу пбери следующую фиксиру изменения сегодня нужно создать топик и начать лить туджа вакансчии хочу видеть в живую как каждый час "
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/consumers/topic_send.py ради задачи: окей делаем приступай к смеансу автономной работы как закнчиваешь задачу пбери следующую фиксиру изменения сегодня нужно создать топик и начать лить туджа вакансчии хочу видеть в живую как каждый час "
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/consumers/topics.yml ради задачи: да бери K.2b и работай автономнор дальше по оставшимся такскам и эпикам и сторям по всем флоу"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/core/apply_button.py ради задачи: # Code Review Agent Ты — Code Reviewer. Твоя задача — провести ревью изменений в текущем проекте. ## Входные данные Аргумент команды: `docs/adr/0013-source-markup-as-a-fact.md tests/test_source_markup"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/core/apply_ref.py ради задачи: # Code Review Agent Ты — Code Reviewer. Твоя задача — провести ревью изменений в текущем проекте. ## Входные данные Аргумент команды: `docs/adr/0013-source-markup-as-a-fact.md tests/test_source_markup"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/core/button_backfill.py ради задачи: # Code Review Agent Ты — Code Reviewer. Твоя задача — провести ревью изменений в текущем проекте. ## Входные данные Аргумент команды: `docs/adr/0013-source-markup-as-a-fact.md tests/test_source_markup"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/core/classify.py ради задачи: продолжай по эпику и не останавливайся"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/core/completeness.py ради задачи: # Code Review Agent Ты — Code Reviewer. Твоя задача — провести ревью изменений в текущем проекте. ## Входные данные Аргумент команды: `изменения job-hunt-84: core/classify.py gate_state, run.py cmd_re"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/core/db.py ради задачи: да, факты по существующему url надо дополнять"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/core/dedup.py ради задачи: # Code Review Agent Ты — Code Reviewer. Твоя задача — провести ревью изменений в текущем проекте. ## Входные данные Аргумент команды: `staged changes for job-hunt-58: identity/fingerprint schema + ali"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/core/embeddings.py ради задачи: # Code Review Agent Ты — Code Reviewer. Твоя задача — провести ревью изменений в текущем проекте. ## Входные данные Аргумент команды: `изменения job-hunt-84: core/classify.py gate_state, run.py cmd_re"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/core/extract.py ради задачи: смотри зная контекст ты сможешь наверное мне помочь, я хочу чтобы ты работал автономно и не прерывался спросить то что я тебе уже говорил autonomous-prompt.md давже в э"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/core/fingerprint.py ради задачи: # Code Review Agent Ты — Code Reviewer. Твоя задача — провести ревью изменений в текущем проекте. ## Входные данные Аргумент команды: `staged changes for job-hunt-58: identity/fingerprint schema + ali"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/core/gateway.py ради задачи: Пока идёт: два вопроса с прошлого раза всё ещё без ответа — 118 (закрываем отказом?) и 49 (садишься за ручной hold-out?). пока пропускаем но не закрываем приступай к автономной работе я пошел по джела"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/core/golden.py ради задачи: https://t.me/prostranstvowork/3699,tg:prostranstvowork,,Вас упомянул Администратор канала,165000,165000,RUB,1,[],\"⭕️ Вас упомянул Администратор канала: - вы победитель! Забирайте 165.000₽ »\",2026-08-0"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/core/goldeneval.py ради задачи: https://t.me/prostranstvowork/3699,tg:prostranstvowork,,Вас упомянул Администратор канала,165000,165000,RUB,1,[],\"⭕️ Вас упомянул Администратор канала: - вы победитель! Забирайте 165.000₽ »\",2026-08-0"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/core/identity.py ради задачи: # Code Review Agent Ты — Code Reviewer. Твоя задача — провести ревью изменений в текущем проекте. ## Входные данные Аргумент команды: `staged changes for job-hunt-58: identity/fingerprint schema + ali"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/core/labels.py ради задачи: # Code Review Agent Ты — Code Reviewer. Твоя задача — провести ревью изменений в текущем проекте. ## Входные данные Аргумент команды: `--branch origin/feature-job-hunt-core` - Если пусто — ревью всех "
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/core/models.py ради задачи: # Code Review Agent Ты — Code Reviewer. Твоя задача — провести ревью изменений в текущем проекте. ## Входные данные Аргумент команды: `` - Если пусто — ревью всех незакоммиченных изменений - Если указ"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/core/overlap.py ради задачи: autonomous-prompt.md"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/core/risk.py ради задачи: продолжай по эпику и не останавливайся"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/core/runlock.py ради задачи: наполнение бд джолжно проходить по хрону ежечасно"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/core/runlog.py ради задачи: # Code Review Agent Ты — Code Reviewer. Твоя задача — провести ревью изменений в текущем проекте. ## Входные данные Аргумент команды: `staged changes for job-hunt-58: identity/fingerprint schema + ali"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/core/salary_stats.py ради задачи: <task-notification> <task-id>a4e163d8301596db5</task-id> <tool-use-id>toolu_01JuFC6HEwC7dwGgP6MduFSG</tool-use-id> <output-file>/private/tmp/claude-501/-Users-person-scripts-job-hunt/e04e2c5"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/core/source_health.py ради задачи: сначала job-hunt-73, хочу понять почему 17 каналов молчат а вообще все далай попорядку и меня не отвлекай ты автономный"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/core/source_id.py ради задачи: да, зови архитектора и приступай"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/core/stack_vocab.py ради задачи: делай"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/core/stats.py ради задачи: # Code Review Agent Ты — Code Reviewer. Твоя задача — провести ревью изменений в текущем проекте. ## Входные данные Аргумент команды: `изменения job-hunt-84: core/classify.py gate_state, run.py cmd_re"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/core/submissions.py ради задачи: продолжай"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/core/suspicion.py ради задачи: # Code Review Agent Ты — Code Reviewer. Твоя задача — провести ревью изменений в текущем проекте. ## Входные данные Аргумент команды: `изменения job-hunt-84: core/classify.py gate_state, run.py cmd_re"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/core/suspicious_phrases.yml ради задачи: # Code Review Agent Ты — Code Reviewer. Твоя задача — провести ревью изменений в текущем проекте. ## Входные данные Аргумент команды: `изменения job-hunt-84: core/classify.py gate_state, run.py cmd_re"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/core/taxonomy.py ради задачи: # Code Review Agent Ты — Code Reviewer. Твоя задача — провести ревью изменений в текущем проекте. ## Входные данные Аргумент команды: `--branch origin/feature-job-hunt-core` - Если пусто — ревью всех "
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/core/taxonomy.yml ради задачи: да бери K.2b и работай автономнор дальше по оставшимся такскам и эпикам и сторям по всем флоу"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/docs/adr/0001-facts-verdicts-identity.md ради задачи: # Автономный прогон — промт Копировать целиком в новую сессию. --- Работай автономно. Не спрашивай разрешений по ходу — они уже даны: commit и push разрешены. ## Задача Репозиторий /Users/tarasmalinov"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/docs/adr/0006-foreign-sources.md ради задачи: # Code Review Agent Ты — Code Reviewer. Твоя задача — провести ревью изменений в текущем проекте. ## Входные данные Аргумент команды: `docs/adr/0001-facts-verdicts-identity.md — ретроспективный ADR (j"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/docs/adr/0007-risk-as-demerit-points.md ради задачи: <task-notification> <task-id>a4e163d8301596db5</task-id> <tool-use-id>toolu_01JuFC6HEwC7dwGgP6MduFSG</tool-use-id> <output-file>/private/tmp/claude-501/-Users-person-scripts-job-hunt/e04e2c5"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/docs/adr/0008-classification-as-facets.md ради задачи: продолжай по эпику и не останавливайся"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/docs/adr/0009-identity-as-a-stage.md ради задачи: # Автономный прогон — промт Копировать целиком в новую сессию. --- Работай автономно. Не спрашивай разрешений по ходу — они уже даны: commit и push разрешены. ## Задача Репозиторий /Users/tarasmalinov"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/docs/adr/0010-source-as-an-entity.md ради задачи: да, зови архитектора и приступай"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/docs/adr/0011-levels-facets-and-the-processing-stage.md ради задачи: https://finder.work/vacancies/34218673,tg:naudalenkebro,,Программист С++,150000,250000,RUB,1,[],\"Программист С++ от 150 000 до 250 000 ₽ Тензор https://finder.work/vacancies/34218673\",,2026-08-02T06:1"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/docs/adr/0012-concurrent-sources.md ради задачи: Пока идёт: два вопроса с прошлого раза всё ещё без ответа — 118 (закрываем отказом?) и 49 (садишься за ручной hold-out?). пока пропускаем но не закрываем приступай к автономной работе я пошел по джела"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/docs/adr/0013-source-markup-as-a-fact.md ради задачи: # Code Review Agent Ты — Code Reviewer. Твоя задача — провести ревью изменений в текущем проекте. ## Входные данные Аргумент команды: `docs/adr/0013-source-markup-as-a-fact.md tests/test_source_markup"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/docs/adr/0014-subscriber-data-ownership-and-delivery.md ради задачи: делай"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/docs/adr/0015-location-quote-node-and-compatibility.md ради задачи: # Code Review Agent Ты — Code Reviewer. Твоя задача — провести ревью изменений в текущем проекте. ## Входные данные Аргумент команды: `` - Если пусто — ревью всех незакоммиченных изменений - Если указ"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/docs/architecture.puml ради задачи: # Автономный прогон — промт Копировать целиком в новую сессию. --- Работай автономно. Не спрашивай разрешений по ходу — они уже даны: commit и push разрешены. ## Задача Репозиторий /Users/tarasmalinov"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/docs/autonomous-prompt.md ради задачи: да, сохрани"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/docs/dataflow.puml ради задачи: # Автономный прогон — промт Копировать целиком в новую сессию. --- Работай автономно. Не спрашивай разрешений по ходу — они уже даны: commit и push разрешены. ## Задача Репозиторий /Users/tarasmalinov"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/docs/pipeline.puml ради задачи: # Автономный прогон — промт Копировать целиком в новую сессию. --- Работай автономно. Не спрашивай разрешений по ходу — они уже даны: commit и push разрешены. ## Задача Репозиторий /Users/tarasmalinov"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/requirements.txt ради задачи: окей делаем приступай к смеансу автономной работы как закнчиваешь задачу пбери следующую фиксиру изменения сегодня нужно создать топик и начать лить туджа вакансчии хочу видеть в живую как каждый час "
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/run.py ради задачи: продолжай по эпику и не останавливайся"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/sources/__init__.py ради задачи: да, зови архитектора и приступай"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/sources/config.yml ради задачи: да, зови архитектора и приступай"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/sources/loader.py ради задачи: да, зови архитектора и приступай"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/sources/parsing.py ради задачи: <task-notification> <task-id>afb9b44548a834ccb</task-id> <tool-use-id>toolu_01AUxGzUwUB6ZzECYRKZdij4</tool-use-id> <output-file>/private/tmp/claude-501/-Users-person-scripts-job-hunt/0793ffe"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/sources/remoteok.py ради задачи: autonomous-prompt.md"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/sources/seed.py ради задачи: да, зови архитектора и приступай"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/sources/telegram.py ради задачи: # Code Review Agent Ты — Code Reviewer. Твоя задача — провести ревью изменений в текущем проекте. ## Входные данные Аргумент команды: `docs/adr/0013-source-markup-as-a-fact.md tests/test_source_markup"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/tests/conftest.py ради задачи: продолжай по эпику и не останавливайся"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/tests/fixtures/scam_golden.README.md ради задачи: https://t.me/prostranstvowork/3699,tg:prostranstvowork,,Вас упомянул Администратор канала,165000,165000,RUB,1,[],\"⭕️ Вас упомянул Администратор канала: - вы победитель! Забирайте 165.000₽ »\",2026-08-0"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/tests/fixtures/telegram_channel_states.README.md ради задачи: сначала job-hunt-73, хочу понять почему 17 каналов молчат а вообще все далай попорядку и меня не отвлекай ты автономный"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/tests/strategies.py ради задачи: продолжай по эпику и не останавливайся"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/tests/test_adr_refs.py ради задачи: делай"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/tests/test_apply_button.py ради задачи: # Code Review Agent Ты — Code Reviewer. Твоя задача — провести ревью изменений в текущем проекте. ## Входные данные Аргумент команды: `docs/adr/0013-source-markup-as-a-fact.md tests/test_source_markup"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/tests/test_apply_ref.py ради задачи: # Code Review Agent Ты — Code Reviewer. Твоя задача — провести ревью изменений в текущем проекте. ## Входные данные Аргумент команды: `docs/adr/0013-source-markup-as-a-fact.md tests/test_source_markup"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/tests/test_apply_ref_matcher.py ради задачи: # Code Review Agent Ты — Code Reviewer. Твоя задача — провести ревью изменений в текущем проекте. ## Входные данные Аргумент команды: `docs/adr/0013-source-markup-as-a-fact.md tests/test_source_markup"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/tests/test_bot_onboarding.py ради задачи: <task-notification> <task-id>a1436de52544294ed</task-id> <tool-use-id>toolu_01QQKa764BPcdoRmf7y8DEyy</tool-use-id> <output-file>/private/tmp/claude-501/-Users-person-scripts-job-hunt/e04e2c5"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/tests/test_button_backfill.py ради задачи: # Code Review Agent Ты — Code Reviewer. Твоя задача — провести ревью изменений в текущем проекте. ## Входные данные Аргумент команды: `docs/adr/0013-source-markup-as-a-fact.md tests/test_source_markup"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/tests/test_centroids.py ради задачи: да бери K.2b и работай автономнор дальше по оставшимся такскам и эпикам и сторям по всем флоу"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/tests/test_classify.py ради задачи: continue autonomy processing task from beads"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/tests/test_completeness.py ради задачи: # Code Review Agent Ты — Code Reviewer. Твоя задача — провести ревью изменений в текущем проекте. ## Входные данные Аргумент команды: `изменения job-hunt-84: core/classify.py gate_state, run.py cmd_re"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/tests/test_confidence.py ради задачи: продолжай по эпику и не останавливайся"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/tests/test_config.py ради задачи: да, зови архитектора и приступай"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/tests/test_db.py ради задачи: # Code Review Agent Ты — Code Reviewer. Твоя задача — провести ревью изменений в текущем проекте. ## Входные данные Аргумент команды: `` - Если пусто — ревью всех незакоммиченных изменений - Если указ"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/tests/test_delivery.py ради задачи: делай"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/tests/test_digest.py ради задачи: продолжай"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/tests/test_direction.py ради задачи: да бери K.2b и работай автономнор дальше по оставшимся такскам и эпикам и сторям по всем флоу"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/tests/test_extract_stage.py ради задачи: да, бери Epic L"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/tests/test_fingerprint.py ради задачи: да, факты по существующему url надо дополнять"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/tests/test_gateway.py ради задачи: Пока идёт: два вопроса с прошлого раза всё ещё без ответа — 118 (закрываем отказом?) и 49 (садишься за ручной hold-out?). пока пропускаем но не закрываем приступай к автономной работе я пошел по джела"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/tests/test_golden.py ради задачи: https://t.me/prostranstvowork/3699,tg:prostranstvowork,,Вас упомянул Администратор канала,165000,165000,RUB,1,[],\"⭕️ Вас упомянул Администратор канала: - вы победитель! Забирайте 165.000₽ »\",2026-08-0"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/tests/test_golden_eval.py ради задачи: да и объясни что там за детекоторы и ккакой тип объявлений им нужен джля корпуса"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/tests/test_identity_links.py ради задачи: # Code Review Agent Ты — Code Reviewer. Твоя задача — провести ревью изменений в текущем проекте. ## Входные данные Аргумент команды: `staged changes for job-hunt-58: identity/fingerprint schema + ali"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/tests/test_identity_stage.py ради задачи: # Code Review Agent Ты — Code Reviewer. Твоя задача — провести ревью изменений в текущем проекте. ## Входные данные Аргумент команды: `staged changes for job-hunt-58: identity/fingerprint schema + ali"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/tests/test_labels.py ради задачи: # Code Review Agent Ты — Code Reviewer. Твоя задача — провести ревью изменений в текущем проекте. ## Входные данные Аргумент команды: `--branch origin/feature-job-hunt-core` - Если пусто — ревью всех "
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/tests/test_latest_verdict.py ради задачи: продолжай по эпику и не останавливайся"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/tests/test_loader.py ради задачи: да, зови архитектора и приступай"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/tests/test_location.py ради задачи: чини"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/tests/test_overlap.py ради задачи: # Code Review Agent Ты — Code Reviewer. Твоя задача — провести ревью изменений в текущем проекте. ## Входные данные Аргумент команды: `core/overlap.py, run.py (cmd_report_overlap), tests/test_overlap."
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/tests/test_ownership.py ради задачи: autonomous-prompt.md приступай"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/tests/test_parsing.py ради задачи: смотри зная контекст ты сможешь наверное мне помочь, я хочу чтобы ты работал автономно и не прерывался спросить то что я тебе уже говорил autonomous-prompt.md давже в э"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/tests/test_predicate.py ради задачи: чини"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/tests/test_profile.py ради задачи: чини"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/tests/test_property_risk.py ради задачи: <task-notification> <task-id>a4e163d8301596db5</task-id> <tool-use-id>toolu_01JuFC6HEwC7dwGgP6MduFSG</tool-use-id> <output-file>/private/tmp/claude-501/-Users-person-scripts-job-hunt/e04e2c5"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/tests/test_property_session.py ради задачи: # Code Review Agent Ты — Code Reviewer. Твоя задача — провести ревью изменений в текущем проекте. ## Входные данные Аргумент команды: `изменения job-hunt-116: sources/remoteok.py currency только при н"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/tests/test_readers.py ради задачи: # Code Review Agent Ты — Code Reviewer. Твоя задача — провести ревью изменений в текущем проекте. ## Входные данные Аргумент команды: `staged changes for job-hunt-58: identity/fingerprint schema + ali"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/tests/test_remoteok.py ради задачи: # Code Review Agent Ты — Code Reviewer. Твоя задача — провести ревью изменений в текущем проекте. ## Входные данные Аргумент команды: `изменения job-hunt-116: sources/remoteok.py currency только при н"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/tests/test_report_gate.py ради задачи: # Code Review Agent Ты — Code Reviewer. Твоя задача — провести ревью изменений в текущем проекте. ## Входные данные Аргумент команды: `изменения job-hunt-84: core/classify.py gate_state, run.py cmd_re"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/tests/test_resume_text.py ради задачи: чини"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/tests/test_retroactive_merge.py ради задачи: # Code Review Agent Ты — Code Reviewer. Твоя задача — провести ревью изменений в текущем проекте. ## Входные данные Аргумент команды: `docs/adr/0001-facts-verdicts-identity.md — ретроспективный ADR (j"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/tests/test_risk.py ради задачи: да и объясни что там за детекоторы и ккакой тип объявлений им нужен джля корпуса"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/tests/test_routing.py ради задачи: да бери K.2b и работай автономнор дальше по оставшимся такскам и эпикам и сторям по всем флоу"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/tests/test_runlock.py ради задачи: наполнение бд джолжно проходить по хрону ежечасно"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/tests/test_salary_stats.py ради задачи: это уже проблемы другого рода посчитать мы занем как хаводи задачи снимай блок"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/tests/test_score_stage.py ради задачи: продолжай по эпику и не останавливайся"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/tests/test_selection.py ради задачи: смотри зная контекст ты сможешь наверное мне помочь, я хочу чтобы ты работал автономно и не прерывался спросить то что я тебе уже говорил autonomous-prompt.md давже в э"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/tests/test_source_cli.py ради задачи: да, зови архитектора и приступай"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/tests/test_source_health.py ради задачи: сначала job-hunt-73, хочу понять почему 17 каналов молчат а вообще все далай попорядку и меня не отвлекай ты автономный"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/tests/test_source_id.py ради задачи: да, зови архитектора и приступай"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/tests/test_source_markup_guards.py ради задачи: смотри зная контекст ты сможешь наверное мне помочь, я хочу чтобы ты работал автономно и не прерывался спросить то что я тебе уже говорил autonomous-prompt.md давже в э"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/tests/test_sources_table.py ради задачи: да, зови архитектора и приступай"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/tests/test_stats_slices.py ради задачи: # Code Review Agent Ты — Code Reviewer. Твоя задача — провести ревью изменений в текущем проекте. ## Входные данные Аргумент команды: `изменения job-hunt-84: core/classify.py gate_state, run.py cmd_re"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/tests/test_submissions.py ради задачи: продолжай"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/tests/test_suspicion.py ради задачи: # Code Review Agent Ты — Code Reviewer. Твоя задача — провести ревью изменений в текущем проекте. ## Входные данные Аргумент команды: `изменения job-hunt-84: core/classify.py gate_state, run.py cmd_re"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/tests/test_taxonomy.py ради задачи: # Code Review Agent Ты — Code Reviewer. Твоя задача — провести ревью изменений в текущем проекте. ## Входные данные Аргумент команды: `--branch origin/feature-job-hunt-core` - Если пусто — ревью всех "
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/tests/test_telegram.py ради задачи: смотри зная контекст ты сможешь наверное мне помочь, я хочу чтобы ты работал автономно и не прерывался спросить то что я тебе уже говорил autonomous-prompt.md давже в э"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/tests/test_telegram_targets.py ради задачи: чини"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/tests/test_topic_posts.py ради задачи: окей делаем приступай к смеансу автономной работы как закнчиваешь задачу пбери следующую фиксиру изменения сегодня нужно создать топик и начать лить туджа вакансчии хочу видеть в живую как каждый час "
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/tests/test_topic_send.py ради задачи: чини"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt правился файл /home/person/scripts/job-hunt/tests/test_verdict_payload.py ради задачи: # Code Review Agent Ты — Code Reviewer. Твоя задача — провести ревью изменений в текущем проекте. ## Входные данные Аргумент команды: `Изменения job-hunt-35: payload v2 вердикта (core/risk.py: Evidenc"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "mcp-grafana",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте mcp-grafana правился файл /home/person/GolandProjects/opensource/mcp-grafana/CHANGELOG.md ради задачи: а почему не фиксим то что сами завели?"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "mcp-grafana",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте mcp-grafana правился файл /home/person/GolandProjects/opensource/mcp-grafana/CONTEXT.md ради задачи: сохрани контекст сессии и есть ли еще кандиты?"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "mcp-grafana",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте mcp-grafana правился файл /home/person/GolandProjects/opensource/mcp-grafana/README.md ради задачи: подтяни контекст нашей oss в графане щзаитем посмотри мои пр и мр далее открой ишью этого репозитория и начни 813"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "mcp-grafana",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте mcp-grafana правился файл /home/person/GolandProjects/opensource/mcp-grafana/client_cache.go ради задачи: # Code Review Agent Ты — Code Reviewer. Твоя задача — провести ревью изменений в текущем проекте. ## Входные данные Аргумент команды: `uncommitted changes on branch fix/1032-normalize-grafana-url-at-b"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "mcp-grafana",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте mcp-grafana правился файл /home/person/GolandProjects/opensource/mcp-grafana/cmd/mcp-grafana/main.go ради задачи: подтяни контекст нашей oss в графане щзаитем посмотри мои пр и мр далее открой ишью этого репозитория и начни 813"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "mcp-grafana",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте mcp-grafana правился файл /home/person/GolandProjects/opensource/mcp-grafana/cmd/mcp-grafana/main_test.go ради задачи: # Code Review Agent Ты — Code Reviewer. Твоя задача — провести ревью изменений в текущем проекте. ## Входные данные Аргумент команды: `uncommitted changes on branch fix/1021-base-path-operational-endp"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "mcp-grafana",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте mcp-grafana правился файл /home/person/GolandProjects/opensource/mcp-grafana/docs/sources/configure/command-line-flags.md ради задачи: подтяни контекст нашей oss в графане щзаитем посмотри мои пр и мр далее открой ишью этого репозитория и начни 813"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "mcp-grafana",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте mcp-grafana правился файл /home/person/GolandProjects/opensource/mcp-grafana/docs/sources/configure/transports-and-addresses.md ради задачи: подтяни контекст нашей oss в графане щзаитем посмотри мои пр и мр далее открой ишью этого репозитория и начни 813"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "mcp-grafana",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте mcp-grafana правился файл /home/person/GolandProjects/opensource/mcp-grafana/mcpgrafana.go ради задачи: а почему не фиксим то что сами завели?"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "mcp-grafana",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте mcp-grafana правился файл /home/person/GolandProjects/opensource/mcp-grafana/mcpgrafana_test.go ради задачи: # Code Review Agent Ты — Code Reviewer. Твоя задача — провести ревью изменений в текущем проекте. ## Входные данные Аргумент команды: `uncommitted changes on branch fix/1032-normalize-grafana-url-at-b"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "mcp-grafana",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте mcp-grafana правился файл /home/person/GolandProjects/opensource/mcp-grafana/validate_url_test.go ради задачи: чет мутно запусти еще ревью им проверь что ничего не сломалось добавь тесты если нужно нужно желлезобитноное решение"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "mcp-grafana",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте mcp-grafana правился файл /home/person/Library/Mobile Documents/iCloud~md~obsidian/Documents/my_synk/Domains/OSS/Grafana OSS Contributing — Tempo bugfixes.md ради задачи: сохрани контекст сессии и есть ли еще кандиты?"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "netbird",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте netbird правился файл /home/person/GolandProjects/opensource/netbird/combined/cmd/root_test.go ради задачи: # Code Review Agent Ты — Code Reviewer. Твоя задача — провести ревью изменений в текущем проекте. ## Входные данные Аргумент команды: `netbird: изменения ветки fix/activitystore-dsn-env относительно o"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "onnx",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте onnx правился файл /Applications/Natively.app/Contents/Resources/app.asar.unpacked/dist-electron/electron/audio/whisper/whisperWorker.js ради задачи: ------------------------------------- Translated Report (Full Report Below) ------------------------------------- Process: Natively [22719] Path: /Applications/Natively.app/Contents/MacOS/Natively Ide"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "pr_watch",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте pr_watch правился файл /home/person/GolandProjects/opensource/clickhouse-datasource/CONTEXT.md ради задачи: сохранил контекст?"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "pr_watch",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте pr_watch правился файл /home/person/GolandProjects/opensource/mcp-grafana/CHANGELOG.md ради задачи: да"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "pr_watch",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте pr_watch правился файл /home/person/GolandProjects/opensource/netbird/CONTEXT.md ради задачи: сохранил контекст?"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "pr_watch",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте pr_watch правился файл /home/person/GolandProjects/opensource/netbird/combined/cmd/root.go ради задачи: да"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "pr_watch",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте pr_watch правился файл /home/person/Library/Mobile Documents/iCloud~md~obsidian/Documents/my_synk/Domains/OSS/Grafana OSS Contributing — Tempo bugfixes.md ради задачи: сохранил контекст?"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "scripts",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте scripts правился файл /home/person/Library/LaunchAgents/com.person.ru-side.plist ради задачи: Пользователь сказал \"займись\" — продолжай весь оставшийся беклог автономно. Порядок: **1. Расписание (launchd)** — создай ~/Library/LaunchAgents/com.person.ru-side.plist, запуск раз в день в"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "scripts",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте scripts правился файл /home/person/Library/Mobile Documents/iCloud~md~obsidian/Documents/my_synk/Domains/OSS/GitHub контрибьютинг план.md ради задачи: ?"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "scripts",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте scripts правился файл /home/person/Library/Mobile Documents/iCloud~md~obsidian/Documents/my_synk/Domains/Work/ssh-work-cert.md ради задачи: перезагружаю мак созрани все"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "scripts",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте scripts правился файл /home/person/dev/job-hunt/CONTEXT.md ради задачи: все делай сегодня нужно будет обогадить источники еще кучей чатов телеграм но проблема в том что там укцча дублей и мошщеников"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "scripts",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте scripts правился файл /home/person/scripts/ru_side/.env ради задачи: Продолжай дальше работу и не забудь запускать ревью и вести заметки в бидс --- КОНТЕКСТ --- Ты работаешь над проектом ru-side-automation (эпик my_synk-12.1) — автосбор RU side-job вакансий. Рабочий ка"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "scripts",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте scripts правился файл /home/person/scripts/ru_side/config.py ради задачи: Добавь два новых TG-канала в адаптер `ru_side/sources/telegram.py`: **Новые каналы:** - `@remote_job_golang` — \"GoLang: 100% Remote\", посты-подборки по 10-20 вакансий в формате списка ссылок - `@remot"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "scripts",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте scripts правился файл /home/person/scripts/ru_side/run.py ради задачи: Отлично, review PASS. Продолжай по плану: 1. Закрой задачу 12.1.7 в beads: `bd close my_synk-12.1.7 \"role edge-fix (_pick_role для hashtag-первой-строки TG), cross-source dedup (_fuzzy_key norm_title+"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "scripts",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте scripts правился файл /home/person/scripts/ru_side/score.py ради задачи: # Code Review Agent Ты — Code Reviewer. Твоя задача — провести ревью изменений в текущем проекте. ## Входные данные Аргумент команды: `` - Если пусто — ревью всех незакоммиченных изменений - Если указ"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "scripts",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте scripts правился файл /home/person/scripts/ru_side/sources/djinni.py ради задачи: # Code Review Agent Ты — Code Reviewer. Твоя задача — провести ревью изменений в текущем проекте. ## Входные данные Аргумент команды: `` - Если пусто — ревью всех незакоммиченных изменений - Если указ"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "scripts",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте scripts правился файл /home/person/scripts/ru_side/sources/hh.py ради задачи: Review PASS для 12.1.8. Финальные шаги: 1. Исправь WARNING в hh.py:22 — поменяй `schedule_id` на `schedule` в `_PARAMS` 2. `bd close my_synk-12.1.8 \"HH.ru adapter (api.hh.ru/vacancies, collect-only), "
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "scripts",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте scripts правился файл /home/person/scripts/ru_side/sources/telegram.py ради задачи: Пользователь сказал \"займись\" — продолжай весь оставшийся беклог автономно. Порядок: **1. Расписание (launchd)** — создай ~/Library/LaunchAgents/com.person.ru-side.plist, запуск раз в день в"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "scripts",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте scripts правился файл /home/person/scripts/ru_side/tracker.py ради задачи: Исправь два WARNING из ревью: 1. tracker.py:57 — operator precedence: `if fkey and (fkey in existing_fuzzy or fkey in batch_fuzzy):` 2. tracker.py:23-30 — guard на пустой norm_role: если `not _norm(ro"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "person",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте person правился файл /Applications/Natively.app/Contents/Resources/app.asar.unpacked/dist-electron/electron/audio/whisper/whisperWorker.js ради задачи: ну закрой его сам"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "person",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте person правился файл /home/person/.git-hooks/commit-msg ради задачи: # Update Config Skill Modify Claude Code configuration by updating settings.json files. ## When Hooks Are Required (Not Memory) If the user wants something to happen automatically in response to an EV"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "person",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте person правился файл /home/person/Desktop/Keychron_K3_hotkeys.txt ради задачи: список горячих клавишь сохрани в тектовом доукменте на рабочем столе"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "person",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте person правился файл /home/person/GolandProjects/opensource/mcp-grafana/mcpgrafana.go ради задачи: да"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "person",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте person правился файл /home/person/GolandProjects/opensource/mcp-grafana/validate_url_test.go ради задачи: да"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "person",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте person правился файл /home/person/Library/LaunchAgents/com.person.pr-watch-digest.plist ради задачи: # Update Config Skill Modify Claude Code configuration by updating settings.json files. ## When Hooks Are Required (Not Memory) If the user wants something to happen automatically in response to an EV"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "person",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте person правился файл /home/person/Library/LaunchAgents/com.person.pr-watch.plist ради задачи: # Update Config Skill Modify Claude Code configuration by updating settings.json files. ## When Hooks Are Required (Not Memory) If the user wants something to happen automatically in response to an EV"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "person",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте person правился файл /home/person/Library/Mobile Documents/iCloud~md~obsidian/Documents/my_synk/Domains/OSS/Grafana OSS Contributing — Tempo bugfixes.md ради задачи: # Update Config Skill Modify Claude Code configuration by updating settings.json files. ## When Hooks Are Required (Not Memory) If the user wants something to happen automatically in response to an EV"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "person",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте person правился файл /home/person/Library/Mobile Documents/iCloud~md~obsidian/Documents/my_synk/Projects/hacker-sprint-memory/STATE.md ради задачи: да записывай в vault"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "person",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте person правился файл /home/person/Library/Mobile Documents/iCloud~md~obsidian/Documents/my_synk/Projects/hacker-sprint-memory/hacker-sprint-memory.md ради задачи: да записывай в vault"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "person",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте person правился файл /home/person/Library/Mobile Documents/iCloud~md~obsidian/Documents/my_synk/Projects/interview-prep/Natively — разбор и удаление.md ради задачи: запиши резульата и переходим к следующему"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "person",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте person правился файл /home/person/Library/Mobile Documents/iCloud~md~obsidian/Documents/my_synk/_INDEX.md ради задачи: Projects/hacker-sprint-memory, черновик архитектуры сразу"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "person",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте person правился файл /home/person/dev/throne/scripts/install-local.sh ради задачи: и настрой мэтч с локальным он уже есть у нас и мы ползуемсмя будут проавки и я хочу править свой проект а не чужой"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "person",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте person правился файл /home/person/projects/lesson-ledger/README.md ради задачи: создай в моем репозитории проект открытый"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "person",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте person правился файл /home/person/scripts/pr_watch/README.md ради задачи: # Update Config Skill Modify Claude Code configuration by updating settings.json files. ## When Hooks Are Required (Not Memory) If the user wants something to happen automatically in response to an EV"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "person",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте person правился файл /home/person/scripts/pr_watch/pr_watch.py ради задачи: почему ты сразу этого не сказал?"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "person",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте person правился файл /home/person/scripts/pr_watch/test_classify.py ради задачи: # Update Config Skill Modify Claude Code configuration by updating settings.json files. ## When Hooks Are Required (Not Memory) If the user wants something to happen automatically in response to an EV"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "throne",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте throne правился файл /home/person/Library/Mobile Documents/iCloud~md~obsidian/Documents/my_synk/Projects/hacker-sprint-memory/STATE.md ради задачи: венрнемся к хатакону давай составим описание идеи"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "throne",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте throne правился файл /home/person/Library/Mobile Documents/iCloud~md~obsidian/Documents/my_synk/Projects/hacker-sprint-memory/pitch.md ради задачи: венрнемся к хатакону давай составим описание идеи"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "throne",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте throne правился файл /home/person/dev/lesson-ledger/README.md ради задачи: протокол добавь в ридми как гипотезу"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "3e45437580b845d1be65184f68038a65",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте 3e45437580b845d1be65184f68038a65 упирались в препятствие: The user doesn't want to proceed with this tool use. The tool use was rejected (eg. if it was a file edit, the new_string was NOT written to the file). To tell you how to proceed, the user said:\nThe u"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt упирались в препятствие: EISDIR: illegal operation on a directory, read '/private/tmp/claude-501/-Users-person-scripts-job-hunt/e04e2c52-f1a4-4f5f-9399-1566112d287b/scratchpad'"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте job-hunt упирались в препятствие: File does not exist. Note: your current working directory is /home/person/scripts/job-hunt."
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "mcp-grafana",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте mcp-grafana упирались в препятствие: File does not exist. Note: your current working directory is /home/person/GolandProjects/opensource/mcp-grafana."
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "onnx",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте onnx упирались в препятствие: The user doesn't want to proceed with this tool use. The tool use was rejected (eg. if it was a file edit, the new_string was NOT written to the file). STOP what you are doing and wait for the user to"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "person",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте person упирались в препятствие: You've hit your monthly spend limit · raise it at claude.ai/settings/usage?from=cc_cli_limit_message"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "person",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте person упирались в препятствие: API Error: 400 The following domains are not accessible to our user agent: ['reddit.com']. Read more: https://support.anthropic.com/en/articles/8896518-does-anthropic-crawl-data-from-the-web-and-how-c"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "person",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте person упирались в препятствие: File does not exist. Note: your current working directory is /home/person."
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "project_state",
+          "subject": "person",
+          "scope": "project"
+        },
+        "values": {
+          "content": "В проекте person упирались в препятствие: The user doesn't want to proceed with this tool use. The tool use was rejected (eg. if it was a file edit, the new_string was NOT written to the file). STOP what you are doing and wait for the user to"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "preference",
+          "subject": "задавать вопросы по одному за раз",
+          "scope": "global"
+        },
+        "values": {
+          "content": "Пользователь просит: задавать вопросы по одному за раз"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "preference",
+          "subject": "не использовать тире и дефисы в тексте",
+          "scope": "global"
+        },
+        "values": {
+          "content": "Пользователь просит: не использовать тире и дефисы в тексте"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "preference",
+          "subject": "отвечать коротко, длинные ответы человек не читает",
+          "scope": "global"
+        },
+        "values": {
+          "content": "Пользователь просит: отвечать коротко, длинные ответы человек не читает"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "preference",
+          "subject": "проверять факты, не выдумывать, не утверждать непроверенное",
+          "scope": "global"
+        },
+        "values": {
+          "content": "Пользователь просит: проверять факты, не выдумывать, не утверждать непроверенное"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "preference",
+          "subject": "сначала показать план, править код после согласования",
+          "scope": "global"
+        },
+        "values": {
+          "content": "Пользователь просит: сначала показать план, править код после согласования"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "external_resource",
+          "subject": "person",
+          "scope": "project"
+        },
+        "values": {
+          "content": "Для проекта person использовался адрес https://www.google.com'"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "external_resource",
+          "subject": "mcp-grafana",
+          "scope": "project"
+        },
+        "values": {
+          "content": "Для проекта mcp-grafana использовался адрес http://10.0.0.1:3000\"`"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "external_resource",
+          "subject": "mcp-grafana",
+          "scope": "project"
+        },
+        "values": {
+          "content": "Для проекта mcp-grafana использовался адрес http://10.0.0.1:3000`"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "external_resource",
+          "subject": "scripts",
+          "scope": "project"
+        },
+        "values": {
+          "content": "Для проекта scripts использовался адрес http://Quala.dev/`"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "external_resource",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "Для проекта job-hunt использовался адрес http://api.hh.ru"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "external_resource",
+          "subject": "person",
+          "scope": "project"
+        },
+        "values": {
+          "content": "Для проекта person использовался адрес http://localhost:11434/v1`"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "external_resource",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "Для проекта job-hunt использовался адрес http://localhost:11434`"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "external_resource",
+          "subject": "mcp-grafana",
+          "scope": "project"
+        },
+        "values": {
+          "content": "Для проекта mcp-grafana использовался адрес http://localhost:5008**"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "external_resource",
+          "subject": "app",
+          "scope": "project"
+        },
+        "values": {
+          "content": "Для проекта app использовался адрес http://localhost:5008/improvements`"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "external_resource",
+          "subject": "7244f639974b42ba976115e3e7f7a819",
+          "scope": "project"
+        },
+        "values": {
+          "content": "Для проекта 7244f639974b42ba976115e3e7f7a819 использовался адрес http://localhost:5008/intents/7244f639974b42ba976115e3e7f7a819?context=simpl-ai"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "external_resource",
+          "subject": "Tarasusrus__lesson-ledger",
+          "scope": "project"
+        },
+        "values": {
+          "content": "Для проекта Tarasusrus__lesson-ledger использовался адрес http://localhost:5008/intents?tag=lesson-ledger"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "external_resource",
+          "subject": "Tarasusrus__lesson-ledger",
+          "scope": "project"
+        },
+        "values": {
+          "content": "Для проекта Tarasusrus__lesson-ledger использовался адрес http://localhost:5008/intents?tag=lesson-ledger`"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "external_resource",
+          "subject": "person",
+          "scope": "project"
+        },
+        "values": {
+          "content": "Для проекта person использовался адрес http://localhost:5008`"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "external_resource",
+          "subject": "3xui-shop",
+          "scope": "project"
+        },
+        "values": {
+          "content": "Для проекта 3xui-shop использовался адрес https://10.0.0.1:2096/user/<vpn_id>`"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "external_resource",
+          "subject": "3xui-shop",
+          "scope": "project"
+        },
+        "values": {
+          "content": "Для проекта 3xui-shop использовался адрес https://person:<redacted>@...`"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "external_resource",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "Для проекта job-hunt использовался адрес https://api.hh.ru"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "external_resource",
+          "subject": "3e45437580b845d1be65184f68038a65",
+          "scope": "project"
+        },
+        "values": {
+          "content": "Для проекта 3e45437580b845d1be65184f68038a65 использовался адрес https://api.telegram.org/bot<TOKEN>/sendMessage`"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "external_resource",
+          "subject": "person",
+          "scope": "project"
+        },
+        "values": {
+          "content": "Для проекта person использовался адрес https://arxiv.org/abs/2509.09498"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "external_resource",
+          "subject": "person",
+          "scope": "project"
+        },
+        "values": {
+          "content": "Для проекта person использовался адрес https://arxiv.org/abs/2510.04618"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "external_resource",
+          "subject": "person",
+          "scope": "project"
+        },
+        "values": {
+          "content": "Для проекта person использовался адрес https://arxiv.org/abs/2510.04618)):"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "external_resource",
+          "subject": "person",
+          "scope": "project"
+        },
+        "values": {
+          "content": "Для проекта person использовался адрес https://arxiv.org/abs/2601.01885"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "external_resource",
+          "subject": "cdaf2aeede844bff9fecf9229d7e25e8",
+          "scope": "project"
+        },
+        "values": {
+          "content": "Для проекта cdaf2aeede844bff9fecf9229d7e25e8 использовался адрес https://arxiv.org/abs/2605.24117"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "external_resource",
+          "subject": "person",
+          "scope": "project"
+        },
+        "values": {
+          "content": "Для проекта person использовался адрес https://arxiv.org/abs/2606.22844"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "external_resource",
+          "subject": "cdaf2aeede844bff9fecf9229d7e25e8",
+          "scope": "project"
+        },
+        "values": {
+          "content": "Для проекта cdaf2aeede844bff9fecf9229d7e25e8 использовался адрес https://arxiv.org/abs/2606.29914"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "external_resource",
+          "subject": "person",
+          "scope": "project"
+        },
+        "values": {
+          "content": "Для проекта person использовался адрес https://arxiv.org/abs/2607.08716"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "external_resource",
+          "subject": "person",
+          "scope": "project"
+        },
+        "values": {
+          "content": "Для проекта person использовался адрес https://arxiv.org/abs/2607.13591"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "external_resource",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "Для проекта job-hunt использовался адрес https://core.telegram.org/bots/api"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "external_resource",
+          "subject": "person",
+          "scope": "project"
+        },
+        "values": {
+          "content": "Для проекта person использовался адрес https://developer.apple.com/documentation/appkit/nswindow/sharingtype-swift.enum/none"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "external_resource",
+          "subject": "person",
+          "scope": "project"
+        },
+        "values": {
+          "content": "Для проекта person использовался адрес https://github.com/Blueturboguy07/cue"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "external_resource",
+          "subject": "person",
+          "scope": "project"
+        },
+        "values": {
+          "content": "Для проекта person использовался адрес https://github.com/LeoYeAI/openclaw-auto-dream"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "external_resource",
+          "subject": "person",
+          "scope": "project"
+        },
+        "values": {
+          "content": "Для проекта person использовался адрес https://github.com/Natively-AI-assistant/natively-cluely-ai-assistant/issues/402**"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "external_resource",
+          "subject": "person",
+          "scope": "project"
+        },
+        "values": {
+          "content": "Для проекта person использовался адрес https://github.com/Natively-AI-assistant/natively-cluely-ai-assistant/pull/403#issuecomment-5101971509"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "external_resource",
+          "subject": "person",
+          "scope": "project"
+        },
+        "values": {
+          "content": "Для проекта person использовался адрес https://github.com/Natively-AI-assistant/natively-cluely-ai-assistant/pull/403"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "external_resource",
+          "subject": "person",
+          "scope": "project"
+        },
+        "values": {
+          "content": "Для проекта person использовался адрес https://github.com/Natively-AI-assistant/natively-cluely-ai-assistant/pull/403**"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "external_resource",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "Для проекта job-hunt использовался адрес https://github.com/Tarasusrus/job-hunt/pull/1"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "external_resource",
+          "subject": "e51aabbac0ef49999f31dd05075ef791",
+          "scope": "project"
+        },
+        "values": {
+          "content": "Для проекта e51aabbac0ef49999f31dd05075ef791 использовался адрес https://github.com/Tarasusrus/job-hunt/pull/2"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "external_resource",
+          "subject": "throne",
+          "scope": "project"
+        },
+        "values": {
+          "content": "Для проекта throne использовался адрес https://github.com/Tarasusrus/lesson-ledger"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "external_resource",
+          "subject": "person",
+          "scope": "project"
+        },
+        "values": {
+          "content": "Для проекта person использовался адрес https://github.com/Tarasusrus/lesson-ledger**"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "external_resource",
+          "subject": "Tarasusrus__lesson-ledger",
+          "scope": "project"
+        },
+        "values": {
+          "content": "Для проекта Tarasusrus__lesson-ledger использовался адрес https://github.com/Tarasusrus/lesson-ledger/pull/new/research/agent-memory-landscape"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "external_resource",
+          "subject": "person",
+          "scope": "project"
+        },
+        "values": {
+          "content": "Для проекта person использовался адрес https://github.com/Tarasusrus/throne.git`"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "external_resource",
+          "subject": "throne",
+          "scope": "project"
+        },
+        "values": {
+          "content": "Для проекта throne использовался адрес https://github.com/Tarasusrus/throne`"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "external_resource",
+          "subject": "throne",
+          "scope": "project"
+        },
+        "values": {
+          "content": "Для проекта throne использовался адрес https://github.com/gently-whitesnow/throne**"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "external_resource",
+          "subject": "person",
+          "scope": "project"
+        },
+        "values": {
+          "content": "Для проекта person использовался адрес https://github.com/gently-whitesnow/throne`"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "external_resource",
+          "subject": "scripts",
+          "scope": "project"
+        },
+        "values": {
+          "content": "Для проекта scripts использовался адрес https://github.com/grafana/grafana-tempo-datasource/pull/223"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "external_resource",
+          "subject": "scripts",
+          "scope": "project"
+        },
+        "values": {
+          "content": "Для проекта scripts использовался адрес https://github.com/grafana/grafana-tempo-datasource/pull/234"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "external_resource",
+          "subject": "mcp-grafana",
+          "scope": "project"
+        },
+        "values": {
+          "content": "Для проекта mcp-grafana использовался адрес https://github.com/grafana/mcp-grafana/issues/1032)**"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "external_resource",
+          "subject": "mcp-grafana",
+          "scope": "project"
+        },
+        "values": {
+          "content": "Для проекта mcp-grafana использовался адрес https://github.com/grafana/mcp-grafana/pull/1033"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "external_resource",
+          "subject": "mcp-grafana",
+          "scope": "project"
+        },
+        "values": {
+          "content": "Для проекта mcp-grafana использовался адрес https://github.com/grafana/mcp-grafana/pull/1033)**"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "external_resource",
+          "subject": "scripts",
+          "scope": "project"
+        },
+        "values": {
+          "content": "Для проекта scripts использовался адрес https://grafana.com/careers/"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "external_resource",
+          "subject": "mcp-grafana",
+          "scope": "project"
+        },
+        "values": {
+          "content": "Для проекта mcp-grafana использовался адрес https://grafana.example.com/grafana/api/frontend/settings`"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "external_resource",
+          "subject": "mcp-grafana",
+          "scope": "project"
+        },
+        "values": {
+          "content": "Для проекта mcp-grafana использовался адрес https://grafana.example.com`"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "external_resource",
+          "subject": "3xui-shop",
+          "scope": "project"
+        },
+        "values": {
+          "content": "Для проекта 3xui-shop использовался адрес https://help.send.tg/en/articles/10279948-crypto-pay-api"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "external_resource",
+          "subject": "person",
+          "scope": "project"
+        },
+        "values": {
+          "content": "Для проекта person использовался адрес https://keychronsupport.zendesk.com/hc/en-us/articles/360044087054-How-to-disable-Auto-Sleep-Mode"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "external_resource",
+          "subject": "person",
+          "scope": "project"
+        },
+        "values": {
+          "content": "Для проекта person использовался адрес https://natively.software/"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "external_resource",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "Для проекта job-hunt использовался адрес https://nott.me/RunelloBot?startapp=<payload>\")`"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "external_resource",
+          "subject": "lesson-ledger",
+          "scope": "project"
+        },
+        "values": {
+          "content": "Для проекта lesson-ledger использовался адрес https://portal.cloudzy.com`"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "external_resource",
+          "subject": "3xui-shop",
+          "scope": "project"
+        },
+        "values": {
+          "content": "Для проекта 3xui-shop использовался адрес https://status.claude.com"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "external_resource",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "Для проекта job-hunt использовался адрес https://t.me/Remoteit/13655"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "external_resource",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "Для проекта job-hunt использовался адрес https://t.me/`"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "external_resource",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "Для проекта job-hunt использовался адрес https://t.me/s/godevjob`"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "external_resource",
+          "subject": "person",
+          "scope": "project"
+        },
+        "values": {
+          "content": "Для проекта person использовался адрес https://tech.wildberries.ru/api/v1/tests/199/attempts/917/answers`"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "external_resource",
+          "subject": "mcp-grafana",
+          "scope": "project"
+        },
+        "values": {
+          "content": "Для проекта mcp-grafana использовался адрес https://throne.whitesnow.tech/install"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "external_resource",
+          "subject": "job-hunt",
+          "scope": "project"
+        },
+        "values": {
+          "content": "Для проекта job-hunt использовался адрес https://person:<redacted>@api.example.com/jobs"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "external_resource",
+          "subject": "3xui-shop",
+          "scope": "project"
+        },
+        "values": {
+          "content": "Для проекта 3xui-shop использовался адрес https://vpn.mcpgate.org:2096/sub/<vpn_id>"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "external_resource",
+          "subject": "3xui-shop",
+          "scope": "project"
+        },
+        "values": {
+          "content": "Для проекта 3xui-shop использовался адрес https://vpn.mcpgate.org:2096/sub/<vpn_id>`"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "external_resource",
+          "subject": "3xui-shop",
+          "scope": "project"
+        },
+        "values": {
+          "content": "Для проекта 3xui-shop использовался адрес https://vpn.mcpgate.org:2096/sub/`"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "external_resource",
+          "subject": "3xui-shop",
+          "scope": "project"
+        },
+        "values": {
+          "content": "Для проекта 3xui-shop использовался адрес https://vpn.mcpgate.org:2096/sub/cpy5f2efr1kzee89"
+        }
+      }
+    }
+  }
+]
