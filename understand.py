@@ -9,6 +9,7 @@ import argparse, json, re
 from datetime import datetime
 from pathlib import Path
 
+import telemetry
 import xmem
 from save import TRANSCRIPTS, blocks, result_text
 from encoder import redact
@@ -209,6 +210,9 @@ def weigh(files):
     return seen
 
 
+@telemetry.traced("weigh_fact", lambda arg, out: {
+    "occurrences": arg["rec"]["n"], "projects": len(arg["rec"]["projects"]),
+    "score": round(out, 3)})
 def score_of(rec, newest):
     """Оценка от 0 до 1. Три доли: повторяемость, охват проектов, свежесть."""
     repeat = min(rec["n"], 10) / 10.0

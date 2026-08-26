@@ -10,6 +10,7 @@ import argparse, json, re, sys
 from datetime import datetime, timezone
 from pathlib import Path
 
+import telemetry
 import xmem
 
 LOG = Path.home() / ".local" / "state" / "memory-encoder" / "suggest-log.jsonl"
@@ -21,6 +22,9 @@ MAX_CHARS = 1200     # потолок на весь кусок, который �
 SCORE = re.compile(r"Оценка уверенности:\s*([0-9]+(?:\.[0-9]+)?)")
 
 
+@telemetry.traced("parse_answer", lambda arg, out: {
+    "answer_chars": len(arg["answer"] or ""), "out": len(out),
+    "scored": sum(1 for s, _ in out if s is not None)})
 def pieces(answer):
     """Ответ памяти разбираем на куски и достаём оценку каждого."""
     try:
@@ -42,6 +46,8 @@ def pieces(answer):
     return out
 
 
+@telemetry.traced("threshold_filter", lambda arg, out: {
+    "in": len(arg["items"]), "out": len(out), "min_score": arg["min_score"]})
 def gate(items, min_score=MIN_SCORE, max_items=MAX_ITEMS, max_chars=MAX_CHARS):
     """Порог. Кусок без оценки не пропускаем: неизвестное не лучше слабого."""
     kept = sorted(((s, t) for s, t in items if s is not None and s >= min_score), reverse=True)
@@ -63,6 +69,8 @@ def render(kept):
     return "\n".join(lines)
 
 
+@telemetry.traced("pipeline", lambda arg, out: {
+    "kept": len(out[1]), "sent_chars": len(out[0]), "silent": not out[0]})
 def suggest(query, mode="single", min_score=MIN_SCORE):
     answer = xmem.read(query, mode=mode)
     kept = gate(pieces(answer), min_score=min_score)

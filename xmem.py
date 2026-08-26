@@ -15,12 +15,18 @@
 """
 import os, subprocess
 
+import telemetry
+
 # Идентификатор хранилища берём из окружения, в коде его быть не должно.
 # Задать можно так: export XMEM_INSTANCE_ID=<id>
 INSTANCE = os.environ.get("XMEM_INSTANCE_ID", "")
 
 # Пустая переменная в окружении значит «не задано», см. .env.example.
 BACKEND = (os.environ.get("XMEM_BACKEND") or "cli").strip().lower()
+
+# Память можно выключить целиком: чтение отдаёт пустоту, запись молча гаснет.
+# Нужно для половины сравнения «без памяти» — иначе не с чем сравнивать.
+DISABLED = bool(os.environ.get("XMEM_DISABLED"))
 
 # Linux не пропускает один аргумент длиннее 128 КиБ (MAX_ARG_STRLEN).
 # Берём с запасом, потому что кириллица это два байта на символ.
@@ -83,6 +89,8 @@ def _split(text):
 
 def write(text, wait=False):
     """Текстовая запись. Ключ выводит экстрактор, см. предупреждение вверху."""
+    if DISABLED:
+        return ""
     adapter = _adapter()
     if adapter is not None:
         # Ограничение на длину аргумента — свойство консоли, а не сервиса.
@@ -102,6 +110,8 @@ def write_objects(records, relations=()):
     Принимает объекты из models. Порядок сохраняется: связь применяется после
     объектов, которые она соединяет, поэтому их можно слать одним вызовом.
     """
+    if DISABLED:
+        return None
     adapter = _adapter()
     if adapter is None:
         raise BackendError("структурная запись недоступна в консоли: "
@@ -110,8 +120,13 @@ def write_objects(records, relations=()):
     return adapter.write_objects(mutations)
 
 
+@telemetry.traced("retrieve", lambda arg, out: {
+    "backend": BACKEND, "disabled": DISABLED, "mode": arg["mode"],
+    "query_chars": len(arg["query"] or ""), "answer_chars": len(out or "")})
 def read(query, mode="single"):
     """Всегда строка: вызывающие разбирают ответ текстом, см. suggest.pieces."""
+    if DISABLED:
+        return ""
     adapter = _adapter()
     if adapter is not None:
         return adapter.read(query, mode=READ_MODES.get(mode, mode))
