@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Единственная дверь наружу: всё общение с xmemory идёт только отсюда.
 
-За дверью три пути, они выбираются переменной XMEM_BACKEND:
+За дверью четыре пути, они выбираются переменной XMEM_BACKEND:
 
   cli  консольная утилита xmemcli. Работает без ключа доступа, но умеет только
        текстовую запись: ключ выводит экстрактор, и при промахе записи
@@ -9,8 +9,10 @@
   api  прямой HTTP. Умеет структурную запись, где ключ задан полем.
   sdk  официальный клиент для Python. То же, что api, но соединение и разбор
        ответа держит он.
+  local  SQLite рядом с проектом. Ни ключа, ни сети, ни квоты, но и читателя
+       нет: на запрос приходят найденные записи, а не пересказ.
 
-Структурная запись есть только у api и sdk. Вызов write_objects на cli падает
+Структурная запись есть у api, sdk и local. Вызов write_objects на cli падает
 явной ошибкой, а не тихо уходит в текст.
 """
 import os, subprocess
@@ -51,9 +53,6 @@ def _cli_run(args, timeout=180):
     return proc.stdout.strip()
 
 
-# Прежнее имя. Оставлено, потому что на него ссылается разбор в тестах и заметках.
-_run = _cli_run
-
 
 def _adapter():
     if BACKEND == "api":
@@ -62,9 +61,13 @@ def _adapter():
     if BACKEND == "sdk":
         import xmem_sdk
         return xmem_sdk
+    if BACKEND == "local":
+        import xmem_local
+        return xmem_local
     if BACKEND == "cli":
         return None
-    raise BackendError("неизвестный XMEM_BACKEND: %r, допустимо cli, api, sdk" % BACKEND)
+    raise BackendError("неизвестный XMEM_BACKEND: %r, допустимо cli, api, sdk, local"
+                       % BACKEND)
 
 
 def _split(text):

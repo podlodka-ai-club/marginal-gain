@@ -5,7 +5,8 @@
 чтение через адаптер возвращало не строку, и ссылка по ключу требовала полей,
 которых у ссылки нет. Обе закрыты здесь.
 """
-import json, os, unittest
+import dataclasses, json, os, tempfile, unittest
+from pathlib import Path
 from unittest import mock
 
 os.environ.setdefault("XMEM_INSTANCE_ID", "test-instance")
@@ -16,8 +17,10 @@ import matrix
 import models
 import telemetry
 import suggest
+import store
 import xmem
 import xmem_api
+import xmem_local
 
 
 class TestKey(unittest.TestCase):
@@ -224,6 +227,168 @@ class TestThreshold(unittest.TestCase):
     def test_unscored_line_has_no_confidence_tail(self):
         """Не приписываем уверенность там, где её не измеряли."""
         self.assertNotIn("уверенность", suggest.render([(None, "факт")]))
+
+
+class TestLocalStore(unittest.TestCase):
+    """Локальная база. Замена сети должна быть незаметна вызывающему."""
+
+    def setUp(self):
+        self.dir = tempfile.TemporaryDirectory()
+        self.repo = store.Repository(Path(self.dir.name) / "memory.db")
+        self.addCleanup(self.dir.cleanup)
+        self.addCleanup(self.repo.close)
+
+    def test_tables_follow_models_without_drift(self):
+        """Колонки выводятся из схемы. Ручной список разошёлся бы молча."""
+        for name, cls in models.OBJECTS.items():
+            got = {row[1] for row in
+                   self.repo.conn.execute('PRAGMA table_info("%s")' % name.lower())}
+            self.assertEqual(got, {f.name for f in dataclasses.fields(cls)}, name)
+
+    def test_migration_is_idempotent(self):
+        """Повторный запуск не должен ни падать, ни накатывать заново."""
+        self.assertEqual(store.migrate(self.repo.conn), 0)
+        self.assertEqual(
+            self.repo.conn.execute("PRAGMA user_version").fetchone()[0],
+            len(store.MIGRATIONS))
+
+    def test_second_write_updates_row_by_key(self):
+        """Первичный ключ схемы — тот же, что в XMD: строка одна, не две."""
+        first = models.Fact(fact_type="preference", subject="стиль", scope="global",
+                            content="Отвечать коротко")
+        self.repo.apply([first.mutation()])
+        self.repo.apply([models.Fact(fact_type="preference", subject="стиль",
+                                     scope="global", content="Отвечать очень коротко"
+                                     ).mutation()])
+        rows = self.repo.conn.execute("SELECT content FROM fact").fetchall()
+        self.assertEqual([r[0] for r in rows], ["Отвечать очень коротко"])
+
+    def test_partial_write_keeps_what_is_already_there(self):
+        """Пустое поле не шлётся и потому не затирает лежащее значение."""
+        self.repo.apply([models.Episode(session_id="s1", episode_number=1,
+                                        title="Правка", outcome="done",
+                                        project="marginal-gain").mutation()])
+        self.repo.apply([models.Episode(session_id="s1", episode_number=1,
+                                        title="Правка", outcome="done").mutation()])
+        row = self.repo.conn.execute("SELECT project FROM episode").fetchone()
+        self.assertEqual(row[0], "marginal-gain")
+
+    def test_empty_string_does_not_blank_a_stored_value(self):
+        """Пустая строка это тоже пустое поле. Ревью нашло исполнением.
+
+        Вычистка секретов умеет свести короткое содержимое к пустой строке.
+        Раньше такая запись доезжала до базы и стирала лежащий там факт.
+        """
+        self.repo.apply([models.Episode(session_id="s1", episode_number=1,
+                                        title="Правка", outcome="done",
+                                        project="marginal-gain").mutation()])
+        self.repo.apply([models.Episode(session_id="s1", episode_number=1,
+                                        title="Правка", outcome="done",
+                                        project="").mutation()])
+        row = self.repo.conn.execute("SELECT project FROM episode").fetchone()
+        self.assertEqual(row[0], "marginal-gain")
+
+    def test_repository_answers_from_another_thread(self):
+        """Адаптер держит один репозиторий на процесс и ходит в него из потоков."""
+        import threading
+        out = []
+        worker = threading.Thread(target=lambda: out.append(self.repo.counts()))
+        worker.start()
+        worker.join()
+        self.assertEqual(len(out), 1)
+
+    def test_relation_endpoints_are_stored(self):
+        ep = models.Episode(session_id="s1", episode_number=1, title="t", outcome="done")
+        fact = models.Fact(fact_type="project_state", subject="p", scope="project",
+                           content="c")
+        self.repo.apply([ep.mutation(), fact.mutation(),
+                         models.link("episode_facts", episode=ep, fact=fact)])
+        roles = {r[0] for r in
+                 self.repo.conn.execute("SELECT role FROM links WHERE relation = ?",
+                                        ("episode_facts",))}
+        self.assertEqual(roles, {"episode", "fact"})
+
+    def test_search_finds_written_fact(self):
+        self.repo.apply([models.Fact(
+            fact_type="project_state", subject="marginal-gain", scope="project",
+            content="Правился файл suggest.py ради порога.").mutation()])
+        got = self.repo.search("Какие файлы правились в проекте marginal-gain?")
+        self.assertTrue(got)
+        self.assertEqual(got[0]["object_type"], "Fact")
+
+    def test_search_stays_silent_without_a_hit(self):
+        """Случайная строка хуже пустоты: она поедет в контекст как факт."""
+        self.assertEqual(self.repo.search("несуществующая ерунда zzz"), [])
+
+
+class TestLocalAdapter(unittest.TestCase):
+    """Порт локальной базы должен совпадать с сетевым до имён."""
+
+    def setUp(self):
+        self.dir = tempfile.TemporaryDirectory()
+        self.addCleanup(self.dir.cleanup)
+        patch = mock.patch.dict(
+            os.environ, {"XMEM_LOCAL_PATH": str(Path(self.dir.name) / "memory.db")})
+        patch.start()
+        self.addCleanup(patch.stop)
+        xmem_local.close()
+        self.addCleanup(xmem_local.close)
+
+    def test_port_matches_the_network_adapter(self):
+        """Меняться местами можно только при одинаковых именах."""
+        for name in ("write_text", "write_objects", "read", "schema"):
+            self.assertTrue(callable(getattr(xmem_local, name)), name)
+
+    def test_backend_switch_picks_local(self):
+        with mock.patch.object(xmem, "BACKEND", "local"):
+            self.assertIs(xmem._adapter(), xmem_local)
+
+    def test_our_own_text_becomes_a_record(self):
+        """Текстовый путь записи не теряется: формат наш, разбор детерминирован."""
+        got = xmem_local.write_text("Fact.\ncontent: Отвечать коротко\n"
+                                    "fact_type: preference\nsubject: стиль\n"
+                                    "scope: global\nОценка уверенности: 0.90.")
+        self.assertEqual(got["stored"], "Fact")
+        self.assertEqual(xmem_local.repository().counts()["Fact"], 1)
+
+    def test_multiline_field_survives(self):
+        """Значение в несколько строк собирается целиком, а не по первой строке."""
+        got = xmem_local.parse_text("Fact.\ncontent: первая строка\n"
+                                    "вторая строка того же поля\n"
+                                    "fact_type: preference\nsubject: стиль\n"
+                                    "scope: global")
+        self.assertIn("вторая строка", got[1]["content"])
+
+    def test_human_note_is_not_glued_to_a_field(self):
+        """«Оценка уверенности» — пояснение человеку, а не продолжение поля."""
+        got = xmem_local.parse_text("Fact.\ncontent: текст\nfact_type: preference\n"
+                                    "subject: стиль\nscope: global\n"
+                                    "Оценка уверенности: 0.90.")
+        self.assertEqual(got[1]["scope"], "global")
+
+    def test_foreign_text_is_kept_not_dropped(self):
+        """Экстрактора нет, но терять вход нельзя: потерю надо видеть."""
+        got = xmem_local.write_text("Разговор abc, проект x, ветка y. user:\nпривет")
+        self.assertEqual(got["stored"], "raw")
+        self.assertEqual(xmem_local.repository().counts()["raw_text"], 1)
+
+    def test_read_returns_text_not_dict(self):
+        """Тот же контракт, что у сетевого адаптера: вызывающий ждёт строку."""
+        self.assertIsInstance(xmem_local.read("что угодно"), str)
+
+    def test_empty_result_is_silence(self):
+        """Не «ничего не найдено» словами: фраза уехала бы в контекст как факт."""
+        self.assertEqual(xmem_local.read("несуществующая ерунда zzz"), "")
+
+    def test_suggestion_survives_the_local_answer(self):
+        """Сквозь: запись, чтение, порог, текст для агента."""
+        fact = models.Fact(fact_type="project_state", subject="marginal-gain",
+                           scope="project",
+                           content="Правился файл suggest.py ради порога.")
+        xmem_local.write_objects([fact.mutation()])
+        with mock.patch.object(xmem, "BACKEND", "local"):
+            text, kept, raw = suggest.suggest("файлы marginal-gain")
+        self.assertIn("suggest.py", text)
 
 
 class TestGoldenSet(unittest.TestCase):
