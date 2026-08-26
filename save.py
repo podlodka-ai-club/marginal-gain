@@ -1,13 +1,21 @@
 #!/usr/bin/env python3
-"""Модуль 1, Сохранение. Наивно: всё содержимое разговора уходит в xmemory.
+"""Модуль 1, Сохранение. Всё содержимое разговора уходит в хранилище.
 
 Никакого отбора, никакой обрезки. Единственное исключение это затирание
 секретов: токены и ключи наружу не уходят никогда.
+
+Запись структурная: разговор ложится строкой Session, каждая реплика, команда
+и результат — строкой Event, между ними ставится связь. Раньше отсюда уходила
+сплошная проза, и ключ выводил экстрактор: при промахе записи схлопывались, а
+на хранилище без экстрактора не появлялось ни одного Event. Ключ задан здесь.
+
+Текстовый путь остался запасным: консоль структурной записи не умеет.
 """
 import argparse, json, sys
 from datetime import datetime, timezone
 from pathlib import Path
 
+import models
 import xmem
 from encoder import redact
 
@@ -29,27 +37,52 @@ def result_text(block):
     return str(body or "")
 
 
+DAYS = ("monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday")
+
+
+def when(stamp):
+    """Час и день недели из отметки времени. Нужны схеме для поиска по времени."""
+    if not stamp:
+        return None, None
+    try:
+        moment = datetime.fromisoformat(str(stamp).replace("Z", "+00:00"))
+    except ValueError:
+        return None, None
+    return moment.hour, DAYS[moment.weekday()]
+
+
 def records_from_line(rec):
-    """Одна строка транскрипта превращается в записи. Целиком, без обрезки."""
-    if rec.get("type") not in ("user", "assistant"):
+    """Одна строка транскрипта превращается в записи. Целиком, без обрезки.
+
+    Вид события берётся из схемы, а не выдумывается: по нему хранилище отличает
+    сообщение человека от ответа агента и от вызова инструмента.
+    """
+    kind_of = rec.get("type")
+    if kind_of not in ("user", "assistant"):
         return []
+    said = "user_message" if kind_of == "user" else "agent_response"
     out = []
     for block in blocks(rec.get("message") or {}):
         kind = block.get("type")
         if kind == "text":
-            out.append(("реплика", block.get("text", "")))
+            out.append((said, "реплика", block.get("text", ""), None))
         elif kind == "thinking":
-            out.append(("размышление", block.get("thinking", "")))
+            out.append(("agent_response", "размышление", block.get("thinking", ""), None))
         elif kind == "tool_use":
-            out.append(("команда %s" % block.get("name", "?"),
-                        json.dumps(block.get("input", {}), ensure_ascii=False)))
+            name = block.get("name", "?")
+            out.append(("tool_call", "команда %s" % name,
+                        json.dumps(block.get("input", {}), ensure_ascii=False), name))
         elif kind == "tool_result":
-            out.append(("результат команды", result_text(block)))
-    return [(role, redact(text)) for role, text in out if str(text).strip()]
+            out.append(("tool_result", "результат команды", result_text(block), None))
+    return [(event_type, role, redact(text), tool)
+            for event_type, role, text, tool in out if str(text).strip()]
 
 
 def load_state():
-    return json.loads(STATE.read_text()) if STATE.exists() else {"files": {}}
+    state = json.loads(STATE.read_text()) if STATE.exists() else {}
+    state.setdefault("files", {})
+    state.setdefault("sessions", {})
+    return state
 
 
 def save_state(state):
@@ -76,18 +109,84 @@ def read_new(path, cursor):
                 rec = json.loads(line)
             except json.JSONDecodeError:
                 continue
-            for role, text in records_from_line(rec):
+            for event_type, role, text, tool in records_from_line(rec):
                 items.append({
                     "seq": seq,
                     "session": rec.get("sessionId") or rec.get("session_id") or "",
                     "at": rec.get("timestamp") or "",
                     "cwd": rec.get("cwd") or "",
                     "branch": rec.get("gitBranch") or "",
+                    "event_type": event_type,
+                    "tool": tool,
                     "role": role,
                     "text": text,
                 })
                 seq += 1
     return items, {"offset": offset, "inode": stat.st_ino, "seq": seq}
+
+
+def event_of(item):
+    """Запись Event по схеме. Ключ — разговор плюс порядковый номер."""
+    hour, day = when(item["at"])
+    return models.Event(
+        session_id=item["session"] or "unknown",
+        sequence_number=item["seq"],
+        event_type=item["event_type"],
+        content=item["text"],
+        tool_name=item["tool"],
+        occurred_at=item["at"] or None,
+        project=Path(item["cwd"]).name if item["cwd"] else None,
+        working_directory=item["cwd"] or None,
+        git_branch=item["branch"] or None,
+        hour_of_day=hour,
+        day_of_week=day)
+
+
+def session_of(item):
+    """Запись Session. Разговор один на много событий, ключ у него один."""
+    return models.Session(
+        session_id=item["session"] or "unknown",
+        project=Path(item["cwd"]).name if item["cwd"] else None,
+        working_directory=item["cwd"] or None,
+        git_branch=item["branch"] or None,
+        started_at=item["at"] or None)
+
+
+def send(items):
+    """Структурная запись пачкой: строки и связи между ними одним вызовом.
+
+    Разговор пишется раньше своих событий: связь ссылается на обе стороны по
+    ключу, и порядок в списке мутаций сохраняется.
+    """
+    records, relations, seen = [], [], {}
+    for item in items:
+        event = event_of(item)
+        session = seen.get(event.session_id)
+        if session is None:
+            session = seen[event.session_id] = session_of(item)
+            records.append(session)
+        records.append(event)
+        relations.append(models.link("session_events", session=session, event=event))
+    if not records:
+        return 0
+    xmem.write_objects(records, relations)
+    return len(records)
+
+
+def deliver(items):
+    """Структурная запись, а при её отсутствии — текст.
+
+    Консоль структурной записи не умеет и падает явной ошибкой. Это не повод
+    терять разговор: запасной путь кладёт то же самое прозой, как было раньше.
+    """
+    try:
+        return send(items)
+    except xmem.BackendError:
+        if xmem.BACKEND != "cli":
+            raise      # структурная запись есть у всех, кроме консоли
+        for item in items:
+            xmem.write(render(item))
+        return len(items)
 
 
 def render(item):
@@ -96,6 +195,60 @@ def render(item):
         item["session"] or "?", where, item["branch"] or "нет",
         item["at"] or "неизвестно", item["role"])
     return "%s\n%s" % (head, item["text"])
+
+
+def ingest(files, limit=None, dry=True, reset=False, verbose=False):
+    """Проход по файлам архива. Отдельно от разбора доводов, чтобы звать извне.
+
+    Потребителю очереди нужен ровно этот проход, а не командная строка вокруг
+    него. Отметка о прочитанном общая, поэтому повторный заход по тому же
+    файлу ничего не задваивает.
+    """
+    state = load_state()
+    if reset:
+        for path in files:
+            state["files"].pop(str(path), None)
+        state["sessions"] = {}
+
+    # Номер события уникален в пределах разговора, а не файла. Разговор часто
+    # разложен по нескольким файлам архива: 59 из 153 на 2026-08-26. Пока номер
+    # считался по файлу, второй файл начинал с нуля и затирал события первого
+    # по ключу (session_id, sequence_number).
+    sessions = dict(state.get("sessions") or {})
+    sent, stopped, batch = 0, False, []
+    for path in files:
+        before = state["files"].get(str(path), {})
+        items, cursor = read_new(path, before)
+        done = 0
+        for item in items:
+            if limit and sent >= limit:
+                stopped = True
+                break
+            talk = item["session"] or "unknown"
+            item["seq"] = sessions.get(talk, 0)
+            sessions[talk] = item["seq"] + 1
+            batch.append(item)
+            sent += 1
+            done += 1
+            if verbose:
+                print("%s #%d %s %d симв."
+                      % (path.name, item["seq"], item["role"], len(item["text"])))
+        # Записи уходят пачкой на файл, и только потом двигается отметка:
+        # если запись не удалась, исключение долетит сюда и отметка останется
+        # прежней. Иначе разговор считался бы сохранённым, не будучи им.
+        if not dry and batch:
+            deliver(batch)
+            # Счётчики двигаются только после успешной записи: если запись
+            # упала, номера не считаются израсходованными.
+            state["sessions"] = dict(sessions)
+        batch = []
+        # Отметку о прочитанном двигаем только если файл дочитан до конца.
+        # Иначе непосланные записи пропали бы молча.
+        state["files"][str(path)] = cursor if done == len(items) else before
+        save_state(state)
+        if stopped:
+            break
+    return sent
 
 
 def main():
@@ -108,36 +261,11 @@ def main():
     ap.add_argument("--verbose", action="store_true")
     args = ap.parse_args()
 
-    state = load_state()
     files = sorted(TRANSCRIPTS.rglob("*.jsonl"))
     if args.only:
         files = [f for f in files if args.only in str(f)]
-    if args.reset:
-        for f in files:
-            state["files"].pop(str(f), None)
-
-    sent, stopped = 0, False
-    for path in files:
-        before = state["files"].get(str(path), {})
-        items, cursor = read_new(path, before)
-        done = 0
-        for item in items:
-            if args.limit and sent >= args.limit:
-                stopped = True
-                break
-            text = render(item)
-            if not args.dry:
-                xmem.write(text)
-            sent += 1
-            done += 1
-            if args.verbose:
-                print("%s #%d %s %d симв." % (path.name, item["seq"], item["role"], len(text)))
-        # Отметку о прочитанном двигаем только если файл дочитан до конца.
-        # Иначе непосланные записи пропали бы молча.
-        state["files"][str(path)] = cursor if done == len(items) else before
-        save_state(state)
-        if stopped:
-            break
+    sent = ingest(files, limit=args.limit, dry=args.dry,
+                  reset=args.reset, verbose=args.verbose)
 
     print("файлов %d, записей %d, режим %s" % (len(files), sent, "холостой" if args.dry else "запись"))
 

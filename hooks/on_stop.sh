@@ -1,15 +1,16 @@
 #!/usr/bin/env bash
 # Точка 5: конец хода агента.
-# Сохраняем ТОЛЬКО текущий разговор, а не весь архив: архив это 21 тысяча
-# записей, разгребать его фоном значит жечь лимит впустую.
+# Разбираем ТОЛЬКО очередь и текущий разговор, а не весь архив: архив это
+# десятки тысяч записей, разгребать его фоном значит жечь лимит впустую.
 # Разбор архива при надобности запускается руками: python3 save.py --send
-DIR="$HOME/.local/state/memory-encoder"
-mkdir -p "$DIR"
+#
+# Зовём потребителя очереди, а не сохранение напрямую: иначе очередь, которую
+# наполняет хук на сообщение человека, так и остаётся непрочитанной.
+source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
 PAYLOAD=$(cat)
 TRANSCRIPT=$(printf '%s' "$PAYLOAD" | python3 -c \
   "import json,sys; print((json.load(sys.stdin).get('transcript_path') or ''))" 2>/dev/null)
-[ -z "$TRANSCRIPT" ] && exit 0
-nohup flock -n "$DIR/save.lock" \
-  python3 "$HOME/GolandProjects/memory-encoder/save.py" --send --only "$TRANSCRIPT" --limit 200 \
-  >> "$DIR/save.log" 2>&1 &
+ARGS=(--send --limit 200)
+[ -n "$TRANSCRIPT" ] && ARGS+=(--transcript "$TRANSCRIPT")
+nohup python3 "$ROOT/drain.py" "${ARGS[@]}" >> "$STATE_DIR/save.log" 2>&1 &
 exit 0

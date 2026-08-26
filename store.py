@@ -23,12 +23,20 @@ DEFAULT_PATH = Path.home() / ".local" / "state" / "memory-encoder" / "memory.db"
 # SQLite к типам относится свободно, а терять значение нельзя.
 TYPES = {str: "TEXT", int: "INTEGER", float: "REAL", bool: "INTEGER"}
 
-# Где искать слова запроса. Порядок задаёт вес: попадание в тему сильнее
-# попадания в текст, потому что тема это то, о чём факт, а текст — как сказан.
+# Где искать слова запроса. Число задаёт вес: попадание в тему сильнее
+# попадания в текст, потому что тема это то, о чём запись, а текст — как сказан.
+# Здесь должны быть все объекты, в которые пишет продукт. Пока Session и Event
+# отсутствовали, разговор ложился в базу и не находился ни одним запросом.
 SEARCH = {
     "Fact": (("subject", 3), ("project", 2), ("content", 1)),
     "Episode": (("title", 3), ("project", 2), ("git_branch", 2), ("summary", 1)),
+    "Event": (("tool_name", 3), ("project", 2), ("git_branch", 2), ("content", 1)),
+    "Session": (("project", 3), ("git_branch", 2), ("working_directory", 1)),
 }
+
+# Потолок строк-кандидатов на объект. Отбор идёт запросом, а не перебором всей
+# таблицы: событий в архиве десятки тысяч, а чтение стоит в горячем пути.
+CANDIDATES = 300
 
 WORD = re.compile(r"[\w./:-]{3,}", re.UNICODE)
 
@@ -217,9 +225,14 @@ class Repository:
             return []
         found = []
         for object_type, fields in SEARCH.items():
+            names = [name for name, _ in fields]
+            where = " OR ".join('"%s" LIKE ?' % name for name in names
+                                for _ in terms)
+            params = ["%%%s%%" % term for _ in names for term in terms]
             with self.lock:
                 rows = self.conn.execute(
-                    'SELECT * FROM "%s"' % _table(object_type)).fetchall()
+                    'SELECT * FROM "%s" WHERE %s LIMIT %d'
+                    % (_table(object_type), where, CANDIDATES), params).fetchall()
             for row in rows:
                 score = 0
                 for name, weight in fields:

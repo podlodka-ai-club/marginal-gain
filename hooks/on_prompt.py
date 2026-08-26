@@ -4,7 +4,15 @@ import json, sys, os
 from datetime import datetime, timezone
 from pathlib import Path
 
-QUEUE = Path.home() / ".local" / "state" / "memory-encoder" / "queue.jsonl"
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+try:
+    from drain import QUEUE          # адрес очереди задаёт её потребитель
+except Exception:
+    # Тот же адрес и та же переменная, что у потребителя. Иначе при сбое
+    # импорта производитель и потребитель разошлись бы по разным файлам,
+    # и молча: хук глотает любое исключение и выходит с нулём.
+    QUEUE = Path(os.environ.get("XMEM_QUEUE_PATH")
+                 or Path.home() / ".local" / "state" / "memory-encoder" / "queue.jsonl")
 
 def main():
     try:
