@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 """Memory Encoder: fon reads Claude Code transcripts and writes episodes to xmemory."""
-import argparse, json, os, re, subprocess, sys, time
+import argparse, json, os, re, sys, time
 from datetime import datetime, timezone
 from pathlib import Path
+
+import xmem
 
 TRANSCRIPTS = Path.home() / ".claude" / "projects"
 STATE = Path.home() / ".local" / "state" / "memory-encoder" / "state.json"
 OUTBOX = Path.home() / ".local" / "state" / "memory-encoder" / "outbox.jsonl"
-INSTANCE = os.environ.get("XMEM_INSTANCE_ID", "")
 
 MAX_TEXT = 1200
 MAX_TOOL = 500
@@ -163,11 +164,9 @@ def send(text, dry_run):
         fh.write(json.dumps({"at": datetime.now(timezone.utc).isoformat(), "sent": not dry_run, "text": text}, ensure_ascii=False) + "\n")
     if dry_run:
         return "dry-run"
-    env = dict(os.environ, XMEM_INSTANCE_ID=INSTANCE)
-    proc = subprocess.run(["xmemcli", "write", text, "--no-wait"], capture_output=True, text=True, env=env, timeout=120)
-    if proc.returncode != 0:
-        raise RuntimeError("xmemcli write failed: %s" % (proc.stdout or proc.stderr)[:300])
-    return proc.stdout.strip()[:200]
+    # Дверь наружу одна на весь модуль, иначе XMEM_BACKEND переключит остальных,
+    # а самый крупный писатель продолжит слать текст мимо выбранного пути.
+    return str(xmem.write(text, wait=False))[:200]
 
 def run_once(args):
     state = load_state()
