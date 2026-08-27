@@ -11,11 +11,12 @@
 """
 import math, sys, unittest
 from pathlib import Path
+from unittest import mock
 
 import numpy as np
 
 HERE = Path(__file__).resolve().parent
-sys.path.insert(0, str(HERE / "research" / "lab" / "x7"))
+sys.path.append(str(HERE / "research" / "lab" / "x7"))
 
 import features
 import understand
@@ -49,9 +50,17 @@ class Wiring(unittest.TestCase):
 
 
 class Stand(unittest.TestCase):
-    def test_stand_has_no_own_copy(self):
+    def test_stand_calls_production_function(self):
+        """Подменяем боевую функцию — столбец стенда обязан поехать за ней.
+
+        Проверка импорта тут не годится: стенд может импортировать модуль
+        и всё равно считать столбец своей копией формулы.
+        """
         import feat
-        self.assertIs(feat.features, features)
+        with mock.patch.object(features, "n_log", lambda rec: 42.0):
+            keys, X, agg = feat.build("pkey", "2026-08-15")
+        j = feat.NAMES.index("n_log")
+        self.assertTrue((X[:, j] == 42.0).all())
 
     def test_stand_column_is_the_formula(self):
         import feat

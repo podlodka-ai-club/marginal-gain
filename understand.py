@@ -9,6 +9,7 @@ import argparse, json, re
 from datetime import datetime
 from pathlib import Path
 
+import features
 import telemetry
 import xmem
 from save import TRANSCRIPTS, blocks, result_text
@@ -210,6 +211,11 @@ def weigh(files):
     return seen
 
 
+def features_of(rec):
+    """Признаки узла факта. Считаются рядом с мерой и в неё не входят."""
+    return features.compute(rec)
+
+
 @telemetry.traced("weigh_fact", lambda arg, out: {
     "occurrences": arg["rec"]["n"], "projects": len(arg["rec"]["projects"]),
     "score": round(out, 3)})
@@ -280,8 +286,10 @@ def main():
                     xmem.write(render_fact(*fact, score=score, rec=rec))
                 fcts += 1
                 if args.verbose:
-                    print("   FACT %.2f [%s/%s] x%d %s"
-                          % (score, fact[0], fact[2], rec["n"], fact[3][:80]))
+                    feats = features_of(rec)
+                    print("   FACT %.2f [%s/%s] x%d %s %s"
+                          % (score, fact[0], fact[2], rec["n"], fact[3][:80],
+                             " ".join("%s=%.3f" % (k, v) for k, v in feats.items())))
     print("эпизодов %d, фактов %d, отсеяно порогом %d, режим %s"
           % (eps, fcts, skipped, "холостой" if args.dry else "запись"))
 
