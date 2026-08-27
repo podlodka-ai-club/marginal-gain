@@ -11,71 +11,16 @@
 
 Текстовый путь остался запасным: консоль структурной записи не умеет.
 """
-import argparse, json, sys
-from datetime import datetime, timezone
+import argparse, json
 from pathlib import Path
 
-import models
-import xmem
-from encoder import redact
+from domain import models
+from storage import port
+from archive.transcripts import TRANSCRIPTS, read_new, when
 
-TRANSCRIPTS = Path.home() / ".claude" / "projects"
+# Книжка учёта своя: что уже прочитано и доставлено. Разбор транскрипта
+# лежит в archive, состояния там нет.
 STATE = Path.home() / ".local" / "state" / "memory-encoder" / "save-state.json"
-
-
-def blocks(message):
-    body = message.get("content")
-    if isinstance(body, str):
-        return [{"type": "text", "text": body}]
-    return [b for b in body if isinstance(b, dict)] if isinstance(body, list) else []
-
-
-def result_text(block):
-    body = block.get("content")
-    if isinstance(body, list):
-        return " ".join(p.get("text", "") for p in body if isinstance(p, dict))
-    return str(body or "")
-
-
-DAYS = ("monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday")
-
-
-def when(stamp):
-    """Час и день недели из отметки времени. Нужны схеме для поиска по времени."""
-    if not stamp:
-        return None, None
-    try:
-        moment = datetime.fromisoformat(str(stamp).replace("Z", "+00:00"))
-    except ValueError:
-        return None, None
-    return moment.hour, DAYS[moment.weekday()]
-
-
-def records_from_line(rec):
-    """Одна строка транскрипта превращается в записи. Целиком, без обрезки.
-
-    Вид события берётся из схемы, а не выдумывается: по нему хранилище отличает
-    сообщение человека от ответа агента и от вызова инструмента.
-    """
-    kind_of = rec.get("type")
-    if kind_of not in ("user", "assistant"):
-        return []
-    said = "user_message" if kind_of == "user" else "agent_response"
-    out = []
-    for block in blocks(rec.get("message") or {}):
-        kind = block.get("type")
-        if kind == "text":
-            out.append((said, "реплика", block.get("text", ""), None))
-        elif kind == "thinking":
-            out.append(("agent_response", "размышление", block.get("thinking", ""), None))
-        elif kind == "tool_use":
-            name = block.get("name", "?")
-            out.append(("tool_call", "команда %s" % name,
-                        json.dumps(block.get("input", {}), ensure_ascii=False), name))
-        elif kind == "tool_result":
-            out.append(("tool_result", "результат команды", result_text(block), None))
-    return [(event_type, role, redact(text), tool)
-            for event_type, role, text, tool in out if str(text).strip()]
 
 
 def load_state():
@@ -90,39 +35,6 @@ def save_state(state):
     tmp = STATE.with_suffix(".tmp")
     tmp.write_text(json.dumps(state, indent=1))
     tmp.replace(STATE)
-
-
-def read_new(path, cursor):
-    stat = path.stat()
-    offset = cursor.get("offset", 0)
-    if stat.st_size < offset or cursor.get("inode") not in (None, stat.st_ino):
-        offset = 0
-    seq = cursor.get("seq", 0)
-    items = []
-    with path.open("r", encoding="utf-8", errors="replace", newline="") as fh:
-        fh.seek(offset)
-        for line in fh:
-            if not line.endswith("\n"):
-                break
-            offset += len(line.encode("utf-8"))
-            try:
-                rec = json.loads(line)
-            except json.JSONDecodeError:
-                continue
-            for event_type, role, text, tool in records_from_line(rec):
-                items.append({
-                    "seq": seq,
-                    "session": rec.get("sessionId") or rec.get("session_id") or "",
-                    "at": rec.get("timestamp") or "",
-                    "cwd": rec.get("cwd") or "",
-                    "branch": rec.get("gitBranch") or "",
-                    "event_type": event_type,
-                    "tool": tool,
-                    "role": role,
-                    "text": text,
-                })
-                seq += 1
-    return items, {"offset": offset, "inode": stat.st_ino, "seq": seq}
 
 
 def event_of(item):
@@ -152,7 +64,7 @@ def session_of(item):
         started_at=item["at"] or None)
 
 
-def send(items):
+def send(items, door=None):
     """Структурная запись пачкой: строки и связи между ними одним вызовом.
 
     Разговор пишется раньше своих событий: связь ссылается на обе стороны по
@@ -169,24 +81,23 @@ def send(items):
         relations.append(models.link("session_events", session=session, event=event))
     if not records:
         return 0
-    xmem.write_objects(records, relations)
+    (door or port.door()).write_objects(records, relations)
     return len(records)
 
 
-def deliver(items):
+def deliver(items, door=None):
     """Структурная запись, а при её отсутствии — текст.
 
-    Консоль структурной записи не умеет и падает явной ошибкой. Это не повод
-    терять разговор: запасной путь кладёт то же самое прозой, как было раньше.
+    Спрашиваем дверь, что она умеет, а не как её зовут. Сравнение с "cli"
+    означало, что пятый путь без структурной записи молча роняет разговор:
+    ошибка не поймана — значит, потеряно.
     """
-    try:
-        return send(items)
-    except xmem.BackendError:
-        if xmem.BACKEND != "cli":
-            raise      # структурная запись есть у всех, кроме консоли
-        for item in items:
-            xmem.write(render(item))
-        return len(items)
+    door = door or port.door()
+    if hasattr(door, "write_objects"):
+        return send(items, door)
+    for item in items:
+        door.write(render(item))
+    return len(items)
 
 
 def render(item):
@@ -197,13 +108,19 @@ def render(item):
     return "%s\n%s" % (head, item["text"])
 
 
-def ingest(files, limit=None, dry=True, reset=False, verbose=False):
+def ingest(files, limit=None, dry=True, reset=False, verbose=False, door=None):
     """Проход по файлам архива. Отдельно от разбора доводов, чтобы звать извне.
 
     Потребителю очереди нужен ровно этот проход, а не командная строка вокруг
     него. Отметка о прочитанном общая, поэтому повторный заход по тому же
     файлу ничего не задваивает.
+
+    Дверь берём один раз на весь проход и передаём дальше: иначе на каждом
+    файле открывалась бы своя, и путь наружу мог бы смениться посреди прохода
+    вместе с окружением.
     """
+    if not dry:
+        door = door or port.door()
     state = load_state()
     if reset:
         for path in files:
@@ -215,13 +132,19 @@ def ingest(files, limit=None, dry=True, reset=False, verbose=False):
     # считался по файлу, второй файл начинал с нуля и затирал события первого
     # по ключу (session_id, sequence_number).
     sessions = dict(state.get("sessions") or {})
-    sent, stopped, batch = 0, False, []
+    sent, stopped, unfinished, reached = 0, False, [], 0
     for path in files:
+        reached += 1
         before = state["files"].get(str(path), {})
-        items, cursor = read_new(path, before)
-        done = 0
+        items, _ = read_new(path, before)
+        # Отметка, до которой всё разобрано. Двигается только на границе
+        # строки: остановка посреди строки либо пропустила бы её соседей,
+        # либо выдала бы уже отданное вторым разом.
+        resume, batch = before, []
         for item in items:
-            if limit and sent >= limit:
+            # Потолок проверяем на границе строки, а не между записями.
+            # Перебор на несколько записей безобиден, разрыв строки — нет.
+            if limit and sent >= limit and resume is not before:
                 stopped = True
                 break
             talk = item["session"] or "unknown"
@@ -229,7 +152,8 @@ def ingest(files, limit=None, dry=True, reset=False, verbose=False):
             sessions[talk] = item["seq"] + 1
             batch.append(item)
             sent += 1
-            done += 1
+            if item["last_in_line"]:
+                resume = item["cursor"]
             if verbose:
                 print("%s #%d %s %d симв."
                       % (path.name, item["seq"], item["role"], len(item["text"])))
@@ -237,24 +161,28 @@ def ingest(files, limit=None, dry=True, reset=False, verbose=False):
         # если запись не удалась, исключение долетит сюда и отметка останется
         # прежней. Иначе разговор считался бы сохранённым, не будучи им.
         if not dry and batch:
-            deliver(batch)
-            # Счётчики двигаются только после успешной записи: если запись
-            # упала, номера не считаются израсходованными.
+            deliver(batch, door)
+            # Счётчики и отметка двигаются вместе и только после успешной
+            # записи. Раньше счётчики шли вперёд, а отметка при сработавшем
+            # потолке стояла — и файл перечитывался с начала, ложась заново
+            # под новыми ключами (session_id, sequence_number).
             state["sessions"] = dict(sessions)
-        batch = []
-        # Отметку о прочитанном двигаем только если файл дочитан до конца.
-        # Иначе непосланные записи пропали бы молча.
-        #
-        # И только если это была запись. Холостой прогон помечал архив
-        # прочитанным, ничего не записав: после него настоящая запись находила
-        # 132 новые строки вместо сорока двух тысяч, а разница выглядела как
-        # пустой архив, а не как съеденная отметка.
-        if not dry:
-            state["files"][str(path)] = cursor if done == len(items) else before
+            state["files"][str(path)] = resume
             save_state(state)
+        elif not dry:
+            # Читать было нечего: отметку всё равно закрепляем, иначе пустой
+            # проход по дочитанному файлу каждый раз открывал бы его заново.
+            state["files"][str(path)] = resume
+            save_state(state)
+        if resume is before or resume.get("offset", 0) < path.stat().st_size:
+            unfinished.append(path)
         if stopped:
             break
-    return sent
+    # Недочитанные называем поимённо: потребитель очереди возвращает их себе,
+    # иначе они пропали бы вместе со снятой подменой. Файлы, до которых из-за
+    # потолка вовсе не дошли, недочитаны тем более.
+    unfinished += [p for p in files[reached:] if p not in unfinished]
+    return {"sent": sent, "unfinished": unfinished}
 
 
 def main():
@@ -270,10 +198,12 @@ def main():
     files = sorted(TRANSCRIPTS.rglob("*.jsonl"))
     if args.only:
         files = [f for f in files if args.only in str(f)]
-    sent = ingest(files, limit=args.limit, dry=args.dry,
-                  reset=args.reset, verbose=args.verbose)
+    got = ingest(files, limit=args.limit, dry=args.dry,
+                 reset=args.reset, verbose=args.verbose)
 
-    print("файлов %d, записей %d, режим %s" % (len(files), sent, "холостой" if args.dry else "запись"))
+    print("файлов %d, записей %d, недочитано %d, режим %s"
+          % (len(files), got["sent"], len(got["unfinished"]),
+             "холостой" if args.dry else "запись"))
 
 
 if __name__ == "__main__":

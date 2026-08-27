@@ -782,81 +782,6 @@
     ]
   },
   {
-    "id": "fact-d94c3657",
-    "kind": "fact",
-    "query": "Какие файлы правились в проекте 3xui-shop?",
-    "expect": [
-      "subscription_link.py"
-    ],
-    "forbid": [],
-    "repeated": false,
-    "occurrences": 3,
-    "source": [
-      [
-        "f7b80743-cb61-405e-93d4-982beb215148",
-        5
-      ],
-      [
-        "f7b80743-cb61-405e-93d4-982beb215148",
-        6
-      ],
-      [
-        "f7b80743-cb61-405e-93d4-982beb215148",
-        8
-      ]
-    ]
-  },
-  {
-    "id": "fact-1c995274",
-    "kind": "fact",
-    "query": "Какие файлы правились в проекте 3xui-shop?",
-    "expect": [
-      "pyproject.toml"
-    ],
-    "forbid": [],
-    "repeated": false,
-    "occurrences": 3,
-    "source": [
-      [
-        "f7b80743-cb61-405e-93d4-982beb215148",
-        5
-      ],
-      [
-        "f7b80743-cb61-405e-93d4-982beb215148",
-        6
-      ],
-      [
-        "f7b80743-cb61-405e-93d4-982beb215148",
-        8
-      ]
-    ]
-  },
-  {
-    "id": "fact-df723652",
-    "kind": "fact",
-    "query": "Какие файлы правились в проекте 3xui-shop?",
-    "expect": [
-      "test_subscription_link.py"
-    ],
-    "forbid": [],
-    "repeated": false,
-    "occurrences": 3,
-    "source": [
-      [
-        "f7b80743-cb61-405e-93d4-982beb215148",
-        5
-      ],
-      [
-        "f7b80743-cb61-405e-93d4-982beb215148",
-        6
-      ],
-      [
-        "f7b80743-cb61-405e-93d4-982beb215148",
-        8
-      ]
-    ]
-  },
-  {
     "id": "fact-ee26ad45",
     "kind": "fact",
     "query": "Какие файлы правились в проекте cdaf2aeede844bff9fecf9229d7e25e8?",
@@ -1132,6 +1057,81 @@
     ]
   },
   {
+    "id": "fact-f496427d",
+    "kind": "fact",
+    "query": "Какие файлы правились в проекте job-hunt?",
+    "expect": [
+      "0001-facts-verdicts-identity.md"
+    ],
+    "forbid": [],
+    "repeated": false,
+    "occurrences": 3,
+    "source": [
+      [
+        "0793ffe5-bba5-4e53-a958-0441d623cc92",
+        7
+      ],
+      [
+        "0793ffe5-bba5-4e53-a958-0441d623cc92",
+        8
+      ],
+      [
+        "99b23e19-5b1d-4cff-8654-296db299a42c",
+        6
+      ]
+    ]
+  },
+  {
+    "id": "fact-86cdb7b7",
+    "kind": "fact",
+    "query": "Какие файлы правились в проекте job-hunt?",
+    "expect": [
+      "strategies.py"
+    ],
+    "forbid": [],
+    "repeated": false,
+    "occurrences": 3,
+    "source": [
+      [
+        "99b23e19-5b1d-4cff-8654-296db299a42c",
+        13
+      ],
+      [
+        "bd85fb51-3304-4bb0-84aa-52e7f4b64731",
+        18
+      ],
+      [
+        "ef617449-d86f-4a54-a3ce-81997cd7cb09",
+        5
+      ]
+    ]
+  },
+  {
+    "id": "fact-68b3962c",
+    "kind": "fact",
+    "query": "Какие файлы правились в проекте job-hunt?",
+    "expect": [
+      "test_adr_refs.py"
+    ],
+    "forbid": [],
+    "repeated": false,
+    "occurrences": 3,
+    "source": [
+      [
+        "0793ffe5-bba5-4e53-a958-0441d623cc92",
+        8
+      ],
+      [
+        "99b23e19-5b1d-4cff-8654-296db299a42c",
+        6
+      ],
+      [
+        "d04342e7-0051-4a5e-b5e5-5d4956010983",
+        12
+      ]
+    ]
+  },
+  {
     "id": "pref-b4fecc8b",
     "kind": "preference",
     "query": "О чём пользователь просил в связи с темой «отвечать коротко, длинные ответы человек не читает»?",
@@ -1140,16 +1140,8 @@
     ],
     "forbid": [],
     "repeated": true,
-    "occurrences": 25,
+    "occurrences": 21,
     "source": [
-      [
-        "7a3b5040-a4c0-4e0e-8467-bbaf1dfff627",
-        10
-      ],
-      [
-        "a614735d-0203-4573-83dc-0e8c2b89e74d",
-        25
-      ],
       [
         "e2e3ea09-917e-43db-89fa-23faf5268fa8",
         8
@@ -1197,14 +1189,6 @@
       [
         "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
         1
-      ],
-      [
-        "f7b80743-cb61-405e-93d4-982beb215148",
-        1
-      ],
-      [
-        "f7b80743-cb61-405e-93d4-982beb215148",
-        9
       ],
       [
         "77f69361-ad5c-4d1e-949c-ae6a02c507b2",
@@ -1363,15 +1347,11 @@
     ],
     "forbid": [],
     "repeated": true,
-    "occurrences": 3,
+    "occurrences": 2,
     "source": [
       [
         "6768f8dc-a363-4751-a39c-45203b274588",
         1
-      ],
-      [
-        "f7b80743-cb61-405e-93d4-982beb215148",
-        3
       ],
       [
         "6011cf1e-80d0-4979-93f5-658b3ec89037",
@@ -1401,6 +1381,69 @@
     ]
   },
   {
+    "id": "url-e002c165",
+    "kind": "external_resource",
+    "query": "Какие внешние адреса использовались в проекте mcp-grafana?",
+    "expect": [
+      "10.0.0.1:3000"
+    ],
+    "forbid": [],
+    "repeated": true,
+    "occurrences": 2,
+    "source": [
+      [
+        "443261a2-4bd1-475b-ac40-a68480bb1021",
+        5
+      ],
+      [
+        "443261a2-4bd1-475b-ac40-a68480bb1021",
+        12
+      ]
+    ]
+  },
+  {
+    "id": "url-8d979f13",
+    "kind": "external_resource",
+    "query": "Какие внешние адреса использовались в проекте job-hunt?",
+    "expect": [
+      "localhost:11434"
+    ],
+    "forbid": [],
+    "repeated": true,
+    "occurrences": 2,
+    "source": [
+      [
+        "ef617449-d86f-4a54-a3ce-81997cd7cb09",
+        20
+      ],
+      [
+        "ef617449-d86f-4a54-a3ce-81997cd7cb09",
+        20
+      ]
+    ]
+  },
+  {
+    "id": "url-a4fb4590",
+    "kind": "external_resource",
+    "query": "Какие внешние адреса использовались в проекте Tarasusrus__lesson-ledger?",
+    "expect": [
+      "localhost:5008"
+    ],
+    "forbid": [],
+    "repeated": true,
+    "occurrences": 2,
+    "source": [
+      [
+        "d654bd7e-41d8-451d-898a-e945b0ec9bcf",
+        12
+      ],
+      [
+        "d654bd7e-41d8-451d-898a-e945b0ec9bcf",
+        18
+      ]
+    ]
+  },
+  {
     "id": "url-33591d7e",
     "kind": "external_resource",
     "query": "Какие внешние адреса использовались в проекте person?",
@@ -1422,26 +1465,9 @@
     ]
   },
   {
-    "id": "url-f3f0ef94",
+    "id": "url-8ed4d240",
     "kind": "external_resource",
-    "query": "Какие внешние адреса использовались в проекте mcp-grafana?",
-    "expect": [
-      "10.0.0.1:3000`"
-    ],
-    "forbid": [],
-    "repeated": true,
-    "occurrences": 1,
-    "source": [
-      [
-        "443261a2-4bd1-475b-ac40-a68480bb1021",
-        12
-      ]
-    ]
-  },
-  {
-    "id": "url-a4fb4590",
-    "kind": "external_resource",
-    "query": "Какие внешние адреса использовались в проекте Tarasusrus__lesson-ledger?",
+    "query": "Какие внешние адреса использовались в проекте person?",
     "expect": [
       "localhost:5008"
     ],
@@ -1450,50 +1476,8 @@
     "occurrences": 1,
     "source": [
       [
-        "d654bd7e-41d8-451d-898a-e945b0ec9bcf",
-        12
-      ]
-    ]
-  },
-  {
-    "id": "url-6f6a0273",
-    "kind": "external_resource",
-    "query": "Какие внешние адреса использовались в проекте person?",
-    "expect": [
-      "localhost:5008`"
-    ],
-    "forbid": [],
-    "repeated": true,
-    "occurrences": 1,
-    "source": [
-      [
         "23ece2e2-1b3d-47cf-bc46-5dc0d8cb67dd",
         20
-      ]
-    ]
-  },
-  {
-    "id": "url-60e2e77a",
-    "kind": "external_resource",
-    "query": "Какие внешние адреса использовались в проекте person?",
-    "expect": [
-      "www.google.com'"
-    ],
-    "forbid": [],
-    "repeated": false,
-    "occurrences": 3,
-    "source": [
-      [
-        "7a3b5040-a4c0-4e0e-8467-bbaf1dfff627",
-        7
-      ],
-      [
-        "7a3b5040-a4c0-4e0e-8467-bbaf1dfff627",
-        8
-      ],
-      [
-        "7a3b5040-a4c0-4e0e-8467-bbaf1dfff627",
-        9
       ]
     ]
   },
@@ -1523,69 +1507,6 @@
     ]
   },
   {
-    "id": "url-b12348a0",
-    "kind": "external_resource",
-    "query": "Какие внешние адреса использовались в проекте job-hunt?",
-    "expect": [
-      "api.hh.ru"
-    ],
-    "forbid": [],
-    "repeated": false,
-    "occurrences": 2,
-    "source": [
-      [
-        "a614735d-0203-4573-83dc-0e8c2b89e74d",
-        23
-      ],
-      [
-        "a614735d-0203-4573-83dc-0e8c2b89e74d",
-        25
-      ]
-    ]
-  },
-  {
-    "id": "url-2b0a1441",
-    "kind": "external_resource",
-    "query": "Какие внешние адреса использовались в проекте job-hunt?",
-    "expect": [
-      "localhost:11434`"
-    ],
-    "forbid": [],
-    "repeated": false,
-    "occurrences": 2,
-    "source": [
-      [
-        "ef617449-d86f-4a54-a3ce-81997cd7cb09",
-        20
-      ],
-      [
-        "ef617449-d86f-4a54-a3ce-81997cd7cb09",
-        20
-      ]
-    ]
-  },
-  {
-    "id": "url-567ca716",
-    "kind": "external_resource",
-    "query": "Какие внешние адреса использовались в проекте job-hunt?",
-    "expect": [
-      "api.hh.ru"
-    ],
-    "forbid": [],
-    "repeated": false,
-    "occurrences": 2,
-    "source": [
-      [
-        "a614735d-0203-4573-83dc-0e8c2b89e74d",
-        20
-      ],
-      [
-        "a614735d-0203-4573-83dc-0e8c2b89e74d",
-        22
-      ]
-    ]
-  },
-  {
     "id": "url-e5606f41",
     "kind": "external_resource",
     "query": "Какие внешние адреса использовались в проекте person?",
@@ -1603,6 +1524,27 @@
       [
         "e2e3ea09-917e-43db-89fa-23faf5268fa8",
         22
+      ]
+    ]
+  },
+  {
+    "id": "url-fcbd8ba1",
+    "kind": "external_resource",
+    "query": "Какие внешние адреса использовались в проекте person?",
+    "expect": [
+      "arxiv.org"
+    ],
+    "forbid": [],
+    "repeated": false,
+    "occurrences": 2,
+    "source": [
+      [
+        "e2e3ea09-917e-43db-89fa-23faf5268fa8",
+        1
+      ],
+      [
+        "e2e3ea09-917e-43db-89fa-23faf5268fa8",
+        19
       ]
     ]
   },
@@ -1628,45 +1570,7 @@
     ]
   },
   {
-    "id": "url-045b425a",
-    "kind": "external_resource",
-    "query": "Какие внешние адреса использовались в проекте 3xui-shop?",
-    "expect": [
-      "vpn.mcpgate.org:2096"
-    ],
-    "forbid": [],
-    "repeated": false,
-    "occurrences": 2,
-    "source": [
-      [
-        "f7b80743-cb61-405e-93d4-982beb215148",
-        9
-      ],
-      [
-        "f7b80743-cb61-405e-93d4-982beb215148",
-        16
-      ]
-    ]
-  },
-  {
-    "id": "url-570781f1",
-    "kind": "external_resource",
-    "query": "Какие внешние адреса использовались в проекте mcp-grafana?",
-    "expect": [
-      "10.0.0.1:3000\"`"
-    ],
-    "forbid": [],
-    "repeated": false,
-    "occurrences": 1,
-    "source": [
-      [
-        "443261a2-4bd1-475b-ac40-a68480bb1021",
-        5
-      ]
-    ]
-  },
-  {
-    "id": "url-ef015e7a",
+    "id": "url-67d9a9ed",
     "kind": "external_resource",
     "query": "Какие внешние адреса использовались в проекте scripts?",
     "expect": [
@@ -1683,7 +1587,7 @@
     ]
   },
   {
-    "id": "url-9e1cc2a0",
+    "id": "url-a25dcc8f",
     "kind": "external_resource",
     "query": "Какие внешние адреса использовались в проекте person?",
     "expect": [
@@ -1695,6 +1599,74 @@
     "source": [
       [
         "e4e1b55b-dc6a-4e07-b8ac-eabdb9e4fdeb",
+        1
+      ]
+    ]
+  },
+  {
+    "id": "url-cb309456",
+    "kind": "external_resource",
+    "query": "Какие внешние адреса использовались в проекте mcp-grafana?",
+    "expect": [
+      "localhost:5008**"
+    ],
+    "forbid": [],
+    "repeated": false,
+    "occurrences": 1,
+    "source": [
+      [
+        "23ece2e2-1b3d-47cf-bc46-5dc0d8cb67dd",
+        19
+      ]
+    ]
+  },
+  {
+    "id": "url-28fb6726",
+    "kind": "external_resource",
+    "query": "Какие внешние адреса использовались в проекте app?",
+    "expect": [
+      "localhost:5008"
+    ],
+    "forbid": [],
+    "repeated": false,
+    "occurrences": 1,
+    "source": [
+      [
+        "23ece2e2-1b3d-47cf-bc46-5dc0d8cb67dd",
+        25
+      ]
+    ]
+  },
+  {
+    "id": "url-bd4fe299",
+    "kind": "external_resource",
+    "query": "Какие внешние адреса использовались в проекте 7244f639974b42ba976115e3e7f7a819?",
+    "expect": [
+      "localhost:5008"
+    ],
+    "forbid": [],
+    "repeated": false,
+    "occurrences": 1,
+    "source": [
+      [
+        "1af83bc7-09a4-4795-9a56-74a0b8d6286c",
+        3
+      ]
+    ]
+  },
+  {
+    "id": "url-d20fec31",
+    "kind": "external_resource",
+    "query": "Какие внешние адреса использовались в проекте 3e45437580b845d1be65184f68038a65?",
+    "expect": [
+      "api.telegram.org"
+    ],
+    "forbid": [],
+    "repeated": false,
+    "occurrences": 1,
+    "source": [
+      [
+        "9780a4d1-5eae-4444-8e87-d3aac02e258d",
         1
       ]
     ]
@@ -2200,81 +2172,6 @@
     "source": []
   },
   {
-    "id": "fact-f496427d",
-    "kind": "fact",
-    "query": "Какие файлы правились в проекте job-hunt?",
-    "expect": [
-      "0001-facts-verdicts-identity.md"
-    ],
-    "forbid": [],
-    "repeated": false,
-    "occurrences": 3,
-    "source": [
-      [
-        "0793ffe5-bba5-4e53-a958-0441d623cc92",
-        7
-      ],
-      [
-        "0793ffe5-bba5-4e53-a958-0441d623cc92",
-        8
-      ],
-      [
-        "99b23e19-5b1d-4cff-8654-296db299a42c",
-        6
-      ]
-    ]
-  },
-  {
-    "id": "fact-86cdb7b7",
-    "kind": "fact",
-    "query": "Какие файлы правились в проекте job-hunt?",
-    "expect": [
-      "strategies.py"
-    ],
-    "forbid": [],
-    "repeated": false,
-    "occurrences": 3,
-    "source": [
-      [
-        "99b23e19-5b1d-4cff-8654-296db299a42c",
-        13
-      ],
-      [
-        "bd85fb51-3304-4bb0-84aa-52e7f4b64731",
-        18
-      ],
-      [
-        "ef617449-d86f-4a54-a3ce-81997cd7cb09",
-        5
-      ]
-    ]
-  },
-  {
-    "id": "fact-68b3962c",
-    "kind": "fact",
-    "query": "Какие файлы правились в проекте job-hunt?",
-    "expect": [
-      "test_adr_refs.py"
-    ],
-    "forbid": [],
-    "repeated": false,
-    "occurrences": 3,
-    "source": [
-      [
-        "0793ffe5-bba5-4e53-a958-0441d623cc92",
-        8
-      ],
-      [
-        "99b23e19-5b1d-4cff-8654-296db299a42c",
-        6
-      ],
-      [
-        "d04342e7-0051-4a5e-b5e5-5d4956010983",
-        12
-      ]
-    ]
-  },
-  {
     "id": "fact-1bc292ff",
     "kind": "fact",
     "query": "Какие файлы правились в проекте job-hunt?",
@@ -2446,6 +2343,81 @@
       [
         "e04e2c52-f1a4-4f5f-9399-1566112d287b",
         17
+      ]
+    ]
+  },
+  {
+    "id": "fact-72b6ea45",
+    "kind": "fact",
+    "query": "Какие файлы правились в проекте job-hunt?",
+    "expect": [
+      "test_score_stage.py"
+    ],
+    "forbid": [],
+    "repeated": false,
+    "occurrences": 3,
+    "source": [
+      [
+        "0793ffe5-bba5-4e53-a958-0441d623cc92",
+        8
+      ],
+      [
+        "d89c0d47-8424-4293-a02b-a04cf79b6954",
+        4
+      ],
+      [
+        "ef617449-d86f-4a54-a3ce-81997cd7cb09",
+        5
+      ]
+    ]
+  },
+  {
+    "id": "fact-d4f4434b",
+    "kind": "fact",
+    "query": "Какие файлы правились в проекте job-hunt?",
+    "expect": [
+      "test_telegram.py"
+    ],
+    "forbid": [],
+    "repeated": false,
+    "occurrences": 3,
+    "source": [
+      [
+        "6da422ef-baa9-4a01-bfb5-9dd3f631871c",
+        2
+      ],
+      [
+        "e04e2c52-f1a4-4f5f-9399-1566112d287b",
+        2
+      ],
+      [
+        "e04e2c52-f1a4-4f5f-9399-1566112d287b",
+        7
+      ]
+    ]
+  },
+  {
+    "id": "fact-bd73f7a2",
+    "kind": "fact",
+    "query": "Какие файлы правились в проекте mcp-grafana?",
+    "expect": [
+      "CHANGELOG.md"
+    ],
+    "forbid": [],
+    "repeated": false,
+    "occurrences": 3,
+    "source": [
+      [
+        "23ece2e2-1b3d-47cf-bc46-5dc0d8cb67dd",
+        7
+      ],
+      [
+        "443261a2-4bd1-475b-ac40-a68480bb1021",
+        2
+      ],
+      [
+        "443261a2-4bd1-475b-ac40-a68480bb1021",
+        10
       ]
     ]
   }

@@ -18,12 +18,14 @@
 зависимость свернулась бы в кольцо. Шаблоны подгружаются при первом вызове,
 там кольца уже нет.
 
-Разбор журнала: python3 telemetry.py --log <файл>
+Разбор журнала: python3 -m infra.telemetry --log <файл>
 """
 import argparse, contextvars, functools, inspect, json, os, re, threading, time, uuid
 from collections import defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
+
+from infra.scrub import SECRETS
 
 LOG = Path(os.environ.get("MEM_TRACE_LOG") or
            Path.home() / ".local" / "state" / "memory-encoder" / "trace.jsonl")
@@ -49,23 +51,13 @@ PERSONAL = [
 if Path.home().name:
     PERSONAL.append((re.compile(r"\b%s\b" % re.escape(Path.home().name)), "person"))
 
-_SECRETS = None
-
-
 def _secrets():
-    """Шаблоны учётных данных берём у пути записи, чтобы копии не разъезжались.
+    """Шаблоны учётных данных одни на весь проект, см. scrub.
 
-    Импорт отложен до первого вызова: при импорте модуля он свернулся бы в
-    кольцо через xmem, при вызове кольца уже нет.
+    Берём именами, а не модулем: ниже в этом же файле есть функция scrub, и
+    имя модуля она бы затёрла.
     """
-    global _SECRETS
-    if _SECRETS is None:
-        try:
-            from encoder import SECRETS
-            _SECRETS = SECRETS
-        except ImportError:
-            _SECRETS = []
-    return _SECRETS
+    return SECRETS
 
 
 def scrub(text):

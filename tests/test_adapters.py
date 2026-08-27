@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Проверки моделей и адаптеров. Запуск: python3 -m unittest test_adapters -v
+"""Проверки моделей и адаптеров. Запуск: python3 -m unittest tests.test_adapters -v
 
 Тесты писались после ревью, которое нашло две поломки исполнением, а не чтением:
 чтение через адаптер возвращало не строку, и ссылка по ключу требовала полей,
@@ -11,16 +11,18 @@ from unittest import mock
 
 os.environ.setdefault("XMEM_INSTANCE_ID", "test-instance")
 
-import evaluate
-import goldenset
-import matrix
-import models
-import telemetry
-import suggest
-import store
-import xmem
-import xmem_api
-import xmem_local
+from eval import evaluate
+from eval import goldenset
+from eval import matrix
+from domain import models
+from infra import telemetry
+from pipeline import suggest
+from storage import db
+from storage import port
+from storage import api
+from storage import local
+
+HERE = Path(__file__).resolve().parent.parent
 
 
 class TestKey(unittest.TestCase):
@@ -102,47 +104,44 @@ class TestLink(unittest.TestCase):
 
 
 class TestBackend(unittest.TestCase):
-    def test_structured_write_refused_on_cli(self):
-        with mock.patch.object(xmem, "BACKEND", "cli"):
-            with self.assertRaises(xmem.BackendError):
-                xmem.write_objects([models.Session(session_id="s")])
+    def test_console_door_cannot_be_asked_for_structured_write(self):
+        """Не «падает при вызове», а метода нет: вызвать нечего."""
+        self.assertFalse(hasattr(port.door("cli"), "write_objects"))
 
     def test_unknown_backend_refused(self):
-        with mock.patch.object(xmem, "BACKEND", "лишний"):
-            with self.assertRaises(xmem.BackendError):
-                xmem.read("что угодно")
+        with self.assertRaises(port.BackendError):
+            port.door("лишний")
 
     def test_read_mode_translated_to_service_name(self):
         stub = mock.Mock(read=mock.Mock(return_value=""))
-        with mock.patch.object(xmem, "_adapter", return_value=stub):
-            xmem.read("вопрос", mode="raw")
+        port.StructuredDoor(stub, "api").read("вопрос", mode="raw")
         self.assertEqual(stub.read.call_args.kwargs["mode"], "raw-tables")
 
 
 class TestHttpAdapter(unittest.TestCase):
     def test_read_returns_text_not_dict(self):
         """Вызывающий разбирает ответ строкой — адаптер обязан её отдать."""
-        with mock.patch.object(xmem_api, "_call",
+        with mock.patch.object(api, "_call",
                                return_value={"reader_result": {"rows": [[4]]}}):
-            self.assertIsInstance(xmem_api.read("сколько"), str)
+            self.assertIsInstance(api.read("сколько"), str)
 
     def test_read_sends_service_field_name(self):
         """Сервис называет поле mode; read_mode он молча игнорирует."""
-        with mock.patch.object(xmem_api, "_call", return_value={}) as call:
-            xmem_api.read("вопрос", mode="raw-tables")
+        with mock.patch.object(api, "_call", return_value={}) as call:
+            api.read("вопрос", mode="raw-tables")
         self.assertEqual(call.call_args.args[1], {"query": "вопрос", "mode": "raw-tables"})
 
     def test_missing_answer_is_empty_text(self):
-        with mock.patch.object(xmem_api, "_call", return_value={}):
-            self.assertEqual(xmem_api.read("вопрос"), "")
+        with mock.patch.object(api, "_call", return_value={}):
+            self.assertEqual(api.read("вопрос"), "")
 
     def test_empty_batch_refused(self):
-        with self.assertRaises(xmem_api.ApiError):
-            xmem_api.write_objects([])
+        with self.assertRaises(api.ApiError):
+            api.write_objects([])
 
     def test_empty_env_falls_back_to_default_address(self):
         """Пустая переменная в окружении не должна давать относительный адрес."""
-        self.assertTrue(xmem_api.BASE.startswith("http"))
+        self.assertTrue(api.BASE.startswith("http"))
 
 
 class TestSuggestSurvivesAdapterAnswer(unittest.TestCase):
@@ -247,7 +246,7 @@ class TestLocalStore(unittest.TestCase):
 
     def setUp(self):
         self.dir = tempfile.TemporaryDirectory()
-        self.repo = store.Repository(Path(self.dir.name) / "memory.db")
+        self.repo = db.Repository(Path(self.dir.name) / "memory.db")
         self.addCleanup(self.dir.cleanup)
         self.addCleanup(self.repo.close)
 
@@ -260,10 +259,10 @@ class TestLocalStore(unittest.TestCase):
 
     def test_migration_is_idempotent(self):
         """Повторный запуск не должен ни падать, ни накатывать заново."""
-        self.assertEqual(store.migrate(self.repo.conn), 0)
+        self.assertEqual(db.migrate(self.repo.conn), 0)
         self.assertEqual(
             self.repo.conn.execute("PRAGMA user_version").fetchone()[0],
-            len(store.MIGRATIONS))
+            len(db.MIGRATIONS))
 
     def test_second_write_updates_row_by_key(self):
         """Первичный ключ схемы — тот же, что в XMD: строка одна, не две."""
@@ -355,29 +354,28 @@ class TestLocalAdapter(unittest.TestCase):
             os.environ, {"XMEM_LOCAL_PATH": str(Path(self.dir.name) / "memory.db")})
         patch.start()
         self.addCleanup(patch.stop)
-        xmem_local.close()
-        self.addCleanup(xmem_local.close)
+        local.close()
+        self.addCleanup(local.close)
 
     def test_port_matches_the_network_adapter(self):
         """Меняться местами можно только при одинаковых именах."""
         for name in ("write_text", "write_objects", "read", "schema"):
-            self.assertTrue(callable(getattr(xmem_local, name)), name)
+            self.assertTrue(callable(getattr(local, name)), name)
 
     def test_backend_switch_picks_local(self):
-        with mock.patch.object(xmem, "BACKEND", "local"):
-            self.assertIs(xmem._adapter(), xmem_local)
+        self.assertIs(port.door("local").adapter, local)
 
     def test_our_own_text_becomes_a_record(self):
         """Текстовый путь записи не теряется: формат наш, разбор детерминирован."""
-        got = xmem_local.write_text("Fact.\ncontent: Отвечать коротко\n"
+        got = local.write_text("Fact.\ncontent: Отвечать коротко\n"
                                     "fact_type: preference\nsubject: стиль\n"
                                     "scope: global\nОценка уверенности: 0.90.")
         self.assertEqual(got["stored"], "Fact")
-        self.assertEqual(xmem_local.repository().counts()["Fact"], 1)
+        self.assertEqual(local.repository().counts()["Fact"], 1)
 
     def test_multiline_field_survives(self):
         """Значение в несколько строк собирается целиком, а не по первой строке."""
-        got = xmem_local.parse_text("Fact.\ncontent: первая строка\n"
+        got = local.parse_text("Fact.\ncontent: первая строка\n"
                                     "вторая строка того же поля\n"
                                     "fact_type: preference\nsubject: стиль\n"
                                     "scope: global")
@@ -385,34 +383,117 @@ class TestLocalAdapter(unittest.TestCase):
 
     def test_human_note_is_not_glued_to_a_field(self):
         """«Оценка уверенности» — пояснение человеку, а не продолжение поля."""
-        got = xmem_local.parse_text("Fact.\ncontent: текст\nfact_type: preference\n"
+        got = local.parse_text("Fact.\ncontent: текст\nfact_type: preference\n"
                                     "subject: стиль\nscope: global\n"
                                     "Оценка уверенности: 0.90.")
         self.assertEqual(got[1]["scope"], "global")
 
     def test_foreign_text_is_kept_not_dropped(self):
         """Экстрактора нет, но терять вход нельзя: потерю надо видеть."""
-        got = xmem_local.write_text("Разговор abc, проект x, ветка y. user:\nпривет")
+        got = local.write_text("Разговор abc, проект x, ветка y. user:\nпривет")
         self.assertEqual(got["stored"], "raw")
-        self.assertEqual(xmem_local.repository().counts()["raw_text"], 1)
+        self.assertEqual(local.repository().counts()["raw_text"], 1)
 
     def test_read_returns_text_not_dict(self):
         """Тот же контракт, что у сетевого адаптера: вызывающий ждёт строку."""
-        self.assertIsInstance(xmem_local.read("что угодно"), str)
+        self.assertIsInstance(local.read("что угодно"), str)
 
     def test_empty_result_is_silence(self):
         """Не «ничего не найдено» словами: фраза уехала бы в контекст как факт."""
-        self.assertEqual(xmem_local.read("несуществующая ерунда zzz"), "")
+        self.assertEqual(local.read("несуществующая ерунда zzz"), "")
 
     def test_suggestion_survives_the_local_answer(self):
         """Сквозь: запись, чтение, порог, текст для агента."""
         fact = models.Fact(fact_type="project_state", subject="marginal-gain",
                            scope="project",
                            content="Правился файл suggest.py ради порога.")
-        xmem_local.write_objects([fact.mutation()])
-        with mock.patch.object(xmem, "BACKEND", "local"):
-            text, kept, raw = suggest.suggest("файлы marginal-gain")
+        local.write_objects([fact.mutation()])
+        text, kept, raw = suggest.suggest("файлы marginal-gain",
+                                          door=port.door("local"))
         self.assertIn("suggest.py", text)
+
+
+class TestSearchTreatsUnderscoreAsALetter(unittest.TestCase):
+    """Подчёркивание в запросе — буква, а не подстановочный знак.
+
+    В LIKE `_` совпадает с любым одиночным символом, а WORD пропускает его в
+    слова: запрос про on_prompt.py тянул из базы заодно onXprompt.py.
+
+    На выдачу это не влияло — счёт очков в Python сверяет подстроку честно и
+    лишнее отбрасывает. Вредило это отбору кандидатов: их берётся не больше
+    CANDIDATES, и мусор вытеснял из этого числа настоящие совпадения.
+    """
+
+    def setUp(self):
+        self.dir = tempfile.TemporaryDirectory()
+        self.addCleanup(self.dir.cleanup)
+        self.repo = db.Repository(Path(self.dir.name) / "m.db")
+        self.addCleanup(self.repo.close)
+
+    def put(self, subject, content):
+        self.repo.apply([models.Fact(fact_type="project_state", subject=subject,
+                                     scope="project", content=content).mutation()])
+
+    def test_like_escapes_the_signs_of_the_pattern(self):
+        """Самый прямой уровень: во что превращается слово вопроса."""
+        self.assertEqual(db.like("on_prompt.py"), "%on\\_prompt.py%")
+        self.assertEqual(db.like("100%"), "%100\\%%")
+        self.assertEqual(db.like("a\\b"), "%a\\\\b%")
+
+    def test_decoys_do_not_crowd_out_the_real_match(self):
+        """Потолок кандидатов занижаем: иначе для проверки нужны сотни строк."""
+        # Каждая ловушка обязана подходить под образец on_prompt.py именно
+        # через подстановку: одна любая буква на месте подчёркивания.
+        for letter in "ABCDEFGH":
+            self.put("шум%s" % letter,
+                     "В проекте demo правился файл on%sprompt.py" % letter)
+        self.put("своё", "В проекте demo правился файл on_prompt.py")
+        with mock.patch.object(db, "CANDIDATES", 4):
+            got = [r["content"] for r in self.repo.search("on_prompt.py", limit=10)]
+        self.assertTrue(any("on_prompt.py" in c for c in got),
+                        "настоящее совпадение вытеснено подставными: %s" % got)
+
+    def test_results_stay_clean_of_wildcard_matches(self):
+        """Сторожевой: выдача и раньше была чистой, пусть такой и остаётся."""
+        self.put("своё", "В проекте demo правился файл on_prompt.py")
+        self.put("чужое", "В проекте demo правился файл onXprompt.py")
+        got = [r["content"] for r in self.repo.search("on_prompt.py", limit=10)]
+        self.assertFalse(any("onXprompt.py" in c for c in got))
+
+
+class TestFixtureCanAnswerEveryCase(unittest.TestCase):
+    """Набор, наполненный своей же фикстурой, обязан быть проходимым.
+
+    fixture() отдавала только Fact, а десять случаев из ста спрашивают ветку —
+    она живёт на Episode. Прогон с пустым хранилищем упирался в 89 из 100 не
+    из-за памяти, а по построению, и разница половин мерялась об этот потолок.
+    """
+
+    EPISODES = {
+        ("s-1", 1): {"session_id": "s-1", "number": 1, "cwd": "/home/p/dev/demo",
+                     "branch": "feature-x", "started_at": "2026-08-01T10:00:00Z",
+                     "ended_at": "2026-08-01T10:30:00Z", "request": "правь alpha.py",
+                     "files": ["/home/p/dev/demo/alpha.py"], "commands": [],
+                     "replies": [], "errors": []},
+    }
+
+    def test_context_case_finds_its_branch_in_the_fixture(self):
+        case = goldenset.case_context(("s-1", 1), self.EPISODES[("s-1", 1)])
+        self.assertIsNotNone(case, "случай про ветку вообще не собрался")
+        rows = goldenset.fixture({}, self.EPISODES, [case])
+        blob = json.dumps(rows, ensure_ascii=False)
+        for want in case["expect"]:
+            self.assertIn(want, blob, "ожидаемое из случая в фикстуру не попало")
+
+    def test_shipped_set_is_answerable_from_its_shipped_fixture(self):
+        """Проверяем то, что реально уехало в репозиторий, а не выдумку."""
+        cases = json.loads((HERE / "eval-cases.json").read_text(encoding="utf-8"))
+        rows = json.loads((HERE / "eval-fixture.json").read_text(encoding="utf-8"))
+        blob = json.dumps(rows, ensure_ascii=False)
+        blind = [c["id"] for c in cases
+                 if c["kind"] != "absence" and c.get("expect")
+                 and not any(want in blob for want in c["expect"])]
+        self.assertEqual(blind, [], "случаи, которые нечем удовлетворить")
 
 
 class TestGoldenSet(unittest.TestCase):
@@ -661,9 +742,9 @@ class TestTelemetry(unittest.TestCase):
         self.assertIn("80%", telemetry.report(rows))
 
     def test_scrub_uses_every_pattern_of_the_write_path(self):
-        """Не три примера, а весь список записи: копия уже разъезжалась молча."""
-        import encoder
-        self.assertIs(telemetry._secrets(), encoder.SECRETS)
+        """Не три примера, а весь список scrub: копия уже разъезжалась молча."""
+        from infra import scrub
+        self.assertIs(telemetry._secrets(), scrub.SECRETS)
         probes = [
             "glpat-abcdefghijkl0000", "ghp_" + "a" * 20, "xmem_" + "b" * 30,
             "eyJhbGciOiJIUzI1.eyJzdWIiOiIxMjM0.abcdef",
@@ -677,11 +758,14 @@ class TestTelemetry(unittest.TestCase):
             cleaned = telemetry.scrub(probe)
             self.assertNotEqual(cleaned, probe, "не вычищено: %s" % probe[:40])
 
-    def test_scrub_survives_missing_write_path(self):
-        """Журнал не должен падать, если путь записи недоступен."""
-        with mock.patch.object(telemetry, "_SECRETS", None), \
-             mock.patch.dict("sys.modules", {"encoder": None}):
-            self.assertIsInstance(telemetry.scrub("текст"), str)
+    def test_scrub_covers_personal_on_top_of_secrets(self):
+        """Свой список личного журнал чистит сверх общих шаблонов scrub."""
+        from infra import scrub
+        probe = "person@example.com 192.168.1.7"
+        self.assertEqual(scrub.redact(probe), probe, "это забота журнала, не scrub")
+        cleaned = telemetry.scrub(probe)
+        self.assertNotIn("person@example.com", cleaned)
+        self.assertNotIn("192.168.1.7", cleaned)
 
 
 class TestJudge(unittest.TestCase):
@@ -775,11 +859,12 @@ class TestMatrix(unittest.TestCase):
 
     def test_memory_off_returns_nothing_and_touches_nothing(self):
         """Половина без памяти обязана не ходить в хранилище вовсе."""
-        with mock.patch.object(xmem, "DISABLED", True), \
-             mock.patch.object(xmem, "_adapter") as adapter:
-            self.assertEqual(xmem.read("вопрос"), "")
-            self.assertEqual(xmem.write("текст"), "")
-            adapter.assert_not_called()
+        off = port.door(disabled=True)
+        self.assertEqual(off.read("вопрос"), "")
+        self.assertEqual(off.write("текст"), "")
+        self.assertIsNone(off.write_objects([models.Session(session_id="s")]))
+        # Не «не позвал адаптер», а держать нечего: адаптера у неё нет вовсе.
+        self.assertFalse(hasattr(off, "adapter"))
 
 
 if __name__ == "__main__":

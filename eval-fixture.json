@@ -95,366 +95,6 @@
       "create": {
         "key": {
           "fact_type": "project_state",
-          "subject": "3xui-shop",
-          "scope": "project"
-        },
-        "values": {
-          "content": "В проекте 3xui-shop правился файл /home/person/dev/3xui-shop/.github/workflows/ci.yml ради задачи: надо делать все так что напчинай по своему усмотрению и заканчивай все задачи которые нужны толкько после того как закончишь вске вернись ко мне"
-        }
-      }
-    }
-  },
-  {
-    "object_mutation": {
-      "object_type": "Fact",
-      "create": {
-        "key": {
-          "fact_type": "project_state",
-          "subject": "3xui-shop",
-          "scope": "project"
-        },
-        "values": {
-          "content": "В проекте 3xui-shop правился файл /home/person/dev/3xui-shop/.github/workflows/deploy-dev.yml ради задачи: ПОМОГ ЗАПУСК ОТ АДМИНА продолжай рабоут у"
-        }
-      }
-    }
-  },
-  {
-    "object_mutation": {
-      "object_type": "Fact",
-      "create": {
-        "key": {
-          "fact_type": "project_state",
-          "subject": "3xui-shop",
-          "scope": "project"
-        },
-        "values": {
-          "content": "В проекте 3xui-shop правился файл /home/person/dev/3xui-shop/.github/workflows/live-smoke.yml ради задачи: надо делать все так что напчинай по своему усмотрению и заканчивай все задачи которые нужны толкько после того как закончишь вске вернись ко мне"
-        }
-      }
-    }
-  },
-  {
-    "object_mutation": {
-      "object_type": "Fact",
-      "create": {
-        "key": {
-          "fact_type": "project_state",
-          "subject": "3xui-shop",
-          "scope": "project"
-        },
-        "values": {
-          "content": "В проекте 3xui-shop правился файл /home/person/dev/3xui-shop/app/bot/services/server_pool.py ради задачи: надо делать все так что напчинай по своему усмотрению и заканчивай все задачи которые нужны толкько после того как закончишь вске вернись ко мне"
-        }
-      }
-    }
-  },
-  {
-    "object_mutation": {
-      "object_type": "Fact",
-      "create": {
-        "key": {
-          "fact_type": "project_state",
-          "subject": "3xui-shop",
-          "scope": "project"
-        },
-        "values": {
-          "content": "В проекте 3xui-shop правился файл /home/person/dev/3xui-shop/app/bot/services/vpn.py ради задачи: надо делать все так что напчинай по своему усмотрению и заканчивай все задачи которые нужны толкько после того как закончишь вске вернись ко мне"
-        }
-      }
-    }
-  },
-  {
-    "object_mutation": {
-      "object_type": "Fact",
-      "create": {
-        "key": {
-          "fact_type": "project_state",
-          "subject": "3xui-shop",
-          "scope": "project"
-        },
-        "values": {
-          "content": "В проекте 3xui-shop правился файл /home/person/dev/3xui-shop/app/bot/utils/CONTEXT.md ради задачи: 1 - да 2 - да 3 - отдельный коомпоз"
-        }
-      }
-    }
-  },
-  {
-    "object_mutation": {
-      "object_type": "Fact",
-      "create": {
-        "key": {
-          "fact_type": "project_state",
-          "subject": "3xui-shop",
-          "scope": "project"
-        },
-        "values": {
-          "content": "В проекте 3xui-shop правился файл /home/person/dev/3xui-shop/app/bot/utils/network.py ради задачи: надо делать все так что напчинай по своему усмотрению и заканчивай все задачи которые нужны толкько после того как закончишь вске вернись ко мне"
-        }
-      }
-    }
-  },
-  {
-    "object_mutation": {
-      "object_type": "Fact",
-      "create": {
-        "key": {
-          "fact_type": "project_state",
-          "subject": "3xui-shop",
-          "scope": "project"
-        },
-        "values": {
-          "content": "В проекте 3xui-shop правился файл /home/person/dev/3xui-shop/app/bot/utils/subscription_link.py ради задачи: надо делать все так что напчинай по своему усмотрению и заканчивай все задачи которые нужны толкько после того как закончишь вске вернись ко мне"
-        }
-      }
-    }
-  },
-  {
-    "object_mutation": {
-      "object_type": "Fact",
-      "create": {
-        "key": {
-          "fact_type": "project_state",
-          "subject": "3xui-shop",
-          "scope": "project"
-        },
-        "values": {
-          "content": "В проекте 3xui-shop правился файл /home/person/dev/3xui-shop/app/db/migration/versions/f5a6b7c8d9e0_add_subscription_url_to_servers.py ради задачи: надо делать все так что напчинай по своему усмотрению и заканчивай все задачи которые нужны толкько после того как закончишь вске вернись ко мне"
-        }
-      }
-    }
-  },
-  {
-    "object_mutation": {
-      "object_type": "Fact",
-      "create": {
-        "key": {
-          "fact_type": "project_state",
-          "subject": "3xui-shop",
-          "scope": "project"
-        },
-        "values": {
-          "content": "В проекте 3xui-shop правился файл /home/person/dev/3xui-shop/docker-compose.dev.yml ради задачи: ПОМОГ ЗАПУСК ОТ АДМИНА продолжай рабоут у"
-        }
-      }
-    }
-  },
-  {
-    "object_mutation": {
-      "object_type": "Fact",
-      "create": {
-        "key": {
-          "fact_type": "project_state",
-          "subject": "3xui-shop",
-          "scope": "project"
-        },
-        "values": {
-          "content": "В проекте 3xui-shop правился файл /home/person/dev/3xui-shop/docker-compose.test.yml ради задачи: надо делать все так что напчинай по своему усмотрению и заканчивай все задачи которые нужны толкько после того как закончишь вске вернись ко мне"
-        }
-      }
-    }
-  },
-  {
-    "object_mutation": {
-      "object_type": "Fact",
-      "create": {
-        "key": {
-          "fact_type": "project_state",
-          "subject": "3xui-shop",
-          "scope": "project"
-        },
-        "values": {
-          "content": "В проекте 3xui-shop правился файл /home/person/dev/3xui-shop/docs/sdd/test_matrix.md ради задачи: тесты по карте"
-        }
-      }
-    }
-  },
-  {
-    "object_mutation": {
-      "object_type": "Fact",
-      "create": {
-        "key": {
-          "fact_type": "project_state",
-          "subject": "3xui-shop",
-          "scope": "project"
-        },
-        "values": {
-          "content": "В проекте 3xui-shop правился файл /home/person/dev/3xui-shop/pyproject.toml ради задачи: надо делать все так что напчинай по своему усмотрению и заканчивай все задачи которые нужны толкько после того как закончишь вске вернись ко мне"
-        }
-      }
-    }
-  },
-  {
-    "object_mutation": {
-      "object_type": "Fact",
-      "create": {
-        "key": {
-          "fact_type": "project_state",
-          "subject": "3xui-shop",
-          "scope": "project"
-        },
-        "values": {
-          "content": "В проекте 3xui-shop правился файл /home/person/dev/3xui-shop/scripts/check_subscription_links.py ради задачи: надо делать все так что напчинай по своему усмотрению и заканчивай все задачи которые нужны толкько после того как закончишь вске вернись ко мне"
-        }
-      }
-    }
-  },
-  {
-    "object_mutation": {
-      "object_type": "Fact",
-      "create": {
-        "key": {
-          "fact_type": "project_state",
-          "subject": "3xui-shop",
-          "scope": "project"
-        },
-        "values": {
-          "content": "В проекте 3xui-shop правился файл /home/person/dev/3xui-shop/scripts/seed_test_panel.py ради задачи: надо делать все так что напчинай по своему усмотрению и заканчивай все задачи которые нужны толкько после того как закончишь вске вернись ко мне"
-        }
-      }
-    }
-  },
-  {
-    "object_mutation": {
-      "object_type": "Fact",
-      "create": {
-        "key": {
-          "fact_type": "project_state",
-          "subject": "3xui-shop",
-          "scope": "project"
-        },
-        "values": {
-          "content": "В проекте 3xui-shop правился файл /home/person/dev/3xui-shop/tests/conftest.py ради задачи: тесты по карте"
-        }
-      }
-    }
-  },
-  {
-    "object_mutation": {
-      "object_type": "Fact",
-      "create": {
-        "key": {
-          "fact_type": "project_state",
-          "subject": "3xui-shop",
-          "scope": "project"
-        },
-        "values": {
-          "content": "В проекте 3xui-shop правился файл /home/person/dev/3xui-shop/tests/test_docker_panel.py ради задачи: ПОМОГ ЗАПУСК ОТ АДМИНА продолжай рабоут у"
-        }
-      }
-    }
-  },
-  {
-    "object_mutation": {
-      "object_type": "Fact",
-      "create": {
-        "key": {
-          "fact_type": "project_state",
-          "subject": "3xui-shop",
-          "scope": "project"
-        },
-        "values": {
-          "content": "В проекте 3xui-shop правился файл /home/person/dev/3xui-shop/tests/test_get_key_integration.py ради задачи: надо делать все так что напчинай по своему усмотрению и заканчивай все задачи которые нужны толкько после того как закончишь вске вернись ко мне"
-        }
-      }
-    }
-  },
-  {
-    "object_mutation": {
-      "object_type": "Fact",
-      "create": {
-        "key": {
-          "fact_type": "project_state",
-          "subject": "3xui-shop",
-          "scope": "project"
-        },
-        "values": {
-          "content": "В проекте 3xui-shop правился файл /home/person/dev/3xui-shop/tests/test_harness_smoke.py ради задачи: тесты по карте"
-        }
-      }
-    }
-  },
-  {
-    "object_mutation": {
-      "object_type": "Fact",
-      "create": {
-        "key": {
-          "fact_type": "project_state",
-          "subject": "3xui-shop",
-          "scope": "project"
-        },
-        "values": {
-          "content": "В проекте 3xui-shop правился файл /home/person/dev/3xui-shop/tests/test_locale_messages.py ради задачи: 1 - паочему сукществующие не испольщзуешь? 2 - включи 3 - ок"
-        }
-      }
-    }
-  },
-  {
-    "object_mutation": {
-      "object_type": "Fact",
-      "create": {
-        "key": {
-          "fact_type": "project_state",
-          "subject": "3xui-shop",
-          "scope": "project"
-        },
-        "values": {
-          "content": "В проекте 3xui-shop правился файл /home/person/dev/3xui-shop/tests/test_server_subscription_url.py ради задачи: надо делать все так что напчинай по своему усмотрению и заканчивай все задачи которые нужны толкько после того как закончишь вске вернись ко мне"
-        }
-      }
-    }
-  },
-  {
-    "object_mutation": {
-      "object_type": "Fact",
-      "create": {
-        "key": {
-          "fact_type": "project_state",
-          "subject": "3xui-shop",
-          "scope": "project"
-        },
-        "values": {
-          "content": "В проекте 3xui-shop правился файл /home/person/dev/3xui-shop/tests/test_subscription_link.py ради задачи: надо делать все так что напчинай по своему усмотрению и заканчивай все задачи которые нужны толкько после того как закончишь вске вернись ко мне"
-        }
-      }
-    }
-  },
-  {
-    "object_mutation": {
-      "object_type": "Fact",
-      "create": {
-        "key": {
-          "fact_type": "project_state",
-          "subject": "3xui-shop",
-          "scope": "project"
-        },
-        "values": {
-          "content": "В проекте 3xui-shop правился файл /home/person/dev/3xui-shop/tests/test_subscription_link_pbt.py ради задачи: надо делать все так что напчинай по своему усмотрению и заканчивай все задачи которые нужны толкько после того как закончишь вске вернись ко мне"
-        }
-      }
-    }
-  },
-  {
-    "object_mutation": {
-      "object_type": "Fact",
-      "create": {
-        "key": {
-          "fact_type": "project_state",
-          "subject": "3xui-shop",
-          "scope": "project"
-        },
-        "values": {
-          "content": "В проекте 3xui-shop правился файл /home/person/dev/3xui-shop/tests/test_trial_integration.py ради задачи: тесты по карте"
-        }
-      }
-    }
-  },
-  {
-    "object_mutation": {
-      "object_type": "Fact",
-      "create": {
-        "key": {
-          "fact_type": "project_state",
           "subject": "AI_1",
           "scope": "project"
         },
@@ -1180,51 +820,6 @@
         },
         "values": {
           "content": "В проекте job-hunt правился файл /home/person/Library/Mobile Documents/iCloud~md~obsidian/Documents/my_synk/Domains/Career/STATE.md ради задачи: # Code Review Agent Ты — Code Reviewer. Твоя задача — провести ревью изменений в текущем проекте. ## Входные данные Аргумент команды: `~/dev/job-hunt — изменения Epic A (job-hunt-9): git diff + новые "
-        }
-      }
-    }
-  },
-  {
-    "object_mutation": {
-      "object_type": "Fact",
-      "create": {
-        "key": {
-          "fact_type": "project_state",
-          "subject": "job-hunt",
-          "scope": "project"
-        },
-        "values": {
-          "content": "В проекте job-hunt правился файл /home/person/Library/Mobile Documents/iCloud~md~obsidian/Documents/my_synk/Domains/Infra/Рабочий ноут Ubuntu — SSH и SOCKS.md ради задачи: сохрани контекст и на сегодня все"
-        }
-      }
-    }
-  },
-  {
-    "object_mutation": {
-      "object_type": "Fact",
-      "create": {
-        "key": {
-          "fact_type": "project_state",
-          "subject": "job-hunt",
-          "scope": "project"
-        },
-        "values": {
-          "content": "В проекте job-hunt правился файл /home/person/Library/Mobile Documents/iCloud~md~obsidian/Documents/my_synk/Domains/Work/STATE.md ради задачи: окей можно только нужно проэьто не забыть сохрани это в волте как важную задачу для провкерки или может хук какой но нам нужнро защититься от этой ситуации я забыл про твой триггер ты тоже контектс уш"
-        }
-      }
-    }
-  },
-  {
-    "object_mutation": {
-      "object_type": "Fact",
-      "create": {
-        "key": {
-          "fact_type": "project_state",
-          "subject": "job-hunt",
-          "scope": "project"
-        },
-        "values": {
-          "content": "В проекте job-hunt правился файл /home/person/Library/Mobile Documents/iCloud~md~obsidian/Documents/my_synk/Domains/Work/ssh-work-cert.md ради задачи: окей можно только нужно проэьто не забыть сохрани это в волте как важную задачу для провкерки или может хук какой но нам нужнро защититься от этой ситуации я забыл про твой триггер ты тоже контектс уш"
         }
       }
     }
@@ -4134,21 +3729,6 @@
           "scope": "project"
         },
         "values": {
-          "content": "В проекте scripts правился файл /home/person/Library/Mobile Documents/iCloud~md~obsidian/Documents/my_synk/Domains/Work/ssh-work-cert.md ради задачи: перезагружаю мак созрани все"
-        }
-      }
-    }
-  },
-  {
-    "object_mutation": {
-      "object_type": "Fact",
-      "create": {
-        "key": {
-          "fact_type": "project_state",
-          "subject": "scripts",
-          "scope": "project"
-        },
-        "values": {
           "content": "В проекте scripts правился файл /home/person/dev/job-hunt/CONTEXT.md ради задачи: все делай сегодня нужно будет обогадить источники еще кучей чатов телеграм но проблема в том что там укцча дублей и мошщеников"
         }
       }
@@ -4699,21 +4279,6 @@
       "object_type": "Fact",
       "create": {
         "key": {
-          "fact_type": "project_state",
-          "subject": "person",
-          "scope": "project"
-        },
-        "values": {
-          "content": "В проекте person упирались в препятствие: The user doesn't want to proceed with this tool use. The tool use was rejected (eg. if it was a file edit, the new_string was NOT written to the file). STOP what you are doing and wait for the user to"
-        }
-      }
-    }
-  },
-  {
-    "object_mutation": {
-      "object_type": "Fact",
-      "create": {
-        "key": {
           "fact_type": "preference",
           "subject": "задавать вопросы по одному за раз",
           "scope": "global"
@@ -4790,41 +4355,11 @@
       "create": {
         "key": {
           "fact_type": "external_resource",
-          "subject": "person",
-          "scope": "project"
-        },
-        "values": {
-          "content": "Для проекта person использовался адрес https://www.google.com'"
-        }
-      }
-    }
-  },
-  {
-    "object_mutation": {
-      "object_type": "Fact",
-      "create": {
-        "key": {
-          "fact_type": "external_resource",
           "subject": "mcp-grafana",
           "scope": "project"
         },
         "values": {
-          "content": "Для проекта mcp-grafana использовался адрес http://10.0.0.1:3000\"`"
-        }
-      }
-    }
-  },
-  {
-    "object_mutation": {
-      "object_type": "Fact",
-      "create": {
-        "key": {
-          "fact_type": "external_resource",
-          "subject": "mcp-grafana",
-          "scope": "project"
-        },
-        "values": {
-          "content": "Для проекта mcp-grafana использовался адрес http://10.0.0.1:3000`"
+          "content": "Для проекта mcp-grafana использовался адрес http://10.0.0.1:3000"
         }
       }
     }
@@ -4839,7 +4374,7 @@
           "scope": "project"
         },
         "values": {
-          "content": "Для проекта scripts использовался адрес http://Quala.dev/`"
+          "content": "Для проекта scripts использовался адрес http://Quala.dev/"
         }
       }
     }
@@ -4854,7 +4389,7 @@
           "scope": "project"
         },
         "values": {
-          "content": "Для проекта job-hunt использовался адрес http://api.hh.ru"
+          "content": "Для проекта job-hunt использовался адрес http://localhost:11434"
         }
       }
     }
@@ -4869,7 +4404,7 @@
           "scope": "project"
         },
         "values": {
-          "content": "Для проекта person использовался адрес http://localhost:11434/v1`"
+          "content": "Для проекта person использовался адрес http://localhost:11434/v1"
         }
       }
     }
@@ -4880,11 +4415,11 @@
       "create": {
         "key": {
           "fact_type": "external_resource",
-          "subject": "job-hunt",
+          "subject": "person",
           "scope": "project"
         },
         "values": {
-          "content": "Для проекта job-hunt использовался адрес http://localhost:11434`"
+          "content": "Для проекта person использовался адрес http://localhost:5008"
         }
       }
     }
@@ -4914,7 +4449,7 @@
           "scope": "project"
         },
         "values": {
-          "content": "Для проекта app использовался адрес http://localhost:5008/improvements`"
+          "content": "Для проекта app использовался адрес http://localhost:5008/improvements"
         }
       }
     }
@@ -4955,86 +4490,11 @@
       "create": {
         "key": {
           "fact_type": "external_resource",
-          "subject": "Tarasusrus__lesson-ledger",
-          "scope": "project"
-        },
-        "values": {
-          "content": "Для проекта Tarasusrus__lesson-ledger использовался адрес http://localhost:5008/intents?tag=lesson-ledger`"
-        }
-      }
-    }
-  },
-  {
-    "object_mutation": {
-      "object_type": "Fact",
-      "create": {
-        "key": {
-          "fact_type": "external_resource",
-          "subject": "person",
-          "scope": "project"
-        },
-        "values": {
-          "content": "Для проекта person использовался адрес http://localhost:5008`"
-        }
-      }
-    }
-  },
-  {
-    "object_mutation": {
-      "object_type": "Fact",
-      "create": {
-        "key": {
-          "fact_type": "external_resource",
-          "subject": "3xui-shop",
-          "scope": "project"
-        },
-        "values": {
-          "content": "Для проекта 3xui-shop использовался адрес https://10.0.0.1:2096/user/<vpn_id>`"
-        }
-      }
-    }
-  },
-  {
-    "object_mutation": {
-      "object_type": "Fact",
-      "create": {
-        "key": {
-          "fact_type": "external_resource",
-          "subject": "3xui-shop",
-          "scope": "project"
-        },
-        "values": {
-          "content": "Для проекта 3xui-shop использовался адрес https://person:<redacted>@...`"
-        }
-      }
-    }
-  },
-  {
-    "object_mutation": {
-      "object_type": "Fact",
-      "create": {
-        "key": {
-          "fact_type": "external_resource",
-          "subject": "job-hunt",
-          "scope": "project"
-        },
-        "values": {
-          "content": "Для проекта job-hunt использовался адрес https://api.hh.ru"
-        }
-      }
-    }
-  },
-  {
-    "object_mutation": {
-      "object_type": "Fact",
-      "create": {
-        "key": {
-          "fact_type": "external_resource",
           "subject": "3e45437580b845d1be65184f68038a65",
           "scope": "project"
         },
         "values": {
-          "content": "Для проекта 3e45437580b845d1be65184f68038a65 использовался адрес https://api.telegram.org/bot<TOKEN>/sendMessage`"
+          "content": "Для проекта 3e45437580b845d1be65184f68038a65 использовался адрес https://api.telegram.org/bot<TOKEN>/sendMessage"
         }
       }
     }
@@ -5065,21 +4525,6 @@
         },
         "values": {
           "content": "Для проекта person использовался адрес https://arxiv.org/abs/2510.04618"
-        }
-      }
-    }
-  },
-  {
-    "object_mutation": {
-      "object_type": "Fact",
-      "create": {
-        "key": {
-          "fact_type": "external_resource",
-          "subject": "person",
-          "scope": "project"
-        },
-        "values": {
-          "content": "Для проекта person использовался адрес https://arxiv.org/abs/2510.04618)):"
         }
       }
     }
@@ -5375,11 +4820,11 @@
       "create": {
         "key": {
           "fact_type": "external_resource",
-          "subject": "person",
+          "subject": "throne",
           "scope": "project"
         },
         "values": {
-          "content": "Для проекта person использовался адрес https://github.com/Tarasusrus/throne.git`"
+          "content": "Для проекта throne использовался адрес https://github.com/Tarasusrus/throne"
         }
       }
     }
@@ -5390,11 +4835,26 @@
       "create": {
         "key": {
           "fact_type": "external_resource",
-          "subject": "throne",
+          "subject": "person",
           "scope": "project"
         },
         "values": {
-          "content": "Для проекта throne использовался адрес https://github.com/Tarasusrus/throne`"
+          "content": "Для проекта person использовался адрес https://github.com/Tarasusrus/throne.git"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Fact",
+      "create": {
+        "key": {
+          "fact_type": "external_resource",
+          "subject": "person",
+          "scope": "project"
+        },
+        "values": {
+          "content": "Для проекта person использовался адрес https://github.com/gently-whitesnow/throne"
         }
       }
     }
@@ -5410,21 +4870,6 @@
         },
         "values": {
           "content": "Для проекта throne использовался адрес https://github.com/gently-whitesnow/throne**"
-        }
-      }
-    }
-  },
-  {
-    "object_mutation": {
-      "object_type": "Fact",
-      "create": {
-        "key": {
-          "fact_type": "external_resource",
-          "subject": "person",
-          "scope": "project"
-        },
-        "values": {
-          "content": "Для проекта person использовался адрес https://github.com/gently-whitesnow/throne`"
         }
       }
     }
@@ -5529,7 +4974,7 @@
           "scope": "project"
         },
         "values": {
-          "content": "Для проекта mcp-grafana использовался адрес https://grafana.example.com/grafana/api/frontend/settings`"
+          "content": "Для проекта mcp-grafana использовался адрес https://grafana.example.com"
         }
       }
     }
@@ -5544,22 +4989,7 @@
           "scope": "project"
         },
         "values": {
-          "content": "Для проекта mcp-grafana использовался адрес https://grafana.example.com`"
-        }
-      }
-    }
-  },
-  {
-    "object_mutation": {
-      "object_type": "Fact",
-      "create": {
-        "key": {
-          "fact_type": "external_resource",
-          "subject": "3xui-shop",
-          "scope": "project"
-        },
-        "values": {
-          "content": "Для проекта 3xui-shop использовался адрес https://help.send.tg/en/articles/10279948-crypto-pay-api"
+          "content": "Для проекта mcp-grafana использовался адрес https://grafana.example.com/grafana/api/frontend/settings"
         }
       }
     }
@@ -5604,7 +5034,7 @@
           "scope": "project"
         },
         "values": {
-          "content": "Для проекта job-hunt использовался адрес https://nott.me/RunelloBot?startapp=<payload>\")`"
+          "content": "Для проекта job-hunt использовался адрес https://nott.me/RunelloBot?startapp=<payload"
         }
       }
     }
@@ -5619,7 +5049,7 @@
           "scope": "project"
         },
         "values": {
-          "content": "Для проекта lesson-ledger использовался адрес https://portal.cloudzy.com`"
+          "content": "Для проекта lesson-ledger использовался адрес https://portal.cloudzy.com"
         }
       }
     }
@@ -5630,11 +5060,11 @@
       "create": {
         "key": {
           "fact_type": "external_resource",
-          "subject": "3xui-shop",
+          "subject": "job-hunt",
           "scope": "project"
         },
         "values": {
-          "content": "Для проекта 3xui-shop использовался адрес https://status.claude.com"
+          "content": "Для проекта job-hunt использовался адрес https://t.me/"
         }
       }
     }
@@ -5664,37 +5094,7 @@
           "scope": "project"
         },
         "values": {
-          "content": "Для проекта job-hunt использовался адрес https://t.me/`"
-        }
-      }
-    }
-  },
-  {
-    "object_mutation": {
-      "object_type": "Fact",
-      "create": {
-        "key": {
-          "fact_type": "external_resource",
-          "subject": "job-hunt",
-          "scope": "project"
-        },
-        "values": {
-          "content": "Для проекта job-hunt использовался адрес https://t.me/s/godevjob`"
-        }
-      }
-    }
-  },
-  {
-    "object_mutation": {
-      "object_type": "Fact",
-      "create": {
-        "key": {
-          "fact_type": "external_resource",
-          "subject": "person",
-          "scope": "project"
-        },
-        "values": {
-          "content": "Для проекта person использовался адрес https://tech.wildberries.ru/api/v1/tests/199/attempts/917/answers`"
+          "content": "Для проекта job-hunt использовался адрес https://t.me/s/godevjob"
         }
       }
     }
@@ -5731,60 +5131,2489 @@
   },
   {
     "object_mutation": {
-      "object_type": "Fact",
+      "object_type": "Episode",
       "create": {
         "key": {
-          "fact_type": "external_resource",
-          "subject": "3xui-shop",
-          "scope": "project"
+          "session_id": "0793ffe5-bba5-4e53-a958-0441d623cc92",
+          "episode_number": 8
         },
         "values": {
-          "content": "Для проекта 3xui-shop использовался адрес https://vpn.mcpgate.org:2096/sub/<vpn_id>"
+          "title": "# Code Review Agent Ты — Code Reviewer. Твоя задача — провести ревью изменений в текущем проекте. ## Входные данные Аргу",
+          "outcome": "blocked",
+          "project": "job-hunt",
+          "git_branch": "feature-job-hunt-core",
+          "started_at": "2026-08-01T12:43:47.160Z",
+          "ended_at": "2026-08-01T14:15:44.564Z"
         }
       }
     }
   },
   {
     "object_mutation": {
-      "object_type": "Fact",
+      "object_type": "Episode",
       "create": {
         "key": {
-          "fact_type": "external_resource",
-          "subject": "3xui-shop",
-          "scope": "project"
+          "session_id": "708fe7a1-9655-49f6-8fd5-87afd900ad48",
+          "episode_number": 6
         },
         "values": {
-          "content": "Для проекта 3xui-shop использовался адрес https://vpn.mcpgate.org:2096/sub/<vpn_id>`"
+          "title": "# Code Review Agent Ты — Code Reviewer. Твоя задача — провести ревью изменений в текущем проекте. ## Входные данные Аргу",
+          "outcome": "blocked",
+          "project": "job-hunt",
+          "git_branch": "feature-job-hunt-core",
+          "started_at": "2026-08-03T05:35:44.842Z",
+          "ended_at": "2026-08-03T07:25:25.475Z"
         }
       }
     }
   },
   {
     "object_mutation": {
-      "object_type": "Fact",
+      "object_type": "Episode",
       "create": {
         "key": {
-          "fact_type": "external_resource",
-          "subject": "3xui-shop",
-          "scope": "project"
+          "session_id": "99b23e19-5b1d-4cff-8654-296db299a42c",
+          "episode_number": 6
         },
         "values": {
-          "content": "Для проекта 3xui-shop использовался адрес https://vpn.mcpgate.org:2096/sub/`"
+          "title": "# Автономный прогон — промт Копировать целиком в новую сессию. --- Работай автономно. Не спрашивай разрешений по ходу — ",
+          "outcome": "blocked",
+          "project": "job-hunt",
+          "git_branch": "feature-job-hunt-core",
+          "started_at": "2026-08-02T01:22:19.893Z",
+          "ended_at": "2026-08-02T01:33:40.570Z"
         }
       }
     }
   },
   {
     "object_mutation": {
-      "object_type": "Fact",
+      "object_type": "Episode",
       "create": {
         "key": {
-          "fact_type": "external_resource",
-          "subject": "3xui-shop",
-          "scope": "project"
+          "session_id": "99b23e19-5b1d-4cff-8654-296db299a42c",
+          "episode_number": 7
         },
         "values": {
-          "content": "Для проекта 3xui-shop использовался адрес https://vpn.mcpgate.org:2096/sub/cpy5f2efr1kzee89"
+          "title": "# Code Review Agent Ты — Code Reviewer. Твоя задача — провести ревью изменений в текущем проекте. ## Входные данные Аргу",
+          "outcome": "blocked",
+          "project": "job-hunt",
+          "git_branch": "feature-job-hunt-core",
+          "started_at": "2026-08-02T01:33:40.585Z",
+          "ended_at": "2026-08-02T01:50:30.120Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "99b23e19-5b1d-4cff-8654-296db299a42c",
+          "episode_number": 10
+        },
+        "values": {
+          "title": "да, зови архитектора и приступай",
+          "outcome": "blocked",
+          "project": "job-hunt",
+          "git_branch": "feature-job-hunt-core",
+          "started_at": "2026-08-02T01:54:38.536Z",
+          "ended_at": "2026-08-02T02:18:12.266Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "99b23e19-5b1d-4cff-8654-296db299a42c",
+          "episode_number": 11
+        },
+        "values": {
+          "title": "продолжай",
+          "outcome": "blocked",
+          "project": "job-hunt",
+          "git_branch": "feature-job-hunt-core",
+          "started_at": "2026-08-02T05:58:33.947Z",
+          "ended_at": "2026-08-02T06:08:47.229Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "bd85fb51-3304-4bb0-84aa-52e7f4b64731",
+          "episode_number": 16
+        },
+        "values": {
+          "title": "<task-notification> <task-id>a1436de52544294ed</task-id> <tool-use-id>toolu_01QQKa764BPcdoRmf7y8DEyy</tool-use-id> <outp",
+          "outcome": "done",
+          "project": "job-hunt",
+          "git_branch": "feature-job-hunt-core",
+          "started_at": "2026-08-04T11:00:41.831Z",
+          "ended_at": "2026-08-04T11:12:01.387Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "cf29fec6-76be-4f73-853a-4c17309fe021",
+          "episode_number": 6
+        },
+        "values": {
+          "title": "run.py --mark <url> --scam --not-job --reason \"...\" --pattern prize_bait [--spread] run.py --export-golden # база -> tes",
+          "outcome": "blocked",
+          "project": "job-hunt",
+          "git_branch": "feature-job-hunt-core",
+          "started_at": "2026-08-03T01:37:27.906Z",
+          "ended_at": "2026-08-03T01:54:21.520Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "d89c0d47-8424-4293-a02b-a04cf79b6954",
+          "episode_number": 4
+        },
+        "values": {
+          "title": "# Code Review Agent Ты — Code Reviewer. Твоя задача — провести ревью изменений в текущем проекте. ## Входные данные Аргу",
+          "outcome": "blocked",
+          "project": "job-hunt",
+          "git_branch": "feature-job-hunt-core",
+          "started_at": "2026-08-02T17:40:51.157Z",
+          "ended_at": "2026-08-02T18:47:09.795Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "e04e2c52-f1a4-4f5f-9399-1566112d287b",
+          "episode_number": 2
+        },
+        "values": {
+          "title": "# Code Review Agent Ты — Code Reviewer. Твоя задача — провести ревью изменений в текущем проекте. ## Входные данные Аргу",
+          "outcome": "blocked",
+          "project": "job-hunt",
+          "git_branch": "feature-job-hunt-core",
+          "started_at": "2026-08-04T02:00:49.923Z",
+          "ended_at": "2026-08-04T02:32:13.964Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "e04e2c52-f1a4-4f5f-9399-1566112d287b",
+          "episode_number": 6
+        },
+        "values": {
+          "title": "окей делаем приступай к смеансу автономной работы как закнчиваешь задачу пбери следующую фиксиру изменения сегодня нужно",
+          "outcome": "blocked",
+          "project": "job-hunt",
+          "git_branch": "feature-job-hunt-core",
+          "started_at": "2026-08-04T03:06:19.760Z",
+          "ended_at": "2026-08-04T03:28:28.469Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "ef617449-d86f-4a54-a3ce-81997cd7cb09",
+          "episode_number": 5
+        },
+        "values": {
+          "title": "продолжай по эпику и не останавливайся",
+          "outcome": "blocked",
+          "project": "job-hunt",
+          "git_branch": "feature-job-hunt-core",
+          "started_at": "2026-08-02T07:55:28.989Z",
+          "ended_at": "2026-08-02T08:51:10.899Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "ef617449-d86f-4a54-a3ce-81997cd7cb09",
+          "episode_number": 10
+        },
+        "values": {
+          "title": "да, факты по существующему url надо дополнять",
+          "outcome": "done",
+          "project": "job-hunt",
+          "git_branch": "feature-job-hunt-core",
+          "started_at": "2026-08-02T12:16:37.856Z",
+          "ended_at": "2026-08-02T12:24:17.635Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "bd85fb51-3304-4bb0-84aa-52e7f4b64731",
+          "episode_number": 19
+        },
+        "values": {
+          "title": "продолжай",
+          "outcome": "blocked",
+          "project": "job-hunt",
+          "git_branch": "feature-job-hunt-core",
+          "started_at": "2026-08-04T13:08:15.838Z",
+          "ended_at": "2026-08-04T13:18:45.315Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "cf29fec6-76be-4f73-853a-4c17309fe021",
+          "episode_number": 3
+        },
+        "values": {
+          "title": "autonomous-prompt.md",
+          "outcome": "done",
+          "project": "job-hunt",
+          "git_branch": "feature-job-hunt-core",
+          "started_at": "2026-08-03T00:36:22.610Z",
+          "ended_at": "2026-08-03T00:41:00.656Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "cf29fec6-76be-4f73-853a-4c17309fe021",
+          "episode_number": 4
+        },
+        "values": {
+          "title": "# Code Review Agent Ты — Code Reviewer. Твоя задача — провести ревью изменений в текущем проекте. ## Входные данные Аргу",
+          "outcome": "blocked",
+          "project": "job-hunt",
+          "git_branch": "feature-job-hunt-core",
+          "started_at": "2026-08-03T00:41:00.668Z",
+          "ended_at": "2026-08-03T01:06:56.643Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "d89c0d47-8424-4293-a02b-a04cf79b6954",
+          "episode_number": 3
+        },
+        "values": {
+          "title": "autonomous-prompt.md",
+          "outcome": "done",
+          "project": "job-hunt",
+          "git_branch": "feature-job-hunt-core",
+          "started_at": "2026-08-02T17:31:56.379Z",
+          "ended_at": "2026-08-02T17:40:51.135Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "0793ffe5-bba5-4e53-a958-0441d623cc92",
+          "episode_number": 14
+        },
+        "values": {
+          "title": "сохрани весь контекст я перезпущу чтобы скинкуть контекст",
+          "outcome": "done",
+          "project": "job-hunt",
+          "git_branch": "feature-job-hunt-core",
+          "started_at": "2026-08-02T00:58:36.418Z",
+          "ended_at": "2026-08-02T01:01:38.991Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "bd85fb51-3304-4bb0-84aa-52e7f4b64731",
+          "episode_number": 4
+        },
+        "values": {
+          "title": "# Code Review Agent Ты — Code Reviewer. Твоя задача — провести ревью изменений в текущем проекте. ## Входные данные Аргу",
+          "outcome": "blocked",
+          "project": "job-hunt",
+          "git_branch": "feature-job-hunt-core",
+          "started_at": "2026-08-04T06:43:46.014Z",
+          "ended_at": "2026-08-04T06:49:42.603Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "bd85fb51-3304-4bb0-84aa-52e7f4b64731",
+          "episode_number": 18
+        },
+        "values": {
+          "title": "<task-notification> <task-id>a4e163d8301596db5</task-id> <tool-use-id>toolu_01JuFC6HEwC7dwGgP6MduFSG</tool-use-id> <outp",
+          "outcome": "blocked",
+          "project": "job-hunt",
+          "git_branch": "feature-job-hunt-core",
+          "started_at": "2026-08-04T11:54:16.707Z",
+          "ended_at": "2026-08-04T12:20:14.461Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "e04e2c52-f1a4-4f5f-9399-1566112d287b",
+          "episode_number": 11
+        },
+        "values": {
+          "title": "<task-notification> <task-id>b1fr0i9r3</task-id> <tool-use-id>toolu_01PreQRZ8FHjMqpvMJih8ttu</tool-use-id> <output-file>",
+          "outcome": "blocked",
+          "project": "job-hunt",
+          "git_branch": "feature-job-hunt-core",
+          "started_at": "2026-08-04T05:03:26.953Z",
+          "ended_at": "2026-08-04T05:13:43.465Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "d04342e7-0051-4a5e-b5e5-5d4956010983",
+          "episode_number": 12
+        },
+        "values": {
+          "title": "делай",
+          "outcome": "blocked",
+          "project": "job-hunt",
+          "git_branch": "feature-job-hunt-core",
+          "started_at": "2026-08-03T14:02:38.782Z",
+          "ended_at": "2026-08-03T14:53:15.964Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "e04e2c52-f1a4-4f5f-9399-1566112d287b",
+          "episode_number": 14
+        },
+        "values": {
+          "title": "чини",
+          "outcome": "blocked",
+          "project": "job-hunt",
+          "git_branch": "feature-job-hunt-core",
+          "started_at": "2026-08-04T05:28:12.434Z",
+          "ended_at": "2026-08-04T05:58:24.488Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "ef617449-d86f-4a54-a3ce-81997cd7cb09",
+          "episode_number": 20
+        },
+        "values": {
+          "title": "да бери K.2b и работай автономнор дальше по оставшимся такскам и эпикам и сторям по всем флоу",
+          "outcome": "done",
+          "project": "job-hunt",
+          "git_branch": "feature-job-hunt-core",
+          "started_at": "2026-08-02T14:02:09.547Z",
+          "ended_at": "2026-08-02T15:16:25.985Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "c1a7ff50-11b2-4869-98b9-2661ce41a74e",
+          "episode_number": 4
+        },
+        "values": {
+          "title": "вложил parquet, начинай с блока 0 и 1.1 двигаемся вот как ты проводишь меня через все решение мне нужно вспомнить как ра",
+          "outcome": "done",
+          "project": "AI_1",
+          "git_branch": "HEAD",
+          "started_at": "2026-08-03T14:24:17.744Z",
+          "ended_at": "2026-08-03T14:27:52.952Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "c1a7ff50-11b2-4869-98b9-2661ce41a74e",
+          "episode_number": 5
+        },
+        "values": {
+          "title": "нет буд по ходу говорить замечания итак # Read tables here... # --- Логи: основная таблица, 32.5 млн строк --- # user / ",
+          "outcome": "blocked",
+          "project": "AI_1",
+          "git_branch": "HEAD",
+          "started_at": "2026-08-03T14:36:00.467Z",
+          "ended_at": "2026-08-03T14:37:52.834Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "c1a7ff50-11b2-4869-98b9-2661ce41a74e",
+          "episode_number": 6
+        },
+        "values": {
+          "title": "и вообще я ожидаю что вначале будет чтение то еать мы накомимя с шейпом смотрим пропуски дубликаты затем идет этап предп",
+          "outcome": "blocked",
+          "project": "AI_1",
+          "git_branch": "HEAD",
+          "started_at": "2026-08-03T14:37:52.967Z",
+          "ended_at": "2026-08-03T14:45:09.030Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "c1a7ff50-11b2-4869-98b9-2661ce41a74e",
+          "episode_number": 7
+        },
+        "values": {
+          "title": "раз мы не ограничены структурно мы букдм делапть по своему вначале чистка приведение типов без удоления и зполнения сред",
+          "outcome": "blocked",
+          "project": "AI_1",
+          "git_branch": "HEAD",
+          "started_at": "2026-08-03T14:56:30.299Z",
+          "ended_at": "2026-08-03T14:59:14.875Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "c1a7ff50-11b2-4869-98b9-2661ce41a74e",
+          "episode_number": 8
+        },
+        "values": {
+          "title": "поэтому отбор по логам обязателен (1.7, 1.13). неопнятно что за цифры непонятно что за 0 3 найденные на 0.2 ? порпавь",
+          "outcome": "done",
+          "project": "AI_1",
+          "git_branch": "HEAD",
+          "started_at": "2026-08-03T15:40:56.393Z",
+          "ended_at": "2026-08-03T15:41:55.774Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "c1a7ff50-11b2-4869-98b9-2661ce41a74e",
+          "episode_number": 9
+        },
+        "values": {
+          "title": "нет не так в задании «отфильтруйте данные пользователей…», мы еще не занем о задании мы делаем классическое действие а и",
+          "outcome": "done",
+          "project": "AI_1",
+          "git_branch": "HEAD",
+          "started_at": "2026-08-03T15:43:21.387Z",
+          "ended_at": "2026-08-03T15:46:06.344Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "c1a7ff50-11b2-4869-98b9-2661ce41a74e",
+          "episode_number": 10
+        },
+        "values": {
+          "title": "вычисти из проекта все тире и дефисы это классический ии маркер",
+          "outcome": "done",
+          "project": "AI_1",
+          "git_branch": "HEAD",
+          "started_at": "2026-08-03T15:47:17.357Z",
+          "ended_at": "2026-08-03T15:49:49.645Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "c1a7ff50-11b2-4869-98b9-2661ce41a74e",
+          "episode_number": 15
+        },
+        "values": {
+          "title": "а ты пристапай к 03 контекст же есть весь",
+          "outcome": "blocked",
+          "project": "AI_1",
+          "git_branch": "HEAD",
+          "started_at": "2026-08-03T15:53:30.501Z",
+          "ended_at": "2026-08-03T15:55:04.824Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "c1a7ff50-11b2-4869-98b9-2661ce41a74e",
+          "episode_number": 16
+        },
+        "values": {
+          "title": "делай все",
+          "outcome": "blocked",
+          "project": "AI_1",
+          "git_branch": "HEAD",
+          "started_at": "2026-08-03T15:55:14.662Z",
+          "ended_at": "2026-08-03T16:00:07.988Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "c1a7ff50-11b2-4869-98b9-2661ce41a74e",
+          "episode_number": 17
+        },
+        "values": {
+          "title": "продолжай",
+          "outcome": "blocked",
+          "project": "AI_1",
+          "git_branch": "HEAD",
+          "started_at": "2026-08-03T17:28:43.566Z",
+          "ended_at": "2026-08-03T17:51:01.739Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "bd85fb51-3304-4bb0-84aa-52e7f4b64731",
+          "episode_number": 3
+        },
+        "values": {
+          "title": "# Автономный прогон — промт Копировать целиком в новую сессию. --- Работай автономно. Не спрашивай разрешений по ходу — ",
+          "outcome": "blocked",
+          "project": "job-hunt",
+          "git_branch": "feature-job-hunt-core",
+          "started_at": "2026-08-04T06:23:20.322Z",
+          "ended_at": "2026-08-04T06:43:45.994Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "e04e2c52-f1a4-4f5f-9399-1566112d287b",
+          "episode_number": 17
+        },
+        "values": {
+          "title": "да и объясни что там за детекоторы и ккакой тип объявлений им нужен джля корпуса",
+          "outcome": "done",
+          "project": "job-hunt",
+          "git_branch": "feature-job-hunt-core",
+          "started_at": "2026-08-04T06:04:06.225Z",
+          "ended_at": "2026-08-04T06:15:00.370Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "ef617449-d86f-4a54-a3ce-81997cd7cb09",
+          "episode_number": 3
+        },
+        "values": {
+          "title": "/home/person/scripts/job-hunt/docs/autonomous-prompt.md прочти и приступай к автономному сеансу",
+          "outcome": "blocked",
+          "project": "job-hunt",
+          "git_branch": "feature-job-hunt-core",
+          "started_at": "2026-08-02T07:29:31.122Z",
+          "ended_at": "2026-08-02T07:36:38.391Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "ef617449-d86f-4a54-a3ce-81997cd7cb09",
+          "episode_number": 4
+        },
+        "values": {
+          "title": "# Code Review Agent Ты — Code Reviewer. Твоя задача — провести ревью изменений в текущем проекте. ## Входные данные Аргу",
+          "outcome": "done",
+          "project": "job-hunt",
+          "git_branch": "feature-job-hunt-core",
+          "started_at": "2026-08-02T07:36:38.401Z",
+          "ended_at": "2026-08-02T07:39:16.738Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "1bf5dc9d-839c-4d52-a980-a0da4aa3392f",
+          "episode_number": 5
+        },
+        "values": {
+          "title": "# Code Review Agent Ты — Code Reviewer. Твоя задача — провести ревью изменений в текущем проекте. ## Входные данные Аргу",
+          "outcome": "blocked",
+          "project": "job-hunt",
+          "git_branch": "HEAD",
+          "started_at": "2026-08-01T05:37:35.993Z",
+          "ended_at": "2026-08-01T05:56:09.743Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
+          "episode_number": 2
+        },
+        "values": {
+          "title": "# Code Review Agent Ты — Code Reviewer. Твоя задача — провести ревью изменений в текущем проекте. ## Входные данные Аргу",
+          "outcome": "blocked",
+          "project": "job-hunt",
+          "git_branch": "HEAD",
+          "started_at": "2026-07-29T03:23:48.359Z",
+          "ended_at": "2026-07-29T03:26:21.935Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
+          "episode_number": 8
+        },
+        "values": {
+          "title": "Skill /review is already loaded above; instructions unchanged.",
+          "outcome": "blocked",
+          "project": "job-hunt",
+          "git_branch": "HEAD",
+          "started_at": "2026-07-29T06:44:08.328Z",
+          "ended_at": "2026-07-29T06:51:34.151Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "0bf3ba2a-8784-4889-8c97-a9d553c1d2f6",
+          "episode_number": 2
+        },
+        "values": {
+          "title": "# Code Review Agent Ты — Code Reviewer. Твоя задача — провести ревью изменений в текущем проекте. ## Входные данные Аргу",
+          "outcome": "done",
+          "project": "job-hunt",
+          "git_branch": "feature-job-hunt-core",
+          "started_at": "2026-08-01T08:32:02.497Z",
+          "ended_at": "2026-08-01T08:37:50.088Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "0bf3ba2a-8784-4889-8c97-a9d553c1d2f6",
+          "episode_number": 3
+        },
+        "values": {
+          "title": "Пуш `2bfe733` и сразу продолжай — job-hunt-11 (Telegram source adapter). Не останавливайся между эпиками, работай автоно",
+          "outcome": "done",
+          "project": "job-hunt",
+          "git_branch": "feature-job-hunt-core",
+          "started_at": "2026-08-01T09:04:07.195Z",
+          "ended_at": "2026-08-01T09:38:08.484Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "6011cf1e-80d0-4979-93f5-658b3ec89037",
+          "episode_number": 7
+        },
+        "values": {
+          "title": "<task-notification> <task-id>a491de31b2856aef0</task-id> <tool-use-id>toolu_01FbXRf7jLgriPjYojJAtGiL</tool-use-id> <outp",
+          "outcome": "done",
+          "project": "job-hunt",
+          "git_branch": "feature-job-hunt-core",
+          "started_at": "2026-08-01T10:07:29.492Z",
+          "ended_at": "2026-08-01T10:13:50.606Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "1bf5dc9d-839c-4d52-a980-a0da4aa3392f",
+          "episode_number": 3
+        },
+        "values": {
+          "title": "# Code Review Agent Ты — Code Reviewer. Твоя задача — провести ревью изменений в текущем проекте. ## Входные данные Аргу",
+          "outcome": "done",
+          "project": "job-hunt",
+          "git_branch": "HEAD",
+          "started_at": "2026-08-01T05:08:22.191Z",
+          "ended_at": "2026-08-01T05:37:35.955Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "0bf3ba2a-8784-4889-8c97-a9d553c1d2f6",
+          "episode_number": 1
+        },
+        "values": {
+          "title": "Читай CONTEXT.md и начинай Epic B. Сначала пиши ADR-0001, потом реализуй. АРХИТЕКТУРНАЯ ЦЕЛЬ (от пользователя): - core =",
+          "outcome": "blocked",
+          "project": "job-hunt",
+          "git_branch": "feature-job-hunt-core",
+          "started_at": "2026-08-01T08:16:56.723Z",
+          "ended_at": "2026-08-01T08:32:02.480Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "6011cf1e-80d0-4979-93f5-658b3ec89037",
+          "episode_number": 3
+        },
+        "values": {
+          "title": "<task-notification> <task-id>af69d0f06939a5984</task-id> <tool-use-id>toolu_0168vKpDNuVPWA8t3qwtgME3</tool-use-id> <outp",
+          "outcome": "blocked",
+          "project": "job-hunt",
+          "git_branch": "feature-job-hunt-core",
+          "started_at": "2026-08-01T09:39:43.761Z",
+          "ended_at": "2026-08-01T09:42:15.608Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "6ec2778b-40a2-456f-aed7-02136355e1db",
+          "episode_number": 2
+        },
+        "values": {
+          "title": "Не задавай вопросов — действуй по спеке из промпта. Пиши тесты, гоняй, репортируй находки. пиши в файл",
+          "outcome": "blocked",
+          "project": "job-hunt",
+          "git_branch": "feature-job-hunt-core",
+          "started_at": "2026-07-30T00:37:21.433Z",
+          "ended_at": "2026-07-30T00:46:33.739Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "fe3b9dc3-6d54-4c39-bdca-d70e1b6bef88",
+          "episode_number": 1
+        },
+        "values": {
+          "title": "Без вопросов. Пиши код сразу. Задача: property-based + adversarial тесты для `core/` в этом репо. Шаг 1: `pip install hy",
+          "outcome": "done",
+          "project": "job-hunt",
+          "git_branch": "feature-job-hunt-core",
+          "started_at": "2026-07-30T00:32:04.924Z",
+          "ended_at": "2026-07-30T00:36:32.074Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
+          "episode_number": 1
+        },
+        "values": {
+          "title": "Задача: построить ядро unified job aggregator в репо `job-hunt` (github.com/Tarasusrus/job-hunt, приватный). Сначала най",
+          "outcome": "blocked",
+          "project": "dev",
+          "git_branch": "HEAD",
+          "started_at": "2026-07-29T03:15:28.205Z",
+          "ended_at": "2026-07-29T03:23:48.347Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
+          "episode_number": 3
+        },
+        "values": {
+          "title": "СТОП — не пиши код пока не скажу. Жди инструкций по модели данных. Обновлённая спецификация — пиши по ней: ## Схема vaca",
+          "outcome": "blocked",
+          "project": "dev",
+          "git_branch": "HEAD",
+          "started_at": "2026-07-29T03:26:24.640Z",
+          "ended_at": "2026-07-29T03:34:40.689Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
+          "episode_number": 5
+        },
+        "values": {
+          "title": "Сделай 2 цикла code review с фокусом на расширяемость, поддерживаемость и SOLID. Цикл 1 — найти нарушения: - Single Resp",
+          "outcome": "blocked",
+          "project": "dev",
+          "git_branch": "HEAD",
+          "started_at": "2026-07-29T04:09:41.875Z",
+          "ended_at": "2026-07-29T04:19:40.630Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
+          "episode_number": 7
+        },
+        "values": {
+          "title": "Два улучшения: ## 1. OCP — core готов к изменениям без правки кода Цель: добавить новый тип источника (RSS, GraphQL API,",
+          "outcome": "blocked",
+          "project": "dev",
+          "git_branch": "HEAD",
+          "started_at": "2026-07-29T06:33:52.592Z",
+          "ended_at": "2026-07-29T06:44:08.319Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "6011cf1e-80d0-4979-93f5-658b3ec89037",
+          "episode_number": 2
+        },
+        "values": {
+          "title": "<task-notification> <task-id>ad4cbc57b265a0d26</task-id> <tool-use-id>toolu_013yKquPabvS6UhC9oJUnqGs</tool-use-id> <outp",
+          "outcome": "blocked",
+          "project": "job-hunt",
+          "git_branch": "feature-job-hunt-core",
+          "started_at": "2026-08-01T09:31:04.910Z",
+          "ended_at": "2026-08-01T09:36:48.197Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "e04e2c52-f1a4-4f5f-9399-1566112d287b",
+          "episode_number": 7
+        },
+        "values": {
+          "title": "смотри зная контекст ты сможешь наверное мне помочь, я хочу чтобы ты работал автономно и не прерывался спросить то что я",
+          "outcome": "blocked",
+          "project": "job-hunt",
+          "git_branch": "feature-job-hunt-core",
+          "started_at": "2026-08-04T03:39:23.475Z",
+          "ended_at": "2026-08-04T04:56:45.613Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "ef617449-d86f-4a54-a3ce-81997cd7cb09",
+          "episode_number": 9
+        },
+        "values": {
+          "title": "# Code Review Agent Ты — Code Reviewer. Твоя задача — провести ревью изменений в текущем проекте. ## Входные данные Аргу",
+          "outcome": "blocked",
+          "project": "job-hunt",
+          "git_branch": "feature-job-hunt-core",
+          "started_at": "2026-08-02T11:34:57.079Z",
+          "ended_at": "2026-08-02T11:57:56.532Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "cf29fec6-76be-4f73-853a-4c17309fe021",
+          "episode_number": 5
+        },
+        "values": {
+          "title": "https://t.me/prostranstvowork/3699,tg:prostranstvowork,,Вас упомянул Администратор канала,165000,165000,RUB,1,[],\"⭕️ Вас",
+          "outcome": "blocked",
+          "project": "job-hunt",
+          "git_branch": "feature-job-hunt-core",
+          "started_at": "2026-08-03T01:08:20.381Z",
+          "ended_at": "2026-08-03T01:32:08.642Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "708fe7a1-9655-49f6-8fd5-87afd900ad48",
+          "episode_number": 5
+        },
+        "values": {
+          "title": "продолжай",
+          "outcome": "done",
+          "project": "job-hunt",
+          "git_branch": "feature-job-hunt-core",
+          "started_at": "2026-08-03T05:32:32.502Z",
+          "ended_at": "2026-08-03T05:35:44.825Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "d654bd7e-41d8-451d-898a-e945b0ec9bcf",
+          "episode_number": 13
+        },
+        "values": {
+          "title": "нет преждлде чем начать раюдотать нужен ресчерч а ты чтото ненужное делаешь это пока только идея для ресчерча",
+          "outcome": "done",
+          "project": "cdaf2aeede844bff9fecf9229d7e25e8",
+          "git_branch": "HEAD",
+          "started_at": "2026-08-07T03:35:41.066Z",
+          "ended_at": "2026-08-07T03:55:24.751Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "d654bd7e-41d8-451d-898a-e945b0ec9bcf",
+          "episode_number": 14
+        },
+        "values": {
+          "title": "снеси схему и миграции и продолжжи ресерч",
+          "outcome": "done",
+          "project": "cdaf2aeede844bff9fecf9229d7e25e8",
+          "git_branch": "HEAD",
+          "started_at": "2026-08-07T04:02:04.012Z",
+          "ended_at": "2026-08-07T04:06:00.589Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "d654bd7e-41d8-451d-898a-e945b0ec9bcf",
+          "episode_number": 15
+        },
+        "values": {
+          "title": "закоммить RESEARCH.md а ьак же по правилма хакатона мы иможемеи споьльзлавьб приложение xmemory найцджи его вв гите и лз",
+          "outcome": "done",
+          "project": "cdaf2aeede844bff9fecf9229d7e25e8",
+          "git_branch": "HEAD",
+          "started_at": "2026-08-07T05:02:46.789Z",
+          "ended_at": "2026-08-07T05:05:43.698Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
+          "episode_number": 4
+        },
+        "values": {
+          "title": "Skill /review is already loaded above; instructions unchanged.",
+          "outcome": "done",
+          "project": "job-hunt",
+          "git_branch": "HEAD",
+          "started_at": "2026-07-29T03:34:40.701Z",
+          "ended_at": "2026-07-29T03:36:18.733Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "6da422ef-baa9-4a01-bfb5-9dd3f631871c",
+          "episode_number": 2
+        },
+        "values": {
+          "title": "# Code Review Agent Ты — Code Reviewer. Твоя задача — провести ревью изменений в текущем проекте. ## Входные данные Аргу",
+          "outcome": "blocked",
+          "project": "job-hunt",
+          "git_branch": "feature-job-hunt-core",
+          "started_at": "2026-08-03T02:21:49.323Z",
+          "ended_at": "2026-08-03T03:03:04.074Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "0793ffe5-bba5-4e53-a958-0441d623cc92",
+          "episode_number": 7
+        },
+        "values": {
+          "title": "я прервал выполнение тепмерь запусти его заново с тем же промтом",
+          "outcome": "done",
+          "project": "job-hunt",
+          "git_branch": "feature-job-hunt-core",
+          "started_at": "2026-08-01T12:32:49.237Z",
+          "ended_at": "2026-08-01T12:43:46.828Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "99b23e19-5b1d-4cff-8654-296db299a42c",
+          "episode_number": 13
+        },
+        "values": {
+          "title": "сначала job-hunt-73, хочу понять почему 17 каналов молчат а вообще все далай попорядку и меня не отвлекай ты автономный",
+          "outcome": "blocked",
+          "project": "job-hunt",
+          "git_branch": "feature-job-hunt-core",
+          "started_at": "2026-08-02T06:23:58.169Z",
+          "ended_at": "2026-08-02T07:14:59.979Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "e2e3ea09-917e-43db-89fa-23faf5268fa8",
+          "episode_number": 8
+        },
+        "values": {
+          "title": "нет это все частное рещение мы говорим сейчас о фоновом проуцессе который должен из контекста сессий поулчить инфу как в",
+          "outcome": "done",
+          "project": "person",
+          "git_branch": "HEAD",
+          "started_at": "2026-08-06T05:59:45.427Z",
+          "ended_at": "2026-08-06T06:01:21.020Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "e4e1b55b-dc6a-4e07-b8ac-eabdb9e4fdeb",
+          "episode_number": 1
+        },
+        "values": {
+          "title": "Projects/interview-prep/Natively — разбор и удаление.md ДАВАй искать следующий инструмент под мою задачу итак мне нужно ",
+          "outcome": "done",
+          "project": "person",
+          "git_branch": "HEAD",
+          "started_at": "2026-07-28T10:47:02.304Z",
+          "ended_at": "2026-07-28T10:48:45.395Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "9780a4d1-5eae-4444-8e87-d3aac02e258d",
+          "episode_number": 1
+        },
+        "values": {
+          "title": "=== Карта workspace === Корень workspace: /home/person/.throne/workspaces/intents/3e45437580b845d1be65184f680",
+          "outcome": "abandoned",
+          "project": "3e45437580b845d1be65184f68038a65",
+          "git_branch": "HEAD",
+          "started_at": "2026-08-06T09:37:39.831Z",
+          "ended_at": "2026-08-06T09:37:43.134Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "d654bd7e-41d8-451d-898a-e945b0ec9bcf",
+          "episode_number": 6
+        },
+        "values": {
+          "title": "ну ок тогда создай распиновку уже зато создай задачи сделай граф зависимости чтоб мне это всё отобразилось на Кина http:",
+          "outcome": "done",
+          "project": "cdaf2aeede844bff9fecf9229d7e25e8",
+          "git_branch": "HEAD",
+          "started_at": "2026-08-06T08:57:09.222Z",
+          "ended_at": "2026-08-06T08:58:50.968Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "6e9b5133-a4e2-436f-a058-227d5bad6091",
+          "episode_number": 3
+        },
+        "values": {
+          "title": "перед тобой решение учебного проректа твоя задача оценить как он выполнен с точки зрения проверяющего ясно ли излодены м",
+          "outcome": "blocked",
+          "project": "AI_1",
+          "git_branch": "HEAD",
+          "started_at": "2026-08-03T18:29:28.870Z",
+          "ended_at": "2026-08-03T18:33:43.925Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "6e9b5133-a4e2-436f-a058-227d5bad6091",
+          "episode_number": 6
+        },
+        "values": {
+          "title": "сократи дубли и сократи",
+          "outcome": "done",
+          "project": "AI_1",
+          "git_branch": "HEAD",
+          "started_at": "2026-08-03T18:34:47.458Z",
+          "ended_at": "2026-08-03T18:35:42.646Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "77f69361-ad5c-4d1e-949c-ae6a02c507b2",
+          "episode_number": 1
+        },
+        "values": {
+          "title": "Продолжай дальше работу и не забудь запускать ревью и вести заметки в бидс --- КОНТЕКСТ --- Ты работаешь над проектом ru",
+          "outcome": "blocked",
+          "project": "scripts",
+          "git_branch": "HEAD",
+          "started_at": "2026-06-19T01:49:32.371Z",
+          "ended_at": "2026-06-19T01:54:56.958Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "bd85fb51-3304-4bb0-84aa-52e7f4b64731",
+          "episode_number": 7
+        },
+        "values": {
+          "title": "нет так не пойдет job-hunt-20.7 (N.5, личный дайджест) — рассылка тебе вакансий по профилю. я не понимаю что это зачем н",
+          "outcome": "done",
+          "project": "job-hunt",
+          "git_branch": "feature-job-hunt-core",
+          "started_at": "2026-08-04T07:08:50.312Z",
+          "ended_at": "2026-08-04T07:08:57.418Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "d04342e7-0051-4a5e-b5e5-5d4956010983",
+          "episode_number": 4
+        },
+        "values": {
+          "title": "1. Дать решение по 118 (переносим креды ru_side или нет) — снимает три недостижимых канала что за перенос только кратко",
+          "outcome": "done",
+          "project": "job-hunt",
+          "git_branch": "feature-job-hunt-core",
+          "started_at": "2026-08-03T12:31:54.737Z",
+          "ended_at": "2026-08-03T12:32:06.800Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "e04e2c52-f1a4-4f5f-9399-1566112d287b",
+          "episode_number": 1
+        },
+        "values": {
+          "title": "autonomous-prompt.md приступай",
+          "outcome": "blocked",
+          "project": "job-hunt",
+          "git_branch": "feature-job-hunt-core",
+          "started_at": "2026-08-04T01:46:17.918Z",
+          "ended_at": "2026-08-04T02:00:49.579Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "ef617449-d86f-4a54-a3ce-81997cd7cb09",
+          "episode_number": 12
+        },
+        "values": {
+          "title": "ладжно в таком случае нам нужно отдельное поле которое в котором мы бы определяли роль и грейд потому что непонятно как ",
+          "outcome": "abandoned",
+          "project": "job-hunt",
+          "git_branch": "feature-job-hunt-core",
+          "started_at": "2026-08-02T13:07:20.461Z",
+          "ended_at": "2026-08-02T13:07:20.461Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "ef617449-d86f-4a54-a3ce-81997cd7cb09",
+          "episode_number": 14
+        },
+        "values": {
+          "title": "ладжно в таком случае нам нужно отдельное поле которое в котором мы бы определяли роль и грейд потому что непонятно как ",
+          "outcome": "abandoned",
+          "project": "job-hunt",
+          "git_branch": "feature-job-hunt-core",
+          "started_at": "2026-08-02T13:07:31.023Z",
+          "ended_at": "2026-08-02T13:07:31.023Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "ef617449-d86f-4a54-a3ce-81997cd7cb09",
+          "episode_number": 15
+        },
+        "values": {
+          "title": "ладжно в таком случае нам нужно отдельное поле которое в котором мы бы определяли роль и грейд потому что непонятно как ",
+          "outcome": "done",
+          "project": "job-hunt",
+          "git_branch": "feature-job-hunt-core",
+          "started_at": "2026-08-02T13:08:13.105Z",
+          "ended_at": "2026-08-02T13:09:10.230Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "ef617449-d86f-4a54-a3ce-81997cd7cb09",
+          "episode_number": 16
+        },
+        "values": {
+          "title": "почему ты не хочешь использовать MBD для того чтобы правильно определить роль потому что абсолютно куча разных вариантов",
+          "outcome": "done",
+          "project": "job-hunt",
+          "git_branch": "feature-job-hunt-core",
+          "started_at": "2026-08-02T13:14:43.191Z",
+          "ended_at": "2026-08-02T13:16:31.332Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "e6abdf31-fa4f-4960-880f-10fd7a4216bd",
+          "episode_number": 10
+        },
+        "values": {
+          "title": "так же мы создали ишью в осс найтива и накидали решение протести его локеально имплеминтируй напиши тесты и убедись что ",
+          "outcome": "done",
+          "project": "my_synk",
+          "git_branch": "HEAD",
+          "started_at": "2026-07-28T08:22:26.086Z",
+          "ended_at": "2026-07-28T08:26:34.615Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "6768f8dc-a363-4751-a39c-45203b274588",
+          "episode_number": 3
+        },
+        "values": {
+          "title": "# Code Review Agent Ты — Code Reviewer. Твоя задача — провести ревью изменений в текущем проекте. ## Входные данные Аргу",
+          "outcome": "done",
+          "project": "3f7007322eef470086a1fc3e35f517a6",
+          "git_branch": "HEAD",
+          "started_at": "2026-08-06T05:32:47.229Z",
+          "ended_at": "2026-08-06T05:47:25.490Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "f2a66fdd-5253-4f43-9ef0-9a17be0d8a17",
+          "episode_number": 4
+        },
+        "values": {
+          "title": "# Code Review Agent Ты — Code Reviewer. Твоя задача — провести ревью изменений в текущем проекте. ## Входные данные Аргу",
+          "outcome": "done",
+          "project": "job-hunt",
+          "git_branch": "HEAD",
+          "started_at": "2026-08-05T07:46:03.500Z",
+          "ended_at": "2026-08-05T07:48:41.214Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "c7864fdd-5ab9-4174-9bbc-0baaec5bdedf",
+          "episode_number": 2
+        },
+        "values": {
+          "title": "# Code Review Agent Ты — Code Reviewer. Твоя задача — провести ревью изменений в текущем проекте. ## Входные данные Аргу",
+          "outcome": "done",
+          "project": "e51aabbac0ef49999f31dd05075ef791",
+          "git_branch": "HEAD",
+          "started_at": "2026-08-05T08:49:04.927Z",
+          "ended_at": "2026-08-05T08:56:46.720Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "443261a2-4bd1-475b-ac40-a68480bb1021",
+          "episode_number": 5
+        },
+        "values": {
+          "title": "раз мы вычислил инвариавнт убедись что в остальных частях репозитория он сохраняется",
+          "outcome": "done",
+          "project": "mcp-grafana",
+          "git_branch": "fix/1021-base-path-operational-endpoints",
+          "started_at": "2026-07-31T08:27:02.554Z",
+          "ended_at": "2026-07-31T08:32:12.393Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "557de9de-327d-44d4-a346-fde6ef3f694f",
+          "episode_number": 6
+        },
+        "values": {
+          "title": "Добавь два новых TG-канала в адаптер `ru_side/sources/telegram.py`: **Новые каналы:** - `@remote_job_golang` — \"GoLang: ",
+          "outcome": "done",
+          "project": "scripts",
+          "git_branch": "HEAD",
+          "started_at": "2026-06-19T08:22:54.907Z",
+          "ended_at": "2026-06-19T10:01:15.502Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "557de9de-327d-44d4-a346-fde6ef3f694f",
+          "episode_number": 8
+        },
+        "values": {
+          "title": "Продолжай. Старые посты (age=492d) — это нормально, freshness=0 даёт score<6, они не пройдут threshold. Убедись что филь",
+          "outcome": "blocked",
+          "project": "scripts",
+          "git_branch": "HEAD",
+          "started_at": "2026-06-21T01:17:27.630Z",
+          "ended_at": "2026-06-21T01:22:33.680Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "feb24791-a870-480f-b3eb-4ed4707e276d",
+          "episode_number": 2
+        },
+        "values": {
+          "title": "посмотри все мои мр пр в графане сколько их штук всего когда узнаешь цифру не говори мне а перепроверь еще раз другим сп",
+          "outcome": "done",
+          "project": "scripts",
+          "git_branch": "HEAD",
+          "started_at": "2026-07-31T01:28:52.604Z",
+          "ended_at": "2026-07-31T01:29:15.291Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "d04342e7-0051-4a5e-b5e5-5d4956010983",
+          "episode_number": 2
+        },
+        "values": {
+          "title": "<command-name>/clear</command-name> <command-message>clear</command-message> <command-args></command-args>",
+          "outcome": "abandoned",
+          "project": "job-hunt",
+          "git_branch": "feature-job-hunt-core",
+          "started_at": "2026-08-03T12:29:50.226Z",
+          "ended_at": "2026-08-03T12:29:50.226Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "ef617449-d86f-4a54-a3ce-81997cd7cb09",
+          "episode_number": 18
+        },
+        "values": {
+          "title": "<task-notification> <task-id>afb9b44548a834ccb</task-id> <tool-use-id>toolu_01RtWkeXnEPWXNazAiWe79qt</tool-use-id> <outp",
+          "outcome": "done",
+          "project": "job-hunt",
+          "git_branch": "feature-job-hunt-core",
+          "started_at": "2026-08-02T13:41:18.255Z",
+          "ended_at": "2026-08-02T13:44:24.399Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "443261a2-4bd1-475b-ac40-a68480bb1021",
+          "episode_number": 6
+        },
+        "values": {
+          "title": "да, коммить 1021 и заводи issue на второй баг только согласуй сос мнйо пр",
+          "outcome": "done",
+          "project": "mcp-grafana",
+          "git_branch": "fix/1021-base-path-operational-endpoints",
+          "started_at": "2026-07-31T08:33:48.203Z",
+          "ended_at": "2026-07-31T08:35:24.958Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "6011cf1e-80d0-4979-93f5-658b3ec89037",
+          "episode_number": 6
+        },
+        "values": {
+          "title": "<task-notification> <task-id>a3bcba5d8dbc70cb5</task-id> <tool-use-id>toolu_01YDcAagmhw5r5pM4nMM8PpR</tool-use-id> <outp",
+          "outcome": "done",
+          "project": "job-hunt",
+          "git_branch": "feature-job-hunt-core",
+          "started_at": "2026-08-01T10:00:00.564Z",
+          "ended_at": "2026-08-01T10:02:49.655Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "77f69361-ad5c-4d1e-949c-ae6a02c507b2",
+          "episode_number": 6
+        },
+        "values": {
+          "title": "Пользователь сказал \"займись\" — продолжай весь оставшийся беклог автономно. Порядок: **1. Расписание (launchd)** — созда",
+          "outcome": "done",
+          "project": "scripts",
+          "git_branch": "HEAD",
+          "started_at": "2026-06-19T02:16:52.875Z",
+          "ended_at": "2026-06-19T02:22:01.522Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "77f69361-ad5c-4d1e-949c-ae6a02c507b2",
+          "episode_number": 8
+        },
+        "values": {
+          "title": "Исправь два WARNING из ревью: 1. tracker.py:57 — operator precedence: `if fkey and (fkey in existing_fuzzy or fkey in ba",
+          "outcome": "done",
+          "project": "scripts",
+          "git_branch": "HEAD",
+          "started_at": "2026-06-19T02:22:41.701Z",
+          "ended_at": "2026-06-19T02:23:27.913Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "6768f8dc-a363-4751-a39c-45203b274588",
+          "episode_number": 1
+        },
+        "values": {
+          "title": "=== Карта workspace === Корень workspace: /home/person/.throne/workspaces/intents/3f7007322eef470086a1fc3e35f",
+          "outcome": "blocked",
+          "project": "3f7007322eef470086a1fc3e35f517a6",
+          "git_branch": "HEAD",
+          "started_at": "2026-08-05T10:53:11.340Z",
+          "ended_at": "2026-08-06T05:16:38.690Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "6011cf1e-80d0-4979-93f5-658b3ec89037",
+          "episode_number": 1
+        },
+        "values": {
+          "title": "Читай CONTEXT.md и git log, потом работай автономно без остановок. АЛГОРИТМ (повторяй по кругу): 1. `bd list` — берёшь с",
+          "outcome": "done",
+          "project": "job-hunt",
+          "git_branch": "feature-job-hunt-core",
+          "started_at": "2026-08-01T09:23:22.237Z",
+          "ended_at": "2026-08-01T09:25:54.350Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "6c857447-0ba0-4709-951f-7204b0b6b1a0",
+          "episode_number": 11
+        },
+        "values": {
+          "title": "поехали правки ⏺ Lesson Ledger — испытательный срок для памяти агента. У кода есть CI, у памяти агента — нет. Проблема. ",
+          "outcome": "done",
+          "project": "throne",
+          "git_branch": "HEAD",
+          "started_at": "2026-08-06T11:05:10.770Z",
+          "ended_at": "2026-08-06T11:05:34.767Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "443261a2-4bd1-475b-ac40-a68480bb1021",
+          "episode_number": 12
+        },
+        "values": {
+          "title": "# Code Review Agent Ты — Code Reviewer. Твоя задача — провести ревью изменений в текущем проекте. ## Входные данные Аргу",
+          "outcome": "done",
+          "project": "mcp-grafana",
+          "git_branch": "fix/1032-normalize-grafana-url-at-boundary",
+          "started_at": "2026-07-31T08:53:07.929Z",
+          "ended_at": "2026-07-31T08:56:29.629Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "d654bd7e-41d8-451d-898a-e945b0ec9bcf",
+          "episode_number": 12
+        },
+        "values": {
+          "title": "я не вижу списка задач где граф зависимостей?",
+          "outcome": "done",
+          "project": "Tarasusrus__lesson-ledger",
+          "git_branch": "HEAD",
+          "started_at": "2026-08-07T03:31:43.970Z",
+          "ended_at": "2026-08-07T03:33:26.002Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "d654bd7e-41d8-451d-898a-e945b0ec9bcf",
+          "episode_number": 18
+        },
+        "values": {
+          "title": "Я ХОЧУ ЧТОБЫ ТЫ СОЗДАЛ ДОПОЛНИТЕЛЬНЫЕ ИНТЕНТЫ Я ХОЧУ ВИДЕТЬ ЭТАПЫ РАБОТЫ С ПАМЯТЬЮ ХОЧУТСЯ РАБОТАТЬ В ОТДЕЛЬНОМ ДЕРЕВЕ В",
+          "outcome": "done",
+          "project": "Tarasusrus__lesson-ledger",
+          "git_branch": "HEAD",
+          "started_at": "2026-08-07T05:24:54.210Z",
+          "ended_at": "2026-08-07T05:29:53.914Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "6c857447-0ba0-4709-951f-7204b0b6b1a0",
+          "episode_number": 12
+        },
+        "values": {
+          "title": "есть репоизторий?",
+          "outcome": "blocked",
+          "project": "throne",
+          "git_branch": "HEAD",
+          "started_at": "2026-08-06T11:05:51.844Z",
+          "ended_at": "2026-08-06T11:06:20.891Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "e2e3ea09-917e-43db-89fa-23faf5268fa8",
+          "episode_number": 31
+        },
+        "values": {
+          "title": "создай в моем репозитории проект открытый",
+          "outcome": "done",
+          "project": "person",
+          "git_branch": "HEAD",
+          "started_at": "2026-08-06T08:16:04.032Z",
+          "ended_at": "2026-08-06T10:32:04.398Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "23ece2e2-1b3d-47cf-bc46-5dc0d8cb67dd",
+          "episode_number": 20
+        },
+        "values": {
+          "title": "как полддключить клодж к этому?",
+          "outcome": "done",
+          "project": "person",
+          "git_branch": "HEAD",
+          "started_at": "2026-08-05T02:34:48.280Z",
+          "ended_at": "2026-08-05T02:35:53.006Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "f2a66fdd-5253-4f43-9ef0-9a17be0d8a17",
+          "episode_number": 5
+        },
+        "values": {
+          "title": "y",
+          "outcome": "done",
+          "project": "job-hunt",
+          "git_branch": "HEAD",
+          "started_at": "2026-08-05T07:50:27.805Z",
+          "ended_at": "2026-08-05T07:54:33.509Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "f2a66fdd-5253-4f43-9ef0-9a17be0d8a17",
+          "episode_number": 6
+        },
+        "values": {
+          "title": "бидс живет локально но можешь ешго запушить ветка приватная",
+          "outcome": "done",
+          "project": "c356e50b09864d5d84ec53b3403a15ed",
+          "git_branch": "HEAD",
+          "started_at": "2026-08-05T07:57:12.782Z",
+          "ended_at": "2026-08-05T07:59:19.809Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "f2a66fdd-5253-4f43-9ef0-9a17be0d8a17",
+          "episode_number": 7
+        },
+        "values": {
+          "title": "какой дальше флоу по контексту сессии?",
+          "outcome": "blocked",
+          "project": "job-hunt",
+          "git_branch": "HEAD",
+          "started_at": "2026-08-05T08:01:12.405Z",
+          "ended_at": "2026-08-05T08:31:24.615Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "e2e3ea09-917e-43db-89fa-23faf5268fa8",
+          "episode_number": 1
+        },
+        "values": {
+          "title": "задача следующая нужно перепрошить клавиатуру кейрхом к3 и отключить функцию энергосбережения я не хочу чтобы огн отклчю",
+          "outcome": "done",
+          "project": "person",
+          "git_branch": "HEAD",
+          "started_at": "2026-08-06T05:04:36.563Z",
+          "ended_at": "2026-08-06T05:04:46.278Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "e2e3ea09-917e-43db-89fa-23faf5268fa8",
+          "episode_number": 22
+        },
+        "values": {
+          "title": "<task-notification> <task-id>a83c9b84e9c85aafa</task-id> <tool-use-id>toolu_01BwwvfX9Bi9VH38Xr6o95JG</tool-use-id> <outp",
+          "outcome": "done",
+          "project": "person",
+          "git_branch": "HEAD",
+          "started_at": "2026-08-06T07:33:34.968Z",
+          "ended_at": "2026-08-06T07:34:04.826Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "e2e3ea09-917e-43db-89fa-23faf5268fa8",
+          "episode_number": 19
+        },
+        "values": {
+          "title": "<task-notification> <task-id>a663a18ffb639d52a</task-id> <tool-use-id>toolu_01AV8qrr9sHpy8hPjCdWmguT</tool-use-id> <outp",
+          "outcome": "done",
+          "project": "person",
+          "git_branch": "HEAD",
+          "started_at": "2026-08-06T06:54:04.659Z",
+          "ended_at": "2026-08-06T06:54:50.544Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "e2e3ea09-917e-43db-89fa-23faf5268fa8",
+          "episode_number": 18
+        },
+        "values": {
+          "title": "<task-notification> <task-id>a8cb354f0a30c1e5b</task-id> <tool-use-id>toolu_01F2kDX7HfSDqQ8f74bcfWRm</tool-use-id> <outp",
+          "outcome": "done",
+          "project": "person",
+          "git_branch": "HEAD",
+          "started_at": "2026-08-06T06:53:29.923Z",
+          "ended_at": "2026-08-06T06:54:04.270Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "77f69361-ad5c-4d1e-949c-ae6a02c507b2",
+          "episode_number": 2
+        },
+        "values": {
+          "title": "# Code Review Agent Ты — Code Reviewer. Твоя задача — провести ревью изменений в текущем проекте. ## Входные данные Аргу",
+          "outcome": "done",
+          "project": "scripts",
+          "git_branch": "HEAD",
+          "started_at": "2026-06-19T01:54:56.974Z",
+          "ended_at": "2026-06-19T01:55:56.901Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "23ece2e2-1b3d-47cf-bc46-5dc0d8cb67dd",
+          "episode_number": 19
+        },
+        "values": {
+          "title": "https://github.com/gently-whitesnow/throne",
+          "outcome": "done",
+          "project": "mcp-grafana",
+          "git_branch": "HEAD",
+          "started_at": "2026-08-05T02:32:22.886Z",
+          "ended_at": "2026-08-05T02:34:21.933Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "23ece2e2-1b3d-47cf-bc46-5dc0d8cb67dd",
+          "episode_number": 25
+        },
+        "values": {
+          "title": "че делать мне я не понял",
+          "outcome": "done",
+          "project": "app",
+          "git_branch": "HEAD",
+          "started_at": "2026-08-05T02:48:14.020Z",
+          "ended_at": "2026-08-05T02:48:20.871Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "1af83bc7-09a4-4795-9a56-74a0b8d6286c",
+          "episode_number": 3
+        },
+        "values": {
+          "title": "начинай работу",
+          "outcome": "done",
+          "project": "7244f639974b42ba976115e3e7f7a819",
+          "git_branch": "HEAD",
+          "started_at": "2026-08-05T08:45:23.594Z",
+          "ended_at": "2026-08-05T08:53:48.709Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "1506b41b-daae-400c-a834-2ff3880a5d58",
+          "episode_number": 1
+        },
+        "values": {
+          "title": "Читай CONTEXT.md и CLAUDE.md, потом работай автономно. ЦЕЛЬ: пользователь хочет сегодня увидеть рабочие Telegram-топики ",
+          "outcome": "blocked",
+          "project": "job-hunt",
+          "git_branch": "main",
+          "started_at": "2026-08-16T06:09:07.072Z",
+          "ended_at": "2026-08-16T06:24:32.707Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "23ece2e2-1b3d-47cf-bc46-5dc0d8cb67dd",
+          "episode_number": 5
+        },
+        "values": {
+          "title": "да",
+          "outcome": "blocked",
+          "project": "person",
+          "git_branch": "HEAD",
+          "started_at": "2026-08-05T01:41:47.072Z",
+          "ended_at": "2026-08-05T01:45:26.253Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "23ece2e2-1b3d-47cf-bc46-5dc0d8cb67dd",
+          "episode_number": 6
+        },
+        "values": {
+          "title": "еще прол битые пукти тоже",
+          "outcome": "blocked",
+          "project": "mcp-grafana",
+          "git_branch": "HEAD",
+          "started_at": "2026-08-05T01:45:39.886Z",
+          "ended_at": "2026-08-05T01:47:39.330Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "23ece2e2-1b3d-47cf-bc46-5dc0d8cb67dd",
+          "episode_number": 7
+        },
+        "values": {
+          "title": "# Code Review Agent Ты — Code Reviewer. Твоя задача — провести ревью изменений в текущем проекте. ## Входные данные Аргу",
+          "outcome": "done",
+          "project": "mcp-grafana",
+          "git_branch": "HEAD",
+          "started_at": "2026-08-05T01:47:39.398Z",
+          "ended_at": "2026-08-05T01:52:34.207Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "443261a2-4bd1-475b-ac40-a68480bb1021",
+          "episode_number": 1
+        },
+        "values": {
+          "title": "подтяни контекст нашей oss в графане щзаитем посмотри мои пр и мр далее открой ишью этого репозитория и начни 813",
+          "outcome": "blocked",
+          "project": "mcp-grafana",
+          "git_branch": "main",
+          "started_at": "2026-07-31T06:47:51.570Z",
+          "ended_at": "2026-07-31T08:08:57.465Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "443261a2-4bd1-475b-ac40-a68480bb1021",
+          "episode_number": 2
+        },
+        "values": {
+          "title": "# Code Review Agent Ты — Code Reviewer. Твоя задача — провести ревью изменений в текущем проекте. ## Входные данные Аргу",
+          "outcome": "done",
+          "project": "mcp-grafana",
+          "git_branch": "fix/1021-base-path-operational-endpoints",
+          "started_at": "2026-07-31T08:08:57.864Z",
+          "ended_at": "2026-07-31T08:11:51.917Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "443261a2-4bd1-475b-ac40-a68480bb1021",
+          "episode_number": 10
+        },
+        "values": {
+          "title": "а почему не фиксим то что сами завели?",
+          "outcome": "done",
+          "project": "mcp-grafana",
+          "git_branch": "fix/1021-base-path-operational-endpoints",
+          "started_at": "2026-07-31T08:48:50.841Z",
+          "ended_at": "2026-07-31T08:53:07.534Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "030b861c-4790-4b32-a0dd-40b2793fbadb",
+          "episode_number": 1
+        },
+        "values": {
+          "title": "claude doctor",
+          "outcome": "abandoned",
+          "project": "person",
+          "git_branch": "HEAD",
+          "started_at": "2026-08-05T07:40:14.228Z",
+          "ended_at": "2026-08-05T07:40:14.228Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "03442ee4-e8c5-4fb1-bfe1-0b173d024208",
+          "episode_number": 1
+        },
+        "values": {
+          "title": "=== Карта workspace === Корень workspace: /home/person/.throne/workspaces/intents/9a7eadfb3be04f11a8127e5cf02",
+          "outcome": "abandoned",
+          "project": "9a7eadfb3be04f11a8127e5cf02c451b",
+          "git_branch": "HEAD",
+          "started_at": "2026-08-10T01:37:54.555Z",
+          "ended_at": "2026-08-10T01:37:57.492Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "03442ee4-e8c5-4fb1-bfe1-0b173d024208",
+          "episode_number": 2
+        },
+        "values": {
+          "title": "Base directory for this skill: /home/person/.throne/workspaces/intents/9a7eadfb3be04f11a8127e5cf02c451b/.clau",
+          "outcome": "done",
+          "project": "9a7eadfb3be04f11a8127e5cf02c451b",
+          "git_branch": "HEAD",
+          "started_at": "2026-08-10T01:37:57.503Z",
+          "ended_at": "2026-08-10T01:50:21.371Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "03442ee4-e8c5-4fb1-bfe1-0b173d024208",
+          "episode_number": 3
+        },
+        "values": {
+          "title": "зови архитектора и создавай эпик нужно оценить сможем ли мы распознавать чеки насколько это будет дорого учитавая хостин",
+          "outcome": "blocked",
+          "project": "9a7eadfb3be04f11a8127e5cf02c451b",
+          "git_branch": "HEAD",
+          "started_at": "2026-08-10T01:52:41.768Z",
+          "ended_at": "2026-08-10T02:21:01.836Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "03442ee4-e8c5-4fb1-bfe1-0b173d024208",
+          "episode_number": 4
+        },
+        "values": {
+          "title": "<task-notification> <task-id>ae773a31c9e44fc7c</task-id> <tool-use-id>toolu_01HaqUKuatYq6g95yVTL8kt8</tool-use-id> <outp",
+          "outcome": "done",
+          "project": "9a7eadfb3be04f11a8127e5cf02c451b",
+          "git_branch": "HEAD",
+          "started_at": "2026-08-10T02:23:27.831Z",
+          "ended_at": "2026-08-10T02:28:02.138Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "03442ee4-e8c5-4fb1-bfe1-0b173d024208",
+          "episode_number": 5
+        },
+        "values": {
+          "title": "закоммить docs/adr и issues.jsonl",
+          "outcome": "done",
+          "project": "9a7eadfb3be04f11a8127e5cf02c451b",
+          "git_branch": "HEAD",
+          "started_at": "2026-08-10T02:32:24.736Z",
+          "ended_at": "2026-08-10T02:34:23.469Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "03442ee4-e8c5-4fb1-bfe1-0b173d024208",
+          "episode_number": 6
+        },
+        "values": {
+          "title": "прогони review и закрой 54z2",
+          "outcome": "abandoned",
+          "project": "Tarasusrus__simpleAI",
+          "git_branch": "HEAD",
+          "started_at": "2026-08-10T02:39:33.911Z",
+          "ended_at": "2026-08-10T02:39:36.775Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "03442ee4-e8c5-4fb1-bfe1-0b173d024208",
+          "episode_number": 7
+        },
+        "values": {
+          "title": "# Code Review Agent Ты — Code Reviewer. Твоя задача — провести ревью изменений в текущем проекте. ## Входные данные Аргу",
+          "outcome": "blocked",
+          "project": "Tarasusrus__simpleAI",
+          "git_branch": "HEAD",
+          "started_at": "2026-08-10T02:39:36.796Z",
+          "ended_at": "2026-08-10T02:44:52.132Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "03442ee4-e8c5-4fb1-bfe1-0b173d024208",
+          "episode_number": 8
+        },
+        "values": {
+          "title": "интент 9a7eadfb3be04f11a8127e5cf02c451b закрывается или нет?",
+          "outcome": "done",
+          "project": "Tarasusrus__simpleAI",
+          "git_branch": "HEAD",
+          "started_at": "2026-08-10T03:06:06.969Z",
+          "ended_at": "2026-08-10T03:06:31.170Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "03cbaa9e-cb8d-42a2-9fdf-e47fb5f253f8",
+          "episode_number": 1
+        },
+        "values": {
+          "title": "=== Карта workspace === Корень workspace: /home/person/.throne/workspaces/intents/f5ff102a88a1493ba05cb0116dc",
+          "outcome": "blocked",
+          "project": "f5ff102a88a1493ba05cb0116dce322a",
+          "git_branch": "HEAD",
+          "started_at": "2026-08-10T01:50:56.907Z",
+          "ended_at": "2026-08-10T01:55:16.930Z"
+        }
+      }
+    }
+  },
+  {
+    "object_mutation": {
+      "object_type": "Episode",
+      "create": {
+        "key": {
+          "session_id": "6da422ef-baa9-4a01-bfb5-9dd3f631871c",
+          "episode_number": 1
+        },
+        "values": {
+          "title": "autonomous-prompt.md",
+          "outcome": "blocked",
+          "project": "job-hunt",
+          "git_branch": "feature-job-hunt-core",
+          "started_at": "2026-08-03T02:08:33.197Z",
+          "ended_at": "2026-08-03T02:21:49.204Z"
         }
       }
     }

@@ -21,14 +21,14 @@
   случаи    вопросы с ожидаемым ответом. Второй прогон задаёт их с чистой
             сессии и смотрит, помогла память или нет.
 
-Запуск: python3 goldenset.py
+Запуск: python3 -m eval.goldenset
 """
 import argparse, hashlib, json, re
 from collections import defaultdict
 from pathlib import Path
 
-import understand as u
-from encoder import redact
+from pipeline import understand as u
+from infra.scrub import redact
 
 SPLIT = "2026-08-09"          # та же граница, что в holdout.py и в замерах
 TARGET = 100                  # размер набора
@@ -247,14 +247,46 @@ def script(cases, episodes):
     return turns
 
 
-def fixture(marked, episodes):
-    """Записи схемы, которыми набор наполняется, если хранилище пустое."""
-    import models
-    out = []
+def fixture(marked, episodes, cases=(), limit=None):
+    """Записи схемы, которыми набор наполняется, если хранилище пустое.
+
+    Наполняем тем, что случаи спрашивают, а не одним удобным видом. Факты
+    отвечают на fact, preference и external_resource; обстановка эпизода —
+    проект, ветка, исход — живёт на Episode, и без него десять случаев из ста
+    не могли пройти в принципе: прогон упирался в 89 из 100 по построению, и
+    разница половин мерялась об этот потолок.
+    """
+    from domain import models
+    facts = []
     for key, rec in sorted(marked.items(), key=lambda kv: repr(kv[0])):
         fact = rec["items"][-1]["fact"]
-        out.append(models.Fact(fact_type=fact[0], subject=anonymize(fact[1]),
-                               scope=fact[2], content=anonymize(fact[3])).mutation())
+        facts.append(models.Fact(fact_type=fact[0], subject=anonymize(fact[1]),
+                                 scope=fact[2], content=anonymize(fact[3])).mutation())
+    # Эпизоды кладём только те, на которые ссылаются случаи: весь архив сюда
+    # не нужен, а без ссылки эпизод в наборе никто не спросит.
+    wanted, seen = [], set()
+    for case in cases:
+        for source in case.get("source") or []:
+            eid = tuple(source)
+            if eid in seen or eid not in episodes:
+                continue
+            seen.add(eid)
+            wanted.append(eid)
+    out = facts[:limit] if limit else list(facts)
+    # Потолок стрижёт факты, но не эпизоды: их и так ровно столько, сколько
+    # спросили случаи, а срезав их, мы вернули бы непроходимый набор.
+    for eid in wanted:
+        ep = episodes[eid]
+        project = anonymize(Path(ep["cwd"]).name if ep["cwd"] else "unknown")
+        out.append(models.Episode(
+            session_id=anonymize(ep["session_id"]) or "unknown",
+            episode_number=ep["number"],
+            title=anonymize(" ".join(ep["request"].split())[:120]),
+            outcome=u.outcome_of(ep),
+            project=project,
+            git_branch=anonymize(ep["branch"]) or None,
+            started_at=ep["started_at"] or None,
+            ended_at=ep["ended_at"] or None).mutation())
     return out
 
 
@@ -319,8 +351,7 @@ def main():
     cases, marked, episodes = build(args.split, args.target)
     Path(args.out).write_text(json.dumps(cases, ensure_ascii=False, indent=2) + "\n",
                               encoding="utf-8")
-    used = {c["id"].split("-", 1)[1] for c in cases if c["kind"] != "absence"}
-    rows = [m for m in fixture(marked, episodes)][:400]
+    rows = fixture(marked, episodes, cases, limit=400)
     Path(args.fixture).write_text(json.dumps(rows, ensure_ascii=False, indent=2) + "\n",
                                   encoding="utf-8")
 

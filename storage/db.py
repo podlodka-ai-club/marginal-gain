@@ -15,7 +15,7 @@
 import dataclasses, hashlib, json, os, re, sqlite3, threading
 from pathlib import Path
 
-import models
+from domain import models
 
 DEFAULT_PATH = Path.home() / ".local" / "state" / "memory-encoder" / "memory.db"
 
@@ -113,6 +113,17 @@ def connect(where=None):
     return conn
 
 
+def like(term):
+    """Слово в образец для LIKE. `_` и `%` в вопросе — буквы, а не подстановка.
+
+    WORD пропускает подчёркивание в слова, а в LIKE оно совпадает с любым
+    одиночным символом: запрос про on_prompt.py находил заодно onXprompt.py.
+    """
+    for sign in ("\\", "%", "_"):
+        term = term.replace(sign, "\\" + sign)
+    return "%" + term + "%"
+
+
 def words(text):
     return [w for w in (m.group(0).lower() for m in WORD.finditer(text or ""))
             if w not in STOP]
@@ -150,8 +161,14 @@ class Repository:
         names = list(row)
         holes = ", ".join("?" * len(names))
         cols = ", ".join('"%s"' % n for n in names)
-        updates = ", ".join('"%s" = excluded."%s"' % (n, n)
-                            for n in names if n not in cls.KEY)
+        # Поля из EARLIEST держат самое раннее из виденного, а не последнее
+        # записанное. COALESCE с обеих сторон: пустое не должно выигрывать у
+        # заполненного, а MIN(x, NULL) в SQLite это NULL.
+        earliest = set(getattr(cls, "EARLIEST", ()))
+        updates = ", ".join(
+            ('"%s" = MIN(COALESCE("%s", excluded."%s"), COALESCE(excluded."%s", "%s"))'
+             % (n, n, n, n, n)) if n in earliest else ('"%s" = excluded."%s"' % (n, n))
+            for n in names if n not in cls.KEY)
         keys = ", ".join('"%s"' % n for n in cls.KEY)
         sql = 'INSERT INTO "%s" (%s) VALUES (%s) ON CONFLICT (%s) DO %s' % (
             _table(object_type), cols, holes, keys,
@@ -232,9 +249,9 @@ class Repository:
         found = []
         for object_type, fields in SEARCH.items():
             names = [name for name, _ in fields]
-            where = " OR ".join('"%s" LIKE ?' % name for name in names
-                                for _ in terms)
-            params = ["%%%s%%" % term for _ in names for term in terms]
+            where = " OR ".join('"%s" LIKE ? ESCAPE \'\\\'' % name
+                                for name in names for _ in terms)
+            params = [like(term) for _ in names for term in terms]
             with self.lock:
                 rows = self.conn.execute(
                     'SELECT * FROM "%s" WHERE %s LIMIT %d'

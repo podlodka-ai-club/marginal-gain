@@ -6,14 +6,43 @@
 бесполезен, он засоряет контекст агента и уводит его в сторону. Молчание это
 нормальный и частый исход.
 """
-import argparse, ast, json, re, sys
+import argparse, ast, json, os, re, signal, sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-import telemetry
-import xmem
+from infra import telemetry
+from storage import port
 
 LOG = Path.home() / ".local" / "state" / "memory-encoder" / "suggest-log.jsonl"
+
+# Срок в горячем пути. Держим его здесь, а не внешней командой: timeout(1)
+# есть не везде, и его отсутствие выглядело как молчаливый успех.
+HOOK_SECONDS = int(os.environ.get("XMEM_HOOK_SECONDS") or 10)
+
+
+class Overdue(Exception):
+    """Срок вышел. Подсказка опоздала и потому больше не нужна."""
+
+
+def deadline(seconds=None):
+    """Прервать себя по истечении срока. Возвращает функцию отмены.
+
+    SIGALRM есть не на всякой платформе; там, где его нет, работаем без
+    срока — это хуже, чем со сроком, но лучше, чем не работать вовсе.
+    """
+    if not hasattr(signal, "SIGALRM"):
+        return lambda: None
+
+    def ring(signum, frame):
+        raise Overdue()
+
+    was = signal.signal(signal.SIGALRM, ring)
+    signal.alarm(seconds if seconds is not None else HOOK_SECONDS)
+
+    def cancel():
+        signal.alarm(0)
+        signal.signal(signal.SIGALRM, was)
+    return cancel
 
 MIN_SCORE = 0.5      # ниже этого факт не подтверждён повторением, см. ADR 0002
 MAX_ITEMS = 5        # больше пяти внимание модели размазывается
@@ -151,15 +180,15 @@ def render(kept):
 
 @telemetry.traced("pipeline", lambda arg, out: {
     "kept": len(out[1]), "sent_chars": len(out[0]), "silent": not out[0]})
-def suggest(query, mode="single", min_score=MIN_SCORE):
-    answer = xmem.read(query, mode=mode)
+def suggest(query, mode="single", min_score=MIN_SCORE, door=None):
+    answer = (door or port.door()).read(query, mode=mode)
     kept = gate(pieces(answer), min_score=min_score)
     return render(kept) if kept else "", kept, answer
 
 
-def note_injection(session_id, text):
+def note_injection(session_id, text, door=None):
     """MemoryInjection: что подставили. Помогло ли, узнаем потом."""
-    xmem.write("\n".join([
+    (door or port.door()).write("\n".join([
         "MemoryInjection.",
         "session_id: %s" % (session_id or "unknown"),
         "injected_at: %s" % datetime.now(timezone.utc).isoformat(),
@@ -189,12 +218,18 @@ def main():
     else:
         query = args.query or sys.stdin.read()
 
+    # Одна дверь на чтение и на отметку: две открывали бы два пути наружу,
+    # и отметка могла лечь не туда, откуда читали.
+    door = port.door()
+    cancel = deadline() if args.hook else (lambda: None)
     try:
-        text, kept, raw = suggest(query, args.mode, args.min_score)
+        text, kept, raw = suggest(query, args.mode, args.min_score, door=door)
     except Exception:
         if args.hook:
             return          # молчим: подсказка не имеет права ломать разговор
         raise
+    finally:
+        cancel()
 
     LOG.parent.mkdir(parents=True, exist_ok=True)
     with LOG.open("a", encoding="utf-8") as fh:
@@ -206,7 +241,7 @@ def main():
     print(text)
     if not args.no_record:
         try:
-            note_injection(session_id, text)
+            note_injection(session_id, text, door=door)
         except Exception:
             pass
 

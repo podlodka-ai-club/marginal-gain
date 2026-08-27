@@ -14,8 +14,8 @@
 import dataclasses, json, re, threading
 from datetime import datetime, timezone
 
-import models
-import store
+from domain import models
+from storage import db
 
 _REPO = None
 _LOCK = threading.Lock()
@@ -37,7 +37,7 @@ def repository():
     global _REPO
     with _LOCK:
         if _REPO is None:
-            _REPO = store.Repository()
+            _REPO = db.Repository()
         return _REPO
 
 
@@ -138,4 +138,4 @@ def read(query, mode="single-answer", timeout=None):
 def schema(timeout=None):
     """Схема берётся из `models`, а не из сети: локально это тот же источник."""
     return {"objects": sorted(models.OBJECTS), "relations": sorted(models.RELATIONS),
-            "path": str(store.path()), "version": len(store.MIGRATIONS)}
+            "path": str(db.path()), "version": len(db.MIGRATIONS)}

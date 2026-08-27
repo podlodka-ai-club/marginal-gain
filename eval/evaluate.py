@@ -9,14 +9,14 @@
 под ней же. Поэтому «прошло 7 из 100» перестаёт быть единственным числом:
 видно, память ничего не нашла, или нашла и порог срезал.
 
-Замер включается переменной: MEM_TRACE=1 python3 evaluate.py
+Замер включается переменной: MEM_TRACE=1 python3 -m eval.evaluate
 """
 import argparse, json, time
 from collections import defaultdict
 from pathlib import Path
 
-import suggest
-import telemetry
+from pipeline import suggest
+from infra import telemetry
 
 CASES = Path(__file__).parent / "eval-cases.json"
 RESULTS = Path.home() / ".local" / "state" / "memory-encoder" / "eval-results.jsonl"
@@ -80,7 +80,7 @@ def main():
 
     path = Path(args.cases)
     if not path.exists():
-        print("нет файла сценариев %s — собери его: python3 goldenset.py" % path)
+        print("нет файла сценариев %s — собери его: python3 -m eval.goldenset" % path)
         return
     cases = json.loads(path.read_text(encoding="utf-8"))
     if args.only:

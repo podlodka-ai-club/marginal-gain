@@ -12,7 +12,7 @@
 from dataclasses import dataclass, fields
 from typing import ClassVar
 
-from encoder import redact
+from infra.scrub import redact
 
 DAYS = ("monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday")
 OUTCOMES = ("done", "abandoned", "blocked")
@@ -41,6 +41,12 @@ class Record:
     KEY: ClassVar[tuple] = ()
     REQUIRED: ClassVar[tuple] = ()
     ENUMS: ClassVar[dict] = {}
+
+    # Поля, которые при повторной записи не двигаются вперёд, а держат самое
+    # раннее из виденного. Разговор разложен по нескольким файлам архива, и
+    # запись собирается из того куска, что попался в пачку: обычное затирание
+    # уводило бы начало сессии на время последнего дописанного события.
+    EARLIEST: ClassVar[tuple] = ()
 
     def key(self):
         """Поля первичного ключа. По ним хранилище находит строку.
@@ -119,6 +125,7 @@ class Session(Record):
 
     OBJECT: ClassVar[str] = "Session"
     KEY: ClassVar[tuple] = ("session_id",)
+    EARLIEST: ClassVar[tuple] = ("started_at",)
     REQUIRED: ClassVar[tuple] = ("session_id",)
 
 

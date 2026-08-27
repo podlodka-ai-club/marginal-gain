@@ -13,7 +13,7 @@
 import argparse, contextlib, fcntl, json, os
 from pathlib import Path
 
-import save
+from pipeline import save
 
 STATE_DIR = Path.home() / ".local" / "state" / "memory-encoder"
 
@@ -79,14 +79,49 @@ def take(path=None):
     return taken
 
 
+def requeue(path, items, unfinished):
+    """Вернуть в очередь строки про недочитанные транскрипты.
+
+    Дописываем в живой файл, а не в подмену: подмену мы сейчас снимем, а хук
+    всё это время пишет именно в живой. Строку берём исходную — в ней есть и
+    разговор, и время, которые потребителю ещё пригодятся.
+    """
+    left = {str(p) for p in unfinished}
+    if not left:
+        return 0
+    target = Path(path) if path else QUEUE
+    back = [it for it in items if it.get("transcript_path") in left]
+    if not back:
+        return 0
+    target.parent.mkdir(parents=True, exist_ok=True)
+    with target.open("a", encoding="utf-8") as fh:
+        for it in back:
+            fh.write(json.dumps(it, ensure_ascii=False) + "\n")
+    return len(back)
+
+
 @contextlib.contextmanager
 def alone():
-    """Один проход по архиву за раз. Замок общий с хуком конца хода."""
+    """Один проход по архиву за раз. Отдаёт True, если замок достался.
+
+    Замок неблокирующий, и это важно. Прежний хук конца хода проверял занятость
+    сам, через `flock -n`, и просто не запускался. Когда проверка переехала
+    сюда с блокирующим LOCK_EX, пережившая ход запись стала собирать за собой
+    очередь фоновых процессов: каждый конец хода порождал ещё один, все ждали,
+    а дождавшись — по очереди разбирали один и тот же транскрипт.
+
+    Занято значит «уже разбирают». Ждать нечего: тот, кто держит замок,
+    разберёт и то, что мы собирались.
+    """
     STATE_DIR.mkdir(parents=True, exist_ok=True)
     with LOCK.open("a") as handle:
-        fcntl.flock(handle, fcntl.LOCK_EX)
         try:
-            yield
+            fcntl.flock(handle, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except (BlockingIOError, OSError):
+            yield False
+            return
+        try:
+            yield True
         finally:
             fcntl.flock(handle, fcntl.LOCK_UN)
 
@@ -101,8 +136,14 @@ def drain(path=None, limit=None, dry=True, extra=()):
     if dry:
         items = read_queue(path)
         files = transcripts(items) + [Path(p) for p in extra if Path(p).exists()]
-        return {"queued": len(items), "transcripts": len(files), "written": 0}
-    with alone():
+        return {"queued": len(items), "transcripts": len(files), "written": 0,
+                "unfinished": 0, "busy": False}
+    with alone() as mine:
+        if not mine:
+            # Разбирает кто-то другой. Очередь не трогаем вовсе: подменить её
+            # значит забрать работу у того, кто уже её делает.
+            return {"queued": 0, "transcripts": 0, "written": 0,
+                    "unfinished": 0, "busy": True}
         taken = take(path)
         items = read_queue(taken)
         files = transcripts(items)
@@ -110,11 +151,19 @@ def drain(path=None, limit=None, dry=True, extra=()):
             target = Path(name)
             if target.exists() and target not in files:
                 files.append(target)
-        sent = save.ingest(files, limit=limit, dry=False) if files else 0
-        # Потолок означает, что разобрано не всё. Файл подмены не трогаем.
-        if not (limit and sent >= limit) and taken.exists():
+        got = save.ingest(files, limit=limit, dry=False) if files else {"sent": 0,
+                                                                        "unfinished": []}
+        sent = got["sent"]
+        # Недочитанное возвращаем в живую очередь, и только потом снимаем
+        # подмену. Раньше при сработавшем потолке подмену не снимали вовсе, а
+        # take() не подменяет очередь, пока подмена лежит: один длинный
+        # транскрипт заклинивал очередь навсегда — хук в неё писал, читать её
+        # больше не приходил никто.
+        requeue(path, items, got["unfinished"])
+        if taken.exists():
             taken.unlink()
-    return {"queued": len(items), "transcripts": len(files), "written": sent}
+    return {"queued": len(items), "transcripts": len(files), "written": sent,
+            "unfinished": len(got["unfinished"]), "busy": False}
 
 
 def main():
@@ -127,9 +176,9 @@ def main():
                     help="разобрать ещё и этот транскрипт, помимо очереди")
     args = ap.parse_args()
     got = drain(args.queue, limit=args.limit, dry=args.dry, extra=args.transcript)
-    print("в очереди %d, разговоров %d, записано %d, режим %s"
+    print("в очереди %d, разговоров %d, записано %d, недочитано %d, режим %s"
           % (got["queued"], got["transcripts"], got["written"],
-             "холостой" if args.dry else "запись"))
+             got.get("unfinished", 0), "холостой" if args.dry else "запись"))
 
 
 if __name__ == "__main__":

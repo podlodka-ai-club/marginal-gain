@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Признаки модуля оценки в боевом коде. Запуск: python3 -m unittest test_features -v
+"""Признаки модуля оценки в боевом коде. Запуск: python3 -m unittest tests.test_features -v
 
 Глоссарий описывает 35 признаков, а посчитаны они только в research/lab/x7/feat.py —
 в исследовательском коде. Стенд меряет собственную копию формулы, боевой код про
@@ -15,11 +15,11 @@ from unittest import mock
 
 import numpy as np
 
-HERE = Path(__file__).resolve().parent
-sys.path.append(str(HERE / "research" / "lab" / "x7"))
+ROOT = Path(__file__).resolve().parent.parent
+sys.path.append(str(ROOT / "research" / "lab" / "x7"))
 
-import features
-import understand
+from domain import features
+from pipeline import understand
 
 
 class Formula(unittest.TestCase):

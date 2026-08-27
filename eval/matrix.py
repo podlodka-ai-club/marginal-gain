@@ -14,9 +14,9 @@
 журнал подсказок отводится в отдельный файл. Иначе вторая половина отвечает
 не из памяти, а из остатков первой.
 
-Запуск: MEM_TRACE=1 python3 matrix.py
+Запуск: MEM_TRACE=1 python3 -m eval.matrix
 """
-import argparse, importlib, json, os, time
+import argparse, json, os, time
 from collections import defaultdict
 from pathlib import Path
 
@@ -37,37 +37,34 @@ def load_env(path=".env"):
 
 
 def reset_session():
-    """Чистая сессия: ничто из прошлого прогона не должно дожить до следующего."""
-    import telemetry
+    """Чистая сессия: ничто из прошлого прогона не должно дожить до следующего.
+
+    Пути наружу закрывает сама дверь: перечисление руками уже забыло
+    storage.local, и его кэш соединения жил насквозь через обе половины.
+    """
+    from infra import telemetry
+    from storage import port
     telemetry.close()
     telemetry._COUNTS.clear()
     try:
-        import xmem_sdk
-        xmem_sdk.close()
+        port.close_all()
     except Exception:
         pass
 
 
-def reload_pipeline():
-    """Перечитываем модули: выключатель памяти читается при импорте.
-
-    Метку прогона проносим через перезагрузку: иначе половины сравнения
-    получают разные метки и отчёт по прогону распадается надвое.
-    """
-    import telemetry
-    run_id = telemetry.RUN_ID
-    import xmem, xmem_api, xmem_sdk, understand, suggest, evaluate
-    for mod in (telemetry, xmem_api, xmem_sdk, xmem, understand, suggest, evaluate):
-        importlib.reload(mod)
-    telemetry.RUN_ID = run_id
-    return suggest, evaluate
-
-
 def run_phase(phase, cases, disabled, mode, min_score):
+    """Половину выбираем окружением. Перезагружать модули больше не нужно.
+
+    Раньше выключатель памяти читался при импорте двери, и сменить половину
+    можно было только importlib.reload — с ним же уезжала метка прогона, и
+    её приходилось проносить руками. Теперь путь наружу выбирается при
+    вызове door(), и перезагружать нечего.
+    """
     os.environ["XMEM_DISABLED"] = "1" if disabled else ""
     reset_session()
-    suggest, evaluate = reload_pipeline()
-    import telemetry
+    from eval import evaluate
+    from pipeline import suggest
+    from infra import telemetry
 
     rows = []
     started = time.time()
@@ -172,7 +169,7 @@ def main():
                                   encoding="utf-8")
         print("\nпострочный итог -> %s" % args.out)
 
-    import telemetry
+    from infra import telemetry
     if telemetry.ENABLED and Path(telemetry.LOG).exists():
         rows = telemetry.read_log(telemetry.LOG)
         for phase in (BASELINE, ACTIVE):

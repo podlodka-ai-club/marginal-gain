@@ -6,7 +6,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 try:
-    from drain import QUEUE          # адрес очереди задаёт её потребитель
+    from pipeline.drain import QUEUE          # адрес очереди задаёт её потребитель
 except Exception:
     # Тот же адрес и та же переменная, что у потребителя. Иначе при сбое
     # импорта производитель и потребитель разошлись бы по разным файлам,
@@ -21,7 +21,7 @@ def main():
         return
     sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
     try:
-        from encoder import redact
+        from infra.scrub import redact
     except Exception:
         redact = lambda s: s
     now = datetime.now(timezone.utc)
