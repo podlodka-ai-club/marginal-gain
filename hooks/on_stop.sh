@@ -7,6 +7,7 @@
 # Зовём потребителя очереди, а не сохранение напрямую: иначе очередь, которую
 # наполняет хук на сообщение человека, так и остаётся непрочитанной.
 source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
+live || { cat >/dev/null; exit 0; }
 PAYLOAD=$(cat)
 TRANSCRIPT=$(printf '%s' "$PAYLOAD" | python3 -c \
   "import json,sys; print((json.load(sys.stdin).get('transcript_path') or ''))" 2>/dev/null)

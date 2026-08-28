@@ -121,7 +121,7 @@ class TestHooksDoNotDependOnAbsentTools(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             base = Path(tmp) / "memory.db"
             env = dict(os.environ, XMEM_BACKEND="local", XMEM_LOCAL_PATH=str(base),
-                       PYTHONPATH=str(HERE))
+                       PYTHONPATH=str(HERE), XMEM_LIVE="1")
             seed = ("import os,sys; sys.path.insert(0,%r);\n"
                     "from storage import local\n"
                     "from domain import models\n"

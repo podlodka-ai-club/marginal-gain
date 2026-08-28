@@ -8,6 +8,7 @@
 # Ошибки уводим в журнал, а не в /dev/null: хук обязан молчать в разговоре,
 # но не обязан молчать вообще.
 source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
+live || { cat >/dev/null; exit 0; }
 PAYLOAD=$(cat)
 echo "$PAYLOAD" | python3 -m pipeline.suggest --hook 2>>"$STATE_DIR/suggest.log"
 exit 0

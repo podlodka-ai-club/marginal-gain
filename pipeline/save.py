@@ -11,7 +11,7 @@
 
 Текстовый путь остался запасным: консоль структурной записи не умеет.
 """
-import argparse, json
+import argparse, json, os
 from pathlib import Path
 
 from domain import models
@@ -23,18 +23,43 @@ from archive.transcripts import TRANSCRIPTS, read_new, when
 STATE = Path.home() / ".local" / "state" / "memory-encoder" / "save-state.json"
 
 
+def state_path():
+    """Книжка учёта своя у каждого хранилища.
+
+    Отметка говорит только «докуда файл разобран», и одна на всех она значит
+    «разобран для одного — считается за всех». С тех пор как ход пишет в
+    локальную базу, а ручной прогон уходит в сеть, общая отметка кормила бы
+    только первого: хук срабатывает каждые несколько минут и выигрывает эту
+    гонку всегда, а сетевой прогон приходил бы к дочитанному архиву.
+
+    Имя хранилища читается при вызове, а не при импорте: путь наружу тоже
+    выбирается в момент вызова door(), и книжка обязана идти за ним.
+    """
+    name = (os.environ.get("XMEM_BACKEND") or "cli").strip().lower() or "cli"
+    return STATE.with_name("%s-%s%s" % (STATE.stem, name, STATE.suffix))
+
+
 def load_state():
-    state = json.loads(STATE.read_text()) if STATE.exists() else {}
+    """Отметки хранилища, а при их отсутствии — прежняя общая книжка.
+
+    Наследство читается, но не переписывается: первая же запись ляжет в свой
+    файл. Иначе разделение отметок означало бы, что архив разбирают заново с
+    начала — сорок две тысячи событий по второму разу.
+    """
+    target = state_path()
+    source = target if target.exists() else STATE
+    state = json.loads(source.read_text()) if source.exists() else {}
     state.setdefault("files", {})
     state.setdefault("sessions", {})
     return state
 
 
 def save_state(state):
-    STATE.parent.mkdir(parents=True, exist_ok=True)
-    tmp = STATE.with_suffix(".tmp")
+    target = state_path()
+    target.parent.mkdir(parents=True, exist_ok=True)
+    tmp = target.with_suffix(".tmp")
     tmp.write_text(json.dumps(state, indent=1))
-    tmp.replace(STATE)
+    tmp.replace(target)
 
 
 def event_of(item):
