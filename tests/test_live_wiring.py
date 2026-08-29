@@ -12,6 +12,7 @@ from unittest import mock
 
 os.environ.setdefault("XMEM_INSTANCE_ID", "test-instance")
 
+from domain import marks
 from pipeline import save
 
 HERE = Path(__file__).resolve().parent.parent
@@ -364,7 +365,11 @@ class TestReadingKeepsItsDeadline(unittest.TestCase):
                                  text=True, timeout=60)
             spent = time.time() - started
             self.assertEqual(got.returncode, 0)
-            self.assertEqual(got.stdout.strip(), "", "опоздавшая подсказка всё же заговорила")
+            # Просьба разметить факты уходит в запрос и при опоздавшей памяти:
+            # она подмешивается до чтения и от его исхода не зависит. Всё
+            # остальное — молчание: опоздавшая подсказка не нужна.
+            said = got.stdout.replace(marks.ask(), "").strip()
+            self.assertEqual(said, "", "опоздавшая подсказка всё же заговорила")
             self.assertLess(spent, 15, "хук держал ход %.1f с вместо срока" % spent)
 
 

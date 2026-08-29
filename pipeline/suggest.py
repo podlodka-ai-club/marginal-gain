@@ -11,6 +11,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from infra import telemetry
+from pipeline import prompt
 from storage import port
 
 LOG = Path.home() / ".local" / "state" / "memory-encoder" / "suggest-log.jsonl"
@@ -215,6 +216,14 @@ def main():
         query, session_id = payload.get("prompt") or "", payload.get("session_id")
         if not query.strip():
             return
+        # Просьба разметить факты уходит в запрос до всякой работы с памятью:
+        # память умеет молчать, падать и опаздывать, а просьба не должна
+        # зависеть ни от одного из этих исходов. Текст тот же самый, что у
+        # pipeline.prompt: одна строка на всех, кто подмешивает её к запросу.
+        try:
+            print(prompt.text())
+        except Exception:
+            pass
     else:
         query = args.query or sys.stdin.read()
 

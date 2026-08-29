@@ -8,7 +8,7 @@
 import argparse
 from pathlib import Path
 
-from domain import features
+from domain import features, marks
 from domain.measure import score_of
 from storage import port
 from archive.transcripts import DAYS, TRANSCRIPTS, episodes_from_file, parse_time
@@ -20,7 +20,22 @@ from infra.scrub import redact
 # `import understand as u`, и ломать его переносом незачем.
 __all__ = ["NOT_CODE", "PREF_TOPICS", "facts_of", "fact_key", "episodes_from_file",
            "outcome_of", "render_episode", "weigh", "features_of", "score_of",
-           "render_fact", "parse_time"]
+           "render_fact", "parse_time", "marked_or_guessed"]
+
+
+def marked_or_guessed(ep):
+    """Факты эпизода с их ключами: сперва разметка модели, иначе шаблоны.
+
+    Разметку предпочитаем не из веры, а из устройства: её ключ назвала модель,
+    а шаблон ключ угадывает. Смешивать оба источника в одном эпизоде нельзя —
+    один и тот же факт пришёл бы дважды под разными ключами и удвоил бы себе
+    подтверждения. Пока разметки в архиве нет, работают прежние правила, и
+    цифра по размеченным копится только вперёд.
+    """
+    facts, dropped = marks.facts_of(ep)
+    if facts:
+        return [(fact, marks.key(fact)) for fact in facts], dropped
+    return [(fact, fact_key(*fact)) for fact in facts_of(ep)], dropped
 
 
 def outcome_of(ep):
@@ -73,8 +88,8 @@ def weigh(files):
     for path in files:
         for ep in episodes_from_file(path):
             project = Path(ep["cwd"]).name if ep["cwd"] else "unknown"
-            for fact in facts_of(ep):
-                rec = seen[fact_key(*fact)]
+            for fact, key in marked_or_guessed(ep)[0]:
+                rec = seen[key]
                 rec["n"] += 1
                 rec["projects"].add(project)
                 if ep["ended_at"] > rec["last"]:
@@ -118,7 +133,7 @@ def main():
     newest = max((r["last"] for r in weights.values() if r["last"]), default="")
 
     door = port.door()
-    eps = fcts = skipped = 0
+    eps = fcts = skipped = lost = 0
     for path in files:
         for ep in episodes_from_file(path):
             if args.limit and eps + fcts >= args.limit:
@@ -130,10 +145,12 @@ def main():
             if args.verbose:
                 title = text.split("title: ")[1].splitlines()[0]
                 print("EPISODE %d %s | %s" % (ep["number"], outcome_of(ep), title[:70]))
-            for fact in facts_of(ep):
+            found, dropped = marked_or_guessed(ep)
+            lost += sum(dropped.values())     # разметка была, но писать её нельзя
+            for fact, key in found:
                 if args.limit and eps + fcts >= args.limit:
                     break
-                rec = weights[fact_key(*fact)]
+                rec = weights[key]
                 score = score_of(rec, newest)
                 if score < args.min_score:
                     skipped += 1
@@ -146,8 +163,8 @@ def main():
                     print("   FACT %.2f [%s/%s] x%d %s %s"
                           % (score, fact[0], fact[2], rec["n"], fact[3][:80],
                              " ".join("%s=%.3f" % (k, v) for k, v in feats.items())))
-    print("эпизодов %d, фактов %d, отсеяно порогом %d, режим %s"
-          % (eps, fcts, skipped, "холостой" if args.dry else "запись"))
+    print("эпизодов %d, фактов %d, отсеяно порогом %d, отброшено разметкой %d, режим %s"
+          % (eps, fcts, skipped, lost, "холостой" if args.dry else "запись"))
 
 
 if __name__ == "__main__":
