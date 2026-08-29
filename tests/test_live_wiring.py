@@ -48,7 +48,8 @@ def registered(event):
 # Наши хуки по именам. Опознавать их по пути этого клона нельзя: соседние
 # хуки в тех же настройках записаны через `~`, и стоит записать так же наш —
 # проверка скажет «точка свободна» о занятой точке.
-MINE = ("on_prompt_queue.sh", "on_prompt_read.sh", "on_stop.sh", "on_prompt.py")
+MINE = ("on_prompt_queue.sh", "on_prompt_read.sh", "on_stop.sh", "on_prompt.py",
+        "on_message_display.sh")
 
 
 def ours(commands):
@@ -95,10 +96,21 @@ class TestPointsAreTaken(unittest.TestCase):
         self.assertTrue(any("on_stop.sh" in c for c in commands),
                         "точка Stop не зовёт запись: %r" % commands)
 
+    def test_the_printing_of_the_answer_calls_cutting(self):
+        """Без занятой точки печати служебный блок видит человек.
+
+        Точка есть только у этого харнесса начиная с 2.1.152, и это
+        единственное место, где вывод ещё можно тронуть: Stop срабатывает,
+        когда ответ уже на экране.
+        """
+        commands = ours(registered("MessageDisplay"))
+        self.assertTrue(any("on_message_display.sh" in c for c in commands),
+                        "точка MessageDisplay не зовёт срезание: %r" % commands)
+
     def test_registered_commands_point_at_files_that_exist(self):
         """Запись в настройках, ведущая в пустоту, молчит так же, как её отсутствие."""
         missing = []
-        for event in ("UserPromptSubmit", "Stop"):
+        for event in ("UserPromptSubmit", "Stop", "MessageDisplay"):
             for command in ours(registered(event)):
                 target = where(command)
                 if target is None or not target.exists():

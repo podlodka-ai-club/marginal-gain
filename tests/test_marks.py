@@ -21,7 +21,7 @@ os.environ.setdefault("XMEM_INSTANCE_ID", "test-instance")
 
 from domain import marks, models
 from infra import config
-from pipeline import prompt, understand
+from pipeline import display, prompt, understand
 
 HERE = Path(__file__).resolve().parent.parent
 HOOKS = HERE / "hooks"
@@ -319,6 +319,120 @@ class TestHumanNeverSeesTheBlock(unittest.TestCase):
         tail = marks.Tail()
         got = "".join(tail.feed(part) for part in ("Готово, ", "поправил ", "файл."))
         self.assertEqual(got + tail.close(), "Готово, поправил файл.")
+
+
+class TestDisplayHookCutsTheBlockOnScreen(unittest.TestCase):
+    """Точка печати. Проверяем хук целиком, от json на входе до json на выходе.
+
+    Проверять один питон мало: решение «звать или не звать» принимает bash, и
+    закрытые ворота выглядят снаружи ровно как исправная работа.
+    """
+
+    def run_hook(self, home, delta, message_id="m1", index=1, final=False, **env):
+        payload = json.dumps({"turn_id": "t1", "message_id": message_id,
+                              "index": index, "final": final, "delta": delta})
+        full = dict(os.environ, HOME=str(home), XMEM_LIVE="1", PYTHONPATH=str(HERE))
+        full.update(env)
+        got = subprocess.run(["bash", str(HOOKS / "on_message_display.sh")],
+                             input=payload, env=full, capture_output=True,
+                             text=True, timeout=60, cwd=str(HERE))
+        self.assertEqual(got.returncode, 0, got.stderr[-300:])
+        return got.stdout.strip()
+
+    def shown(self, out):
+        """Что хук велел напечатать. Пустой вывод значит «печатай как было»."""
+        if not out:
+            return None
+        return json.loads(out)["hookSpecificOutput"]["displayContent"]
+
+    def test_block_never_reaches_the_screen_and_plain_text_is_untouched(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            first = self.shown(self.run_hook(tmp, "Готово.\n%s\n" % marks.XMD1_BEGIN))
+            inside = self.shown(self.run_hook(tmp, json.dumps(UNIT) + "\n", index=2))
+            last = self.shown(self.run_hook(tmp, "%s\n" % marks.XMD1_END,
+                                            index=3, final=True))
+            after = self.shown(self.run_hook(tmp, "обычный текст\n",
+                                             message_id="m2", index=0))
+        self.assertEqual(first, "Готово.\n")
+        self.assertEqual(inside, "")
+        self.assertEqual(last, "")
+        # Дельта без маркеров решения не требует: молчание печатает исходное.
+        self.assertIsNone(after, "хук вмешался в обычный текст")
+
+    def test_the_switch_turns_cutting_off(self):
+        """Рубильник: блок показывается целиком, разбор при этом не меняется."""
+        with tempfile.TemporaryDirectory() as tmp:
+            out = self.run_hook(tmp, "Готово.\n%s\n" % marks.XMD1_BEGIN,
+                                XMEM_HIDE_MARKS="0")
+            self.assertEqual(out, "", "рубильник не выключил срезание")
+            state = Path(tmp) / ".local/state/memory-encoder/hide-marks"
+            state.parent.mkdir(parents=True, exist_ok=True)
+            state.write_text("0\n")
+            out = self.run_hook(tmp, "Готово.\n%s\n" % marks.XMD1_BEGIN)
+            self.assertEqual(out, "", "файл-рубильник не выключил срезание")
+
+    def test_the_switch_is_read_before_python_is_spawned(self):
+        """Выключенное срезание не должно стоить запуска интерпретатора.
+
+        Проверка поведения этого не ловит: питон читает тот же рубильник и
+        молчит сам, поэтому «ничего не напечатано» выходит и тогда, когда
+        bash-проверку убрали вовсе. Смотрим не на вывод, а на то, звали ли
+        питон: точка печати срабатывает по разу на порцию строк ответа.
+        """
+        with tempfile.TemporaryDirectory() as tmp:
+            stub, spy = Path(tmp) / "bin", Path(tmp) / "python-was-called"
+            stub.mkdir()
+            (stub / "python3").write_text("#!/bin/sh\ntouch %s\nexit 0\n" % spy)
+            (stub / "python3").chmod(0o755)
+            self.run_hook(tmp, "Готово.\n%s\n" % marks.XMD1_BEGIN,
+                          XMEM_HIDE_MARKS="0",
+                          PATH="%s:%s" % (stub, os.environ["PATH"]))
+            self.assertFalse(spy.exists(), "рубильник выключен, а питон всё равно звали")
+
+    def test_python_half_reads_the_switch_on_its_own(self):
+        """Второй слой рубильника: питон зовут и напрямую, не только из bash.
+
+        В хуке bash отсекает раньше, поэтому проверка через него про питонью
+        половину не говорит ничего. Обвес, который берёт `pipeline.display`
+        сам, обязан слушаться того же рубильника.
+        """
+        payload = {"turn_id": "t", "message_id": "m9", "index": 1, "final": False,
+                   "delta": "Готово.\n%s\n" % marks.XMD1_BEGIN}
+        with tempfile.TemporaryDirectory() as tmp:
+            with mock.patch.object(config, "STATE_DIR", Path(tmp)), \
+                 mock.patch.object(display, "STATE", Path(tmp) / "display"):
+                with mock.patch.dict(os.environ, {"XMEM_HIDE_MARKS": "0"}):
+                    self.assertIsNone(display.answer(payload))
+                with mock.patch.dict(os.environ, {"XMEM_HIDE_MARKS": "1"}):
+                    got = display.answer(payload)
+                self.assertEqual(got["hookSpecificOutput"]["displayContent"], "Готово.\n")
+
+    def test_closed_gate_leaves_the_screen_alone(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            out = self.run_hook(tmp, "Готово.\n%s\n" % marks.XMD1_BEGIN,
+                                XMEM_LIVE="0")
+        self.assertEqual(out, "", "хук работает при закрытых воротах")
+
+    def test_a_broken_python_does_not_break_the_screen(self):
+        """Питон падает — на экран уходит исходная дельта, а не мусор."""
+        with tempfile.TemporaryDirectory() as tmp:
+            stub = Path(tmp) / "bin"
+            stub.mkdir()
+            (stub / "python3").write_text("#!/bin/sh\necho boom >&2\nexit 1\n")
+            (stub / "python3").chmod(0o755)
+            out = self.run_hook(tmp, "Готово.\n%s\n" % marks.XMD1_BEGIN,
+                                PATH="%s:%s" % (stub, os.environ["PATH"]))
+        self.assertEqual(out, "", "сломанный питон заговорил в вывод")
+
+    def test_state_of_an_open_block_lives_between_calls(self):
+        """Хук на каждую дельту запускается заново; «внутри блока» — на диске."""
+        with tempfile.TemporaryDirectory() as tmp:
+            self.run_hook(tmp, "%s\n" % marks.XMD1_BEGIN)
+            left = list((Path(tmp) / ".local/state/memory-encoder/display").iterdir())
+            self.assertEqual(len(left), 1, "отметка об открытом блоке не легла")
+            self.run_hook(tmp, "%s\n" % marks.XMD1_END, index=2, final=True)
+            left = list((Path(tmp) / ".local/state/memory-encoder/display").iterdir())
+            self.assertEqual(left, [], "отметка осталась после конца блока")
 
 
 class TestDroppedUnitsAreCounted(unittest.TestCase):
