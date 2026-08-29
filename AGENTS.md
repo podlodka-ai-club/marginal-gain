@@ -5,23 +5,25 @@
 
 ## Рубильники
 
+Всё переставляется одной командой; она же показывает, откуда взято значение.
+
 ```bash
-# где память живая (нет файла — молчим везде)
-cat ~/.local/state/memory-encoder/live-projects
+./bin/xmem                 # состояние целиком
+./bin/xmem live off        # заглушить все хуки во всех проектах
+./bin/xmem here add        # сделать текущий каталог живым
+./bin/xmem backend local   # ход пишет в SQLite (умолчание), sdk — в xmemory
+./bin/xmem marks show      # показывать служебный блок на экране
+./bin/xmem scheme xmd1     # схема разметки: просьба и маппер парой
+```
 
-touch ~/.local/state/memory-encoder/off              # заглушить всё разом
-rm    ~/.local/state/memory-encoder/off              # вернуть как было
+Окружение сильнее файла и потому сильнее команды — на один запуск:
 
-echo local > ~/.local/state/memory-encoder/backend   # ход пишет в SQLite (умолчание)
-echo sdk   > ~/.local/state/memory-encoder/backend   # ход уходит в xmemory
-rm           ~/.local/state/memory-encoder/backend   # сбросить к умолчанию
-
-XMEM_LIVE=0 …          # заглушить один запуск, XMEM_LIVE=1 — включить
-XMEM_BACKEND=sdk …     # путь наружу на один запуск, сильнее файла
+```bash
+XMEM_LIVE=0 …          # заглушить, XMEM_LIVE=1 — включить
+XMEM_BACKEND=sdk …     # путь наружу
+XMEM_HIDE_MARKS=0 …    # показать служебный блок
+XMEM_MARKS=xmd1 …      # схема разметки
 XMEM_HOOK_SECONDS=10   # срок чтения в горячем пути
-XMEM_MARKS=xmd1        # схема разметки фактов, файл — .../marks
-XMEM_HIDE_MARKS=0      # показать служебный блок на экране, файл — .../hide-marks
-
 ```
 
 Порядок силы: окружение сильнее файла, файл сильнее умолчания. Полная таблица

@@ -22,7 +22,8 @@ HIDE="${XMEM_HIDE_MARKS:-}"
 if [ -z "$HIDE" ] && [ -f "$STATE_DIR/hide-marks" ]; then
   HIDE="$(head -n 1 "$STATE_DIR/hide-marks" | tr -d '[:space:]')"
 fi
-case "$HIDE" in 0|no|off) cat >/dev/null; exit 0 ;; esac
+# Те же слова «нет», что понимает infra/config.SHOW.
+case "$HIDE" in 0|no|off|show|false) cat >/dev/null; exit 0 ;; esac
 
 PAYLOAD=$(cat)
 
