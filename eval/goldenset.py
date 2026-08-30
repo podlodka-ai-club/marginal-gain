@@ -70,8 +70,12 @@ def collect(files):
                 continue
             eid = (ep["session_id"], ep["number"])
             episodes[eid] = ep
+            # Проект кладём рядом с фактом: у факта о правке подпись это путь
+            # файла, а не имя проекта, и спросить проект больше не у кого.
+            project = Path(ep["cwd"]).name if ep["cwd"] else "unknown"
             for fact in u.facts_of(ep):
-                occ[u.fact_key(*fact)].append({"eid": eid, "day": day, "fact": fact})
+                occ[u.fact_key(*fact)].append({"eid": eid, "day": day, "fact": fact,
+                                               "project": project})
     return occ, episodes
 
 
@@ -99,14 +103,15 @@ def sources(rec):
 
 def case_fact(key, rec):
     """Спрашиваем про проект, ждём путь файла, который в нём правили."""
-    fact = rec["items"][-1]["fact"]
+    item = rec["items"][-1]
+    fact = item["fact"]
     path = anonymize(file_of(fact[3]))
     if not path or "/" not in path:
         return None
     return {
         "id": "fact-%s" % short(key),
         "kind": "fact",
-        "query": "Какие файлы правились в проекте %s?" % anonymize(fact[1]),
+        "query": "Какие файлы правились в проекте %s?" % anonymize(item["project"]),
         "expect": [Path(path).name],
         "forbid": [],
         "repeated": rec["repeated"],

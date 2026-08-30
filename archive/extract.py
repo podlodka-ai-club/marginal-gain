@@ -67,9 +67,21 @@ def preferences(ep):
 
 
 def edited_files(ep):
-    """Правка файла — состояние проекта. Наши служебные пути не в счёт."""
+    """Правка файла — состояние проекта. Наши служебные пути не в счёт.
+
+    Подпись факта — путь файла, а не имя проекта. Подпись это первичный ключ
+    строки в хранилище: подписав файл проектом, мы получали одну строку на весь
+    проект, и каждая следующая правка затирала предыдущую. Разбор всего архива
+    2026-08-31 в пустую базу: 402 разных файла, 40 проектов — на прежней подписи
+    доезжало 39 строк, на этой доезжают все 402.
+
+    Проект из факта не пропал: он лежит в поле `project` записи (см.
+    `understand.fact_of`) и назван словами в содержании. Поиск взвешивает
+    `project` наравне с темой, поэтому вопрос про проект находит его файлы
+    по-прежнему.
+    """
     project, request = _project(ep), _request(ep)
-    return [("project_state", project, "project",
+    return [("project_state", target, "project",
              "В проекте %s правился файл %s ради задачи: %s"
              % (project, target, request[:200]))
             for target in ep["files"][:15]
@@ -110,9 +122,15 @@ RULES = {"preferences": preferences, "edited_files": edited_files,
 
 
 def facts_of(ep):
-    """Факты эпизода по всем известным правилам. Секреты чистим один раз."""
+    """Факты эпизода по всем известным правилам. Секреты чистим один раз.
+
+    Тема чистится наравне с содержанием: она стала путём файла, а путь бывает
+    с секретом внутри. Запись всё равно вычистит ключ на выходе
+    (`models.Record.key`), и не почисти мы тему здесь — мера считала бы узел
+    по одному ключу, а хранилище хранило бы его под другим.
+    """
     found = [fact for name in NAMES for fact in RULES[name](ep)]
-    return [(t, s, sc, redact(c)) for t, s, sc, c in found]
+    return [(t, redact(s), sc, redact(c)) for t, s, sc, c in found]
 
 
 def fact_key(fact_type, subject, scope, content):
@@ -122,5 +140,5 @@ def fact_key(fact_type, subject, scope, content):
     if fact_type == "preference":
         return ("pref", subject)   # subject это тема, она и есть ключ
     if "правился файл" in content:
-        return ("file", subject, content.split("правился файл ")[-1].split(" ради")[0])
+        return ("file", subject)   # subject это путь файла, он и есть ключ
     return ("other", subject, content[:60])

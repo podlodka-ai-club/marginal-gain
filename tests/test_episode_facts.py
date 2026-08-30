@@ -130,9 +130,9 @@ class Spy:
         """Сколько разных связей эпизод — факт должно получиться из записанного.
 
         Ключ факта — тип, тема и охват, содержание в него не входит. Два факта
-        одного эпизода про один и тот же проект — это одна строка и одна связь,
-        а не две. Считать связи по числу фактов значит требовать от базы того,
-        чего схема не обещала.
+        одного эпизода с общей темой — например два препятствия одного проекта —
+        это одна строка и одна связь, а не две. Считать связи по числу фактов
+        значит требовать от базы того, чего схема не обещала.
         """
         out = set()
         for batch, _ in self.batches:
@@ -385,17 +385,17 @@ class TestTheReportKeepsSecrets(unittest.TestCase):
                 self.assertNotIn(secret, " ".join(x or "" for x in row))
 
 
-class TestFactsWithOneKeyCollapse(unittest.TestCase):
-    """Ключ факта не знает про содержание. Схлопывание надо видеть, а не гадать.
+class TestFactsOfDifferentFilesStayApart(unittest.TestCase):
+    """Ключ факта не знает про содержание — знать его должна подпись.
 
-    Правка трёх файлов в одном эпизоде даёт три факта с одним ключом
-    `project_state|проект|project`: в базе останется одна строка, последняя.
-    Это свойство схемы, а не записи, и трогать ключ здесь нельзя —
-    `Association.source_key` адресует факт той же строкой. Проверка стоит,
-    чтобы счётчик прохода и содержимое базы расходились явно.
+    Правка двух файлов в одном эпизоде даёт два факта, и подписаны они путями
+    файлов, а не проектом: в базе две строки. Раньше подписью служило имя
+    проекта, обе правки ложились в одну строку, и вторая затирала первую.
+    Свойствами это меряется в `tests/test_fact_identity.py`, здесь стоит
+    один пример — чтобы счётчик прохода и содержимое базы сверялись явно.
     """
 
-    def test_three_edits_of_one_episode_become_one_row(self):
+    def test_two_edits_of_one_episode_become_two_rows(self):
         shape = [("разговор-1", [{"request": "Посмотри, что там с базой",
                                   "files": ["%s/db.py" % CWD, "%s/port.py" % CWD],
                                   "reply": "Готово.", "error": ""}])]
@@ -404,9 +404,32 @@ class TestFactsWithOneKeyCollapse(unittest.TestCase):
             got = digest(archive(tmp, shape), spy)
             keys = {tuple(r.key().items()) for r in spy.records(models.Fact)}
             self.assertEqual(got["facts"], 2, "правки перестали давать по факту")
-            self.assertEqual(len(keys), 1, "ключ факта стал зависеть от содержания")
+            self.assertEqual(len(keys), 2, "два файла снова делят одну подпись")
+            self.assertEqual(counts(base)["Fact"], 2)
+            self.assertEqual(relations(base).get("episode_facts", 0), 2)
+
+    def test_one_key_still_means_one_row(self):
+        """Где подпись всё же общая, схлопывание остаётся — и это не случайность.
+
+        Препятствие подписано проектом: два разных препятствия одного проекта
+        это одна строка, последняя. Трогать ключ ради содержания нельзя —
+        `Association.source_key` адресует факт строкой `fact_type|subject|scope`.
+        Проверка держит границу задачи: свою подпись получил файл, а не всё
+        подряд.
+        """
+        shape = [("разговор-1", [{"request": "Посмотри, что там с базой",
+                                  "files": [], "reply": "Готово.",
+                                  "error": "FileNotFoundError: db.py"},
+                                 {"request": "Посмотри, что там с базой",
+                                  "files": [], "reply": "Готово.",
+                                  "error": "FileNotFoundError: port.py"}])]
+        with tempfile.TemporaryDirectory() as tmp, store(tmp) as base:
+            spy = Spy(port.door())
+            got = digest(archive(tmp, shape), spy)
+            keys = {tuple(r.key().items()) for r in spy.records(models.Fact)}
+            self.assertEqual(got["facts"], 2)
+            self.assertEqual(len(keys), 1, "ключ препятствия стал знать содержание")
             self.assertEqual(counts(base)["Fact"], 1)
-            self.assertEqual(relations(base).get("episode_facts", 0), 1)
 
 
 class TestTextDoorKeepsWorking(unittest.TestCase):
