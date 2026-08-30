@@ -2,8 +2,10 @@
 """Модуль 2, Понимание. Разбирает разговор на Episode и Fact из схемы xmemory.
 
 Наивно, без модели: границей эпизода считается сообщение человека, всё, что
-агент сделал до следующего сообщения, попадает в этот эпизод. Итог пишется
-текстом, из которого xmemory раскладывает узлы графа.
+агент сделал до следующего сообщения, попадает в этот эпизод. Итог уходит
+записями схемы: ключ эпизода и ключ факта задаём мы, и между ними ставится
+связь episode_facts. Дверь без структурной записи получает тот же итог
+прозой — её собирает та же запись схемы, см. render_episode.
 
 Разбор идёт по отметке о прочитанном, а не по всему архиву. Прежде каждый
 заход перепахивал все транскрипты целиком, и потому понимание звали руками:
@@ -13,11 +15,11 @@
 import argparse, contextlib, json
 from pathlib import Path
 
-from domain import features, marks
+from domain import features, marks, models
 from domain.measure import score_of
 from infra import locks
 from storage import port
-from archive.transcripts import DAYS, TRANSCRIPTS, episodes_from_file, parse_time
+from archive.transcripts import TRANSCRIPTS, episodes_from_file, parse_time, when
 from archive.extract import NOT_CODE, PREF_TOPICS, facts_of, fact_key
 from infra.scrub import redact
 
@@ -27,7 +29,8 @@ from infra.scrub import redact
 __all__ = ["NOT_CODE", "PREF_TOPICS", "facts_of", "fact_key", "episodes_from_file",
            "outcome_of", "render_episode", "weigh", "features_of", "score_of",
            "render_fact", "parse_time", "marked_or_guessed", "unread", "digest",
-           "read_file", "one_episode", "touched", "tail_of", "advance"]
+           "read_file", "one_episode", "touched", "tail_of", "advance",
+           "episode_of", "fact_of", "summary_of", "deliver"]
 
 # Своя книжка учёта: докуда архив разобран пониманием. Отметка сохранения не
 # годится — оно читает файл построчно, а понимание режет его на эпизоды.
@@ -163,35 +166,106 @@ def outcome_of(ep):
     return "abandoned"
 
 
-def render_episode(ep):
-    """Текст, из которого xmemory собирает Episode и связанные Event."""
-    started = parse_time(ep["started_at"])
-    project = Path(ep["cwd"]).name if ep["cwd"] else "unknown"
-    title = " ".join(ep["request"].split())[:80]
-    lines = [
-        "Episode %d of session %s." % (ep["number"], ep["session_id"]),
-        "title: %s" % title,
-        "project: %s" % project,
-        "working_directory: %s" % (ep["cwd"] or "unknown"),
-        "git_branch: %s" % (ep["branch"] or "none"),
-        "started_at: %s" % (ep["started_at"] or "unknown"),
-        "ended_at: %s" % (ep["ended_at"] or "unknown"),
-        "outcome: %s" % outcome_of(ep),
-    ]
-    if started:
-        lines.append("hour_of_day: %d" % started.hour)
-        lines.append("day_of_week: %s" % DAYS[started.weekday()])
-    summary = ["Человек попросил: %s" % " ".join(ep["request"].split())[:600]]
+def summary_of(ep):
+    """Пересказ эпизода одной строкой: просьба, что трогали, чем кончилось."""
+    out = ["Человек попросил: %s" % " ".join(ep["request"].split())[:600]]
     if ep["files"]:
-        summary.append("Правились файлы: %s." % ", ".join(ep["files"][:15]))
+        out.append("Правились файлы: %s." % ", ".join(ep["files"][:15]))
     if ep["commands"]:
-        summary.append("Запускались команды: %s." % "; ".join(ep["commands"][:10]))
+        out.append("Запускались команды: %s." % "; ".join(ep["commands"][:10]))
     if ep["errors"]:
-        summary.append("Упирались в: %s" % ep["errors"][0])
+        out.append("Упирались в: %s" % ep["errors"][0])
     if ep["replies"]:
-        summary.append("Итог: %s" % " ".join(ep["replies"][-1].split())[:600])
-    lines.append("summary: %s" % " ".join(summary))
+        out.append("Итог: %s" % " ".join(ep["replies"][-1].split())[:600])
+    return " ".join(out)
+
+
+def episode_of(ep):
+    """Запись Episode по схеме. Ключ — разговор плюс номер эпизода.
+
+    Разговор без идентификатора в архиве встречается, а половина ключа пустой
+    быть не может: зовём такой «unknown» — тем же словом и по той же причине,
+    что сохранение в save.session_of.
+    """
+    hour, day = when(ep["started_at"])
+    return models.Episode(
+        session_id=ep["session_id"] or "unknown",
+        episode_number=ep["number"],
+        title=" ".join(ep["request"].split())[:80],
+        summary=summary_of(ep),
+        outcome=outcome_of(ep),
+        project=Path(ep["cwd"]).name if ep["cwd"] else None,
+        working_directory=ep["cwd"] or None,
+        git_branch=ep["branch"] or None,
+        started_at=ep["started_at"] or None,
+        ended_at=ep["ended_at"] or None,
+        hour_of_day=hour,
+        day_of_week=day)
+
+
+def fact_of(ep, fact):
+    """Запись Fact по схеме. Ключ — тип, тема и охват; их назвали мы сами.
+
+    Раньше факт уходил прозой, и ключ ему выводил разборщик на той стороне.
+    Промах разборщика схлопывал разные факты в одну строку, и связать факт с
+    эпизодом было не по чему: ключ, которого мы не знаем, в связь не поставить.
+    """
+    fact_type, subject, scope, content = fact
+    return models.Fact(
+        fact_type=fact_type, subject=subject, scope=scope, content=content,
+        # Проект есть у проектного факта. Глобальный факт — про человека, а не
+        # про проект, и приписать ему проект мало того что неправда: поиск
+        # взвешивает поле project наравне с темой, и предпочтение всплывало бы
+        # первым на любой вопрос про этот проект. Текстовый путь поля project
+        # не пишет вовсе, см. render_fact.
+        project=(Path(ep["cwd"]).name if ep["cwd"] and scope != "global" else None),
+        updated_at=ep["ended_at"] or None)
+
+
+def render_episode(ep):
+    """Тот же эпизод прозой — для двери, которая структурной записи не умеет.
+
+    Собирается из той же записи схемы, что уходит структурой. Считай оба
+    описания порознь — они разъедутся молча, и хранилище перестанет сходиться
+    само с собой: половина эпизодов легла бы по одним полям, половина по другим.
+    """
+    record = episode_of(ep)
+    lines = [
+        "Episode %d of session %s." % (record.episode_number, record.session_id),
+        "title: %s" % record.title,
+        "project: %s" % (record.project or "unknown"),
+        "working_directory: %s" % (record.working_directory or "unknown"),
+        "git_branch: %s" % (record.git_branch or "none"),
+        "started_at: %s" % (record.started_at or "unknown"),
+        "ended_at: %s" % (record.ended_at or "unknown"),
+        "outcome: %s" % record.outcome,
+    ]
+    if record.hour_of_day is not None:
+        lines.append("hour_of_day: %d" % record.hour_of_day)
+        lines.append("day_of_week: %s" % record.day_of_week)
+    lines.append("summary: %s" % record.summary)
     return redact("\n".join(lines))
+
+
+def deliver(ep, episode, facts, door):
+    """Структурная запись, а при её отсутствии — текст.
+
+    Спрашиваем дверь, что она умеет, а не как её зовут: тем же правилом и по
+    той же причине, что в save.deliver — сравнение с именем «cli» роняло бы
+    пятый путь без структурной записи молча.
+
+    Эпизод, его факты и связи между ними уходят одним вызовом. Порядок в
+    списке сохраняется, поэтому связь ставится после обеих строк, которые она
+    соединяет.
+    """
+    if hasattr(door, "write_objects"):
+        return door.write_objects(
+            [episode] + [record for record, _ in facts],
+            [models.link("episode_facts", episode=episode, fact=record)
+             for record, _ in facts])
+    door.write(render_episode(ep))
+    for _, line in facts:
+        door.write(line)
 
 
 def weigh(files):
@@ -357,15 +431,21 @@ def read_file(episodes, got, weights, newest, limit, dry, min_score, verbose, do
 
 
 def one_episode(ep, taken, got, weights, newest, dry, min_score, verbose, door):
-    """Один эпизод и его факты. Отдаёт новое число записанных целиком."""
-    text = render_episode(ep)
-    if not dry:
-        door.write(text)
+    """Один эпизод и его факты. Отдаёт новое число записанных целиком.
+
+    Отбор идёт до записи, запись — одним вызовом. Иначе факт уходил бы в
+    хранилище раньше, чем стало известно, есть ли у него эпизод, и связь
+    ставить было бы не на что.
+    """
+    episode = episode_of(ep)
     if verbose:
-        title = text.split("title: ")[1].splitlines()[0]
-        print("EPISODE %d %s | %s" % (ep["number"], outcome_of(ep), title[:70]))
+        # Вычистка нужна и здесь: в хранилище её делает сама запись
+        # (Record.values), а отчёт печатается в журнал хука на каждом ходе.
+        print("EPISODE %d %s | %s"
+              % (ep["number"], episode.outcome, redact(episode.title or "")[:70]))
     found, dropped = marked_or_guessed(ep)
     got["lost"] += sum(dropped.values())           # разметка была, писать нельзя
+    chosen = []
     for fact, key in found:
         rec = weights.get(key) or {"n": 1, "last": ep["ended_at"],
                                    "projects": set()}
@@ -373,16 +453,18 @@ def one_episode(ep, taken, got, weights, newest, dry, min_score, verbose, door):
         if score < min_score:
             got["skipped"] += 1
             continue
-        if not dry:
-            door.write(render_fact(*fact, score=score, rec=rec))
-        got["facts"] += 1
+        chosen.append((fact_of(ep, fact),
+                       render_fact(*fact, score=score, rec=rec)))
         if verbose:
             feats = features_of(rec)
             print("   FACT %.2f [%s/%s] x%d %s %s"
                   % (score, fact[0], fact[2], rec["n"], fact[3][:80],
                      " ".join("%s=%.3f" % (k, v) for k, v in feats.items())))
-    # Счётчик двигается вместе с отметкой и по той же причине: оборвись запись
-    # на фактах, эпизод не записан целиком и считать его нечестно.
+    if not dry:
+        deliver(ep, episode, chosen, door)
+    # Счётчики двигаются вместе с отметкой и по той же причине: оборвись запись,
+    # эпизод не записан целиком и считать его — вместе с фактами — нечестно.
+    got["facts"] += len(chosen)
     got["episodes"] += 1
     return taken + 1
 
