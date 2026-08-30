@@ -10,9 +10,10 @@
 коснулись, а разбор идёт обычным проходом сохранения. Так у события остаётся
 единственный источник номера, и повторный заход ничего не задваивает.
 """
-import argparse, contextlib, fcntl, json, os
+import argparse, json, os
 from pathlib import Path
 
+from infra import locks
 from pipeline import save
 
 STATE_DIR = Path.home() / ".local" / "state" / "memory-encoder"
@@ -20,7 +21,6 @@ STATE_DIR = Path.home() / ".local" / "state" / "memory-encoder"
 # Тот же замок, под которым работает хук конца хода. Иначе два прохода делят
 # один файл отметок: каждый читает его целиком и перезаписывает целиком, и
 # проигравший откатывает продвижение победителя.
-LOCK = STATE_DIR / "save.lock"
 
 QUEUE = Path(os.environ.get("XMEM_QUEUE_PATH")
              or Path.home() / ".local" / "state" / "memory-encoder" / "queue.jsonl")
@@ -100,30 +100,15 @@ def requeue(path, items, unfinished):
     return len(back)
 
 
-@contextlib.contextmanager
 def alone():
     """Один проход по архиву за раз. Отдаёт True, если замок достался.
 
-    Замок неблокирующий, и это важно. Прежний хук конца хода проверял занятость
-    сам, через `flock -n`, и просто не запускался. Когда проверка переехала
-    сюда с блокирующим LOCK_EX, пережившая ход запись стала собирать за собой
-    очередь фоновых процессов: каждый конец хода порождал ещё один, все ждали,
-    а дождавшись — по очереди разбирали один и тот же транскрипт.
-
-    Занято значит «уже разбирают». Ждать нечего: тот, кто держит замок,
-    разберёт и то, что мы собирались.
+    Сам замок и доводы за неблокирующий лежат в infra.locks: тот же замок
+    нужен пониманию, а звать друг друга модулям конвейера незачем. Своего имени
+    у замка здесь нет намеренно — заведи мы его, очередь и понимание разошлись
+    бы по разным файлам, и в базу полезли бы двое.
     """
-    STATE_DIR.mkdir(parents=True, exist_ok=True)
-    with LOCK.open("a") as handle:
-        try:
-            fcntl.flock(handle, fcntl.LOCK_EX | fcntl.LOCK_NB)
-        except (BlockingIOError, OSError):
-            yield False
-            return
-        try:
-            yield True
-        finally:
-            fcntl.flock(handle, fcntl.LOCK_UN)
+    return locks.alone(locks.PASS)
 
 
 def drain(path=None, limit=None, dry=True, extra=()):

@@ -34,7 +34,10 @@ XMEM_HOOK_SECONDS=10   # срок чтения в горячем пути
 | Где | Что |
 |-----|-----|
 | `~/.local/state/memory-encoder/queue.jsonl` | очередь: что положил хук на сообщении человека |
-| `~/.local/state/memory-encoder/save-state-<путь>.json` | докуда разобран архив, своя отметка у каждого хранилища |
+| `~/.local/state/memory-encoder/save-state-<путь>.json` | докуда разобран архив сохранением, своя отметка у каждого хранилища |
+| `~/.local/state/memory-encoder/understand-state-<путь>.json` | докуда разобран архив пониманием, тоже своя у каждого хранилища; при `XMEM_DISABLED` путь называется `off` |
+| `~/.local/state/memory-encoder/save.lock` | замок на проход по архиву, общий у очереди и понимания: база одна |
+| `~/.local/state/memory-encoder/live-projects` | ворота: где память живая. Понимание на конце хода сужено до архива названного проекта |
 | `~/.local/state/memory-encoder/suggest.log`, `save.log`, `queue.log` | ошибки хуков; в разговор они не попадают |
 | `~/.local/state/memory-encoder/suggest-log.jsonl` | что спрашивали и сколько прошло порог |
 | `~/.local/state/memory-encoder/memory.db` | локальная база |

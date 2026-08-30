@@ -15,6 +15,7 @@ from unittest import mock
 
 os.environ.setdefault("XMEM_INSTANCE_ID", "test-instance")
 
+from infra import locks
 from pipeline import drain
 from pipeline import save
 from domain import models
@@ -225,9 +226,15 @@ class TestWritePathReachesTheStore(unittest.TestCase):
             repo.close()
 
     def run_module(self, module, argv):
+        # Книжки учёта обоих проходов уводим в свой каталог. Понимание тоже
+        # ведёт отметку, и без подмены проверка писала бы в настоящую: своим
+        # временным архивом в чужой книжке и разовым зелёным на нём.
         with mock.patch.object(module, "TRANSCRIPTS", self.archive), \
+             mock.patch.object(locks, "PASS", Path(self.dir.name) / "save.lock"), \
              mock.patch.dict(os.environ, {"XMEM_BACKEND": "local"}), \
              mock.patch.object(save, "STATE", Path(self.dir.name) / "state.json"), \
+             mock.patch.object(understand, "STATE",
+                               Path(self.dir.name) / "understand.json"), \
              mock.patch.object(sys, "argv", argv):
             module.main()
 
@@ -501,7 +508,7 @@ class TestSecondRunBowsOut(unittest.TestCase):
         self.dir = tempfile.TemporaryDirectory()
         self.addCleanup(self.dir.cleanup)
         self.root = Path(self.dir.name)
-        lock = mock.patch.object(drain, "LOCK", self.root / "save.lock")
+        lock = mock.patch.object(locks, "PASS", self.root / "save.lock")
         lock.start()
         self.addCleanup(lock.stop)
         self.queue = self.root / "queue.jsonl"
@@ -528,7 +535,7 @@ class TestSecondRunBowsOut(unittest.TestCase):
     def test_busy_lock_returns_instead_of_waiting(self):
         import fcntl, time
         drain.STATE_DIR.mkdir(parents=True, exist_ok=True)
-        with drain.LOCK.open("a") as held:
+        with locks.PASS.open("a") as held:
             fcntl.flock(held, fcntl.LOCK_EX)
             started = time.time()
             with self.within(3):
@@ -542,7 +549,7 @@ class TestSecondRunBowsOut(unittest.TestCase):
         import fcntl
         drain.STATE_DIR.mkdir(parents=True, exist_ok=True)
         before = self.queue.read_text(encoding="utf-8")
-        with drain.LOCK.open("a") as held:
+        with locks.PASS.open("a") as held:
             fcntl.flock(held, fcntl.LOCK_EX)
             with self.within(3):
                 drain.drain(self.queue, dry=False)
@@ -644,7 +651,7 @@ class TestQueueKeepsRotating(unittest.TestCase):
         st = mock.patch.object(save, "STATE", root / "state.json")
         st.start()
         self.addCleanup(st.stop)
-        lock = mock.patch.object(drain, "LOCK", root / "save.lock")
+        lock = mock.patch.object(locks, "PASS", root / "save.lock")
         lock.start()
         self.addCleanup(lock.stop)
 

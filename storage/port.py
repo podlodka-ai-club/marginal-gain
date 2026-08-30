@@ -173,6 +173,21 @@ def _local():
 ADAPTERS = {"api": _api, "sdk": _sdk, "local": _local}
 
 
+def store_name(backend=None, disabled=None):
+    """Как зовут путь наружу. Тем же правилом, каким его выбирает door().
+
+    Нужно книжкам учёта обоих проходов: отметка «докуда разобрано» принадлежит
+    хранилищу, и выключенная память — такое же хранилище, как остальные. Считай
+    её локальной — и половина сравнения «без памяти» закроет архив, не записав
+    ни строчки, а настоящий локальный проход придёт к дочитанному.
+    """
+    if disabled is None:
+        disabled = bool(os.environ.get("XMEM_DISABLED"))
+    if disabled:
+        return SilentDoor.name
+    return (backend or os.environ.get("XMEM_BACKEND") or "cli").strip().lower() or "cli"
+
+
 def door(backend=None, disabled=None):
     """Путь наружу. Имя из аргумента, иначе из окружения — при вызове, не при импорте.
 

@@ -126,10 +126,20 @@ def read_new(path, cursor):
     return items, {"offset": offset, "inode": stat.st_ino, "seq": seq}
 
 
+def _lines(path):
+    """Строки файла по одной, с закрытием файла в конце."""
+    with path.open(encoding="utf-8", errors="replace") as fh:
+        for line in fh:
+            yield line
+
+
 def episodes_from_file(path):
     """Режем разговор на эпизоды по сообщениям человека."""
     current, out = None, []
-    for line in path.open(encoding="utf-8", errors="replace"):
+    # Файл закрываем явно и читаем построчно: понимание зовётся в конце
+    # каждого хода и обходит сотни транскриптов. Брошенный дескриптор живёт
+    # до сборки мусора, а целый файл в памяти это мегабайты на каждый.
+    for line in _lines(path):
         try:
             rec = json.loads(line)
         except json.JSONDecodeError:

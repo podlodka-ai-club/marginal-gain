@@ -35,8 +35,7 @@ def state_path():
     Имя хранилища читается при вызове, а не при импорте: путь наружу тоже
     выбирается в момент вызова door(), и книжка обязана идти за ним.
     """
-    name = (os.environ.get("XMEM_BACKEND") or "cli").strip().lower() or "cli"
-    return STATE.with_name("%s-%s%s" % (STATE.stem, name, STATE.suffix))
+    return STATE.with_name("%s-%s%s" % (STATE.stem, port.store_name(), STATE.suffix))
 
 
 def load_state():
