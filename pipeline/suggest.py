@@ -430,7 +430,24 @@ def notes_of(log=None):
     return out
 
 
-def main():
+def transcripts(only=None):
+    """Файлы архива, по которым идёт отметка исхода.
+
+    Сужение до названного каталога — то же правило и та же причина, что у
+    понимания на конце хода: хук не должен ходить по чужим разговорам.
+    """
+    from archive.transcripts import TRANSCRIPTS
+    found = sorted(TRANSCRIPTS.rglob("*.jsonl")) if not only \
+        else sorted(Path(only).rglob("*.jsonl"))
+    return [path for path in found if not only or only in str(path)]
+
+
+def parser():
+    """Разбор аргументов отдельно от работы: его зовут проверки.
+
+    Хук подставляет ключи строкой и всегда выходит нулём. Ключ, которого нет,
+    роняет проход молча — ни в разговоре, ни по коду возврата этого не видно.
+    """
     ap = argparse.ArgumentParser(description="Подсказка агенту из xmemory")
     ap.add_argument("query", nargs="?")
     ap.add_argument("--mode", default="single", choices=["single", "raw", "xresponse"])
@@ -439,11 +456,15 @@ def main():
     ap.add_argument("--no-record", action="store_true", help="не писать MemoryInjection")
     ap.add_argument("--settle", action="store_true",
                     help="отметить исход ходов, куда подставляли память, и выйти")
-    args = ap.parse_args()
+    ap.add_argument("--only", help="только транскрипты, чей путь содержит эту строку")
+    return ap
+
+
+def main():
+    args = parser().parse_args()
 
     if args.settle:
-        from archive.transcripts import TRANSCRIPTS
-        got = settle(sorted(TRANSCRIPTS.rglob("*.jsonl")))
+        got = settle(transcripts(args.only))
         # «Пересчитано», а не «отмечено»: журнал не помечается разобранным, и
         # каждый заход проходит его целиком. Запись идёт по ключу, поверх, так
         # что вреда нет — но и числа новых отметок это не даёт.

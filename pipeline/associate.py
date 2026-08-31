@@ -23,7 +23,7 @@
 хранилище число, которое меньше правды. Повторный проход отдаёт то же самое:
 ключ карточки — источник, цель и повод, и запись по нему идёт поверх.
 """
-import argparse, itertools
+import argparse, itertools, json
 from pathlib import Path
 
 from archive.transcripts import TRANSCRIPTS, episodes_from_file
@@ -37,6 +37,52 @@ CEILING = 8
 
 # Карточки уходят пачками: их тысячи, а вызов двери стоит дорого.
 BATCH = 200
+
+# Отметка о состоянии архива на прошлом проходе. Своя книжка, как у сохранения и
+# понимания, и по той же причине: хранилище у каждого прохода своё, и «сделано
+# для одного» не значит «сделано для всех».
+STATE = Path.home() / ".local" / "state" / "memory-encoder" / "associate-state.json"
+
+
+def state_path():
+    """Книжка учёта своя у каждого хранилища, см. understand.state_path."""
+    return STATE.with_name("%s-%s%s" % (STATE.stem, port.store_name(), STATE.suffix))
+
+
+def shape_of(files):
+    """Отпечаток архива: путь, узел, размер. Считается без открытия файлов.
+
+    Проход по связям обходит архив целиком — вес карточки это число наблюдений,
+    и по куску архива он вышел бы меньше правды. Полный обход на каждом ходе
+    стоит секунды, поэтому сперва спрашиваем, менялось ли хоть что-нибудь:
+    один stat на файл против трёхсот разборов.
+    """
+    out = {}
+    for path in files:
+        try:
+            stat = path.stat()
+        except OSError:
+            continue                # файл исчез между списком и проверкой
+        out[str(path)] = [stat.st_ino, stat.st_size]
+    return out
+
+
+def load_shape():
+    target = state_path()
+    if not target.exists():
+        return {}
+    try:
+        return json.loads(target.read_text()).get("archive") or {}
+    except (OSError, ValueError):
+        return {}                   # книжка побилась: считаем, что её нет
+
+
+def save_shape(shape):
+    target = state_path()
+    target.parent.mkdir(parents=True, exist_ok=True)
+    tmp = target.with_suffix(".tmp")
+    tmp.write_text(json.dumps({"archive": shape}, indent=1))
+    tmp.replace(target)
 
 
 def identity(fact):
@@ -169,7 +215,14 @@ def build(files, dry=True, door=None, limit=None):
 
     Отдаёт, сколько карточек нашлось и сколько уехало в хранилище: расхождение
     между этими числами и есть то, что молча теряется.
+
+    Архив не менялся с прошлой записи — выходим, не открыв ни одного файла:
+    конец хода зовёт этот проход каждый ход. Отметка двигается только после
+    записи, поэтому холостой прогон ничего не закрывает.
     """
+    shape = shape_of(files)
+    if not dry and shape and shape == load_shape():
+        return {"cards": 0, "written": 0, "idle": True}
     graph = scan(files)
     got = {"cards": len(graph), "written": 0}
     for cue in models.CUES:
@@ -182,15 +235,24 @@ def build(files, dry=True, door=None, limit=None):
     items = sorted(graph.items())[:limit] if limit else sorted(graph.items())
     for start in range(0, len(items), BATCH):
         got["written"] += deliver(items[start:start + BATCH], door)
+    # Потолок оставляет часть карточек ненаписанными, и закрывать под ним архив
+    # нельзя: остаток не досчитался бы никогда.
+    if not limit:
+        save_shape(shape)
     return got
 
 
-def main():
+def parser():
+    """Разбор аргументов отдельно от работы: его зовут проверки, см. suggest."""
     ap = argparse.ArgumentParser(description="Связи между фактами по эпизодам архива")
     ap.add_argument("--send", dest="dry", action="store_false", default=True)
     ap.add_argument("--only", help="только транскрипты, чей путь содержит эту строку")
     ap.add_argument("--limit", type=int, help="потолок карточек за заход")
-    args = ap.parse_args()
+    return ap
+
+
+def main():
+    args = parser().parse_args()
 
     files = sorted(TRANSCRIPTS.rglob("*.jsonl"))
     if args.only:
