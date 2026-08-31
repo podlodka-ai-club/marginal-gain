@@ -1,13 +1,18 @@
 #!/usr/bin/env python3
-"""Шесть объектов схемы XMD как питоновские записи.
+"""Семь объектов схемы XMD как питоновские записи.
 
 До сих пор объекты жили только в хранилище, а код собирал их текстом и отдавал
 экстрактору. Экстрактор угадывает ключ, и при промахе записи схлопываются на
 одну строку. Здесь ключ задан явно, так что запись через структурные мутации
 детерминирована: что положили, то и легло.
 
-Схема — версия 7, инстанс «вторая память». Списки значений и обязательность
+Схема — версия 8, инстанс «вторая память». Списки значений и обязательность
 полей повторяют XMD; расхождение с хранилищем ловится проверкой validate().
+
+Версия 8 добавила срок факта (`Fact.valid_until`) и отложенное (`LapsedFact`).
+Локальная база выводит таблицы отсюда и потому знает их сразу; хранилище за
+сетью надо обновить отдельно, иначе структурная запись туда упрётся в поле,
+которого та схема не знает.
 """
 from dataclasses import dataclass, fields
 from typing import ClassVar
@@ -47,6 +52,13 @@ class Record:
     # запись собирается из того куска, что попался в пачку: обычное затирание
     # уводило бы начало сессии на время последнего дописанного события.
     EARLIEST: ClassVar[tuple] = ()
+
+    # Поля, которые движутся только вперёд. Зеркало EARLIEST и по той же
+    # причине: срок факта продлевают с разных сторон — разбор архива и
+    # обращение, — и режим памяти у них может отличаться. Обычное затирание
+    # означало бы, что показ факта под коротким режимом укорачивает жизнь
+    # тому, кому долгий срок уже назначили.
+    LATEST: ClassVar[tuple] = ()
 
     def key(self):
         """Поля первичного ключа. По ним хранилище находит строку.
@@ -106,6 +118,15 @@ class Record:
             self._validate_key()
             return {"object_mutation": {"object_type": self.OBJECT,
                                         op: {"key": self.key()}}}
+        if op == "update":
+            # Обновление адресует лежащую строку и несёт только то, что
+            # меняется. Спрашивать с него обязательные поля значило бы читать
+            # запись целиком ради того, чтобы сдвинуть ей одно значение, —
+            # а на горячем пути читателя может и не быть.
+            self._validate_key()
+            return {"object_mutation": {"object_type": self.OBJECT,
+                                        op: {"key": self.key(),
+                                             "values": self.values()}}}
         self.validate()
         return {"object_mutation": {"object_type": self.OBJECT,
                                     op: {"key": self.key(), "values": self.values()}}}
@@ -180,9 +201,14 @@ class Fact(Record):
     content: str = None
     project: str = None
     updated_at: str = None
+    # До каких пор факт считается верным. Ставит `domain.lifespan.until` по
+    # режиму памяти, продлевает обращение. Пустое значение значит «не
+    # протухает»: забывать не по чему, и выбрасывать такое молча нельзя.
+    valid_until: str = None
 
     OBJECT: ClassVar[str] = "Fact"
     KEY: ClassVar[tuple] = ("fact_type", "subject", "scope")
+    LATEST: ClassVar[tuple] = ("valid_until",)
     REQUIRED: ClassVar[tuple] = ("fact_type", "subject", "scope", "content")
     ENUMS: ClassVar[dict] = {"fact_type": FACT_TYPES, "scope": SCOPES}
 
@@ -203,6 +229,25 @@ class Fact(Record):
         fact_type, rest = (key.split("|", 1) + [""])[:2]
         subject, _, scope = rest.rpartition("|")
         return cls(fact_type=fact_type, subject=subject, scope=scope)
+
+
+@dataclass
+class LapsedFact(Fact):
+    """Факт, у которого вышел срок. Отдельный объект, а не флаг на факте.
+
+    Флаг оставил бы запись в той же выборке, и «первую выдачу» пришлось бы
+    отличать порогом на каждом чтении — то есть помнить про срок в каждом
+    месте, где память кого-нибудь спрашивают. Отдельное место убирает запись из
+    выборки один раз и навсегда, а достать её оттуда можно только нарочно,
+    глубоким чтением.
+
+    Поля наследуются от `Fact` целиком и нарочно: считай их здесь заново — они
+    разъедутся молча, и переклад начнёт терять колонки, которых в копии нет.
+    """
+
+    lapsed_at: str = None
+
+    OBJECT: ClassVar[str] = "LapsedFact"
 
 
 @dataclass
@@ -239,7 +284,7 @@ class MemoryInjection(Record):
 
 
 OBJECTS = {c.OBJECT: c for c in
-           (Session, Episode, Event, Fact, Association, MemoryInjection)}
+           (Session, Episode, Event, Fact, LapsedFact, Association, MemoryInjection)}
 
 # Связи схемы: имя -> роль в связи -> объект на этом конце.
 RELATIONS = {

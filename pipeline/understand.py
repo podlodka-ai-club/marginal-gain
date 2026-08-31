@@ -15,7 +15,7 @@
 import argparse, contextlib, json
 from pathlib import Path
 
-from domain import features, marks, models
+from domain import features, lifespan, marks, models
 from domain.measure import score_of
 from infra import locks
 from storage import port
@@ -311,12 +311,16 @@ def episode_of(ep):
         day_of_week=day)
 
 
-def fact_of(ep, fact):
+def fact_of(ep, fact, mode=None):
     """Запись Fact по схеме. Ключ — тип, тема и охват; их назвали мы сами.
 
     Раньше факт уходил прозой, и ключ ему выводил разборщик на той стороне.
     Промах разборщика схлопывал разные факты в одну строку, и связать факт с
     эпизодом было не по чему: ключ, которого мы не знаем, в связь не поставить.
+
+    Срок жизни ставится всем фактам одинаково, по режиму памяти. Из типа факта
+    он не выводится нарочно: тип говорит, о чём запись, а скорость устаревания
+    это свойство того, как памятью пользуются, см. `domain.lifespan`.
     """
     fact_type, subject, scope, content = fact
     return models.Fact(
@@ -327,7 +331,8 @@ def fact_of(ep, fact):
         # первым на любой вопрос про этот проект. Текстовый путь поля project
         # не пишет вовсе, см. render_fact.
         project=(Path(ep["cwd"]).name if ep["cwd"] and scope != "global" else None),
-        updated_at=ep["ended_at"] or None)
+        updated_at=ep["ended_at"] or None,
+        valid_until=lifespan.until(ep["ended_at"], mode))
 
 
 def render_episode(ep):
@@ -421,9 +426,14 @@ def features_of(rec):
     return features.compute(rec)
 
 
-def render_fact(fact_type, subject, scope, content, score=None, rec=None):
+def render_fact(fact_type, subject, scope, content, score=None, rec=None,
+                until=None):
     lines = ["Fact.", "content: %s" % content, "fact_type: %s" % fact_type,
              "subject: %s" % subject, "scope: %s" % scope]
+    # Срок пишем и в текстовом пути. Пропусти его здесь — и факты, записанные
+    # прозой, не выбывали бы никогда: дыра, о которой пришлось бы помнить.
+    if until is not None:
+        lines.append("valid_until: %s" % until)
     if rec is not None:
         lines.append("Подтверждений в архиве: %d, проектов: %d, последний раз: %s."
                      % (rec["n"], len(rec["projects"]), (rec["last"] or "неизвестно")[:10]))
@@ -562,6 +572,9 @@ def one_episode(ep, taken, got, weights, newest, dry, min_score, verbose, door):
     ставить было бы не на что.
     """
     episode = episode_of(ep)
+    # Режим памяти читаем раз на эпизод, а не на каждый факт: значение одно на
+    # все факты, и лезть за ним в файл по десять раз подряд незачем.
+    mode = lifespan.mode()
     if verbose:
         # Вычистка нужна и здесь: в хранилище её делает сама запись
         # (Record.values), а отчёт печатается в журнал хука на каждом ходе.
@@ -577,8 +590,9 @@ def one_episode(ep, taken, got, weights, newest, dry, min_score, verbose, door):
         if score < min_score:
             got["skipped"] += 1
             continue
-        chosen.append((fact_of(ep, fact),
-                       render_fact(*fact, score=score, rec=rec)))
+        record = fact_of(ep, fact, mode)
+        chosen.append((record, render_fact(*fact, score=score, rec=rec,
+                                           until=record.valid_until)))
         if verbose:
             feats = features_of(rec)
             print("   FACT %.2f [%s/%s] x%d %s %s"

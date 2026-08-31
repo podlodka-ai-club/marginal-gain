@@ -42,13 +42,18 @@ CANDIDATES = 300
 # разговор — сырьё и метаданные. Без этого веса на вопрос «какие файлы
 # правились» первыми шли строки разговоров: у них попаданий больше, а пользы
 # меньше.
-PRIORITY = {"Fact": 4, "Episode": 3, "Event": 2, "Session": 1}
+PRIORITY = {"Fact": 4, "LapsedFact": 4, "Episode": 3, "Event": 2, "Session": 1}
 
 # Сколько строк каждого вида берётся в выдачу. Приоритет выше был множителем, а
 # множитель не гарантирует места: событий в базе 45 тысяч против 466 фактов, и
 # десяток длинных команд закрывал собой всю десятку. Квота даёт факту место, но
 # событие не запрещает: недобранное одним видом достаётся остальным.
-QUOTA = {"Fact": 6, "Episode": 3, "Event": 3, "Session": 1}
+QUOTA = {"Fact": 6, "LapsedFact": 6, "Episode": 3, "Event": 3, "Session": 1}
+
+# Отложенное ищется только глубоким чтением. В первой выдаче ему не место —
+# ровно ради этого его туда и переложили; отличать его порогом на чтении
+# значило бы помнить про срок в каждом месте, где память спрашивают.
+DEEP = {"LapsedFact": (("subject", 3), ("project", 2), ("content", 1))}
 
 WORD = re.compile(r"[\w./:-]{3,}", re.UNICODE)
 
@@ -94,7 +99,23 @@ def _v1(conn):
     conn.execute('CREATE INDEX IF NOT EXISTS episode_project ON episode (project)')
 
 
-MIGRATIONS = (_v1,)
+def _v2(conn):
+    """Срок факта и отложенное.
+
+    Пустая база получает и то и другое от `_v1`: таблицы он выводит из `models`,
+    а там уже и колонка, и объект. Поэтому шаг обязан быть терпимым к тому, что
+    всё на месте, — иначе новая база не заведётся вовсе.
+    """
+    conn.execute(_ddl(models.LapsedFact))
+    have = {row[1] for row in conn.execute('PRAGMA table_info("fact")')}
+    if "valid_until" not in have:
+        conn.execute('ALTER TABLE fact ADD COLUMN "valid_until" TEXT')
+    # Переклад отбирает строки по сроку и делает это в фоне после каждого хода.
+    conn.execute('CREATE INDEX IF NOT EXISTS fact_valid_until ON fact (valid_until)')
+    conn.execute('CREATE INDEX IF NOT EXISTS lapsedfact_subject ON lapsedfact (subject)')
+
+
+MIGRATIONS = (_v1, _v2)
 
 
 def migrate(conn):
@@ -167,13 +188,16 @@ class Repository:
         names = list(row)
         holes = ", ".join("?" * len(names))
         cols = ", ".join('"%s"' % n for n in names)
-        # Поля из EARLIEST держат самое раннее из виденного, а не последнее
-        # записанное. COALESCE с обеих сторон: пустое не должно выигрывать у
-        # заполненного, а MIN(x, NULL) в SQLite это NULL.
+        # EARLIEST держит самое раннее из виденного, LATEST — самое позднее.
+        # COALESCE с обеих сторон: пустое не должно выигрывать у заполненного,
+        # а MIN(x, NULL) в SQLite это NULL. Перезапись знает факт целиком и
+        # потому вправе назначить срок тому, у кого его ещё нет.
         earliest = set(getattr(cls, "EARLIEST", ()))
+        latest = set(getattr(cls, "LATEST", ()))
         updates = ", ".join(
-            ('"%s" = MIN(COALESCE("%s", excluded."%s"), COALESCE(excluded."%s", "%s"))'
-             % (n, n, n, n, n)) if n in earliest else ('"%s" = excluded."%s"' % (n, n))
+            ('"%s" = %s(COALESCE("%s", excluded."%s"), COALESCE(excluded."%s", "%s"))'
+             % (n, "MIN" if n in earliest else "MAX", n, n, n, n))
+            if n in earliest or n in latest else ('"%s" = excluded."%s"' % (n, n))
             for n in names if n not in cls.KEY)
         keys = ", ".join('"%s"' % n for n in cls.KEY)
         sql = 'INSERT INTO "%s" (%s) VALUES (%s) ON CONFLICT (%s) DO %s' % (
@@ -181,6 +205,37 @@ class Repository:
             ("UPDATE SET " + updates) if updates else "NOTHING")
         with self.lock:
             self.conn.execute(sql, [_plain(row[n]) for n in names])
+
+    def update(self, object_type, key, values):
+        """Обновление адресует лежащую строку. Нет строки — нечего обновлять.
+
+        Не upsert: обновление несёт только изменившееся, и вставка по нему
+        завела бы строку с одним ключом и без содержимого — призрак, которого
+        в архиве не было. Так продление срока по ключу из чужой выдачи
+        воскрешало бы факты, давно уехавшие в отложенное.
+        """
+        cls = models.OBJECTS.get(object_type)
+        if cls is None:
+            raise ValueError("нет такого объекта схемы: %s" % object_type)
+        known = {f.name for f in dataclasses.fields(cls)}
+        row = {k: v for k, v in values.items() if k in known and k not in cls.KEY}
+        if not row:
+            return 0
+        # Поле из LATEST обновление только отодвигает и только у того, у кого
+        # оно уже есть. Пустой срок значит «не протухает»: продление не вправе
+        # назначить конец тому, кому его не назначали, — оно знает лишь ключ.
+        latest = set(getattr(cls, "LATEST", ()))
+        names = list(row)
+        sets = ", ".join(
+            ('"%s" = CASE WHEN "%s" IS NULL OR "%s" = \'\' THEN "%s" '
+             'ELSE MAX("%s", ?) END' % (n, n, n, n, n)) if n in latest
+            else ('"%s" = ?' % n) for n in names)
+        where = " AND ".join('"%s" = ?' % n for n in key)
+        with self.lock:
+            return self.conn.execute(
+                'UPDATE "%s" SET %s WHERE %s' % (_table(object_type), sets, where),
+                [_plain(row[n]) for n in names] + [_plain(v) for v in key.values()]
+            ).rowcount
 
     def delete(self, object_type, key):
         where = " AND ".join('"%s" = ?' % n for n in key)
@@ -217,6 +272,9 @@ class Repository:
                         continue
                     if op == "delete":
                         self.delete(object_type, body[op]["key"])
+                    elif op == "update":
+                        self.update(object_type, body[op]["key"],
+                                    body[op].get("values") or {})
                     else:
                         self.upsert(object_type, body[op]["key"],
                                     body[op].get("values") or {})
@@ -242,18 +300,22 @@ class Repository:
 
     # --- чтение -------------------------------------------------------------
 
-    def search(self, query, limit=10):
+    def search(self, query, limit=10, deep=False):
         """Поиск по словам вопроса. Головы у базы нет, есть совпадения.
 
         Вес складывается по полям: попадание в тему весит больше, чем в текст.
         Строки без единого попадания не возвращаются вовсе — молчание честнее
         случайной строки.
+
+        Глубокое чтение (`deep`) добавляет к выборке отложенное. Обычное — нет,
+        и в этом весь смысл переклада: просроченное выбывает из первой выдачи
+        само, а не отсеивается порогом на каждом чтении.
         """
         terms = words(query)
         if not terms:
             return []
         found = []
-        for object_type, fields in SEARCH.items():
+        for object_type, fields in (dict(SEARCH, **DEEP) if deep else SEARCH).items():
             names = [name for name, _ in fields]
             where = " OR ".join('"%s" LIKE ? ESCAPE \'\\\'' % name
                                 for name in names for _ in terms)
@@ -339,6 +401,33 @@ class Repository:
             if len(out) >= limit:
                 break
         return out
+
+    def lapse(self, now, dry=False):
+        """Просроченные факты уезжают в отложенное. Переклад, а не удаление.
+
+        Обе половины под одним замком и одной фиксацией: оборвись переклад
+        посередине, запись пропала бы совсем — а вся затея в том, чтобы она
+        осталась цела и её можно было достать глубоким чтением.
+
+        Отбор идёт сравнением строк, поэтому формат срока обязан быть один; его
+        держит `domain.lifespan.stamp`. Пустой срок не выходит никогда: факт без
+        срока забывать не по чему, и выбрасывать его молча нельзя.
+        """
+        shared = [f.name for f in dataclasses.fields(models.Fact)]
+        names = ", ".join('"%s"' % name for name in shared)
+        where = ('"valid_until" IS NOT NULL AND "valid_until" != \'\' '
+                 'AND "valid_until" < ?')
+        with self.lock:
+            if dry:
+                return self.conn.execute(
+                    'SELECT count(*) FROM "fact" WHERE %s' % where, (now,)).fetchone()[0]
+            moved = self.conn.execute(
+                'INSERT OR REPLACE INTO "lapsedfact" (%s, "lapsed_at") '
+                'SELECT %s, ? FROM "fact" WHERE %s' % (names, names, where),
+                (now, now)).rowcount
+            self.conn.execute('DELETE FROM "fact" WHERE %s' % where, (now,))
+            self.conn.commit()
+        return moved
 
     def counts(self):
         out = {}

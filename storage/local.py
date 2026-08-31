@@ -140,6 +140,25 @@ def neighbours(keys, limit=10, timeout=None):
     return repository().neighbours(list(keys), limit=limit)
 
 
+def lapse(now, dry=False, timeout=None):
+    """Переклад просроченного в отложенное. Умеет только своя база.
+
+    Отбор идёт по всей таблице фактов, и сети такого запроса не задать: она
+    отвечает пересказом, а не выборкой. Дверь спрашивает про умение, а не про
+    имя пути, поэтому её отсутствие ничего не роняет.
+    """
+    return repository().lapse(now, dry=dry)
+
+
+def deep(query, limit=10, timeout=None):
+    """Глубокое чтение: к найденному добавляется отложенное.
+
+    Отдаёт записи, а не строку: в отличие от обычного чтения, спрашивают его
+    нарочно и разбирают сами.
+    """
+    return repository().search(query, limit=limit, deep=True)
+
+
 def schema(timeout=None):
     """Схема берётся из `models`, а не из сети: локально это тот же источник."""
     return {"objects": sorted(models.OBJECTS), "relations": sorted(models.RELATIONS),

@@ -25,7 +25,7 @@
 import argparse, os, subprocess, sys
 from pathlib import Path
 
-from domain import marks
+from domain import lifespan, marks
 from infra import config
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -189,7 +189,7 @@ class Listing(Switch):
 
 # Имена в порядке добавления, как в реестрах правил и схем. Проверка сверяется
 # с этим списком: запись без имени работать не должна.
-NAMES = ["live", "here", "backend", "scheme", "marks"]
+NAMES = ["live", "here", "backend", "scheme", "marks", "memory"]
 
 SWITCHES = {
     "live": Presence(
@@ -209,6 +209,12 @@ SWITCHES = {
         "блок на экране", "срезать служебный блок или показывать",
         "XMEM_HIDE_MARKS", "hide-marks", "hide", values=("hide", "show"),
         explain={"show": "блок виден человеку, разбор при этом работает как работал"}),
+    "memory": Switch(
+        "режим памяти", "сколько факт верен без обращений",
+        "XMEM_MEMORY", "memory", config.DEFAULT_MEMORY,
+        values=tuple(sorted(lifespan.MODES, key=lambda n: lifespan.MODES[n])),
+        explain={name: "%d дней, дальше факт уходит в отложенное" % span
+                 for name, span in lifespan.MODES.items()}),
 }
 
 

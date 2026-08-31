@@ -119,14 +119,19 @@ class StructuredDoor:
     def write(self, text, wait=False):
         return self.adapter.write_text(text, wait=wait)
 
-    def write_objects(self, records, relations=()):
+    def write_objects(self, records, relations=(), op="create"):
         """Записи схемы и связи между ними.
 
         Принимает объекты из models. Порядок сохраняется: связь применяется
         после объектов, которые она соединяет, поэтому их можно слать одним
         вызовом.
+
+        `op` выбирает вид мутации. Обновление адресует лежащую строку и несёт
+        только изменившееся — им продлевается срок факта, и требовать от такой
+        записи полного набора полей значило бы читать факт целиком ради одного
+        значения.
         """
-        mutations = [r.mutation() for r in records] + list(relations)
+        mutations = [r.mutation(op) for r in records] + list(relations)
         return self.adapter.write_objects(mutations)
 
     @telemetry.traced("retrieve", _read_meta)
@@ -144,6 +149,24 @@ class StructuredDoor:
             raise AttributeError("путь %s обхода по графу не умеет" % self.name)
         return step(keys, limit=limit)
 
+    def lapse(self, now, dry=False):
+        """Переклад просроченного в отложенное. Умеет не всякий путь наружу.
+
+        Спрашиваем адаптер, а не имя двери: у сетевого читателя выборки по
+        сроку нет, и забывание не имеет права ронять на нём ход.
+        """
+        step = getattr(self.adapter, "lapse", None)
+        if step is None:
+            raise AttributeError("путь %s забывать не умеет" % self.name)
+        return step(now, dry=dry)
+
+    def deep(self, query, limit=10):
+        """Глубокое чтение: к найденному добавляется отложенное."""
+        step = getattr(self.adapter, "deep", None)
+        if step is None:
+            raise AttributeError("путь %s глубокого чтения не умеет" % self.name)
+        return step(query, limit=limit)
+
 
 class SilentDoor:
     """Память выключена целиком: чтение отдаёт пустоту, запись молча гаснет.
@@ -158,7 +181,7 @@ class SilentDoor:
     def write(self, text, wait=False):
         return ""
 
-    def write_objects(self, records, relations=()):
+    def write_objects(self, records, relations=(), op="create"):
         return None
 
     @telemetry.traced("retrieve", _read_meta)

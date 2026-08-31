@@ -10,7 +10,7 @@ import argparse, ast, json, os, re, signal, sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-from domain import models
+from domain import lifespan, models
 from infra import telemetry
 from pipeline import prompt
 from storage import port
@@ -55,7 +55,7 @@ SCORE = re.compile(r"Оценка уверенности:\s*([0-9]+(?:\.[0-9]+)?
 # Служебные поля записи: агенту не говорят ничего, а потолок съедают.
 NOISE = ("first_seen_at", "observed_at", "created_at", "updated_at", "id",
          "object_type", "via_graph", "sequence_number", "session_id",
-         "fact_type", "scope", "subject")
+         "fact_type", "scope", "subject", "valid_until", "lapsed_at")
 
 
 def _parse(text):
@@ -305,6 +305,34 @@ def sources_of(kept):
     return out
 
 
+def renew(kept, door=None, at=None, mode=None):
+    """Продлить срок фактам, которые ушли в выдачу. Спрошенное живёт дальше.
+
+    Обращение здесь — это показ: факт попал в кусок, который увидел агент.
+    Второй счётчик обращения, польза, пишется отметкой исхода в поле `helped`;
+    какой из двух лучше держит память живой, решается по данным, а продлевать
+    достаточно по любому.
+
+    Уходит обновлением, а не записью целиком: мы знаем ключ факта и новый срок,
+    а содержимое лежит в хранилище — читать его ради продления незачем, да и
+    нечем на горячем пути. Строки, которой нет, обновление не заводит, поэтому
+    ключ из чужой выдачи не воскрешает уехавшее в отложенное.
+
+    Дверь без структурной записи оставляет всё как было: продление это добавка,
+    и её отсутствие не должно менять ни выдачу, ни ход.
+    """
+    door = door or port.door()
+    if not hasattr(door, "write_objects"):
+        return []
+    until = lifespan.until(at, mode)
+    renewals = [models.Fact(fact_type=source.fact_type, subject=source.subject,
+                            scope=source.scope, valid_until=until)
+                for source in sources_of(kept) if source.OBJECT == "Fact"]
+    if renewals:
+        door.write_objects(renewals, op="update")
+    return renewals
+
+
 def injection_of(session_id, text, at=None):
     """Запись MemoryInjection по схеме. Ключ — разговор и время вставки."""
     return models.MemoryInjection(
@@ -336,6 +364,10 @@ def note_injection(session_id, text, kept=(), door=None, at=None):
         relations.append(models.link("injection_source_%s" % role,
                                      memory_injection=record, **{role: source}))
     door.write_objects([session, record], relations)
+    # Обращение продлевает срок: то, что попало в выдачу, живёт дальше. Стоит
+    # здесь, а не в самой подсказке, потому что подсказку зовёт ещё и замер, а
+    # замер не должен двигать сроки в хранилище, которое меряет.
+    renew(kept, door=door, at=record.injected_at)
     # Ключ уходит в журнал после записи, а не до неё. По нему проход `--settle`
     # потом находит, чем кончился ход, и ключ вставки, которой в хранилище нет,
     # заставил бы его завести пустую запись с одним ключом.
