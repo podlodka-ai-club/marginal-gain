@@ -203,6 +203,9 @@ class Association(Record):
 
     OBJECT: ClassVar[str] = "Association"
     KEY: ClassVar[tuple] = ("source_key", "target_key", "cue")
+    # Когда повод увидели впервые — самое раннее из виденного, а не последнее
+    # записанное: связь накапливается проходами, и «впервые» назад не двигается.
+    EARLIEST: ClassVar[tuple] = ("first_seen_at",)
     REQUIRED: ClassVar[tuple] = ("source_key", "target_key", "cue", "weight")
     ENUMS: ClassVar[dict] = {"cue": CUES}
 

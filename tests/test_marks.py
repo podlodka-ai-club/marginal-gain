@@ -180,11 +180,20 @@ class TestStorageSchemaStaysWhereItWas(unittest.TestCase):
                                   cue="same_episode", weight=1.0)
         self.assertEqual(link.key()["source_key"], fact.identity())
 
-    def test_models_module_is_not_touched_by_this_work(self):
-        """Проверка та же, что в DoD: domain/models.py в диффе не тронут."""
-        diff = subprocess.run(["git", "diff", "--name-only", "HEAD"],
-                              cwd=str(HERE), capture_output=True, text=True)
-        self.assertNotIn("domain/models.py", diff.stdout.split())
+    def test_the_schema_knows_nothing_about_the_markup(self):
+        """Схема хранилища не знает про внешнюю разметку — ни словом.
+
+        Прежде тут стояла проверка диффа: `domain/models.py` не должен был
+        появляться в `git diff HEAD`. Она держалась ровно до первой законной
+        правки схемы по другой задаче и краснела на ней, ничего не говоря про
+        разметку. Требование то же, но сказано про содержимое, а не про
+        состояние рабочего дерева: внешний формат знают двое — просьба и
+        маппер, и схема к ним не относится.
+        """
+        body = (HERE / "domain" / "models.py").read_text(encoding="utf-8").lower()
+        for word in ("marks", "xmd1", "memory-facts", "confidence", "predicate"):
+            self.assertNotIn(word, body,
+                             "схема заговорила про внешнюю разметку: %s" % word)
 
 
 class TestExternalFormatIsLockedInTheMapper(unittest.TestCase):
