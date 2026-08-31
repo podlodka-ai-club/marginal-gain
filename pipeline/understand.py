@@ -19,7 +19,8 @@ from domain import features, marks, models
 from domain.measure import score_of
 from infra import locks
 from storage import port
-from archive.transcripts import TRANSCRIPTS, episodes_from_file, parse_time, when
+from archive.transcripts import (TRANSCRIPTS, episodes_and_events,
+                                 episodes_from_file, parse_time, when)
 from archive.extract import NOT_CODE, PREF_TOPICS, facts_of, fact_key
 from infra.scrub import redact
 
@@ -94,11 +95,101 @@ def tail_of(ep):
                                len(ep["errors"]))
 
 
-def mark_of(episodes, count, stat):
-    """Отметка: докуда файл разобран и чем кончился разобранный кусок."""
+def mark_of(episodes, count, stat, bases=None, event_bases=None, event_counts=None):
+    """Отметка: докуда файл разобран и чем кончился разобранный кусок.
+
+    Вместе с отметкой лежит нумерация: с какого номера начинаются эпизоды
+    каждого разговора в этом файле и сколько их тут. По этим двум числам
+    восстанавливается счётчик разговора, см. counters_of.
+    """
     return {"size": stat.st_size, "inode": stat.st_ino, "episodes": count,
             "tail": tail_of(episodes[count - 1]) if count else "",
+            "bases": dict(bases or {}), "counts": dict(counts_of(episodes)),
+            "event_bases": dict(event_bases or {}),
+            "event_counts": dict(event_counts or {}),
             "done": count == len(episodes)}
+
+
+def counts_of(episodes):
+    """Сколько эпизодов каждого разговора в этом файле."""
+    out = {}
+    for ep in episodes:
+        talk = ep["session_id"] or "unknown"
+        out[talk] = out.get(talk, 0) + 1
+    return out
+
+
+def counters_of(state, bases="bases", counts="counts"):
+    """Докуда занумерован каждый разговор. Складывается из отметок файлов.
+
+    Отдельной книжки для счётчиков нет нарочно. Две книжки об одном и том же
+    расходятся на первом же `--reset`: отметки выбранных файлов забыты, а
+    счётчик помнит их номера, и следующий разбор начинает разговор с чужого
+    места. Здесь забытая отметка сама освобождает свои номера.
+    """
+    out = {}
+    for mark in (state.get("files") or {}).values():
+        seen = mark.get(counts) or {}
+        for talk, base in (mark.get(bases) or {}).items():
+            out[talk] = max(out.get(talk, 0), base + seen.get(talk, 0))
+    return out
+
+
+def event_counters_of(state):
+    """То же самое для событий: докуда занумерованы события разговора.
+
+    Номера событий присваивает сохранение, а понимание их повторяет: связь
+    эпизод — событие адресует событие ключом `разговор + номер`, и промах здесь
+    означал бы связь на строку, которой в хранилище нет. Правило нумерации
+    общее и лежит в одном месте, см. transcripts.record_of.
+    """
+    return counters_of(state, bases="event_bases", counts="event_counts")
+
+
+def event_bases_of(counts, before, counters):
+    """С какого номера идут события этого файла в каждом разговоре."""
+    bases = dict(before.get("event_bases") or {})
+    for talk in counts:
+        bases.setdefault(talk, counters.get(talk, 0))
+    return bases
+
+
+def absolute_events(episodes, bases):
+    """Номера событий эпизода — от начала разговора, а не от начала файла."""
+    for ep in episodes:
+        base = bases.get(ep["session_id"] or "unknown", 0)
+        ep["events"] = [base + number for number in ep.get("events") or []]
+    return episodes
+
+
+def bases_of(episodes, before, counters):
+    """С какого номера идут эпизоды этого файла в каждом разговоре.
+
+    Присваивается один раз, при первом разборе файла, и дальше живёт в его
+    отметке: иначе перечитанный хвостовой эпизод получил бы новый номер и лёг
+    бы в хранилище вторым.
+    """
+    bases = dict(before.get("bases") or {})
+    for talk in counts_of(episodes):
+        bases.setdefault(talk, counters.get(talk, 0))
+    return bases
+
+
+def renumber(episodes, bases):
+    """Номер эпизода — по разговору, а не по файлу.
+
+    Ключ эпизода это разговор плюс номер. Разговор часто разложен по нескольким
+    файлам архива (66 из 160 на 2026-08-31), и счёт внутри файла означал, что
+    первый эпизод второго файла затирает первый эпизод первого: из 1944 эпизодов
+    архива доезжало 1736. Ровно тем же способом и по той же причине считает
+    номера событий сохранение, см. save.ingest.
+    """
+    seen = {}
+    for ep in episodes:
+        talk = ep["session_id"] or "unknown"
+        seen[talk] = seen.get(talk, 0) + 1
+        ep["number"] = bases.get(talk, 0) + seen[talk]
+    return episodes
 
 
 def advance(mark, unseen, taken, before):
@@ -110,7 +201,7 @@ def advance(mark, unseen, taken, before):
                 done=False)
 
 
-def unread(path, before):
+def unread(path, before, counters=None, event_counters=None):
     """Эпизоды файла, которых понимание ещё не разбирало, и отметка после них.
 
     Неизменившийся файл не открываем вовсе: узнать это стоит одного stat, а
@@ -129,7 +220,11 @@ def unread(path, before):
     if (before.get("done") and before.get("inode") == stat.st_ino
             and before.get("size") == stat.st_size):
         return [], before
-    episodes = episodes_from_file(path)
+    episodes, event_counts = episodes_and_events(path)
+    bases = bases_of(episodes, before, counters or {})
+    renumber(episodes, bases)
+    event_bases = event_bases_of(event_counts, before, event_counters or {})
+    absolute_events(episodes, event_bases)
     start = before.get("episodes", 0)
     if before.get("inode") != stat.st_ino or stat.st_size < before.get("size", 0):
         start = 0                       # файл подменили или обрезали
@@ -140,7 +235,8 @@ def unread(path, before):
     elif start and stat.st_size != before.get("size") \
             and tail_of(episodes[start - 1]) != before.get("tail"):
         start -= 1                      # хвостовой эпизод дорос, берём его снова
-    return episodes[start:], mark_of(episodes, len(episodes), stat)
+    return episodes[start:], mark_of(episodes, len(episodes), stat, bases,
+                                    event_bases, event_counts)
 
 
 def marked_or_guessed(ep):
@@ -259,10 +355,23 @@ def deliver(ep, episode, facts, door):
     соединяет.
     """
     if hasattr(door, "write_objects"):
+        # Разговор идёт первой записью: связь ссылается на обе стороны по
+        # ключу, и порядок в списке мутаций сохраняется. Без этой связи эпизод
+        # был островом — события разговора лежали отдельно, эпизоды отдельно,
+        # и вопрос «что было в этом эпизоде» не собирался ничем.
+        session = models.Session(session_id=episode.session_id)
+        # События эпизода уже лежат в хранилище: их пишет сохранение, и здесь
+        # мы адресуем их ключом, а не создаём заново. Номер события общий —
+        # правило нумерации одно на два модуля, см. transcripts.record_of.
+        events = [models.Event(session_id=episode.session_id, sequence_number=number)
+                  for number in ep.get("events") or []]
         return door.write_objects(
-            [episode] + [record for record, _ in facts],
-            [models.link("episode_facts", episode=episode, fact=record)
-             for record, _ in facts])
+            [session, episode] + [record for record, _ in facts],
+            [models.link("session_episodes", session=session, episode=episode)]
+            + [models.link("episode_events", episode=episode, event=event)
+               for event in events]
+            + [models.link("episode_facts", episode=episode, fact=record)
+               for record, _ in facts])
     door.write(render_episode(ep))
     for _, line in facts:
         door.write(line)
@@ -377,7 +486,10 @@ def write_all(fresh, state, got, weights, newest, limit, dry, min_score,
     """Разбор и запись изменившихся файлов. Всё, ради чего держится замок."""
     for path in fresh:
         try:
-            episodes, mark = unread(path, state["files"].get(str(path), {}))
+            # Счётчики разговоров пересчитываются на каждом файле: предыдущий
+            # мог занять номера того же разговора прямо в этом проходе.
+            episodes, mark = unread(path, state["files"].get(str(path), {}),
+                                    counters_of(state), event_counters_of(state))
         except OSError:
             continue
         if not episodes:

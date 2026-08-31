@@ -22,6 +22,7 @@ from infra.timeline import DAYS, parse_time, when
 
 # Имена времени видны отсюда намеренно: вызывающие берут разбор у чтения архива.
 __all__ = ["TRANSCRIPTS", "EDIT_TOOLS", "DAYS", "parse_time", "when", "blocks",
+           "record_of", "starts_episode", "episodes_and_events",
            "result_text", "records_from_line", "read_new", "episodes_from_file"]
 
 TRANSCRIPTS = Path.home() / ".claude" / "projects"
@@ -47,6 +48,34 @@ def result_text(block):
     return str(body or "")
 
 
+def record_of(kind_of, block):
+    """Запись из одного блока строки, либо None, если записи в нём нет.
+
+    Правило одно на всех: по нему сохранение нумерует события, а понимание
+    считает, какие из них попали в эпизод. Была бы копия в каждом — копии
+    разошлись бы молча, и связь эпизод — событие повисла бы на номере, которого
+    в хранилище нет.
+    """
+    said = "user_message" if kind_of == "user" else "agent_response"
+    kind = block.get("type")
+    if kind == "text":
+        out = (said, "реплика", block.get("text", ""), None)
+    elif kind == "thinking":
+        out = ("agent_response", "размышление", block.get("thinking", ""), None)
+    elif kind == "tool_use":
+        name = block.get("name", "?")
+        out = ("tool_call", "команда %s" % name,
+               json.dumps(block.get("input", {}), ensure_ascii=False), name)
+    elif kind == "tool_result":
+        out = ("tool_result", "результат команды", result_text(block), None)
+    else:
+        return None
+    event_type, role, text, tool = out
+    if not str(text).strip():
+        return None
+    return (event_type, role, redact(text), tool)
+
+
 def records_from_line(rec):
     """Одна строка транскрипта превращается в записи. Целиком, без обрезки.
 
@@ -56,22 +85,18 @@ def records_from_line(rec):
     kind_of = rec.get("type")
     if kind_of not in ("user", "assistant"):
         return []
-    said = "user_message" if kind_of == "user" else "agent_response"
-    out = []
-    for block in blocks(rec.get("message") or {}):
-        kind = block.get("type")
-        if kind == "text":
-            out.append((said, "реплика", block.get("text", ""), None))
-        elif kind == "thinking":
-            out.append(("agent_response", "размышление", block.get("thinking", ""), None))
-        elif kind == "tool_use":
-            name = block.get("name", "?")
-            out.append(("tool_call", "команда %s" % name,
-                        json.dumps(block.get("input", {}), ensure_ascii=False), name))
-        elif kind == "tool_result":
-            out.append(("tool_result", "результат команды", result_text(block), None))
-    return [(event_type, role, redact(text), tool)
-            for event_type, role, text, tool in out if str(text).strip()]
+    found = [record_of(kind_of, block) for block in blocks(rec.get("message") or {})]
+    return [item for item in found if item is not None]
+
+
+def starts_episode(kind_of, block):
+    """Граница эпизода: непустая реплика человека.
+
+    Правило живёт здесь, а не в разборе: по нему режет эпизоды понимание, и по
+    нему же считает границы всякий, кому нужно знать, где эпизод начался.
+    """
+    return (kind_of == "user" and block.get("type") == "text"
+            and bool((block.get("text") or "").strip()))
 
 
 def read_new(path, cursor):
@@ -135,7 +160,22 @@ def _lines(path):
 
 def episodes_from_file(path):
     """Режем разговор на эпизоды по сообщениям человека."""
+    return episodes_and_events(path)[0]
+
+
+def episodes_and_events(path):
+    """Эпизоды файла и сколько событий у каждого разговора в этом файле.
+
+    Номера событий эпизод несёт в поле `events` — те же порядковые номера, что
+    присваивает сохранение, только считанные от начала файла. Абсолютными их
+    делает тот, кто знает, сколько событий разговора было в предыдущих файлах,
+    см. understand.event_bases_of.
+
+    Считается тем же проходом, что и эпизоды: второй проход по файлу стоил бы
+    столько же, сколько первый, а конец хода обходит сотни транскриптов.
+    """
     current, out = None, []
+    seq, counts = {}, {}
     # Файл закрываем явно и читаем построчно: понимание зовётся в конце
     # каждого хода и обходит сотни транскриптов. Брошенный дескриптор живёт
     # до сборки мусора, а целый файл в памяти это мегабайты на каждый.
@@ -146,16 +186,28 @@ def episodes_from_file(path):
             continue
         if rec.get("type") not in ("user", "assistant"):
             continue
+        talk = rec.get("sessionId") or rec.get("session_id") or ""
+        # Разговор без имени зовём «unknown» — тем же словом и по той же
+        # причине, что сохранение: половина ключа пустой быть не может, и
+        # счётчик обязан класть такие события в ту же корзину.
+        who = talk or "unknown"
+        kind_of = rec.get("type")
         for block in blocks(rec.get("message") or {}):
             kind = block.get("type")
-            if kind == "text" and rec.get("type") == "user":
+            # Номер события считаем до всего прочего и для каждого блока, даже
+            # если эпизода ещё нет: сохранение нумерует так же, а записи до
+            # первой реплики человека — предисловие, эпизода у них нет.
+            number = None
+            if record_of(kind_of, block) is not None:
+                number = seq.get(who, 0)
+                seq[who] = number + 1
+                counts[who] = seq[who]
+            if starts_episode(kind_of, block):
                 text = (block.get("text") or "").strip()
-                if not text:
-                    continue
                 if current:
                     out.append(current)
                 current = {
-                    "session_id": rec.get("sessionId") or rec.get("session_id") or "",
+                    "session_id": talk,
                     "number": len(out) + 1,
                     "request": text,
                     "started_at": rec.get("timestamp") or "",
@@ -163,10 +215,16 @@ def episodes_from_file(path):
                     "cwd": rec.get("cwd") or "",
                     "branch": rec.get("gitBranch") or "",
                     "files": [], "commands": [], "replies": [], "errors": [],
+                    "events": [],
                 }
-            elif current is None:
+                if number is not None:
+                    current["events"].append(number)
                 continue
-            elif kind == "tool_use":
+            if current is None:
+                continue
+            if number is not None:
+                current["events"].append(number)
+            if kind == "tool_use":
                 name = block.get("name", "?")
                 inp = block.get("input") or {}
                 current["ended_at"] = rec.get("timestamp") or current["ended_at"]
@@ -186,4 +244,4 @@ def episodes_from_file(path):
                 current["ended_at"] = rec.get("timestamp") or current["ended_at"]
     if current:
         out.append(current)
-    return out
+    return out, counts

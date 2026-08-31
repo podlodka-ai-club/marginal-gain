@@ -446,9 +446,9 @@ class TestTheCeilingBoundsTheParseToo(Digest):
             # архиву — это мера, и она считается вся, см. digest.
             real, opened = understand.unread, []
 
-            def counting(path, before):
+            def counting(path, before, counters=None, event_counters=None):
                 opened.append(path)
-                return real(path, before)
+                return real(path, before, counters, event_counters)
 
             with mock.patch.object(understand, "unread", counting):
                 self.run_understanding(tmp, files, limit=1)
