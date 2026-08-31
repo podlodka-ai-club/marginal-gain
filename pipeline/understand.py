@@ -100,6 +100,24 @@ def tail_of(ep):
                                len(ep["errors"]))
 
 
+def head_of(episodes):
+    """Отпечаток начала файла: по нему видно, тот ли это файл вообще.
+
+    Узла файла для этого мало. На overlayfs (любой запуск в контейнере) номер
+    узла после удаления переиспользуется тут же: подменённый файл приходит с
+    прежним узлом и большим размером, то есть выглядит ровно как дописанный, и
+    разбор начинается не с начала. На APFS такого не видно — узлы там не
+    переиспользуются, и проверка молча зеленела на машине разработчика.
+
+    Берём разговор и время первого эпизода: подмена меняет либо то, либо то, а
+    дописывание не трогает ни того, ни другого.
+    """
+    if not episodes:
+        return ""
+    first = episodes[0]
+    return "%s|%s" % (first.get("session_id", ""), first.get("started_at", ""))
+
+
 def mark_of(episodes, count, stat, bases=None, event_bases=None, event_counts=None):
     """Отметка: докуда файл разобран и чем кончился разобранный кусок.
 
@@ -108,6 +126,7 @@ def mark_of(episodes, count, stat, bases=None, event_bases=None, event_counts=No
     восстанавливается счётчик разговора, см. counters_of.
     """
     return {"size": stat.st_size, "inode": stat.st_ino, "episodes": count,
+            "head": head_of(episodes),
             "tail": tail_of(episodes[count - 1]) if count else "",
             "bases": dict(bases or {}), "counts": dict(counts_of(episodes)),
             "event_bases": dict(event_bases or {}),
@@ -240,6 +259,10 @@ def unread(path, before, counters=None, event_counters=None):
         start = 0
     elif before.get("inode") != stat.st_ino or stat.st_size < before.get("size", 0):
         start = 0                       # файл подменили или обрезали
+    elif before.get("head") and head_of(episodes) != before["head"]:
+        # Узел прежний, размер вырос, а начало файла другое: узел переиспользован
+        # после удаления (overlayfs делает это сразу). Отметка не о нём.
+        start = 0
     elif start > len(episodes):
         # Файл переписали на месте: узел прежний, размер вырос, а эпизодов
         # стало меньше. Отметка указывает за конец — верить ей больше нельзя.

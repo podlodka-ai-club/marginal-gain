@@ -1,0 +1,12 @@
+.git
+.idea
+.hypothesis
+.pytest_cache
+__pycache__
+**/__pycache__
+*.pyc
+.env
+research
+archive
+CONTEXT.md
+eval-*.json

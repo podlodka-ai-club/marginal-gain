@@ -1,0 +1,52 @@
+# Локальная база одной командой:
+#
+#   docker compose up db            создать схему в томе xmem-state
+#   docker compose run --rm tests   прогнать проверки
+#   docker compose run --rm shell   консоль внутри образа
+#
+# База — SQLite, файл в томе `xmem-state`. Сервера у неё нет и не будет: путь
+# наружу `local` выбран как раз затем, чтобы не держать ни сети, ни ключа, ни
+# квоты. Поэтому `db` — не демон, а разовый прогон миграций; он завершается с
+# нулём, и это норма, а не падение.
+
+services:
+  # Схема. Гоняется столько раз, сколько нужно: миграции идут CREATE IF NOT
+  # EXISTS и версией, повторный запуск ничего не портит.
+  db:
+    build: .
+    image: marginal-gain:dev
+    command: ["python3", "-m", "storage.db", "migrate"]
+    environment:
+      XMEM_LOCAL_PATH: /state/memory.db
+    volumes:
+      - xmem-state:/state
+
+  # Проверки. Тот же образ, чтобы «у меня зелено» значило то же самое на
+  # любой машине. База проверкам не нужна — они делают свою во временном
+  # каталоге, — но том подключён: часть проверок читает путь из окружения.
+  tests:
+    build: .
+    image: marginal-gain:dev
+    command: ["python3", "-m", "pytest", "-q"]
+    environment:
+      XMEM_LOCAL_PATH: /state/memory.db
+    volumes:
+      - .:/app
+      - xmem-state:/state
+
+  # Руки. Отсюда видно и базу, и рубильники: ./bin/xmem, python3 -m storage.db
+  # counts, python3 -m storage.db search "запрос".
+  shell:
+    build: .
+    image: marginal-gain:dev
+    command: ["bash"]
+    stdin_open: true
+    tty: true
+    environment:
+      XMEM_LOCAL_PATH: /state/memory.db
+    volumes:
+      - .:/app
+      - xmem-state:/state
+
+volumes:
+  xmem-state:

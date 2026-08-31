@@ -206,6 +206,33 @@ class TestCursorFollowsTheGrowingArchive(Digest):
 
     @SLOW
     @given(sizes=ARCHIVES)
+    def test_a_replaced_file_with_a_reused_inode_is_read_from_the_start(self, sizes):
+        """Узел файла после удаления переиспользуется — на overlayfs всегда.
+
+        Подмена тогда неотличима от дописывания по stat: узел прежний, размер
+        больше. Проверка ставит ровно этот случай руками, потому что на APFS
+        его не воспроизвести, а в контейнере он случается сам собой.
+        """
+        with tempfile.TemporaryDirectory() as tmp:
+            files = archive(tmp, sizes)
+            self.run_understanding(tmp, files)
+            files[0].unlink()
+            append(files[0], rows("session-новая", 0, sizes[0] + 2))
+            with mock.patch.object(understand, "STATE",
+                                   Path(tmp) / "understand.json"), \
+                 mock.patch.dict(os.environ, {"XMEM_BACKEND": "local"}):
+                state_file = understand.state_path()
+            state = json.loads(state_file.read_text(encoding="utf-8"))
+            mark = state["files"][str(files[0])]
+            mark["inode"] = files[0].stat().st_ino      # узел «переиспользован»
+            state_file.write_text(json.dumps(state, ensure_ascii=False),
+                                  encoding="utf-8")
+            got = self.run_understanding(tmp, files)
+            self.assertEqual(got["episodes"], sizes[0] + 2,
+                             "подменённый файл разобран по старой отметке")
+
+    @SLOW
+    @given(sizes=ARCHIVES)
     def test_a_replaced_file_is_read_from_the_start(self, sizes):
         """Файл подменили или обрезали — отметка в нём больше ничего не значит."""
         with tempfile.TemporaryDirectory() as tmp:
