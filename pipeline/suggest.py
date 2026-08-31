@@ -53,7 +53,9 @@ MAX_CHARS = 1200     # потолок на весь кусок, который �
 SCORE = re.compile(r"Оценка уверенности:\s*([0-9]+(?:\.[0-9]+)?)")
 
 # Служебные поля записи: агенту не говорят ничего, а потолок съедают.
-NOISE = ("first_seen_at", "observed_at", "created_at", "updated_at", "id")
+NOISE = ("first_seen_at", "observed_at", "created_at", "updated_at", "id",
+         "object_type", "via_graph", "sequence_number", "session_id",
+         "fact_type", "scope", "subject")
 
 
 def _parse(text):
@@ -102,6 +104,11 @@ def _text(chunk):
     parts = []
     if chunk.get("content"):
         parts.append(str(chunk["content"]))
+    # У факта весь смысл в тексте: подпись, охват и вид дословно повторяют его
+    # же содержание, а на потолок в 1200 символов это втрое дороже. У эпизода
+    # наоборот — там ветка и исход, и терять их нельзя, на этом уже спотыкались.
+    if chunk.get("object_type") == "Fact" and parts:
+        return parts[0]
     for key, value in chunk.items():
         if key == "content" or key in NOISE:
             continue
@@ -183,11 +190,83 @@ def render(kept):
     return "\n".join(lines)
 
 
+# Затухание на шаг по графу. Сосед приходит не потому, что его спросили, а
+# потому, что он связан с тем, что спросили: весить больше источника он не может.
+DAMPING = 0.5
+
+# Сколько соседей добираем. Потолок на всю выдачу всё равно режет, но обходить
+# граф ради кусков, которые заведомо не влезут, незачем.
+MAX_NEAR = 3
+
+
+def keys_of(kept):
+    """Подписи фактов, которые прошли порог. От них и делается шаг."""
+    out = []
+    for item in kept:
+        record = item[2] if len(item) > 2 else None
+        if isinstance(record, dict) and record.get("object_type") == "Fact":
+            try:
+                out.append(models.Fact(fact_type=record.get("fact_type") or "",
+                                       subject=record.get("subject") or "",
+                                       scope=record.get("scope") or "").identity())
+            except (TypeError, ValueError):
+                continue
+    return out
+
+
+@telemetry.traced("graph_step", lambda arg, out: {
+    "from": len(arg["kept"]), "near": len(out)})
+def near(kept, door, limit=MAX_NEAR):
+    """Один шаг по графу: факты, связанные с тем, что уже нашлось.
+
+    Дверь, которая обхода не умеет, оставляет выдачу как была: у сетевого
+    читателя такого чтения нет, и подсказка не имеет права от него зависеть.
+
+    Шаг ровно один. Сосед соседа приходил бы уже не по связи с вопросом, а по
+    связи со связью — на архиве это заливает выдачу быстрее, чем помогает.
+    """
+    keys = keys_of(kept)
+    if not keys:
+        return []
+    try:
+        found = door.neighbours(keys, limit=limit)
+    except AttributeError:
+        return []
+    except Exception:
+        # Обход это добавка. Упади он — подсказка обязана отдать то, что нашла
+        # поиском, а не промолчать целиком.
+        return []
+    # База затухания — лучшая из оценок прямых попаданий. Оценки может не быть
+    # вовсе: её дописывает только текстовый путь, а в хранилище лежат записи.
+    # Тогда за базу берётся единица, то есть полное попадание, и сосед всё
+    # равно оказывается ниже него.
+    top = max([s for s, _, _ in kept if s is not None] or [1.0])
+    out = []
+    for record, weight in found:
+        record = dict(record, via_graph=True)
+        out.append((round(top * DAMPING, 4), _text(record), record))
+    return out
+
+
 @telemetry.traced("pipeline", lambda arg, out: {
     "kept": len(out[1]), "sent_chars": len(out[0]), "silent": not out[0]})
 def suggest(query, mode="single", min_score=MIN_SCORE, door=None):
-    answer = (door or port.door()).read(query, mode=mode)
+    door = door or port.door()
+    answer = door.read(query, mode=mode)
     kept = gate(pieces(answer), min_score=min_score)
+    # Соседи добираются после порога и ставятся следом: прямое попадание
+    # первым, добавка второй. Потолки те же — их считает тот же `gate`.
+    added = near(kept, door)
+    if added:
+        room = MAX_ITEMS - len(kept)
+        if room > 0:
+            size = sum(len(t) for _, t, _ in kept)
+            for score, text, record in added[:room]:
+                clean = " ".join(text.split())
+                if size + len(clean) > MAX_CHARS:
+                    continue
+                kept.append((score, clean, record))
+                size += len(clean)
     return render(kept) if kept else "", kept, answer
 
 

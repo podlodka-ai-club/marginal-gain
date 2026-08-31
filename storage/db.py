@@ -44,6 +44,12 @@ CANDIDATES = 300
 # меньше.
 PRIORITY = {"Fact": 4, "Episode": 3, "Event": 2, "Session": 1}
 
+# Сколько строк каждого вида берётся в выдачу. Приоритет выше был множителем, а
+# множитель не гарантирует места: событий в базе 45 тысяч против 466 фактов, и
+# десяток длинных команд закрывал собой всю десятку. Квота даёт факту место, но
+# событие не запрещает: недобранное одним видом достаётся остальным.
+QUOTA = {"Fact": 6, "Episode": 3, "Event": 3, "Session": 1}
+
 WORD = re.compile(r"[\w./:-]{3,}", re.UNICODE)
 
 # Служебные слова вопроса. Без отсева «какие» и «проект» тянут половину базы.
@@ -267,11 +273,68 @@ class Repository:
                     found.append((score * PRIORITY.get(object_type, 1),
                                   object_type, dict(row)))
         found.sort(key=lambda item: item[0], reverse=True)
-        out = []
-        for score, object_type, row in found[:limit]:
+        out, taken = [], {}
+        for score, object_type, row in found:
+            if len(out) >= limit:
+                break
+            if taken.get(object_type, 0) >= QUOTA.get(object_type, limit):
+                continue
+            taken[object_type] = taken.get(object_type, 0) + 1
             record = {k: v for k, v in row.items() if v not in (None, "")}
             record["object_type"] = object_type
             out.append(record)
+        # Место, не занятое своим видом, отдаём остальным: квота гарантирует
+        # место, а не отнимает его. Иначе выдача выходила бы короче потолка при
+        # полной базе.
+        if len(out) < limit:
+            seen = {id(r) for r in out}
+            for score, object_type, row in found:
+                if len(out) >= limit:
+                    break
+                record = {k: v for k, v in row.items() if v not in (None, "")}
+                record["object_type"] = object_type
+                if any(r == record for r in out):
+                    continue
+                out.append(record)
+        return out
+
+    def neighbours(self, keys, limit=10):
+        """Факты, связанные карточкой с любым из названных.
+
+        Обход по ключу, а не поиск словами: связь адресует факт строкой
+        `fact_type|subject|scope`, и найти по ней строку можно только так.
+        Возвращает пары (запись факта, вес связи), тяжёлые связи первыми.
+
+        Сам факт-источник в соседи не попадает: он уже в выдаче, и второй раз
+        он бы только съел потолок.
+        """
+        if not keys:
+            return []
+        holes = ", ".join("?" * len(keys))
+        rows = self.conn.execute(
+            "SELECT source_key, target_key, weight FROM association "
+            "WHERE source_key IN (%s) OR target_key IN (%s) "
+            "ORDER BY weight DESC LIMIT %d" % (holes, holes, limit * 4),
+            list(keys) + list(keys)).fetchall()
+        known, out = set(keys), []
+        for source, target, weight in rows:
+            other = target if source in known else source
+            if other in known:
+                continue
+            known.add(other)
+            parts = other.split("|", 2)
+            if len(parts) != 3:
+                continue
+            found = self.conn.execute(
+                'SELECT * FROM fact WHERE fact_type = ? AND subject = ? AND scope = ?',
+                parts).fetchone()
+            if found is None:
+                continue        # связь пережила факт: конец есть, строки нет
+            record = {k: v for k, v in dict(found).items() if v not in (None, "")}
+            record["object_type"] = "Fact"
+            out.append((record, weight))
+            if len(out) >= limit:
+                break
         return out
 
     def counts(self):

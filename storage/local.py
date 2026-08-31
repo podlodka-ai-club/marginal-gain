@@ -135,6 +135,11 @@ def read(query, mode="single-answer", timeout=None):
     return json.dumps(found, ensure_ascii=False) if found else ""
 
 
+def neighbours(keys, limit=10, timeout=None):
+    """Соседи по графу связей. У сети такого чтения нет, у базы есть."""
+    return repository().neighbours(list(keys), limit=limit)
+
+
 def schema(timeout=None):
     """Схема берётся из `models`, а не из сети: локально это тот же источник."""
     return {"objects": sorted(models.OBJECTS), "relations": sorted(models.RELATIONS),

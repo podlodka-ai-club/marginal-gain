@@ -133,6 +133,17 @@ class StructuredDoor:
     def read(self, query, mode="single"):
         return self.adapter.read(query, mode=READ_MODES.get(mode, mode))
 
+    def neighbours(self, keys, limit=10):
+        """Шаг по графу связей. Умеет не всякий путь наружу.
+
+        Спрашиваем адаптер, а не имя двери: у сетевого читателя такого обхода
+        нет, и подсказка обязана работать без него ровно как раньше.
+        """
+        step = getattr(self.adapter, "neighbours", None)
+        if step is None:
+            raise AttributeError("путь %s обхода по графу не умеет" % self.name)
+        return step(keys, limit=limit)
+
 
 class SilentDoor:
     """Память выключена целиком: чтение отдаёт пустоту, запись молча гаснет.
