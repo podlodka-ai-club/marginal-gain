@@ -15,7 +15,7 @@
 import dataclasses, hashlib, json, os, re, sqlite3, threading
 from pathlib import Path
 
-from domain import models
+from domain import lifespan, models
 
 DEFAULT_PATH = Path.home() / ".local" / "state" / "memory-encoder" / "memory.db"
 
@@ -115,7 +115,37 @@ def _v2(conn):
     conn.execute('CREATE INDEX IF NOT EXISTS lapsedfact_subject ON lapsedfact (subject)')
 
 
-MIGRATIONS = (_v1, _v2)
+def _v3(conn):
+    """Срок задним числом тем фактам, что записаны до появления срока.
+
+    Без этого шага забывание включено вхолостую. Поле есть, но у лежащих фактов
+    оно пусто, а пустой срок значит «не протухает никогда» — выбыть не может ни
+    один. Само это не рассосётся: старые записи не переписываются, их дополняют
+    по ключу, и срок появился бы только у тех, кого тронули заново.
+
+    Считаем от «когда видели», а не от «сейчас». От «сейчас» все получили бы
+    один день смерти и выбыли бы разом, а годовой факт прожил бы столько же,
+    сколько вчерашний. Отметки, которой нет, `lifespan.until` подставляет
+    «сейчас» — решение записано в ADR 0007: срок от неточного начала лучше, чем
+    факт, который не выбудет никогда.
+
+    Трогаем только пустое. Назначить срок впервые шаг вправе — он знает строку
+    целиком, в отличие от продления, которое знает лишь ключ; переписать уже
+    назначенное — нет, иначе он нарушил бы то же правило с другой стороны.
+
+    Подпись факта (`fact_type|subject|scope`) не двигается: ею связь адресует
+    факт, и смена подписи оборвала бы граф молча.
+    """
+    rows = conn.execute(
+        'SELECT "fact_type", "subject", "scope", "updated_at" FROM "fact" '
+        'WHERE "valid_until" IS NULL OR "valid_until" = \'\'').fetchall()
+    for row in rows:
+        conn.execute('UPDATE "fact" SET "valid_until" = ? WHERE "fact_type" = ? '
+                     'AND "subject" = ? AND "scope" = ?',
+                     (lifespan.until(row[3]), row[0], row[1], row[2]))
+
+
+MIGRATIONS = (_v1, _v2, _v3)
 
 
 def migrate(conn):

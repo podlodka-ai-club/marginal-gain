@@ -513,6 +513,263 @@ class TestTheHookCallsTheSweep(unittest.TestCase):
         self.assertEqual(order, sorted(order), "забывание идёт не последним")
 
 
+def rewind(base):
+    """Вернуть базе ту версию схемы, что была до назначения срока задним числом."""
+    conn = sqlite3.connect(str(base))
+    try:
+        conn.execute("PRAGMA user_version = %d" % db.MIGRATIONS.index(db._v3))
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def unset(base, *names):
+    """Стереть срок. Без имён — у всех: так выглядит живая база до шага."""
+    conn = sqlite3.connect(str(base))
+    try:
+        if names:
+            holes = ", ".join("?" * len(names))
+            conn.execute('UPDATE fact SET valid_until = NULL WHERE subject IN (%s)'
+                         % holes, ["%s/%s" % (CWD, n) for n in names])
+        else:
+            conn.execute("UPDATE fact SET valid_until = NULL")
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def deadlines(base):
+    """Срок каждого факта по теме. То, что шаг обязан заполнить."""
+    return {row["subject"]: row["valid_until"] for row in rows_of(base, "fact")}
+
+
+def reopen():
+    """Открыть базу заново. Открытие и есть тот момент, когда шаг накатывается.
+
+    Дверь открывает базу лениво, при первом обращении. Здесь обращаемся сразу:
+    иначе проверка смотрела бы в файл, которого шаг ещё не касался.
+    """
+    local.close()
+    local.repository()
+    return port.door()
+
+
+def old(name, at, kind="project_state", scope="project"):
+    """Факт без срока: так его писал код до того, как у факта появился срок."""
+    return models.Fact(fact_type=kind, subject="%s/%s" % (CWD, name), scope=scope,
+                       content="правился файл %s" % name, project="demo",
+                       updated_at=lifespan.stamp(at))
+
+
+
+# --- 5. Срок задним числом тем, кто уже лежит ------------------------------
+
+
+class TestTheOldFactsGetTheirDeadlineToo(unittest.TestCase):
+    """Шаг схемы назначает срок фактам, записанным до того, как срок появился.
+
+    Без него забывание включено вхолостую: у лежащих фактов поле пусто, пустой
+    срок значит «не протухает никогда», и выбыть не может ни один. Само это не
+    рассосётся — старые записи не переписываются, их дополняют по ключу.
+
+    Мутации, на которых проверки обязаны краснеть:
+      * считать срок от «сейчас», а не от «когда видели»
+      * трогать те строки, которым срок уже назначен
+      * пропускать факт без «когда видели», оставляя его бессмертным
+      * менять подпись факта — связи повисли бы молча
+    """
+
+    @SLOW
+    @given(ages=st.lists(st.integers(min_value=0, max_value=900),
+                         min_size=1, max_size=6, unique=True),
+           mode=st.sampled_from(MODES))
+    def test_the_deadline_counts_from_when_the_fact_was_seen(self, ages, mode):
+        """Срок каждого — его собственная отметка плюс режим. Не общий день."""
+        with tempfile.TemporaryDirectory() as tmp, store(tmp, mode) as base:
+            door = port.door()
+            seen = {}
+            for number, age in enumerate(ages):
+                at = datetime.now(timezone.utc) - timedelta(days=age)
+                seen["file%d.py" % number] = at
+                put(door, old("file%d.py" % number, at))
+            unset(base)
+            rewind(base)
+            reopen()
+            got = deadlines(base)
+            for name, at in seen.items():
+                self.assertEqual(got["%s/%s" % (CWD, name)],
+                                 lifespan.until(at, mode), name)
+
+    @SLOW
+    @given(ages=st.lists(st.integers(min_value=0, max_value=900),
+                         min_size=2, max_size=6, unique=True),
+           mode=st.sampled_from(MODES))
+    def test_the_deadlines_do_not_all_fall_on_one_day(self, ages, mode):
+        """Отметки разные — значит и сроки разные. Иначе все выбудут разом."""
+        with tempfile.TemporaryDirectory() as tmp, store(tmp, mode) as base:
+            door = port.door()
+            for number, age in enumerate(ages):
+                put(door, old("file%d.py" % number,
+                              datetime.now(timezone.utc) - timedelta(days=age)))
+            unset(base)
+            rewind(base)
+            reopen()
+            self.assertEqual(len(set(deadlines(base).values())), len(ages))
+
+    @SLOW
+    @given(age=st.integers(min_value=1, max_value=900),
+           mode=st.sampled_from(MODES))
+    def test_a_fact_older_than_the_mode_is_overdue_at_once(self, age, mode):
+        """Судьба старого факта решена его возрастом, а не днём миграции."""
+        with tempfile.TemporaryDirectory() as tmp, store(tmp, mode) as base:
+            door = port.door()
+            put(door, old("db.py", datetime.now(timezone.utc) - timedelta(days=age)))
+            unset(base)
+            rewind(base)
+            door = reopen()
+            expect = 1 if age > lifespan.days(mode) else 0
+            self.assertEqual(forget.sweep(door=door, dry=True)["moved"], expect)
+
+    def test_before_the_step_the_sweep_finds_nothing_at_any_date(self):
+        """Живая база до шага: срок пуст у всех, и забывание меряет пустоту."""
+        with tempfile.TemporaryDirectory() as tmp, store(tmp) as base:
+            door = port.door()
+            put(door, old("db.py", datetime.now(timezone.utc) - timedelta(days=400)))
+            unset(base)
+            far = lifespan.stamp(datetime.now(timezone.utc) + timedelta(days=365))
+            self.assertEqual(forget.sweep(door=door, now=far, dry=True)["moved"], 0)
+            rewind(base)
+            door = reopen()
+            self.assertEqual(forget.sweep(door=door, now=far, dry=True)["moved"], 1)
+
+    @SLOW
+    @given(age=st.integers(min_value=0, max_value=900),
+           shift=st.integers(min_value=-400, max_value=400),
+           mode=st.sampled_from(MODES))
+    def test_a_deadline_already_set_is_left_alone(self, age, shift, mode):
+        """Назначить впервые — можно, переписать назначенное — нет.
+
+        Правило «срок движется только вперёд» держит продление, и оно не вправе
+        назначать конец тому, кому его не назначали. Шаг знает строку целиком и
+        потому вправе назначить срок впервые — но только впервые.
+        """
+        with tempfile.TemporaryDirectory() as tmp, store(tmp, mode) as base:
+            door = port.door()
+            at = datetime.now(timezone.utc) - timedelta(days=age)
+            mine = lifespan.stamp(at + timedelta(days=shift))
+            put(door, old("db.py", at), old("port.py", at))
+            unset(base, "port.py")
+            conn = sqlite3.connect(str(base))
+            conn.execute("UPDATE fact SET valid_until = ? WHERE subject = ?",
+                         (mine, "%s/db.py" % CWD))
+            conn.commit()
+            conn.close()
+            rewind(base)
+            reopen()
+            got = deadlines(base)
+            self.assertEqual(got["%s/db.py" % CWD], mine, "чужой срок переписан")
+            self.assertEqual(got["%s/port.py" % CWD], lifespan.until(at, mode))
+
+    @SLOW
+    @given(mode=st.sampled_from(MODES))
+    def test_a_fact_without_a_seen_moment_still_gets_a_deadline(self, mode):
+        """Решение записано в ADR 0007: срок от «сейчас», а не пустота.
+
+        Пустой срок — ровно та дыра, которую чинит задача: такой факт не выбудет
+        никогда. Срок от «сейчас» щедрее правды не больше чем на один режим, и
+        следующая же запись факта его поправит.
+        """
+        with tempfile.TemporaryDirectory() as tmp, store(tmp, mode) as base:
+            door = port.door()
+            put(door, models.Fact(fact_type="preference", subject="отвечать коротко",
+                                  scope="global", content="человек не читает длинное"))
+            unset(base)
+            rewind(base)
+            before = lifespan.until(None, mode)
+            reopen()
+            after = lifespan.until(None, mode)
+            got = deadlines(base)["отвечать коротко"]
+            self.assertTrue(got, "факт без отметки остался бессмертным")
+            self.assertTrue(before <= got <= after, got)
+
+    @SLOW
+    @given(names=st.lists(st.sampled_from(["db.py", "port.py", "run.py", "api.py"]),
+                          min_size=2, max_size=4, unique=True),
+           mode=st.sampled_from(MODES))
+    def test_the_links_survive_the_step(self, names, mode):
+        """Подпись факта шаг не трогает, значит связи целы до единицы.
+
+        Смена подписи рвёт граф молча: связь адресует факт строкой
+        `fact_type|subject|scope`, и повисший конец ничем себя не выдаёт.
+        """
+        with tempfile.TemporaryDirectory() as tmp, store(tmp, mode) as base:
+            door = port.door()
+            at = datetime.now(timezone.utc) - timedelta(days=200)
+            facts = [old(name, at) for name in names]
+            put(door, *facts)
+            put(door, *[models.Association(
+                source_key=facts[0].identity(), target_key=other.identity(),
+                cue="same_file", weight=0.5, observed_at=lifespan.stamp(at))
+                for other in facts[1:]])
+            was_links = rows_of(base, "association")
+            was_keys = sorted(f.identity() for f in facts)
+            unset(base)
+            rewind(base)
+            reopen()
+            now_links = rows_of(base, "association")
+            self.assertEqual(len(now_links), len(was_links))
+            self.assertEqual(sorted((r["source_key"], r["target_key"], r["cue"])
+                                    for r in now_links),
+                             sorted((r["source_key"], r["target_key"], r["cue"])
+                                    for r in was_links))
+            self.assertEqual(sorted(models.Fact(**{k: row[k] for k in
+                                                   ("fact_type", "subject", "scope")}
+                                                ).identity()
+                                    for row in rows_of(base, "fact")), was_keys)
+
+    @SLOW
+    @given(names=st.lists(st.sampled_from(["db.py", "port.py", "run.py", "api.py"]),
+                          min_size=1, max_size=4, unique=True))
+    def test_the_step_moves_no_fact_anywhere(self, names):
+        """Шаг ставит поле, а не перекладывает. Отложенное после него пусто."""
+        with tempfile.TemporaryDirectory() as tmp, store(tmp) as base:
+            door = port.door()
+            at = datetime.now(timezone.utc) - timedelta(days=900)
+            put(door, *[old(name, at) for name in names])
+            unset(base)
+            rewind(base)
+            reopen()
+            self.assertEqual(len(rows_of(base, "fact")), len(names))
+            self.assertEqual(rows_of(base, "lapsedfact"), [])
+
+    def test_the_step_runs_once_and_not_on_every_opening(self):
+        """Версия схемы в файле и есть отметка. Иначе шаг ходил бы каждый раз."""
+        with tempfile.TemporaryDirectory() as tmp, store(tmp) as base:
+            put(port.door(), old("db.py", datetime.now(timezone.utc)))
+            unset(base)
+            rewind(base)
+            reopen()
+            self.assertTrue(deadlines(base)["%s/db.py" % CWD])
+            unset(base)
+            reopen()
+            self.assertIsNone(deadlines(base)["%s/db.py" % CWD],
+                              "шаг накатился второй раз")
+
+    def test_the_migrated_fact_is_renewed_like_any_other(self):
+        """Назначенный задним числом срок продлевается обычным порядком."""
+        with tempfile.TemporaryDirectory() as tmp, store(tmp, "short") as base:
+            at = datetime.now(timezone.utc) - timedelta(days=3)
+            put(port.door(), old("db.py", at))
+            unset(base)
+            rewind(base)
+            door = reopen()
+            was = deadlines(base)["%s/db.py" % CWD]
+            _, kept, _ = suggest.suggest("db.py", mode="raw", min_score=0.0, door=door)
+            suggest.renew(kept, door=door)
+            self.assertGreater(deadlines(base)["%s/db.py" % CWD], was)
+
+
+
 class Deaf:
     """Дверь без переклада и глубокого чтения. Такова сеть, и она в строю."""
 
