@@ -121,8 +121,12 @@ class TestHooksDoNotDependOnAbsentTools(unittest.TestCase):
         """Сквозь: факт в локальной базе, запрос в хук, подсказка на выходе."""
         with tempfile.TemporaryDirectory() as tmp:
             base = Path(tmp) / "memory.db"
+            # Свой HOME на прогон: состояние конвейера (журнал подсказки,
+            # книжки учёта) живёт под ним. Без подмены сквозной тест дописывал
+            # строку в живой журнал пользователя, и отметка исхода потом
+            # заводила по ней пустую запись о вставке, которой не было.
             env = dict(os.environ, XMEM_BACKEND="local", XMEM_LOCAL_PATH=str(base),
-                       PYTHONPATH=str(HERE), XMEM_LIVE="1")
+                       PYTHONPATH=str(HERE), XMEM_LIVE="1", HOME=tmp)
             seed = ("import os,sys; sys.path.insert(0,%r);\n"
                     "from storage import local\n"
                     "from domain import models\n"

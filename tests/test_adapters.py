@@ -221,7 +221,7 @@ class TestThreshold(unittest.TestCase):
             {"content": "с оценкой. Оценка уверенности: 0.90."},
         ], ensure_ascii=False)}, ensure_ascii=False)
         kept = suggest.gate(suggest.pieces(answer))
-        self.assertEqual([s for s, _ in kept], [0.9, None])
+        self.assertEqual([s for s, _, _ in kept], [0.9, None])
 
     def test_one_long_piece_does_not_starve_the_rest(self):
         """Длинный кусок пропускаем, а не обрываем на нём всю выдачу.
@@ -238,7 +238,7 @@ class TestThreshold(unittest.TestCase):
 
     def test_unscored_line_has_no_confidence_tail(self):
         """Не приписываем уверенность там, где её не измеряли."""
-        self.assertNotIn("уверенность", suggest.render([(None, "факт")]))
+        self.assertNotIn("уверенность", suggest.render([(None, "факт", None)]))
 
 
 class TestLocalStore(unittest.TestCase):

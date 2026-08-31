@@ -1,0 +1,315 @@
+#!/usr/bin/env python3
+"""Вставка памяти: что подставили, из чего собрали, помогло ли.
+
+Запуск: python3 -m unittest tests.test_injection_feedback -v
+
+Память записывала, что подставила в разговор, и никогда не отмечала исход:
+семнадцать записей о вставке лежали без единой отметки и без единой связи с
+тем, из чего они собраны. Пока петли нет, улучшать память можно только по
+набору эталонов — по тому, что мы сами про неё придумали, а не по тому, как
+она сработала в живой работе.
+
+Запись при этом уходила прозой, и ключ ей выводил разборщик на той стороне —
+тот самый класс, который уже чинили у фактов: ключ, которого мы не знаем, в
+связь не поставить.
+
+**Правило отметки, записанное до кода.** `helped` — не «память помогла»;
+такого наблюдения у нас нет. Это «ход, в который её подставили, дошёл до
+конца»: берём первый эпизод того же разговора, начавшийся не раньше вставки,
+и смотрим его исход. `done` — True, `blocked` — False, `abandoned` или эпизода
+нет вовсе — поле не пишем: неизвестное это не отрицательное.
+"""
+import contextlib, json, os, sqlite3, tempfile, unittest
+from pathlib import Path
+from unittest import mock
+
+from hypothesis import HealthCheck, given, settings, strategies as st
+
+os.environ.setdefault("XMEM_INSTANCE_ID", "test-instance")
+
+from domain import models
+from pipeline import suggest, understand
+from storage import local, port
+
+CWD = "/home/person/dev/demo"
+BRANCH = "injections"
+TALK = "разговор-1"
+
+SLOW = settings(deadline=None, max_examples=20,
+                suppress_health_check=[HealthCheck.too_slow])
+
+OUTCOMES = st.sampled_from(["done", "blocked", "abandoned"])
+
+
+@contextlib.contextmanager
+def store(tmp):
+    base = Path(tmp) / "memory.db"
+    local.close()
+    with mock.patch.dict(os.environ, {"XMEM_BACKEND": "local", "XMEM_DISABLED": "",
+                                      "XMEM_LOCAL_PATH": str(base)}), \
+         mock.patch.object(understand, "STATE", Path(tmp) / "understand.json"), \
+         mock.patch.object(suggest, "LOG", Path(tmp) / "suggest-log.jsonl"):
+        try:
+            yield base
+        finally:
+            local.close()
+
+
+def episode_rows(session, specs):
+    """Строки транскрипта: эпизод на просьбу, исход задаётся ответом и ошибкой."""
+    out = []
+    for spec in specs:
+        head = {"sessionId": session, "timestamp": spec["at"], "cwd": CWD,
+                "gitBranch": BRANCH}
+        out.append(dict(head, type="user", message={"content": spec["request"]}))
+        if spec["outcome"] == "done":
+            blocks = [{"type": "tool_use", "name": "Edit",
+                       "input": {"file_path": "%s/db.py" % CWD}},
+                      {"type": "text", "text": "Готово."}]
+        elif spec["outcome"] == "blocked":
+            blocks = [{"type": "tool_result", "is_error": True,
+                       "content": "FileNotFoundError: db.py"},
+                      {"type": "text", "text": "Не вышло."}]
+        else:
+            # Брошенный ход — это ход без ответа вовсе. Пустая реплика не
+            # брошенный: она попадает в список ответов и делает эпизод удавшимся.
+            continue
+        out.append(dict(head, type="assistant", message={"content": blocks}))
+    return out
+
+
+def archive(root, specs, session=TALK):
+    path = Path(root) / "разговор.jsonl"
+    with path.open("a", encoding="utf-8") as fh:
+        for line in episode_rows(session, specs):
+            fh.write(json.dumps(line, ensure_ascii=False) + "\n")
+    return [path]
+
+
+def injections_in(base):
+    if not Path(base).exists():
+        return {}
+    conn = sqlite3.connect(str(base))
+    try:
+        conn.row_factory = sqlite3.Row
+        return {(r["session_id"], r["injected_at"]): dict(r)
+                for r in conn.execute("SELECT * FROM memoryinjection")}
+    except sqlite3.OperationalError:
+        return {}
+    finally:
+        conn.close()
+
+
+def links_of(base, relation):
+    conn = sqlite3.connect(str(base))
+    try:
+        found = {}
+        for link_id, role, kind, key in conn.execute(
+                "SELECT link_id, role, object_type, object_key FROM links "
+                "WHERE relation = ?", (relation,)):
+            found.setdefault(link_id, {})[role] = (kind, json.loads(key))
+        return found
+    finally:
+        conn.close()
+
+
+def has_row(base, table, key):
+    where = " AND ".join('"%s" = ?' % name for name in key)
+    conn = sqlite3.connect(str(base))
+    try:
+        return bool(conn.execute('SELECT 1 FROM "%s" WHERE %s' % (table, where),
+                                 list(key.values())).fetchone())
+    finally:
+        conn.close()
+
+
+class Spy:
+    """Настоящая дверь, которая помнит, чем её звали."""
+
+    def __init__(self, inner):
+        self.inner, self.texts, self.batches = inner, [], []
+
+    def write(self, text, wait=False):
+        self.texts.append(text)
+        return self.inner.write(text, wait=wait)
+
+    def write_objects(self, records, relations=()):
+        self.batches.append((list(records), list(relations)))
+        return self.inner.write_objects(records, relations)
+
+    def read(self, query, mode="single"):
+        return self.inner.read(query, mode=mode)
+
+
+def fill(files):
+    """Наполняем хранилище так, как это делает конвейер."""
+    understand.digest(files, door=port.door(), dry=False)
+
+
+class TestTheInjectionGoesAsStructure(unittest.TestCase):
+    """Запись о вставке уходит записью схемы, а не прозой."""
+
+    @SLOW
+    @given(outcome=OUTCOMES)
+    def test_a_structured_door_is_never_asked_to_write_text(self, outcome):
+        with tempfile.TemporaryDirectory() as tmp, store(tmp):
+            spy = Spy(port.door())
+            suggest.note_injection(TALK, "Из памяти: что-то было", door=spy)
+            self.assertEqual(spy.texts, [], "вставка ушла прозой")
+            self.assertTrue(spy.batches, "вставка не ушла вовсе")
+
+    def test_the_key_is_ours_and_has_no_empty_half(self):
+        with tempfile.TemporaryDirectory() as tmp, store(tmp) as base:
+            suggest.note_injection(None, "Из памяти: что-то было", door=port.door())
+            found = injections_in(base)
+            self.assertEqual(len(found), 1)
+            for (talk, at) in found:
+                self.assertTrue(talk, "разговор пустой")
+                self.assertTrue(at, "время вставки пустое")
+
+
+class TestTheInjectionKnowsItsTalkAndSources(unittest.TestCase):
+    """Связи: куда подставили и из чего собрали."""
+
+    def test_the_talk_is_linked(self):
+        with tempfile.TemporaryDirectory() as tmp, store(tmp) as base:
+            suggest.note_injection(TALK, "Из памяти: что-то было", door=port.door())
+            found = links_of(base, "injection_target_session")
+            self.assertEqual(len(found), 1)
+            ends = list(found.values())[0]
+            self.assertEqual(set(ends), {"memory_injection", "session"})
+            self.assertEqual(ends["session"][1]["session_id"], TALK)
+
+    def test_every_source_fact_is_linked(self):
+        """Факт, попавший в подсказку, становится источником вставки."""
+        specs = [{"request": "Посмотри, что там с базой", "outcome": "done",
+                  "at": "2026-08-28T10:00:00Z"}]
+        with tempfile.TemporaryDirectory() as tmp, store(tmp) as base:
+            files = archive(tmp, specs)
+            fill(files)
+            door = port.door()
+            text, kept, _ = suggest.suggest("файлы demo", mode="raw",
+                                            min_score=0.0, door=door)
+            self.assertTrue(kept, "память ничего не нашла, проверять нечего")
+            suggest.note_injection(TALK, text, kept, door=door)
+            found = links_of(base, "injection_source_fact")
+            self.assertTrue(found, "источников у вставки нет")
+            for ends in found.values():
+                self.assertEqual(set(ends), {"memory_injection", "fact"})
+                self.assertTrue(has_row(base, "fact", ends["fact"][1]),
+                                "источник вставки — факт, которого нет в базе")
+
+    def test_an_injection_without_sources_is_still_written(self):
+        """Источников может не быть: вставка от этого не перестаёт быть."""
+        with tempfile.TemporaryDirectory() as tmp, store(tmp) as base:
+            suggest.note_injection(TALK, "Из памяти: что-то было", (), door=port.door())
+            self.assertEqual(len(injections_in(base)), 1)
+            self.assertEqual(links_of(base, "injection_source_fact"), {})
+
+
+class TestTheOutcomeIsSettledFromTheArchive(unittest.TestCase):
+    """Отметка исхода. Правило описано в начале файла и здесь исполняется."""
+
+    @SLOW
+    @given(outcome=OUTCOMES)
+    def test_the_mark_follows_the_next_episode(self, outcome):
+        specs = [{"request": "Посмотри, что там с базой", "outcome": outcome,
+                  "at": "2026-08-28T12:00:00Z"}]
+        with tempfile.TemporaryDirectory() as tmp, store(tmp) as base:
+            files = archive(tmp, specs)
+            fill(files)
+            door = port.door()
+            suggest.note_injection(TALK, "Из памяти: что-то было", (), door=door,
+                                   at="2026-08-28T11:00:00Z")
+            suggest.settle(files, door=door)
+            row = list(injections_in(base).values())[0]
+            self.assertEqual(row["session_outcome"], outcome)
+            if outcome == "done":
+                self.assertEqual(row["helped"], 1)
+            elif outcome == "blocked":
+                self.assertEqual(row["helped"], 0)
+            else:
+                self.assertIsNone(row["helped"],
+                                  "неизвестное записано как отрицательное")
+
+    def test_an_episode_before_the_injection_does_not_count(self):
+        """Ход, который кончился до вставки, к ней отношения не имеет."""
+        specs = [{"request": "Посмотри, что там с базой", "outcome": "done",
+                  "at": "2026-08-28T09:00:00Z"}]
+        with tempfile.TemporaryDirectory() as tmp, store(tmp) as base:
+            files = archive(tmp, specs)
+            fill(files)
+            door = port.door()
+            suggest.note_injection(TALK, "Из памяти: что-то было", (), door=door,
+                                   at="2026-08-28T18:00:00Z")
+            suggest.settle(files, door=door)
+            row = list(injections_in(base).values())[0]
+            self.assertIsNone(row["helped"])
+            self.assertEqual(row["session_outcome"], "unknown")
+
+    def test_settling_twice_changes_nothing(self):
+        specs = [{"request": "Посмотри, что там с базой", "outcome": "done",
+                  "at": "2026-08-28T12:00:00Z"}]
+        with tempfile.TemporaryDirectory() as tmp, store(tmp) as base:
+            files = archive(tmp, specs)
+            fill(files)
+            door = port.door()
+            suggest.note_injection(TALK, "Из памяти: что-то было", (), door=door,
+                                   at="2026-08-28T11:00:00Z")
+            suggest.settle(files, door=door)
+            was = injections_in(base)
+            suggest.settle(files, door=door)
+            self.assertEqual(injections_in(base), was)
+
+    @SLOW
+    @given(outcome=OUTCOMES)
+    def test_the_mark_belongs_to_the_schema(self, outcome):
+        """Исход — из списка схемы, а не выдуманное слово."""
+        specs = [{"request": "Посмотри, что там с базой", "outcome": outcome,
+                  "at": "2026-08-28T12:00:00Z"}]
+        with tempfile.TemporaryDirectory() as tmp, store(tmp) as base:
+            files = archive(tmp, specs)
+            fill(files)
+            door = port.door()
+            suggest.note_injection(TALK, "Из памяти", (), door=door,
+                                   at="2026-08-28T11:00:00Z")
+            suggest.settle(files, door=door)
+            for row in injections_in(base).values():
+                self.assertIn(row["session_outcome"], models.INJECTION_OUTCOMES)
+
+
+class TestTheJournalIsTheListOfInjections(unittest.TestCase):
+    """Отметка исхода идёт по журналу: перечислить вставки в хранилище нечем.
+
+    Отсюда её слабое место, названное явно: строка журнала без записи в
+    хранилище заводит запись с одним ключом и без содержимого. Так и вышло
+    один раз — сквозной тест хука писал в живой журнал пользователя.
+    """
+
+    def test_a_journal_line_without_a_key_is_skipped(self):
+        """Старые строки журнала — про запрос, а не про вставку. Их не берём."""
+        with tempfile.TemporaryDirectory() as tmp, store(tmp):
+            log = Path(tmp) / "suggest-log.jsonl"
+            log.write_text(json.dumps({"query": "что там", "kept": 0,
+                                       "sent": False}) + "\n", encoding="utf-8")
+            self.assertEqual(suggest.notes_of(log), [])
+
+    def test_a_broken_line_does_not_kill_the_pass(self):
+        with tempfile.TemporaryDirectory() as tmp, store(tmp):
+            log = Path(tmp) / "suggest-log.jsonl"
+            log.write_text("не json\n" + json.dumps(
+                {"session_id": TALK, "injected_at": "2026-08-28T11:00:00Z",
+                 "sent": True}) + "\n", encoding="utf-8")
+            self.assertEqual(suggest.notes_of(log),
+                             [(TALK, "2026-08-28T11:00:00Z")])
+
+    def test_the_injection_writes_its_own_key_to_the_journal(self):
+        """Ключ пишет сама отметка: молчание строки не оставляет."""
+        with tempfile.TemporaryDirectory() as tmp, store(tmp):
+            suggest.note_injection(TALK, "Из памяти: что-то было", (),
+                                   door=port.door())
+            self.assertEqual([talk for talk, _ in suggest.notes_of()], [TALK])
+
+
+if __name__ == "__main__":
+    unittest.main()

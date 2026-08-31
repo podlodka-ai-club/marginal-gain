@@ -10,6 +10,7 @@ import argparse, ast, json, os, re, signal, sys
 from datetime import datetime, timezone
 from pathlib import Path
 
+from domain import models
 from infra import telemetry
 from pipeline import prompt
 from storage import port
@@ -120,18 +121,21 @@ def pieces(answer):
     # На контейнер его ставить нельзя: список голых строк тоже список, и тогда
     # «no matching files» внутри списка проходит порог как факт.
     if isinstance(body, list):
-        chunks = [(_text(c), isinstance(c, dict)) for c in body]
+        chunks = [(_text(c), c if isinstance(c, dict) else None) for c in body]
     elif isinstance(body, dict):
-        chunks = [(_text(body), True)]
+        chunks = [(_text(body), body)]
     else:
-        chunks = [(c, False) for c in re.split(r"\n\s*\n", str(body))]
+        chunks = [(c, None) for c in re.split(r"\n\s*\n", str(body))]
     out = []
-    for chunk, structured in chunks:
+    for chunk, record in chunks:
         text = chunk.strip()
         if not text:
             continue
         found = SCORE.search(text)
-        out.append((float(found.group(1)) if found else None, text, structured))
+        # Саму запись несём дальше, а не только её текст: по ней вставка потом
+        # называет свои источники. Ключ, до которого нельзя дотянуться, в связь
+        # не поставить — это уже проходили на фактах.
+        out.append((float(found.group(1)) if found else None, text, record))
     return out
 
 
@@ -151,20 +155,20 @@ def gate(items, min_score=MIN_SCORE, max_items=MAX_ITEMS, max_chars=MAX_CHARS):
     порог отдавал пустоту, имея за спиной пятьдесят пять тысяч символов
     найденного.
     """
-    rows = [(i[0], i[1], i[2] if len(i) > 2 else False) for i in items]
-    scored = sorted(((s, t) for s, t, _ in rows if s is not None and s >= min_score),
-                    reverse=True)
+    rows = [(i[0], i[1], i[2] if len(i) > 2 else None) for i in items]
+    scored = sorted(((s, t, r) for s, t, r in rows if s is not None and s >= min_score),
+                    key=lambda item: item[0], reverse=True)
     # Проза читателя без оценки это не факт, а его собственные слова: так
     # приходит и «no matching files». Пропускаем только структурные записи.
-    plain = [(None, t) for s, t, struct in rows if s is None and struct]
+    plain = [(None, t, r) for s, t, r in rows if s is None and r]
     out, size = [], 0
-    for score, text in (scored + plain)[:max_items]:
+    for score, text, record in (scored + plain)[:max_items]:
         clean = SCORE.sub("", text).strip()
         if not clean:
             continue
         if size + len(clean) > max_chars:
             continue     # длинный кусок пропускаем, а не обрываем на нём выдачу
-        out.append((score, clean))
+        out.append((score, clean, record))
         size += len(clean)
     return out
 
@@ -172,7 +176,7 @@ def gate(items, min_score=MIN_SCORE, max_items=MAX_ITEMS, max_chars=MAX_CHARS):
 def render(kept):
     """Формат под агента: сжатые утверждения, без обращений и предисловий."""
     lines = ["Из памяти прошлых разговоров:"]
-    for score, text in kept:
+    for score, text, _ in kept:
         one = " ".join(text.split())
         lines.append("- %s (уверенность %.2f)" % (one, score) if score is not None
                      else "- %s" % one)
@@ -187,15 +191,157 @@ def suggest(query, mode="single", min_score=MIN_SCORE, door=None):
     return render(kept) if kept else "", kept, answer
 
 
-def note_injection(session_id, text, door=None):
-    """MemoryInjection: что подставили. Помогло ли, узнаем потом."""
-    (door or port.door()).write("\n".join([
+def sources_of(kept):
+    """Записи, из которых собрана подсказка, в виде концов связи.
+
+    Читатель отдаёт найденное записями схемы, и у каждой есть свой ключ. Берём
+    только те объекты, которые схема разрешает считать источником вставки:
+    факт и эпизод.
+    """
+    out = []
+    for item in kept:
+        record = item[2] if len(item) > 2 else None
+        if not isinstance(record, dict):
+            continue
+        kind = record.get("object_type")
+        if kind == "Fact":
+            found = models.Fact(fact_type=record.get("fact_type") or "",
+                                subject=record.get("subject") or "",
+                                scope=record.get("scope") or "")
+        elif kind == "Episode":
+            found = models.Episode(session_id=record.get("session_id") or "",
+                                   episode_number=record.get("episode_number"))
+        else:
+            continue
+        try:
+            found._validate_key()
+        except models.SchemaError:
+            continue          # запись без половины ключа в связь не поставить
+        out.append(found)
+    return out
+
+
+def injection_of(session_id, text, at=None):
+    """Запись MemoryInjection по схеме. Ключ — разговор и время вставки."""
+    return models.MemoryInjection(
+        session_id=session_id or "unknown",
+        injected_at=at or datetime.now(timezone.utc).isoformat(),
+        injected_content=" ".join((text or "").split())[:600],
+        notes="подставлено модулем подсказки по порогу %.2f" % MIN_SCORE)
+
+
+def note_injection(session_id, text, kept=(), door=None, at=None):
+    """MemoryInjection: что подставили и из чего собрали. Исход — потом.
+
+    Уходит структурой: прежде запись писалась прозой, и ключ ей выводил
+    разборщик на той стороне. Ключ, которого мы не знаем, в связь не поставить,
+    поэтому у вставки не было ни разговора, ни источников — она лежала сама по
+    себе и ни с чем не сходилась.
+    """
+    door = door or port.door()
+    record = injection_of(session_id, text, at)
+    # Ключ вставки уходит в свой журнал сразу: по нему проход `--settle` потом
+    # находит, чем кончился ход. Перечислить вставки в хранилище нечем —
+    # читать оттуда мы умеем только поиском словами.
+    remember(record)
+    if not hasattr(door, "write_objects"):
+        return door.write(render_injection(record))
+    session = models.Session(session_id=record.session_id)
+    relations = [models.link("injection_target_session",
+                             memory_injection=record, session=session)]
+    for source in sources_of(kept):
+        role = "fact" if source.OBJECT == "Fact" else "episode"
+        relations.append(models.link("injection_source_%s" % role,
+                                     memory_injection=record, **{role: source}))
+    door.write_objects([session, record], relations)
+    return record
+
+
+def render_injection(record):
+    """Та же запись прозой — для двери, которая структурной записи не умеет."""
+    return "\n".join([
         "MemoryInjection.",
-        "session_id: %s" % (session_id or "unknown"),
-        "injected_at: %s" % datetime.now(timezone.utc).isoformat(),
-        "injected_content: %s" % " ".join(text.split())[:600],
-        "notes: подставлено модулем подсказки по порогу %.2f" % MIN_SCORE,
-    ]))
+        "session_id: %s" % record.session_id,
+        "injected_at: %s" % record.injected_at,
+        "injected_content: %s" % (record.injected_content or ""),
+        "notes: %s" % (record.notes or ""),
+    ])
+
+
+def settle(files, door=None, log=None):
+    """Отметить исход ходов, в которые подставляли память.
+
+    Правило. `helped` это не «память помогла» — такого наблюдения у нас нет.
+    Это «ход, в который её подставили, дошёл до конца»: берём первый эпизод
+    того же разговора, начавшийся не раньше вставки, и смотрим его исход.
+    `done` — да, `blocked` — нет, `abandoned` или эпизода нет вовсе — поле не
+    пишем: неизвестное это не отрицательное.
+
+    Список вставок берём из своего журнала, а не из хранилища: читать оттуда мы
+    умеем только поиском словами, а перечислить вставки поиск не может.
+    """
+    from archive.transcripts import episodes_from_file
+    from pipeline import understand
+
+    known = notes_of(log)
+    if not known:
+        return {"seen": 0, "settled": 0}
+    ends = {}
+    for path in files:
+        try:
+            episodes = episodes_from_file(path)
+        except OSError:
+            continue
+        for ep in episodes:
+            talk = ep["session_id"] or "unknown"
+            ends.setdefault(talk, []).append(
+                (ep["started_at"] or "", understand.outcome_of(ep)))
+    for pairs in ends.values():
+        pairs.sort()
+
+    door = door or port.door()
+    got = {"seen": len(known), "settled": 0}
+    records = []
+    for talk, at in known:
+        outcome = "unknown"
+        for started, found in ends.get(talk, []):
+            if started >= at:
+                outcome = found
+                break
+        helped = {"done": True, "blocked": False}.get(outcome)
+        records.append(models.MemoryInjection(
+            session_id=talk, injected_at=at,
+            session_outcome=outcome, helped=helped))
+        got["settled"] += 1
+    if records and hasattr(door, "write_objects"):
+        door.write_objects(records)
+    return got
+
+
+def remember(record, log=None):
+    """Строка журнала о вставке: разговор и время, то есть её ключ."""
+    where = Path(log) if log else LOG
+    where.parent.mkdir(parents=True, exist_ok=True)
+    with where.open("a", encoding="utf-8") as fh:
+        fh.write(json.dumps({"session_id": record.session_id,
+                             "injected_at": record.injected_at,
+                             "sent": True}, ensure_ascii=False) + "\n")
+
+
+def notes_of(log=None):
+    """Вставки из журнала: разговор и время. Битые строки пропускаем."""
+    where = Path(log) if log else LOG
+    if not where.exists():
+        return []
+    out = []
+    for line in where.read_text(encoding="utf-8").splitlines():
+        try:
+            row = json.loads(line)
+        except ValueError:
+            continue
+        if row.get("injected_at") and row.get("sent"):
+            out.append((row.get("session_id") or "unknown", row["injected_at"]))
+    return out
 
 
 def main():
@@ -205,7 +351,15 @@ def main():
     ap.add_argument("--min-score", type=float, default=MIN_SCORE)
     ap.add_argument("--hook", action="store_true", help="режим хука: запрос из json на входе")
     ap.add_argument("--no-record", action="store_true", help="не писать MemoryInjection")
+    ap.add_argument("--settle", action="store_true",
+                    help="отметить исход ходов, куда подставляли память, и выйти")
     args = ap.parse_args()
+
+    if args.settle:
+        from archive.transcripts import TRANSCRIPTS
+        got = settle(sorted(TRANSCRIPTS.rglob("*.jsonl")))
+        print("вставок в журнале %d, отмечено %d" % (got["seen"], got["settled"]))
+        return
 
     session_id = None
     if args.hook:
@@ -243,14 +397,17 @@ def main():
     LOG.parent.mkdir(parents=True, exist_ok=True)
     with LOG.open("a", encoding="utf-8") as fh:
         fh.write(json.dumps({"query": query[:300], "kept": len(kept),
-                             "sent": bool(text), "raw_chars": len(raw)}, ensure_ascii=False) + "\n")
+                             "sent": bool(text), "raw_chars": len(raw)},
+                            ensure_ascii=False) + "\n")
 
     if not text:
         return              # нечему всплывать, молчим
     print(text)
     if not args.no_record:
         try:
-            note_injection(session_id, text, door=door)
+            # Ключ вставки в журнал пишет сама отметка: молчание журнальной
+            # строки не оставляет, а вставка без ключа не находится потом.
+            note_injection(session_id, text, kept, door=door)
         except Exception:
             pass
 
