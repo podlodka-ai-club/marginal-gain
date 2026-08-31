@@ -79,11 +79,15 @@ def run_phase(phase, cases, disabled, mode, min_score):
             except Exception as exc:
                 answer, kept, raw, error = "", [], "", str(exc)[:200]
         # Разбор один на оба прогона: своя копия правил разъехалась бы
-        # с оценкой, и половины перестали бы быть сравнимыми.
-        verdict = evaluate.judge(case, answer, raw, error)
+        # с оценкой, и половины перестали бы быть сравнимыми. Найденным
+        # считается то, что могло дойти до агента: ложные находки убирает тот
+        # же отсев, каким подсказка чистит выдачу.
+        known, cut = suggest.knowledge(raw, case["query"]) if raw else ("", 0)
+        verdict = evaluate.judge(case, answer, known, error, raw=raw)
         rows.append({
             "phase": phase, "id": case["id"], "kind": case.get("kind", ""),
             "ok": verdict["ok"], "found_in_answer": verdict["found_in_answer"],
+            "false_find": verdict["false_find"], "sifted": cut,
             "missed": verdict["missed"], "false_hits": verdict["false_hits"],
             "kept": len(kept), "chars": len(answer), "raw_chars": len(raw or ""),
             "seconds": round(time.time() - t, 2), "error": error,
@@ -128,6 +132,11 @@ def compare(base, active, base_sec, active_sec):
                      % (len(knew), len(lost), 100.0 * len(lost) / len(knew)))
     else:
         lines.append("память не ответила нужным ни разу: терять было нечего")
+    false = sum(1 for r in active if r.get("false_find"))
+    lines.append("ложных находок отсеяно %d: слово было только внутри команды в событии"
+                 % false)
+    lines.append("отсев убрал %d кусков сырого ответа"
+                 % sum(r.get("sifted") or 0 for r in active))
     broken = sum(1 for r in active if r["error"])
     if broken:
         lines.append("упало с ошибкой: %d (пройденными не считаются)" % broken)

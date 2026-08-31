@@ -11,6 +11,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from domain import lifespan, models
+from domain.query import words
 from infra import telemetry
 from pipeline import prompt
 from storage import port
@@ -146,6 +147,112 @@ def pieces(answer):
     return out
 
 
+# Где событие случилось, а не что оно говорит. Слово вопроса, попавшее только
+# сюда, находкой не является: событий одного проекта в архиве десятки тысяч, и
+# любое из них подошло бы так же.
+PLACE = ("project", "working_directory", "session_id")
+
+# Чем событие является: инструмент, ветка, вид, время. Сюда вопрос обращается
+# по делу — «что делали в ветке X», «что запускали в среду».
+DEED = ("tool_name", "git_branch", "event_type", "occurred_at", "day_of_week")
+
+# Сырьё. У факта и эпизода есть своё утверждение, у события — только дословный
+# текст, который оно несёт: команда, её вывод, реплика.
+RAW_MATERIAL = ("Event",)
+
+# Вопросы, которые дословного как раз и просят. «Какой командой это чинили» —
+# это ровно событие, и отсеивать его нельзя: отсев режет случайное совпадение,
+# а не вид записи. Список собран руками, как и STOP.
+VERBATIM = ("команд", "запуск", "запусти", "выполн", "терминал", "консол",
+            "вывод", "показал", "ошибк", "traceback", "bash", "shell",
+            "command", "output", "error", "stderr", "stdout")
+
+# Разделители, которых в обычном слове не бывает: они выдают имя — путь, файл,
+# проект, ветку. Просьбой о дословном имя не бывает никогда. Без этой оговорки
+# вопрос про `errors.py`, проект `bash-tools` или ветку `error-handler` выключал
+# бы отсев целиком и молча: сравнение шло подстрокой по всему вопросу.
+NAMEISH = ".:/-"
+
+
+def terms_of(query):
+    """Слова вопроса. Тем же правилом, каким их берёт поиск, см. domain/query."""
+    return words(query)
+
+
+def asks_verbatim(query):
+    """Вопрос просит дословного: команду, её вывод, ошибку.
+
+    Смотрим на слова вопроса, а не на его текст. Подстрока по всему вопросу
+    ошибалась в обе стороны сразу: имя файла `errors.py` включало исключение и
+    выключало отсев целиком, а сказать об этом было некому.
+    """
+    return any(word.startswith(mark)
+               for word in terms_of(query)
+               if not any(sign in word for sign in NAMEISH)
+               for mark in VERBATIM)
+
+
+def incidental(record, terms, verbatim=False):
+    """Ложная находка: событие, зацепившееся за вопрос ничем.
+
+    Ничем — значит только именем места, где оно случилось, или словом внутри
+    дословного тела, которое оно несёт. Слово из вопроса случайно встретилось
+    внутри команды, которую агент когда-то выполнил; формально совпадение есть,
+    знания нет. Такой кусок съедает потолок выдачи и уводит агента в сторону.
+
+    Отсев режет совпадение, а не вид. Событие доходит до агента, когда вопрос
+    обратился к нему по делу — назвал инструмент, ветку, время, — и когда сам
+    вопрос просит дословного: «какой командой это чинили» это ровно событие.
+
+    Факт и эпизод не трогаем никогда: у них есть собственное утверждение, и имя
+    проекта в нём — законная тема, а не случайная зацепка.
+    """
+    if not isinstance(record, dict):
+        return False
+    if record.get("object_type") not in RAW_MATERIAL or verbatim:
+        return False
+    place = " ".join(str(record.get(name) or "") for name in PLACE).lower()
+    deed = " ".join(str(record.get(name) or "") for name in DEED).lower()
+    # Слово, объяснимое именем места, обращением по делу не считается: ветка
+    # почти всегда носит имя проекта, и попадание в неё — то же совпадение,
+    # что и попадание в сам проект.
+    return not any(term in deed and term not in place for term in terms)
+
+
+@telemetry.traced("sift_incidental", lambda arg, out: {
+    "in": len(arg["items"]), "out": len(out)})
+def sift(items, query):
+    """Убрать ложные находки. Всё остальное — порядок, оценки — как было.
+
+    Стоит между разбором ответа и порогом: порог считает уверенность, а тут
+    решается, знание ли это вообще. Вопрос без единого своего слова отсеивать
+    нечем — такой ответ проходит целиком.
+    """
+    terms = terms_of(query)
+    if not terms:
+        return list(items)
+    verbatim = asks_verbatim(query)
+    return [row for row in items
+            if not incidental(row[2] if len(row) > 2 else None, terms, verbatim)]
+
+
+def knowledge(answer, query):
+    """Сырой ответ хранилища без ложных находок и число отсеянных кусков.
+
+    Этим спрашивает замер. Найденным считается то, что вообще могло дойти до
+    агента: иначе «нашли» считает подстроки, «отдали» — знание, и разрыв между
+    ними меряет две разные вещи. Одно правило на обе стороны, разойтись нечему.
+
+    Число отсеянного отдаётся вместе с текстом нарочно. Кусок, срезанный зря,
+    записывается в мусор, а не в потерю: по одному итогу перетянутый отсев
+    выглядит улучшением. Пусть объём среза будет виден отдельным числом.
+    """
+    chunks = pieces(answer)
+    kept = sift(chunks, query)
+    return ("\n".join(text for _score, text, _record in kept),
+            len(chunks) - len(kept))
+
+
 @telemetry.traced("threshold_filter", lambda arg, out: {
     "in": len(arg["items"]), "out": len(out), "min_score": arg["min_score"]})
 def gate(items, min_score=MIN_SCORE, max_items=MAX_ITEMS, max_chars=MAX_CHARS):
@@ -258,7 +365,9 @@ def near(kept, door, limit=MAX_NEAR):
 def suggest(query, mode="single", min_score=MIN_SCORE, door=None):
     door = door or port.door()
     answer = door.read(query, mode=mode)
-    kept = gate(pieces(answer), min_score=min_score)
+    # Отсев до порога: ложная находка не должна ни занимать место в
+    # пятёрке, ни съедать потолок в 1200 символов.
+    kept = gate(sift(pieces(answer), query), min_score=min_score)
     # Соседи добираются после порога и ставятся следом: прямое попадание
     # первым, добавка второй. Потолки те же — их считает тот же `gate`.
     added = near(kept, door)

@@ -23,27 +23,44 @@ CASES = Path(__file__).parent / "eval-cases.json"
 RESULTS = Path.home() / ".local" / "state" / "memory-encoder" / "eval-results.jsonl"
 
 
-def judge(case, answer, raw, error):
+def judge(case, answer, known, error, raw=None):
     """Разбор одного результата. Упавший случай пройденным не считается.
 
     Раньше `ok` не смотрел на ошибку, и случай «промолчи» проходил всегда:
     сломанный конвейер молчит не хуже исправного. Итог не мог опуститься
     ниже пяти, сколько бы всё ни было сломано.
+
+    `known` — сырой ответ памяти без ложных находок, его готовит тот же отсев,
+    каким подсказка чистит выдачу (`suggest.knowledge`). Раньше на его месте
+    стоял сырой ответ целиком, и находкой считалась любая подстрока: слово,
+    случайно попавшее внутрь команды в событии, записывалось в «нашли» и
+    навсегда оставалось необъяснимой потерей. Одно правило на обе стороны,
+    иначе «нашли» и «отдали» меряют разные миры.
     """
     expect = case.get("expect") or []
     forbid = case.get("forbid") or []
-    low_sent, low_raw = answer.lower(), (raw or "").lower()
+    low_sent = answer.lower()
+    low_known = (known or "").lower()
+    low_raw = (raw if raw is not None else known or "").lower()
     hits = [e for e in expect if e.lower() in low_sent]
     # `found_in_answer` — попадание в ответ памяти, а не в её содержимое.
     # При режиме single ответ синтезирован читателем, и факт может лежать
     # в хранилище, не попав в него. Названо по тому, что действительно меряет.
+    known_hits = [e for e in expect if e.lower() in low_known]
     raw_hits = [e for e in expect if e.lower() in low_raw]
     false_hits = [f for f in forbid if f.lower() in low_sent]
     ok = error is None and not false_hits and (bool(expect) and len(hits) == len(expect)
                                                or bool(forbid) and not expect)
+    found = bool(expect) and len(known_hits) == len(expect)
     return {
         "ok": bool(ok),
-        "found_in_answer": bool(expect) and len(raw_hits) == len(expect),
+        "found_in_answer": found,
+        # Ложная находка: в сыром ответе слово есть, знанием оно не является.
+        # Требуем, чтобы не уцелело ничего: случай, где одно ожидаемое слово
+        # пережило отсев, а второе нет, — не мусор, а потеря на извлечении, и
+        # записывать его в мусор значит завышать долю отсеянного.
+        "false_find": (bool(expect) and not found and not known_hits
+                       and len(raw_hits) == len(expect)),
         "hits": hits, "missed": [e for e in expect if e not in hits],
         "false_hits": false_hits,
     }
@@ -57,11 +74,15 @@ def run_case(case, mode, min_score):
             error = None
         except Exception as exc:
             answer, kept, raw, error = "", [], "", str(exc)[:300]
-    verdict = judge(case, answer, raw, error)
+    # Найденным считается то, что могло дойти: ложные находки отсеивает тот же
+    # код, что чистит выдачу.
+    known, cut = suggest.knowledge(raw, case["query"]) if raw else ("", 0)
+    verdict = judge(case, answer, known, error, raw=raw)
     return {
         "id": case["id"], "kind": case.get("kind", ""), "trace_id": tr.trace_id,
         "query": case["query"], "ok": verdict["ok"],
         "found_in_answer": verdict["found_in_answer"],
+        "false_find": verdict["false_find"], "sifted": cut,
         "hits": verdict["hits"], "missed": verdict["missed"],
         "false_hits": verdict["false_hits"], "need": len(case.get("expect") or []),
         "kept": len(kept), "seconds": round(time.time() - started, 2),
@@ -115,6 +136,8 @@ def main():
                 extra += " лишнее: %s" % ", ".join(res["false_hits"])
             if not res["ok"] and res["found_in_answer"]:
                 extra += " (память ответила, срезал порог)"
+            if res["false_find"]:
+                extra += " (ложная находка: слово только внутри команды)"
             if res["error"]:
                 extra = " ошибка: %s" % res["error"]
             print("%-18s %-10s %4.1f с %5d симв.%s"
@@ -151,6 +174,7 @@ def summary(rows):
     failed = sum(1 for r in rows if r["error"])
     answered = [r for r in rows if r["found_in_answer"]]
     lost = [r for r in answered if not r["ok"]]
+    false = [r for r in rows if r.get("false_find")]
     lines.append("")
     lines.append("итог: %d из %d" % (passed, len(rows)))
     if failed:
@@ -160,6 +184,15 @@ def summary(rows):
                      % (len(answered), len(lost), 100.0 * len(lost) / len(answered)))
     else:
         lines.append("память не ответила нужным ни разу: терять было нечего")
+    # Ложная находка потерей не является: слово встретилось внутри команды в
+    # событии, знанием оно не было. Считаем отдельно, чтобы разрыв «нашли —
+    # отдали» не приписывал себе чужой мусор.
+    lines.append("ложных находок отсеяно %d: слово было только внутри команды в событии"
+                 % len(false))
+    # Объём среза отдельным числом: срезанное зря по итогу неотличимо от
+    # срезанного по делу, и перетянутый отсев выглядел бы улучшением.
+    lines.append("отсев убрал %d кусков сырого ответа"
+                 % sum(r.get("sifted") or 0 for r in rows))
     return "\n".join(lines)
 
 

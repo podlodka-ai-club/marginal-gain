@@ -12,10 +12,12 @@
 
 Путь к файлу задаётся переменной XMEM_LOCAL_PATH.
 """
-import dataclasses, hashlib, json, os, re, sqlite3, threading
+import dataclasses, hashlib, json, os, sqlite3, threading
 from pathlib import Path
 
 from domain import lifespan, models
+# Слово вопроса — правило одно на поиск и на отсев, см. domain/query.py.
+from domain.query import words
 
 DEFAULT_PATH = Path.home() / ".local" / "state" / "memory-encoder" / "memory.db"
 
@@ -54,14 +56,6 @@ QUOTA = {"Fact": 6, "LapsedFact": 6, "Episode": 3, "Event": 3, "Session": 1}
 # ровно ради этого его туда и переложили; отличать его порогом на чтении
 # значило бы помнить про срок в каждом месте, где память спрашивают.
 DEEP = {"LapsedFact": (("subject", 3), ("project", 2), ("content", 1))}
-
-WORD = re.compile(r"[\w./:-]{3,}", re.UNICODE)
-
-# Служебные слова вопроса. Без отсева «какие» и «проект» тянут половину базы.
-STOP = {"какие", "какой", "какая", "какое", "что", "где", "когда", "кто", "чем",
-        "как", "почему", "зачем", "было", "были", "есть", "про", "для", "над",
-        "файлы", "файл", "проекте", "проект", "проекта", "шла", "работа",
-        "правились", "правился", "the", "what", "which", "was", "were", "did"}
 
 
 def path():
@@ -179,11 +173,6 @@ def like(term):
     for sign in ("\\", "%", "_"):
         term = term.replace(sign, "\\" + sign)
     return "%" + term + "%"
-
-
-def words(text):
-    return [w for w in (m.group(0).lower() for m in WORD.finditer(text or ""))
-            if w not in STOP]
 
 
 class Repository:
