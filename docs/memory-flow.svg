@@ -1,0 +1,116 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1480" height="1000" viewBox="0 0 1480 1000" font-family="Helvetica Neue, Helvetica, Arial, sans-serif">
+<style>
+  .t   { fill:#1b1b1f; }
+  .h1  { font-size:30px; font-weight:700; }
+  .h2  { font-size:19px; font-weight:700; }
+  .lbl { font-size:15px; font-weight:700; }
+  .p   { font-size:14px; fill:#3d3d46; }
+  .s   { font-size:13px; fill:#6b6b76; }
+  .n   { font-size:13px; fill:#8a4b1f; }
+  .box { fill:#ffffff; stroke:#c9c9d2; stroke-width:1.5; rx:8; }
+  .read  { fill:#eef4ff; stroke:#7fa4d9; }
+  .arrow { stroke:#5a5a66; stroke-width:2; fill:none; marker-end:url(#a); }
+</style>
+<defs>
+  <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+    <path d="M0 0 L10 5 L0 10 z" fill="#5a5a66"/>
+  </marker>
+  <marker id="ag" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+    <path d="M0 0 L10 5 L0 10 z" fill="#9a9aa6"/>
+  </marker>
+</defs>
+
+<rect width="1480" height="1000" fill="#fbfbfd"/>
+<text class="t h1" x="48" y="58">Вторая память агента: что происходит вокруг одного ответа</text>
+<text class="s" x="48" y="84">Состояние ветки fact-file-key на 31 августа 2026</text>
+
+<!-- LEFT COLUMN -->
+<rect x="48" y="112" width="620" height="640" rx="12" fill="#eef4ff" stroke="#a9c2ea" stroke-width="1.5"/>
+<text class="t h2" x="72" y="146">Пока агент отвечает</text>
+<text class="p" x="72" y="170">Начинается в момент, когда пришёл новый запрос от человека.</text>
+<text class="p" x="72" y="190">Агент ждёт: всё, что здесь, стоит у него на пути.</text>
+
+<rect class="box" x="72" y="212" width="290" height="72"/>
+<text class="lbl t" x="88" y="238">Пришёл запрос</text>
+<text class="p" x="88" y="260">Текст запроса — он же поисковая</text>
+<text class="p" x="88" y="276">строка для памяти</text>
+
+<path class="arrow" d="M217 288 L217 316"/>
+
+<rect class="box" x="72" y="318" width="560" height="86"/>
+<text class="lbl t" x="88" y="344">Поиск в хранилище</text>
+<text class="p" x="88" y="366">Хранилище ищет по словам запроса и возвращает строки: факты,</text>
+<text class="p" x="88" y="384">эпизоды прошлых разговоров, отдельные события.</text>
+
+<path class="arrow" d="M217 406 L217 434"/>
+
+<rect class="box" x="72" y="436" width="560" height="104"/>
+<text class="lbl t" x="88" y="462">Отбор: что из найденного отдать</text>
+<text class="p" x="88" y="484">Порог по уверенности, потолок в десять строк и 1200 знаков.</text>
+<text class="p" x="88" y="502">Строки идут по убыванию уверенности.</text>
+<text class="p" x="88" y="524">Каждому виду записи своя доля мест: фактов 6, эпизодов 3, событий 3.</text>
+
+<path class="arrow" d="M217 542 L217 570"/>
+
+<rect class="box" x="72" y="572" width="560" height="86"/>
+<text class="lbl t" x="88" y="598">Шаг по связям</text>
+<text class="p" x="88" y="620">К найденному добираются соседи по графу: то, что правилось вместе.</text>
+<text class="p" x="88" y="638">Шаг ровно один, оценка соседа вдвое ниже источника.</text>
+
+<path class="arrow" d="M217 660 L217 688"/>
+
+<rect class="box" x="72" y="690" width="560" height="46"/>
+<text class="lbl t" x="88" y="718">Отобранное дописывается к запросу — агент видит его как часть задачи</text>
+
+<!-- RIGHT COLUMN -->
+<rect x="700" y="112" width="732" height="640" rx="12" fill="#f2f1ec" stroke="#cfcabb" stroke-width="1.5"/>
+<text class="t h2" x="724" y="146">После того, как агент ответил</text>
+<text class="p" x="724" y="170">Четыре прохода подряд. Человек их не ждёт — ответ уже отдан.</text>
+<text class="p" x="724" y="190">Каждый проход помнит, до какого места он дочитал, и второй заход</text>
+<text class="p" x="724" y="208">подряд стоит миллисекунды: перечитывать нечего.</text>
+
+<rect class="box" x="724" y="230" width="684" height="70"/>
+<text class="lbl t" x="740" y="256">1. Разбор разговора</text>
+<text class="p" x="740" y="278">Записи разговора раскладываются на сессию, эпизоды и события.</text>
+
+<path class="arrow" d="M1066 302 L1066 322"/>
+
+<rect class="box" x="724" y="324" width="684" height="88"/>
+<text class="lbl t" x="740" y="350">2. Понимание</text>
+<text class="p" x="740" y="372">Из эпизодов достаются факты: что за проект, какие файлы правились,</text>
+<text class="p" x="740" y="390">на чём споткнулись. Каждый факт привязывается к своему эпизоду.</text>
+
+<path class="arrow" d="M1066 414 L1066 434"/>
+
+<rect class="box" x="724" y="436" width="684" height="88"/>
+<text class="lbl t" x="740" y="462">3. Связи</text>
+<text class="p" x="740" y="484">Факты, встретившиеся в одном эпизоде, связываются друг с другом.</text>
+<text class="p" x="740" y="502">Чем чаще пара встречается, тем тяжелее связь. Сейчас 1303 связи.</text>
+
+<path class="arrow" d="M1066 526 L1066 546"/>
+
+<rect class="box" x="724" y="548" width="684" height="88"/>
+<text class="lbl t" x="740" y="574">4. Отметка исхода</text>
+<text class="p" x="740" y="596">По каждой подсказке смотрим, чем кончился разговор, куда её</text>
+<text class="p" x="740" y="614">поставили, и отмечаем, помогла ли она.</text>
+
+<rect class="box" x="724" y="660" width="684" height="76" fill="#fdf6e8" stroke="#d8c08a"/>
+<text class="lbl t" x="740" y="686">Поломка здесь не видна снаружи</text>
+<text class="p" x="740" y="708">Проход не имеет права уронить разговор, поэтому он молчит при любой</text>
+<text class="p" x="740" y="726">ошибке. Сломанная память выглядит так же, как пустая.</text>
+
+<!-- STORAGE -->
+<rect x="48" y="776" width="1384" height="96" rx="12" fill="#ffffff" stroke="#c9c9d2" stroke-width="1.5"/>
+<text class="t h2" x="72" y="806">Хранилище — одно на оба столбца</text>
+<text class="p" x="72" y="830">Разговор · Эпизод · Событие · Факт · Связь · Подсказка. Левый столбец только читает, правый только пишет.</text>
+<text class="p" x="72" y="852">Два носителя: локальный на этой машине и сетевой. Поиск умеют оба, ходить по связям — пока только локальный.</text>
+
+<path stroke="#9a9aa6" stroke-width="2" stroke-dasharray="5 4" fill="none" marker-end="url(#ag)" d="M352 736 L352 776"/>
+<path stroke="#9a9aa6" stroke-width="2" stroke-dasharray="5 4" fill="none" marker-end="url(#ag)" d="M1066 736 L1066 776"/>
+
+<!-- GAPS -->
+<text class="t h2" x="48" y="916">Чего в контуре нет</text>
+<text class="p" x="48" y="944">·  Срока жизни у факта. Есть «когда увидели», нет «до каких пор верно» — вчерашняя правда и позапрошлогодняя весят одинаково.</text>
+<text class="p" x="48" y="966">·  Отсева ложных находок. Память находит нужное в 52 случаях из 100, доносит в 30: слово из вопроса попадает внутрь чужой команды.</text>
+<text class="p" x="48" y="988">·  Обхода связей у сетевого носителя. Там память работает хуже, и не сообщает об этом.</text>
+</svg>
