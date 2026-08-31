@@ -328,6 +328,31 @@ def source_content(base, identity):
     return (row or [""])[0] or ""
 
 
+class TestASignatureIsParsedBackWhateverСontainsIt(unittest.TestCase):
+    """Подпись разбирается обратно, даже если в теме есть разделитель.
+
+    Тема размеченного факта — свободный текст модели, и `|` в нём вполне
+    реален. Разбор слева направо уводил тему в охват, схема браковала значение,
+    и весь проход падал уже после обхода архива — вся работа терялась.
+    Крайние поля подписи это закрытые перечисления, поэтому режем с краёв.
+    """
+
+    def test_a_subject_with_a_separator_survives_the_round_trip(self):
+        fact = models.Fact(fact_type="project_state", subject="а|б|в",
+                           scope="project", content="что-то")
+        back = associate.fact_of(fact.identity())
+        self.assertEqual((back.fact_type, back.subject, back.scope),
+                         ("project_state", "а|б|в", "project"))
+        back._validate_key()
+
+    def test_the_pass_does_not_die_on_such_a_fact(self):
+        graph = {("project_state|а|б|project", "project_state|в|project",
+                  "same_episode"): {"weight": 1, "first": "", "last": ""}}
+        with tempfile.TemporaryDirectory() as tmp, store(tmp) as base:
+            associate.deliver(sorted(graph.items()), port.door())
+            self.assertEqual(len(cards_in(base)), 1)
+
+
 class TestAnEmptyArchiveIsNotAFailure(unittest.TestCase):
     """Архив без фактов — обычное дело, а не повод падать."""
 

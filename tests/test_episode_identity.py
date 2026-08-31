@@ -187,6 +187,34 @@ class TestOneNumberPerEpisodeOfATalk(unittest.TestCase):
             self.assertEqual(len(now), len(was) + more)
 
 
+class TestAnOldMarkDoesNotRestartTheCount(unittest.TestCase):
+    """Отметка прежнего формата не знает про нумерацию. Верить ей нельзя.
+
+    Книжка учёта переживает выкатку: у всех отметок живой базы нет ни `bases`,
+    ни `counts`. Считай мы такую отметку разобранной, счётчик разговора начался
+    бы с нуля — и второй файл затёр бы эпизоды первого. Ровно то схлопывание,
+    которое эта работа чинит, только зашедшее с другой стороны.
+    """
+
+    def test_a_mark_without_numbering_is_read_again(self):
+        shape = [("разговор-1", 2), ("разговор-1", 2)]
+        with tempfile.TemporaryDirectory() as tmp, store(tmp) as base:
+            files = archive(tmp, shape)
+            # Отметка старого образца: файл разобран целиком, о нумерации в ней
+            # ни слова.
+            state = {"files": {}}
+            for path in files:
+                stat = path.stat()
+                state["files"][str(path)] = {
+                    "size": stat.st_size, "inode": stat.st_ino,
+                    "episodes": 2, "tail": "", "done": True}
+            understand.save_state(state)
+            port.door()          # база заводится дверью, а не проходом
+            digest(files)
+            self.assertEqual(len(episodes_in(base)), 4,
+                             "эпизоды затёрты: счётчик начался с нуля")
+
+
 class TestTheEpisodeBelongsToItsTalk(unittest.TestCase):
     """Связь session_episodes: эпизод перестаёт быть островом."""
 
@@ -223,6 +251,41 @@ class TestTheEpisodeBelongsToItsTalk(unittest.TestCase):
             for ends in found.values():
                 self.assertEqual(ends["session"][1]["session_id"],
                                  ends["episode"][1]["session_id"])
+
+
+class TestTheLastLineIsCountedTheSameByBoth(unittest.TestCase):
+    """Файл без перевода строки в конце. Строку эту считают двое, и по-разному.
+
+    Сохранение читает архив побайтно и незавершённую строку намеренно не берёт:
+    её ещё дописывают. Понимание читает построчно и берёт её же. Разойдясь на
+    одной строке, счётчики событий разъезжаются навсегда: расхождение оседает в
+    отметке файла, и все следующие файлы разговора сдвинуты.
+    """
+
+    def test_neither_pass_counts_the_unfinished_line(self):
+        shape = [("разговор-1", 2)]
+        with tempfile.TemporaryDirectory() as tmp, store(tmp) as base:
+            files = archive(tmp, shape)
+            # Дописываем строку без завершающего перевода — так выглядит файл,
+            # в который прямо сейчас пишут.
+            with files[0].open("a", encoding="utf-8") as fh:
+                fh.write(json.dumps(
+                    {"sessionId": "разговор-1", "timestamp": "2026-08-28T23:00:00Z",
+                     "cwd": CWD, "gitBranch": BRANCH, "type": "user",
+                     "message": {"content": "ещё просьба"}}, ensure_ascii=False))
+            save.ingest(files, dry=False, door=port.door())
+            digest(files)
+            conn = sqlite3.connect(str(base))
+            try:
+                events = {(r[0], r[1]) for r in conn.execute(
+                    "SELECT session_id, sequence_number FROM event")}
+            finally:
+                conn.close()
+            linked = {(e["event"][1]["session_id"], e["event"][1]["sequence_number"])
+                      for e in links_of(base, "episode_events").values()}
+            self.assertEqual(linked - events, set(),
+                             "связь зовёт событие, которого нет: %s"
+                             % sorted(linked - events)[:3])
 
 
 class TestTheEpisodeOwnsItsEvents(unittest.TestCase):

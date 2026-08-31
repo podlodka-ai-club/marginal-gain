@@ -191,6 +191,19 @@ class Fact(Record):
         k = self.key()
         return "%s|%s|%s" % (k["fact_type"], k["subject"], k["scope"])
 
+    @classmethod
+    def of_identity(cls, key):
+        """Обратно из строки в запись. Тема может содержать разделитель.
+
+        Режем с краёв, а не слева направо: вид и охват — закрытые перечисления
+        схемы, а тема это свободный текст (у размеченного факта её пишет
+        модель, и `|` там вполне реален). Разбор слева уводил хвост темы в
+        охват, схема браковала значение, и падал весь проход.
+        """
+        fact_type, rest = (key.split("|", 1) + [""])[:2]
+        subject, _, scope = rest.rpartition("|")
+        return cls(fact_type=fact_type, subject=subject, scope=scope)
+
 
 @dataclass
 class Association(Record):

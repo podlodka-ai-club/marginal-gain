@@ -141,9 +141,8 @@ def card_of(key, rec):
 
 
 def fact_of(key):
-    """Конец связи по подписи. Подпись собрана нами, разбирается однозначно."""
-    fact_type, subject, scope = key.split("|", 2)
-    return models.Fact(fact_type=fact_type, subject=subject, scope=scope)
+    """Конец связи по подписи. Разбор общий, см. models.Fact.of_identity."""
+    return models.Fact.of_identity(key)
 
 
 def deliver(items, door):

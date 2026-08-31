@@ -310,6 +310,23 @@ class TestTheJournalIsTheListOfInjections(unittest.TestCase):
                                    door=port.door())
             self.assertEqual([talk for talk, _ in suggest.notes_of()], [TALK])
 
+    def test_a_failed_write_leaves_no_key_behind(self):
+        """Ключ в журнале без записи в хранилище заводит пустую вставку.
+
+        Порядок поэтому такой: сперва запись, потом журнал. Иначе `--settle`
+        по осиротевшему ключу создаёт запись с одним ключом и без содержимого —
+        так уже случалось, чистить пришлось вручную.
+        """
+
+        class Broken:
+            def write_objects(self, records, relations=()):
+                raise RuntimeError("хранилище не приняло запись")
+
+        with tempfile.TemporaryDirectory() as tmp, store(tmp):
+            with self.assertRaises(RuntimeError):
+                suggest.note_injection(TALK, "Из памяти", (), door=Broken())
+            self.assertEqual(suggest.notes_of(), [])
+
 
 if __name__ == "__main__":
     unittest.main()

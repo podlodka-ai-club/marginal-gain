@@ -129,26 +129,44 @@ class TestTheNeighbourComesAlong(unittest.TestCase):
                             "сосед по графу не пришёл: %s" % near)
 
     def test_the_neighbour_weighs_less_than_the_hit(self):
-        """Затухание: сосед не может весить больше того, от кого пришёл.
+        """Затухание: сосед весит вдвое меньше того, от кого пришёл.
 
-        Оценки у прямого попадания может не быть: её дописывает текстовый путь,
-        а в хранилище лежат записи. Тогда база сравнения — единица, то есть
-        полное попадание; ниже него сосед обязан быть в любом случае.
+        Дверь здесь поддельная: настоящая база оценок не хранит (их дописывает
+        только текстовый путь), и на ней это свойство невыразимо — проверка
+        свелась бы к сравнению двух констант. Спрашиваем сам шаг.
         """
-        with tempfile.TemporaryDirectory() as tmp, store(tmp):
-            fill(archive(tmp, [["db.py", "port.py"]]))
-            door = port.door()
-            _, kept, _ = suggest.suggest("db.py", mode="raw", min_score=0.0,
-                                         door=door)
-            direct = [score for score, _, record in kept
-                      if score is not None
-                      and not (isinstance(record, dict) and record.get("via_graph"))]
-            neighbour = [score for score, _, record in kept
-                         if score is not None
-                         and isinstance(record, dict) and record.get("via_graph")]
-            self.assertTrue(neighbour, "сосед пришёл без оценки вовсе")
-            base = max(direct or [1.0])
-            self.assertLess(max(neighbour), base)
+        source = {"object_type": "Fact", "fact_type": "project_state",
+                  "subject": "/x/db.py", "scope": "project", "content": "db"}
+        neighbour = {"object_type": "Fact", "fact_type": "project_state",
+                     "subject": "/x/port.py", "scope": "project", "content": "port"}
+
+        class OneNeighbour:
+            def neighbours(self, keys, limit=10):
+                return [(neighbour, 3.0)]
+
+        got = suggest.near([(0.9, "db", source)], OneNeighbour())
+        self.assertEqual(len(got), 1)
+        self.assertLess(got[0][0], 0.9)
+        self.assertEqual(got[0][0], round(0.9 * suggest.DAMPING, 4))
+
+    def test_a_neighbour_gets_no_score_when_the_hit_has_none(self):
+        """Выдуманное число выглядит как измеренное. Лучше молчать.
+
+        В хранилище оценок нет, и сосед был единственной строкой выдачи с
+        цифрой: слабейшее в ответе выглядело как единственное проверенное.
+        """
+        neighbour = {"object_type": "Fact", "fact_type": "project_state",
+                     "subject": "/x/port.py", "scope": "project", "content": "port"}
+
+        class OneNeighbour:
+            def neighbours(self, keys, limit=10):
+                return [(neighbour, 3.0)]
+
+        source = {"object_type": "Fact", "fact_type": "project_state",
+                  "subject": "/x/db.py", "scope": "project", "content": "db"}
+        got = suggest.near([(None, "db", source)], OneNeighbour())
+        self.assertEqual([score for score, _, _ in got], [None])
+        self.assertNotIn("уверенность", suggest.render(got))
 
     @SLOW
     @given(shape=st.lists(st.lists(st.sampled_from(NAMES), min_size=2, max_size=4,
@@ -158,8 +176,9 @@ class TestTheNeighbourComesAlong(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp, store(tmp):
             fill(archive(tmp, shape))
             door = port.door()
-            _, kept, _ = suggest.suggest("db.py", mode="raw", min_score=0.0,
+            _, kept, _ = suggest.suggest(shape[0][0], mode="raw", min_score=0.0,
                                          door=door)
+            self.assertTrue(by_graph(kept), "соседей нет вовсе, порядок проверять не на чем")
             seen_neighbour = False
             for score, text, record in kept:
                 near = isinstance(record, dict) and record.get("via_graph")
@@ -194,7 +213,7 @@ class TestOneStepOnly(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp, store(tmp) as base:
             fill(archive(tmp, shape))
             door = port.door()
-            _, kept, _ = suggest.suggest("db.py", mode="raw", min_score=0.0,
+            _, kept, _ = suggest.suggest(shape[0][0], mode="raw", min_score=0.0,
                                          door=door)
             conn = sqlite3.connect(str(base))
             try:
@@ -203,6 +222,7 @@ class TestOneStepOnly(unittest.TestCase):
             finally:
                 conn.close()
             near = by_graph(kept)
+            self.assertTrue(near, "ни одного соседа: проверять нечего")
             for record in near:
                 self.assertIn("%s|%s|%s" % (record["fact_type"], record["subject"],
                                             record["scope"]), known)
@@ -212,17 +232,27 @@ class TestTheDeafDoorStillWorks(unittest.TestCase):
     """Дверь без обхода графа работает как раньше — молча и без ошибок."""
 
     @SLOW
-    @given(shape=st.lists(st.lists(st.sampled_from(NAMES), min_size=1, max_size=3,
+    @given(shape=st.lists(st.lists(st.sampled_from(NAMES), min_size=2, max_size=3,
                                    unique=True), min_size=1, max_size=3))
     def test_the_outcome_matches_the_plain_search(self, shape):
+        """Выдача глухой двери — ровно та же, что у поиска без шага по графу.
+
+        Сравниваем с настоящей дверью, а не просто смотрим на отсутствие
+        пометки: без сравнения проверка проходит и на коде, который по графу
+        не ходит вовсе.
+        """
         with tempfile.TemporaryDirectory() as tmp, store(tmp):
             fill(archive(tmp, shape))
-            deaf = Deaf(port.door())
-            _, kept, _ = suggest.suggest("db.py", mode="raw", min_score=0.0,
-                                         door=deaf)
-            for _, _, record in kept:
-                if isinstance(record, dict):
-                    self.assertNotIn("via_graph", record)
+            live = port.door()
+            _, rich, _ = suggest.suggest(shape[0][0], mode="raw", min_score=0.0,
+                                         door=live)
+            _, plain, _ = suggest.suggest(shape[0][0], mode="raw", min_score=0.0,
+                                          door=Deaf(live))
+            self.assertTrue(by_graph(rich), "живая дверь соседей не дала")
+            self.assertEqual(by_graph(plain), [])
+            self.assertEqual(texts(plain),
+                             [t for t, r in zip(texts(rich), [x[2] for x in rich])
+                              if not (isinstance(r, dict) and r.get("via_graph"))])
 
     def test_an_empty_graph_changes_nothing(self):
         """Связей нет — выдача ровно та же, что и была."""

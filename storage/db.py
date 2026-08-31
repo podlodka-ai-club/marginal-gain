@@ -287,7 +287,6 @@ class Repository:
         # место, а не отнимает его. Иначе выдача выходила бы короче потолка при
         # полной базе.
         if len(out) < limit:
-            seen = {id(r) for r in out}
             for score, object_type, row in found:
                 if len(out) >= limit:
                     break
@@ -311,23 +310,27 @@ class Repository:
         if not keys:
             return []
         holes = ", ".join("?" * len(keys))
-        rows = self.conn.execute(
-            "SELECT source_key, target_key, weight FROM association "
-            "WHERE source_key IN (%s) OR target_key IN (%s) "
-            "ORDER BY weight DESC LIMIT %d" % (holes, holes, limit * 4),
-            list(keys) + list(keys)).fetchall()
+        with self.lock:
+            rows = self.conn.execute(
+                "SELECT source_key, target_key, weight FROM association "
+                "WHERE source_key IN (%s) OR target_key IN (%s) "
+                "ORDER BY weight DESC LIMIT %d" % (holes, holes, limit * 4),
+                list(keys) + list(keys)).fetchall()
         known, out = set(keys), []
         for source, target, weight in rows:
             other = target if source in known else source
             if other in known:
                 continue
             known.add(other)
-            parts = other.split("|", 2)
-            if len(parts) != 3:
+            # Разбор общий со схемой: тема факта может содержать разделитель,
+            # и деление слева направо теряло бы такого соседа молча.
+            end = models.Fact.of_identity(other)
+            if not (end.fact_type and end.subject and end.scope):
                 continue
-            found = self.conn.execute(
-                'SELECT * FROM fact WHERE fact_type = ? AND subject = ? AND scope = ?',
-                parts).fetchone()
+            with self.lock:
+                found = self.conn.execute(
+                    'SELECT * FROM fact WHERE fact_type = ? AND subject = ? '
+                    'AND scope = ?', (end.fact_type, end.subject, end.scope)).fetchone()
             if found is None:
                 continue        # связь пережила факт: конец есть, строки нет
             record = {k: v for k, v in dict(found).items() if v not in (None, "")}

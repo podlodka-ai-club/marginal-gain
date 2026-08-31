@@ -73,13 +73,18 @@ def save_state(state):
 def touched(path, before):
     """Изменился ли файл с прошлого захода. Стоит одного stat, без разбора.
 
+    Отметка прежнего образца, без нумерации, за разобранную не считается: по
+    ней нельзя восстановить, с какого номера идут эпизоды разговора в этом
+    файле, а без этого счёт начался бы с нуля и затёр бы соседний файл.
+
     Отделено от разбора нарочно: под потолком заход разбирает считанные файлы,
     а проверить обязан все. Складывай он весь архив в память ради потолка в
     сотню эпизодов — заход стоил бы как полный проход, а отметки нетронутых
     файлов остались бы прежними, и следующий ход перечитал бы всё заново.
     """
     stat = path.stat()
-    return not (before.get("done") and before.get("inode") == stat.st_ino
+    return not (before.get("done") and "bases" in before
+                and before.get("inode") == stat.st_ino
                 and before.get("size") == stat.st_size)
 
 
@@ -217,7 +222,8 @@ def unread(path, before, counters=None, event_counters=None):
     иначе потолок в один эпизод крутил бы один и тот же файл вечно.
     """
     stat = path.stat()
-    if (before.get("done") and before.get("inode") == stat.st_ino
+    if (before.get("done") and "bases" in before
+            and before.get("inode") == stat.st_ino
             and before.get("size") == stat.st_size):
         return [], before
     episodes, event_counts = episodes_and_events(path)
@@ -226,7 +232,13 @@ def unread(path, before, counters=None, event_counters=None):
     event_bases = event_bases_of(event_counts, before, event_counters or {})
     absolute_events(episodes, event_bases)
     start = before.get("episodes", 0)
-    if before.get("inode") != stat.st_ino or stat.st_size < before.get("size", 0):
+    if "bases" not in before:
+        # Отметка прежнего образца: о нумерации в ней ни слова. Считать её
+        # разобранной нельзя — номера эпизодов взялись бы с нуля, и второй файл
+        # разговора затёр бы первый. Книжка учёта переживает выкатку, поэтому
+        # такие отметки встречаются у всего архива разом, а не поштучно.
+        start = 0
+    elif before.get("inode") != stat.st_ino or stat.st_size < before.get("size", 0):
         start = 0                       # файл подменили или обрезали
     elif start > len(episodes):
         # Файл переписали на месте: узел прежний, размер вырос, а эпизодов

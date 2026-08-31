@@ -238,13 +238,18 @@ def near(kept, door, limit=MAX_NEAR):
         return []
     # База затухания — лучшая из оценок прямых попаданий. Оценки может не быть
     # вовсе: её дописывает только текстовый путь, а в хранилище лежат записи.
-    # Тогда за базу берётся единица, то есть полное попадание, и сосед всё
-    # равно оказывается ниже него.
-    top = max([s for s, _, _ in kept if s is not None] or [1.0])
+    # Тогда соседу оценку не приписываем: выдуманное число выглядело бы как
+    # измеренное, и слабейшая строка оказалась бы единственной с цифрой.
+    scored = [s for s, _, _ in kept if s is not None]
+    top = max(scored) if scored else None
+    # Вес связи задаёт порядок соседей — их отдаёт хранилище тяжёлыми вперёд.
+    # В оценку он не входит: она у всех соседей одна и ниже источника, иначе
+    # тяжёлая связь вытаскивала бы соседа выше того, о чём спросили.
     out = []
-    for record, weight in found:
+    for record, _weight in found:
         record = dict(record, via_graph=True)
-        out.append((round(top * DAMPING, 4), _text(record), record))
+        out.append((round(top * DAMPING, 4) if top is not None else None,
+                    _text(record), record))
     return out
 
 
@@ -319,12 +324,10 @@ def note_injection(session_id, text, kept=(), door=None, at=None):
     """
     door = door or port.door()
     record = injection_of(session_id, text, at)
-    # Ключ вставки уходит в свой журнал сразу: по нему проход `--settle` потом
-    # находит, чем кончился ход. Перечислить вставки в хранилище нечем —
-    # читать оттуда мы умеем только поиском словами.
-    remember(record)
     if not hasattr(door, "write_objects"):
-        return door.write(render_injection(record))
+        door.write(render_injection(record))
+        remember(record)
+        return record
     session = models.Session(session_id=record.session_id)
     relations = [models.link("injection_target_session",
                              memory_injection=record, session=session)]
@@ -333,6 +336,10 @@ def note_injection(session_id, text, kept=(), door=None, at=None):
         relations.append(models.link("injection_source_%s" % role,
                                      memory_injection=record, **{role: source}))
     door.write_objects([session, record], relations)
+    # Ключ уходит в журнал после записи, а не до неё. По нему проход `--settle`
+    # потом находит, чем кончился ход, и ключ вставки, которой в хранилище нет,
+    # заставил бы его завести пустую запись с одним ключом.
+    remember(record)
     return record
 
 
@@ -437,7 +444,10 @@ def main():
     if args.settle:
         from archive.transcripts import TRANSCRIPTS
         got = settle(sorted(TRANSCRIPTS.rglob("*.jsonl")))
-        print("вставок в журнале %d, отмечено %d" % (got["seen"], got["settled"]))
+        # «Пересчитано», а не «отмечено»: журнал не помечается разобранным, и
+        # каждый заход проходит его целиком. Запись идёт по ключу, поверх, так
+        # что вреда нет — но и числа новых отметок это не даёт.
+        print("вставок в журнале %d, пересчитано %d" % (got["seen"], got["settled"]))
         return
 
     session_id = None
