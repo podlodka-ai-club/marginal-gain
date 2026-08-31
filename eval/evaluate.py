@@ -15,6 +15,7 @@ import argparse, json, time
 from collections import defaultdict
 from pathlib import Path
 
+from eval import goldenset
 from pipeline import suggest
 from infra import telemetry
 
@@ -82,7 +83,15 @@ def main():
     if not path.exists():
         print("нет файла сценариев %s — собери его: python3 -m eval.goldenset" % path)
         return
-    cases = json.loads(path.read_text(encoding="utf-8"))
+    # Версию набора проверяет загрузчик: цифра, снятая на чужой сборке, не
+    # сравнима с прежней, а выглядит точно так же.
+    try:
+        meta, cases = goldenset.load(path, "cases")
+    except goldenset.SetVersionError as bad:
+        print(bad)
+        return
+    print("набор версии %d, подпись факта: %s, собран %s"
+          % (meta["version"], meta.get("identity"), meta.get("built_at")))
     if args.only:
         cases = [c for c in cases if args.only in c["id"]]
     if args.kind:

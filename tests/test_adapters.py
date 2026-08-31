@@ -487,8 +487,8 @@ class TestFixtureCanAnswerEveryCase(unittest.TestCase):
 
     def test_shipped_set_is_answerable_from_its_shipped_fixture(self):
         """Проверяем то, что реально уехало в репозиторий, а не выдумку."""
-        cases = json.loads((HERE / "eval-cases.json").read_text(encoding="utf-8"))
-        rows = json.loads((HERE / "eval-fixture.json").read_text(encoding="utf-8"))
+        _, cases = goldenset.load(HERE / "eval-cases.json", "cases")
+        _, rows = goldenset.load(HERE / "eval-fixture.json", "fixture")
         blob = json.dumps(rows, ensure_ascii=False)
         blind = [c["id"] for c in cases
                  if c["kind"] != "absence" and c.get("expect")
@@ -522,19 +522,19 @@ class TestGoldenSet(unittest.TestCase):
 
     def test_script_turns_carry_what_they_feed(self):
         """Реплика без привязки к случаю бесполезна: нечем проверить результат."""
-        turns = json.load(open("eval-script.json", encoding="utf-8"))
+        _, turns = goldenset.load("eval-script.json", "script")
         self.assertTrue(turns)
         self.assertTrue(all(t["feeds"] for t in turns))
 
     def test_script_is_ordered_by_time(self):
         """Иначе разговор про файл случается раньше, чем файл в нём появился."""
-        turns = json.load(open("eval-script.json", encoding="utf-8"))
+        _, turns = goldenset.load("eval-script.json", "script")
         stamps = [t["started_at"] for t in turns]
         self.assertEqual(stamps, sorted(stamps))
 
     def test_every_case_is_reachable_from_script(self):
-        cases = json.load(open("eval-cases.json", encoding="utf-8"))
-        turns = json.load(open("eval-script.json", encoding="utf-8"))
+        _, cases = goldenset.load("eval-cases.json", "cases")
+        _, turns = goldenset.load("eval-script.json", "script")
         fed = {c for t in turns for c in t["feeds"]}
         need = {c["id"] for c in cases if c["kind"] != "absence"}
         self.assertEqual(need - fed, set())

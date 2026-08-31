@@ -25,6 +25,7 @@
 """
 import argparse, hashlib, json, re
 from collections import defaultdict
+from datetime import datetime, timezone
 from pathlib import Path
 
 from pipeline import understand as u
@@ -32,6 +33,23 @@ from infra.scrub import redact
 
 SPLIT = "2026-08-09"          # та же граница, что в holdout.py и в замерах
 TARGET = 100                  # размер набора
+
+# Версия набора. Растёт, когда меняется смысл собранного, а не форма файла:
+# цифра, снятая на наборе версии N, сравнима только с цифрой того же N.
+#   1 — подпись факта о правке это имя проекта; вопрос про файлы спрашивал
+#       подписью, то есть на прежней сборке — путём файла вместо проекта;
+#   2 — подпись это путь файла, проект берётся из эпизода.
+VERSION = 2
+
+# Чем подписан факт в этой версии. Лежит в конверте, чтобы расхождение было
+# видно по заголовку файла, а не вычитывалось из сотни случаев.
+IDENTITY = "file-path"
+
+KINDS = ("cases", "fixture", "script")
+
+
+class SetVersionError(RuntimeError):
+    """Набор собран не этим кодом. Читать его — мерить не то, что думаешь."""
 HOME = str(Path.home())
 USER = Path.home().name
 
@@ -344,6 +362,57 @@ def build(split, target):
     return picked[:target], marked, episodes
 
 
+def envelope(kind, items, **meta):
+    """Конверт набора: версия, вид, размер, содержимое.
+
+    Форма одна на все три файла. Разные заголовки у случаев, реплик и фикстуры
+    означали бы три места, где проверяется версия, и три способа забыть её.
+    """
+    if kind not in KINDS:
+        raise SetVersionError("неизвестный вид набора: %s, известны %s"
+                              % (kind, ", ".join(KINDS)))
+    body = {"version": VERSION, "kind": kind, "identity": IDENTITY,
+            "built_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+            "count": len(items)}
+    body.update(meta)
+    body["items"] = list(items)
+    return body
+
+
+def dump(path, kind, items, **meta):
+    """Набор в файл вместе с конвертом."""
+    Path(path).write_text(
+        json.dumps(envelope(kind, items, **meta), ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8")
+
+
+def load(path, kind=None):
+    """Набор из файла. Чужой не отдаём вовсе: молчание тут дороже падения.
+
+    Голый список — это набор прежней сборки. Он читался бы как свой и дал бы
+    число, несравнимое ни с чем, поэтому отказ здесь такой же, как на чужой
+    версии.
+    """
+    where = Path(path)
+    body = json.loads(where.read_text(encoding="utf-8"))
+    if not isinstance(body, dict) or "version" not in body:
+        raise SetVersionError(
+            "%s собран прежней сборкой, без версии. Пересобрать: "
+            "python3 -m eval.goldenset" % where.name)
+    if body["version"] != VERSION:
+        raise SetVersionError(
+            "%s версии %s, а нужна %d. Пересобрать: python3 -m eval.goldenset"
+            % (where.name, body["version"], VERSION))
+    if kind is not None and body.get("kind") != kind:
+        raise SetVersionError("%s это набор вида %r, а спрашивали %r"
+                              % (where.name, body.get("kind"), kind))
+    items = body.get("items") or []
+    if body.get("count") != len(items):
+        raise SetVersionError("%s: в конверте %s записей, в списке %d — файл оборван"
+                              % (where.name, body.get("count"), len(items)))
+    return body, items
+
+
 def main():
     ap = argparse.ArgumentParser(description="Золотой набор из архива разговоров")
     ap.add_argument("--split", default=SPLIT)
@@ -354,19 +423,16 @@ def main():
     args = ap.parse_args()
 
     cases, marked, episodes = build(args.split, args.target)
-    Path(args.out).write_text(json.dumps(cases, ensure_ascii=False, indent=2) + "\n",
-                              encoding="utf-8")
+    dump(args.out, "cases", cases, split=args.split, target=args.target)
     rows = fixture(marked, episodes, cases, limit=400)
-    Path(args.fixture).write_text(json.dumps(rows, ensure_ascii=False, indent=2) + "\n",
-                                  encoding="utf-8")
-
+    dump(args.fixture, "fixture", rows, split=args.split)
     turns = script(cases, episodes)
-    Path(args.script).write_text(json.dumps(turns, ensure_ascii=False, indent=2) + "\n",
-                                 encoding="utf-8")
+    dump(args.script, "script", turns, split=args.split)
 
     from collections import Counter
     kinds = Counter(c["kind"] for c in cases)
     pos = sum(1 for c in cases if c["repeated"])
+    print("набор версии %d, подпись факта: %s" % (VERSION, IDENTITY))
     print("случаев %d, из них положительных по разметке %d" % (len(cases), pos))
     print("по видам:", ", ".join("%s %d" % kv for kv in sorted(kinds.items())))
     fed = {c for t in turns for c in t["feeds"]}

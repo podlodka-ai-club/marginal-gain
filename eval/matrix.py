@@ -20,6 +20,8 @@ import argparse, json, os, time
 from collections import defaultdict
 from pathlib import Path
 
+from eval import goldenset
+
 BASELINE = "без памяти"
 ACTIVE = "с памятью"
 
@@ -144,7 +146,8 @@ def main():
     args = ap.parse_args()
 
     load_env()
-    cases = json.loads(Path(args.cases).read_text(encoding="utf-8"))
+    meta, cases = goldenset.load(args.cases, "cases")
+    print("набор версии %d, подпись факта: %s" % (meta["version"], meta.get("identity")))
     if args.kind:
         cases = [c for c in cases if c.get("kind") == args.kind]
     if args.limit:

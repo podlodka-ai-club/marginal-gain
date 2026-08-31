@@ -1,2424 +1,2437 @@
-[
-  {
-    "id": "fact-18b04541",
-    "kind": "fact",
-    "query": "Какие файлы правились в проекте job-hunt?",
-    "expect": [
-      "db.py"
-    ],
-    "forbid": [],
-    "repeated": true,
-    "occurrences": 13,
-    "source": [
-      [
-        "0793ffe5-bba5-4e53-a958-0441d623cc92",
-        8
-      ],
-      [
-        "708fe7a1-9655-49f6-8fd5-87afd900ad48",
-        6
-      ],
-      [
-        "99b23e19-5b1d-4cff-8654-296db299a42c",
-        6
-      ],
-      [
-        "99b23e19-5b1d-4cff-8654-296db299a42c",
-        7
-      ],
-      [
-        "99b23e19-5b1d-4cff-8654-296db299a42c",
-        10
-      ],
-      [
-        "99b23e19-5b1d-4cff-8654-296db299a42c",
-        11
-      ],
-      [
-        "bd85fb51-3304-4bb0-84aa-52e7f4b64731",
-        16
-      ],
-      [
-        "cf29fec6-76be-4f73-853a-4c17309fe021",
-        6
-      ],
-      [
-        "d89c0d47-8424-4293-a02b-a04cf79b6954",
-        4
-      ],
-      [
-        "e04e2c52-f1a4-4f5f-9399-1566112d287b",
-        2
-      ],
-      [
-        "e04e2c52-f1a4-4f5f-9399-1566112d287b",
-        6
-      ],
-      [
-        "ef617449-d86f-4a54-a3ce-81997cd7cb09",
-        5
-      ],
-      [
-        "ef617449-d86f-4a54-a3ce-81997cd7cb09",
-        10
-      ]
-    ]
-  },
-  {
-    "id": "fact-6539782b",
-    "kind": "fact",
-    "query": "Какие файлы правились в проекте job-hunt?",
-    "expect": [
-      "run.py"
-    ],
-    "forbid": [],
-    "repeated": true,
-    "occurrences": 11,
-    "source": [
-      [
-        "0793ffe5-bba5-4e53-a958-0441d623cc92",
-        8
-      ],
-      [
-        "708fe7a1-9655-49f6-8fd5-87afd900ad48",
-        6
-      ],
-      [
-        "99b23e19-5b1d-4cff-8654-296db299a42c",
-        7
-      ],
-      [
-        "bd85fb51-3304-4bb0-84aa-52e7f4b64731",
-        16
-      ],
-      [
-        "bd85fb51-3304-4bb0-84aa-52e7f4b64731",
-        19
-      ],
-      [
-        "cf29fec6-76be-4f73-853a-4c17309fe021",
-        3
-      ],
-      [
-        "cf29fec6-76be-4f73-853a-4c17309fe021",
-        4
-      ],
-      [
-        "d89c0d47-8424-4293-a02b-a04cf79b6954",
-        3
-      ],
-      [
-        "d89c0d47-8424-4293-a02b-a04cf79b6954",
-        4
-      ],
-      [
-        "e04e2c52-f1a4-4f5f-9399-1566112d287b",
-        6
-      ],
-      [
-        "ef617449-d86f-4a54-a3ce-81997cd7cb09",
-        5
-      ]
-    ]
-  },
-  {
-    "id": "fact-6eb4a480",
-    "kind": "fact",
-    "query": "Какие файлы правились в проекте job-hunt?",
-    "expect": [
-      "CONTEXT.md"
-    ],
-    "forbid": [],
-    "repeated": true,
-    "occurrences": 7,
-    "source": [
-      [
-        "0793ffe5-bba5-4e53-a958-0441d623cc92",
-        8
-      ],
-      [
-        "0793ffe5-bba5-4e53-a958-0441d623cc92",
-        14
-      ],
-      [
-        "bd85fb51-3304-4bb0-84aa-52e7f4b64731",
-        4
-      ],
-      [
-        "bd85fb51-3304-4bb0-84aa-52e7f4b64731",
-        16
-      ],
-      [
-        "bd85fb51-3304-4bb0-84aa-52e7f4b64731",
-        18
-      ],
-      [
-        "bd85fb51-3304-4bb0-84aa-52e7f4b64731",
-        19
-      ],
-      [
-        "e04e2c52-f1a4-4f5f-9399-1566112d287b",
-        11
-      ]
-    ]
-  },
-  {
-    "id": "fact-1d610bb2",
-    "kind": "fact",
-    "query": "Какие файлы правились в проекте job-hunt?",
-    "expect": [
-      "ownership.py"
-    ],
-    "forbid": [],
-    "repeated": true,
-    "occurrences": 3,
-    "source": [
-      [
-        "bd85fb51-3304-4bb0-84aa-52e7f4b64731",
-        16
-      ],
-      [
-        "d04342e7-0051-4a5e-b5e5-5d4956010983",
-        12
-      ],
-      [
-        "e04e2c52-f1a4-4f5f-9399-1566112d287b",
-        6
-      ]
-    ]
-  },
-  {
-    "id": "fact-0b36f11f",
-    "kind": "fact",
-    "query": "Какие файлы правились в проекте job-hunt?",
-    "expect": [
-      "test_topic_send.py"
-    ],
-    "forbid": [],
-    "repeated": true,
-    "occurrences": 3,
-    "source": [
-      [
-        "bd85fb51-3304-4bb0-84aa-52e7f4b64731",
-        19
-      ],
-      [
-        "e04e2c52-f1a4-4f5f-9399-1566112d287b",
-        6
-      ],
-      [
-        "e04e2c52-f1a4-4f5f-9399-1566112d287b",
-        14
-      ]
-    ]
-  },
-  {
-    "id": "fact-e37e0672",
-    "kind": "fact",
-    "query": "Какие файлы правились в проекте job-hunt?",
-    "expect": [
-      "bot_onboarding.py"
-    ],
-    "forbid": [],
-    "repeated": true,
-    "occurrences": 2,
-    "source": [
-      [
-        "bd85fb51-3304-4bb0-84aa-52e7f4b64731",
-        16
-      ],
-      [
-        "bd85fb51-3304-4bb0-84aa-52e7f4b64731",
-        19
-      ]
-    ]
-  },
-  {
-    "id": "fact-662109c9",
-    "kind": "fact",
-    "query": "Какие файлы правились в проекте job-hunt?",
-    "expect": [
-      "topic_send.py"
-    ],
-    "forbid": [],
-    "repeated": true,
-    "occurrences": 2,
-    "source": [
-      [
-        "bd85fb51-3304-4bb0-84aa-52e7f4b64731",
-        19
-      ],
-      [
-        "e04e2c52-f1a4-4f5f-9399-1566112d287b",
-        6
-      ]
-    ]
-  },
-  {
-    "id": "fact-f5f94801",
-    "kind": "fact",
-    "query": "Какие файлы правились в проекте job-hunt?",
-    "expect": [
-      "test_telegram_targets.py"
-    ],
-    "forbid": [],
-    "repeated": true,
-    "occurrences": 2,
-    "source": [
-      [
-        "e04e2c52-f1a4-4f5f-9399-1566112d287b",
-        6
-      ],
-      [
-        "e04e2c52-f1a4-4f5f-9399-1566112d287b",
-        14
-      ]
-    ]
-  },
-  {
-    "id": "fact-7c404a9a",
-    "kind": "fact",
-    "query": "Какие файлы правились в проекте job-hunt?",
-    "expect": [
-      "telegram_targets.py"
-    ],
-    "forbid": [],
-    "repeated": true,
-    "occurrences": 1,
-    "source": [
-      [
-        "e04e2c52-f1a4-4f5f-9399-1566112d287b",
-        6
-      ]
-    ]
-  },
-  {
-    "id": "fact-090bffa5",
-    "kind": "fact",
-    "query": "Какие файлы правились в проекте job-hunt?",
-    "expect": [
-      "telegram_targets.yml"
-    ],
-    "forbid": [],
-    "repeated": true,
-    "occurrences": 1,
-    "source": [
-      [
-        "e04e2c52-f1a4-4f5f-9399-1566112d287b",
-        6
-      ]
-    ]
-  },
-  {
-    "id": "fact-ec852691",
-    "kind": "fact",
-    "query": "Какие файлы правились в проекте job-hunt?",
-    "expect": [
-      "topics.yml"
-    ],
-    "forbid": [],
-    "repeated": true,
-    "occurrences": 1,
-    "source": [
-      [
-        "ef617449-d86f-4a54-a3ce-81997cd7cb09",
-        20
-      ]
-    ]
-  },
-  {
-    "id": "fact-14e57062",
-    "kind": "fact",
-    "query": "Какие файлы правились в проекте job-hunt?",
-    "expect": [
-      "stack_vocab.py"
-    ],
-    "forbid": [],
-    "repeated": true,
-    "occurrences": 1,
-    "source": [
-      [
-        "d04342e7-0051-4a5e-b5e5-5d4956010983",
-        12
-      ]
-    ]
-  },
-  {
-    "id": "fact-464e7993",
-    "kind": "fact",
-    "query": "Какие файлы правились в проекте job-hunt?",
-    "expect": [
-      "test_bot_onboarding.py"
-    ],
-    "forbid": [],
-    "repeated": true,
-    "occurrences": 1,
-    "source": [
-      [
-        "bd85fb51-3304-4bb0-84aa-52e7f4b64731",
-        16
-      ]
-    ]
-  },
-  {
-    "id": "fact-ada14712",
-    "kind": "fact",
-    "query": "Какие файлы правились в проекте job-hunt?",
-    "expect": [
-      "test_digest.py"
-    ],
-    "forbid": [],
-    "repeated": true,
-    "occurrences": 1,
-    "source": [
-      [
-        "bd85fb51-3304-4bb0-84aa-52e7f4b64731",
-        19
-      ]
-    ]
-  },
-  {
-    "id": "fact-d186b277",
-    "kind": "fact",
-    "query": "Какие файлы правились в проекте job-hunt?",
-    "expect": [
-      "test_routing.py"
-    ],
-    "forbid": [],
-    "repeated": true,
-    "occurrences": 1,
-    "source": [
-      [
-        "ef617449-d86f-4a54-a3ce-81997cd7cb09",
-        20
-      ]
-    ]
-  },
-  {
-    "id": "fact-3e7d16ef",
-    "kind": "fact",
-    "query": "Какие файлы правились в проекте AI_1?",
-    "expect": [
-      "Решение.ipynb"
-    ],
-    "forbid": [],
-    "repeated": false,
-    "occurrences": 10,
-    "source": [
-      [
-        "c1a7ff50-11b2-4869-98b9-2661ce41a74e",
-        4
-      ],
-      [
-        "c1a7ff50-11b2-4869-98b9-2661ce41a74e",
-        5
-      ],
-      [
-        "c1a7ff50-11b2-4869-98b9-2661ce41a74e",
-        6
-      ],
-      [
-        "c1a7ff50-11b2-4869-98b9-2661ce41a74e",
-        7
-      ],
-      [
-        "c1a7ff50-11b2-4869-98b9-2661ce41a74e",
-        8
-      ],
-      [
-        "c1a7ff50-11b2-4869-98b9-2661ce41a74e",
-        9
-      ],
-      [
-        "c1a7ff50-11b2-4869-98b9-2661ce41a74e",
-        10
-      ],
-      [
-        "c1a7ff50-11b2-4869-98b9-2661ce41a74e",
-        15
-      ],
-      [
-        "c1a7ff50-11b2-4869-98b9-2661ce41a74e",
-        16
-      ],
-      [
-        "c1a7ff50-11b2-4869-98b9-2661ce41a74e",
-        17
-      ]
-    ]
-  },
-  {
-    "id": "fact-c206c169",
-    "kind": "fact",
-    "query": "Какие файлы правились в проекте job-hunt?",
-    "expect": [
-      "risk.py"
-    ],
-    "forbid": [],
-    "repeated": false,
-    "occurrences": 9,
-    "source": [
-      [
-        "0793ffe5-bba5-4e53-a958-0441d623cc92",
-        8
-      ],
-      [
-        "bd85fb51-3304-4bb0-84aa-52e7f4b64731",
-        3
-      ],
-      [
-        "bd85fb51-3304-4bb0-84aa-52e7f4b64731",
-        4
-      ],
-      [
-        "bd85fb51-3304-4bb0-84aa-52e7f4b64731",
-        18
-      ],
-      [
-        "d89c0d47-8424-4293-a02b-a04cf79b6954",
-        4
-      ],
-      [
-        "e04e2c52-f1a4-4f5f-9399-1566112d287b",
-        17
-      ],
-      [
-        "ef617449-d86f-4a54-a3ce-81997cd7cb09",
-        3
-      ],
-      [
-        "ef617449-d86f-4a54-a3ce-81997cd7cb09",
-        4
-      ],
-      [
-        "ef617449-d86f-4a54-a3ce-81997cd7cb09",
-        5
-      ]
-    ]
-  },
-  {
-    "id": "fact-6dfc017b",
-    "kind": "fact",
-    "query": "Какие файлы правились в проекте job-hunt?",
-    "expect": [
-      "CONTEXT.md"
-    ],
-    "forbid": [],
-    "repeated": false,
-    "occurrences": 6,
-    "source": [
-      [
-        "1bf5dc9d-839c-4d52-a980-a0da4aa3392f",
-        5
-      ],
-      [
-        "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
-        2
-      ],
-      [
-        "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
-        8
-      ],
-      [
-        "0bf3ba2a-8784-4889-8c97-a9d553c1d2f6",
-        2
-      ],
-      [
-        "0bf3ba2a-8784-4889-8c97-a9d553c1d2f6",
-        3
-      ],
-      [
-        "6011cf1e-80d0-4979-93f5-658b3ec89037",
-        7
-      ]
-    ]
-  },
-  {
-    "id": "fact-888aaa51",
-    "kind": "fact",
-    "query": "Какие файлы правились в проекте job-hunt?",
-    "expect": [
-      "db.py"
-    ],
-    "forbid": [],
-    "repeated": false,
-    "occurrences": 6,
-    "source": [
-      [
-        "1bf5dc9d-839c-4d52-a980-a0da4aa3392f",
-        3
-      ],
-      [
-        "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
-        2
-      ],
-      [
-        "0bf3ba2a-8784-4889-8c97-a9d553c1d2f6",
-        1
-      ],
-      [
-        "6011cf1e-80d0-4979-93f5-658b3ec89037",
-        3
-      ],
-      [
-        "6011cf1e-80d0-4979-93f5-658b3ec89037",
-        7
-      ],
-      [
-        "6ec2778b-40a2-456f-aed7-02136355e1db",
-        2
-      ]
-    ]
-  },
-  {
-    "id": "fact-fe0124f4",
-    "kind": "fact",
-    "query": "Какие файлы правились в проекте job-hunt?",
-    "expect": [
-      "gateway.py"
-    ],
-    "forbid": [],
-    "repeated": false,
-    "occurrences": 5,
-    "source": [
-      [
-        "1bf5dc9d-839c-4d52-a980-a0da4aa3392f",
-        3
-      ],
-      [
-        "1bf5dc9d-839c-4d52-a980-a0da4aa3392f",
-        5
-      ],
-      [
-        "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
-        8
-      ],
-      [
-        "0bf3ba2a-8784-4889-8c97-a9d553c1d2f6",
-        3
-      ],
-      [
-        "fe3b9dc3-6d54-4c39-bdca-d70e1b6bef88",
-        1
-      ]
-    ]
-  },
-  {
-    "id": "fact-81a4c974",
-    "kind": "fact",
-    "query": "Какие файлы правились в проекте job-hunt?",
-    "expect": [
-      "run.py"
-    ],
-    "forbid": [],
-    "repeated": false,
-    "occurrences": 5,
-    "source": [
-      [
-        "1bf5dc9d-839c-4d52-a980-a0da4aa3392f",
-        3
-      ],
-      [
-        "1bf5dc9d-839c-4d52-a980-a0da4aa3392f",
-        5
-      ],
-      [
-        "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
-        8
-      ],
-      [
-        "0bf3ba2a-8784-4889-8c97-a9d553c1d2f6",
-        3
-      ],
-      [
-        "6011cf1e-80d0-4979-93f5-658b3ec89037",
-        7
-      ]
-    ]
-  },
-  {
-    "id": "fact-7d75e6a0",
-    "kind": "fact",
-    "query": "Какие файлы правились в проекте dev?",
-    "expect": [
-      "run.py"
-    ],
-    "forbid": [],
-    "repeated": false,
-    "occurrences": 4,
-    "source": [
-      [
-        "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
-        1
-      ],
-      [
-        "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
-        3
-      ],
-      [
-        "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
-        5
-      ],
-      [
-        "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
-        7
-      ]
-    ]
-  },
-  {
-    "id": "fact-83db9d53",
-    "kind": "fact",
-    "query": "Какие файлы правились в проекте job-hunt?",
-    "expect": [
-      "test_gateway.py"
-    ],
-    "forbid": [],
-    "repeated": false,
-    "occurrences": 4,
-    "source": [
-      [
-        "1bf5dc9d-839c-4d52-a980-a0da4aa3392f",
-        3
-      ],
-      [
-        "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
-        8
-      ],
-      [
-        "0bf3ba2a-8784-4889-8c97-a9d553c1d2f6",
-        3
-      ],
-      [
-        "6011cf1e-80d0-4979-93f5-658b3ec89037",
-        2
-      ]
-    ]
-  },
-  {
-    "id": "fact-a9237373",
-    "kind": "fact",
-    "query": "Какие файлы правились в проекте job-hunt?",
-    "expect": [
-      "taxonomy.yml"
-    ],
-    "forbid": [],
-    "repeated": false,
-    "occurrences": 4,
-    "source": [
-      [
-        "e04e2c52-f1a4-4f5f-9399-1566112d287b",
-        2
-      ],
-      [
-        "e04e2c52-f1a4-4f5f-9399-1566112d287b",
-        7
-      ],
-      [
-        "ef617449-d86f-4a54-a3ce-81997cd7cb09",
-        9
-      ],
-      [
-        "ef617449-d86f-4a54-a3ce-81997cd7cb09",
-        20
-      ]
-    ]
-  },
-  {
-    "id": "fact-8d6974ea",
-    "kind": "fact",
-    "query": "Какие файлы правились в проекте job-hunt?",
-    "expect": [
-      "test_golden_eval.py"
-    ],
-    "forbid": [],
-    "repeated": false,
-    "occurrences": 4,
-    "source": [
-      [
-        "bd85fb51-3304-4bb0-84aa-52e7f4b64731",
-        3
-      ],
-      [
-        "cf29fec6-76be-4f73-853a-4c17309fe021",
-        5
-      ],
-      [
-        "e04e2c52-f1a4-4f5f-9399-1566112d287b",
-        14
-      ],
-      [
-        "e04e2c52-f1a4-4f5f-9399-1566112d287b",
-        17
-      ]
-    ]
-  },
-  {
-    "id": "fact-38cf1010",
-    "kind": "fact",
-    "query": "Какие файлы правились в проекте job-hunt?",
-    "expect": [
-      "test_source_markup_guards.py"
-    ],
-    "forbid": [],
-    "repeated": false,
-    "occurrences": 4,
-    "source": [
-      [
-        "708fe7a1-9655-49f6-8fd5-87afd900ad48",
-        5
-      ],
-      [
-        "708fe7a1-9655-49f6-8fd5-87afd900ad48",
-        6
-      ],
-      [
-        "e04e2c52-f1a4-4f5f-9399-1566112d287b",
-        2
-      ],
-      [
-        "e04e2c52-f1a4-4f5f-9399-1566112d287b",
-        7
-      ]
-    ]
-  },
-  {
-    "id": "fact-ee26ad45",
-    "kind": "fact",
-    "query": "Какие файлы правились в проекте cdaf2aeede844bff9fecf9229d7e25e8?",
-    "expect": [
-      "RESEARCH.md"
-    ],
-    "forbid": [],
-    "repeated": false,
-    "occurrences": 3,
-    "source": [
-      [
-        "d654bd7e-41d8-451d-898a-e945b0ec9bcf",
-        13
-      ],
-      [
-        "d654bd7e-41d8-451d-898a-e945b0ec9bcf",
-        14
-      ],
-      [
-        "d654bd7e-41d8-451d-898a-e945b0ec9bcf",
-        15
-      ]
-    ]
-  },
-  {
-    "id": "fact-5d3886db",
-    "kind": "fact",
-    "query": "Какие файлы правились в проекте dev?",
-    "expect": [
-      "db.py"
-    ],
-    "forbid": [],
-    "repeated": false,
-    "occurrences": 3,
-    "source": [
-      [
-        "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
-        1
-      ],
-      [
-        "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
-        3
-      ],
-      [
-        "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
-        5
-      ]
-    ]
-  },
-  {
-    "id": "fact-b114ac15",
-    "kind": "fact",
-    "query": "Какие файлы правились в проекте dev?",
-    "expect": [
-      "test_db.py"
-    ],
-    "forbid": [],
-    "repeated": false,
-    "occurrences": 3,
-    "source": [
-      [
-        "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
-        1
-      ],
-      [
-        "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
-        3
-      ],
-      [
-        "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
-        5
-      ]
-    ]
-  },
-  {
-    "id": "fact-9a015fae",
-    "kind": "fact",
-    "query": "Какие файлы правились в проекте job-hunt?",
-    "expect": [
-      "dedup.py"
-    ],
-    "forbid": [],
-    "repeated": false,
-    "occurrences": 3,
-    "source": [
-      [
-        "0bf3ba2a-8784-4889-8c97-a9d553c1d2f6",
-        1
-      ],
-      [
-        "0bf3ba2a-8784-4889-8c97-a9d553c1d2f6",
-        2
-      ],
-      [
-        "6011cf1e-80d0-4979-93f5-658b3ec89037",
-        7
-      ]
-    ]
-  },
-  {
-    "id": "fact-9818680f",
-    "kind": "fact",
-    "query": "Какие файлы правились в проекте job-hunt?",
-    "expect": [
-      "runlog.py"
-    ],
-    "forbid": [],
-    "repeated": false,
-    "occurrences": 3,
-    "source": [
-      [
-        "1bf5dc9d-839c-4d52-a980-a0da4aa3392f",
-        3
-      ],
-      [
-        "1bf5dc9d-839c-4d52-a980-a0da4aa3392f",
-        5
-      ],
-      [
-        "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
-        8
-      ]
-    ]
-  },
-  {
-    "id": "fact-70af81ed",
-    "kind": "fact",
-    "query": "Какие файлы правились в проекте job-hunt?",
-    "expect": [
-      "test_db.py"
-    ],
-    "forbid": [],
-    "repeated": false,
-    "occurrences": 3,
-    "source": [
-      [
-        "1bf5dc9d-839c-4d52-a980-a0da4aa3392f",
-        3
-      ],
-      [
-        "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
-        2
-      ],
-      [
-        "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
-        4
-      ]
-    ]
-  },
-  {
-    "id": "fact-33788714",
-    "kind": "fact",
-    "query": "Какие файлы правились в проекте job-hunt?",
-    "expect": [
-      "test_dedup.py"
-    ],
-    "forbid": [],
-    "repeated": false,
-    "occurrences": 3,
-    "source": [
-      [
-        "0bf3ba2a-8784-4889-8c97-a9d553c1d2f6",
-        1
-      ],
-      [
-        "0bf3ba2a-8784-4889-8c97-a9d553c1d2f6",
-        2
-      ],
-      [
-        "6011cf1e-80d0-4979-93f5-658b3ec89037",
-        7
-      ]
-    ]
-  },
-  {
-    "id": "fact-748cd5d3",
-    "kind": "fact",
-    "query": "Какие файлы правились в проекте job-hunt?",
-    "expect": [
-      "test_property.py"
-    ],
-    "forbid": [],
-    "repeated": false,
-    "occurrences": 3,
-    "source": [
-      [
-        "1bf5dc9d-839c-4d52-a980-a0da4aa3392f",
-        3
-      ],
-      [
-        "6ec2778b-40a2-456f-aed7-02136355e1db",
-        2
-      ],
-      [
-        "fe3b9dc3-6d54-4c39-bdca-d70e1b6bef88",
-        1
-      ]
-    ]
-  },
-  {
-    "id": "fact-29d919ed",
-    "kind": "fact",
-    "query": "Какие файлы правились в проекте job-hunt?",
-    "expect": [
-      "classify.py"
-    ],
-    "forbid": [],
-    "repeated": false,
-    "occurrences": 3,
-    "source": [
-      [
-        "d89c0d47-8424-4293-a02b-a04cf79b6954",
-        3
-      ],
-      [
-        "d89c0d47-8424-4293-a02b-a04cf79b6954",
-        4
-      ],
-      [
-        "ef617449-d86f-4a54-a3ce-81997cd7cb09",
-        5
-      ]
-    ]
-  },
-  {
-    "id": "fact-14f64d02",
-    "kind": "fact",
-    "query": "Какие файлы правились в проекте job-hunt?",
-    "expect": [
-      "dedup.py"
-    ],
-    "forbid": [],
-    "repeated": false,
-    "occurrences": 3,
-    "source": [
-      [
-        "0793ffe5-bba5-4e53-a958-0441d623cc92",
-        8
-      ],
-      [
-        "99b23e19-5b1d-4cff-8654-296db299a42c",
-        6
-      ],
-      [
-        "99b23e19-5b1d-4cff-8654-296db299a42c",
-        7
-      ]
-    ]
-  },
-  {
-    "id": "fact-5b023ec1",
-    "kind": "fact",
-    "query": "Какие файлы правились в проекте job-hunt?",
-    "expect": [
-      "extract.py"
-    ],
-    "forbid": [],
-    "repeated": false,
-    "occurrences": 3,
-    "source": [
-      [
-        "6da422ef-baa9-4a01-bfb5-9dd3f631871c",
-        2
-      ],
-      [
-        "e04e2c52-f1a4-4f5f-9399-1566112d287b",
-        2
-      ],
-      [
-        "e04e2c52-f1a4-4f5f-9399-1566112d287b",
-        7
-      ]
-    ]
-  },
-  {
-    "id": "fact-f496427d",
-    "kind": "fact",
-    "query": "Какие файлы правились в проекте job-hunt?",
-    "expect": [
-      "0001-facts-verdicts-identity.md"
-    ],
-    "forbid": [],
-    "repeated": false,
-    "occurrences": 3,
-    "source": [
-      [
-        "0793ffe5-bba5-4e53-a958-0441d623cc92",
-        7
-      ],
-      [
-        "0793ffe5-bba5-4e53-a958-0441d623cc92",
-        8
-      ],
-      [
-        "99b23e19-5b1d-4cff-8654-296db299a42c",
-        6
-      ]
-    ]
-  },
-  {
-    "id": "fact-86cdb7b7",
-    "kind": "fact",
-    "query": "Какие файлы правились в проекте job-hunt?",
-    "expect": [
-      "strategies.py"
-    ],
-    "forbid": [],
-    "repeated": false,
-    "occurrences": 3,
-    "source": [
-      [
-        "99b23e19-5b1d-4cff-8654-296db299a42c",
-        13
-      ],
-      [
-        "bd85fb51-3304-4bb0-84aa-52e7f4b64731",
-        18
-      ],
-      [
-        "ef617449-d86f-4a54-a3ce-81997cd7cb09",
-        5
-      ]
-    ]
-  },
-  {
-    "id": "fact-68b3962c",
-    "kind": "fact",
-    "query": "Какие файлы правились в проекте job-hunt?",
-    "expect": [
-      "test_adr_refs.py"
-    ],
-    "forbid": [],
-    "repeated": false,
-    "occurrences": 3,
-    "source": [
-      [
-        "0793ffe5-bba5-4e53-a958-0441d623cc92",
-        8
-      ],
-      [
-        "99b23e19-5b1d-4cff-8654-296db299a42c",
-        6
-      ],
-      [
-        "d04342e7-0051-4a5e-b5e5-5d4956010983",
-        12
-      ]
-    ]
-  },
-  {
-    "id": "pref-b4fecc8b",
-    "kind": "preference",
-    "query": "О чём пользователь просил в связи с темой «отвечать коротко, длинные ответы человек не читает»?",
-    "expect": [
-      "отвечать коротко, длинные ответы человек не читает"
-    ],
-    "forbid": [],
-    "repeated": true,
-    "occurrences": 21,
-    "source": [
-      [
-        "e2e3ea09-917e-43db-89fa-23faf5268fa8",
-        8
-      ],
-      [
-        "e4e1b55b-dc6a-4e07-b8ac-eabdb9e4fdeb",
-        1
-      ],
-      [
-        "9780a4d1-5eae-4444-8e87-d3aac02e258d",
-        1
-      ],
-      [
-        "d654bd7e-41d8-451d-898a-e945b0ec9bcf",
-        6
-      ],
-      [
-        "6e9b5133-a4e2-436f-a058-227d5bad6091",
-        3
-      ],
-      [
-        "6e9b5133-a4e2-436f-a058-227d5bad6091",
-        6
-      ],
-      [
-        "c1a7ff50-11b2-4869-98b9-2661ce41a74e",
-        6
-      ],
-      [
-        "c1a7ff50-11b2-4869-98b9-2661ce41a74e",
-        7
-      ],
-      [
-        "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
-        1
-      ],
-      [
-        "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
-        1
-      ],
-      [
-        "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
-        1
-      ],
-      [
-        "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
-        1
-      ],
-      [
-        "77f69361-ad5c-4d1e-949c-ae6a02c507b2",
-        1
-      ],
-      [
-        "bd85fb51-3304-4bb0-84aa-52e7f4b64731",
-        3
-      ],
-      [
-        "bd85fb51-3304-4bb0-84aa-52e7f4b64731",
-        7
-      ],
-      [
-        "d04342e7-0051-4a5e-b5e5-5d4956010983",
-        4
-      ],
-      [
-        "e04e2c52-f1a4-4f5f-9399-1566112d287b",
-        1
-      ],
-      [
-        "ef617449-d86f-4a54-a3ce-81997cd7cb09",
-        12
-      ],
-      [
-        "ef617449-d86f-4a54-a3ce-81997cd7cb09",
-        14
-      ],
-      [
-        "ef617449-d86f-4a54-a3ce-81997cd7cb09",
-        15
-      ],
-      [
-        "ef617449-d86f-4a54-a3ce-81997cd7cb09",
-        16
-      ]
-    ]
-  },
-  {
-    "id": "pref-90270f60",
-    "kind": "preference",
-    "query": "О чём пользователь просил в связи с темой «проверять факты, не выдумывать, не утверждать непроверенное»?",
-    "expect": [
-      "проверять факты, не выдумывать, не утверждать непроверенное"
-    ],
-    "forbid": [],
-    "repeated": true,
-    "occurrences": 14,
-    "source": [
-      [
-        "e6abdf31-fa4f-4960-880f-10fd7a4216bd",
-        10
-      ],
-      [
-        "6768f8dc-a363-4751-a39c-45203b274588",
-        3
-      ],
-      [
-        "f2a66fdd-5253-4f43-9ef0-9a17be0d8a17",
-        4
-      ],
-      [
-        "c7864fdd-5ab9-4174-9bbc-0baaec5bdedf",
-        2
-      ],
-      [
-        "443261a2-4bd1-475b-ac40-a68480bb1021",
-        5
-      ],
-      [
-        "557de9de-327d-44d4-a346-fde6ef3f694f",
-        6
-      ],
-      [
-        "557de9de-327d-44d4-a346-fde6ef3f694f",
-        8
-      ],
-      [
-        "77f69361-ad5c-4d1e-949c-ae6a02c507b2",
-        1
-      ],
-      [
-        "feb24791-a870-480f-b3eb-4ed4707e276d",
-        2
-      ],
-      [
-        "99b23e19-5b1d-4cff-8654-296db299a42c",
-        6
-      ],
-      [
-        "bd85fb51-3304-4bb0-84aa-52e7f4b64731",
-        3
-      ],
-      [
-        "d04342e7-0051-4a5e-b5e5-5d4956010983",
-        2
-      ],
-      [
-        "e04e2c52-f1a4-4f5f-9399-1566112d287b",
-        1
-      ],
-      [
-        "ef617449-d86f-4a54-a3ce-81997cd7cb09",
-        18
-      ]
-    ]
-  },
-  {
-    "id": "pref-1b881221",
-    "kind": "preference",
-    "query": "О чём пользователь просил в связи с темой «сначала показать план, править код после согласования»?",
-    "expect": [
-      "сначала показать план, править код после согласования"
-    ],
-    "forbid": [],
-    "repeated": true,
-    "occurrences": 7,
-    "source": [
-      [
-        "443261a2-4bd1-475b-ac40-a68480bb1021",
-        6
-      ],
-      [
-        "6011cf1e-80d0-4979-93f5-658b3ec89037",
-        6
-      ],
-      [
-        "77f69361-ad5c-4d1e-949c-ae6a02c507b2",
-        1
-      ],
-      [
-        "77f69361-ad5c-4d1e-949c-ae6a02c507b2",
-        6
-      ],
-      [
-        "77f69361-ad5c-4d1e-949c-ae6a02c507b2",
-        8
-      ],
-      [
-        "bd85fb51-3304-4bb0-84aa-52e7f4b64731",
-        16
-      ],
-      [
-        "e04e2c52-f1a4-4f5f-9399-1566112d287b",
-        1
-      ]
-    ]
-  },
-  {
-    "id": "pref-79b4bbda",
-    "kind": "preference",
-    "query": "О чём пользователь просил в связи с темой «задавать вопросы по одному за раз»?",
-    "expect": [
-      "задавать вопросы по одному за раз"
-    ],
-    "forbid": [],
-    "repeated": true,
-    "occurrences": 2,
-    "source": [
-      [
-        "6768f8dc-a363-4751-a39c-45203b274588",
-        1
-      ],
-      [
-        "6011cf1e-80d0-4979-93f5-658b3ec89037",
-        1
-      ]
-    ]
-  },
-  {
-    "id": "pref-c447f4c7",
-    "kind": "preference",
-    "query": "О чём пользователь просил в связи с темой «не использовать тире и дефисы в тексте»?",
-    "expect": [
-      "не использовать тире и дефисы в тексте"
-    ],
-    "forbid": [],
-    "repeated": true,
-    "occurrences": 2,
-    "source": [
-      [
-        "6c857447-0ba0-4709-951f-7204b0b6b1a0",
-        11
-      ],
-      [
-        "c1a7ff50-11b2-4869-98b9-2661ce41a74e",
-        10
-      ]
-    ]
-  },
-  {
-    "id": "url-e002c165",
-    "kind": "external_resource",
-    "query": "Какие внешние адреса использовались в проекте mcp-grafana?",
-    "expect": [
-      "10.0.0.1:3000"
-    ],
-    "forbid": [],
-    "repeated": true,
-    "occurrences": 2,
-    "source": [
-      [
-        "443261a2-4bd1-475b-ac40-a68480bb1021",
-        5
-      ],
-      [
-        "443261a2-4bd1-475b-ac40-a68480bb1021",
-        12
-      ]
-    ]
-  },
-  {
-    "id": "url-8d979f13",
-    "kind": "external_resource",
-    "query": "Какие внешние адреса использовались в проекте job-hunt?",
-    "expect": [
-      "localhost:11434"
-    ],
-    "forbid": [],
-    "repeated": true,
-    "occurrences": 2,
-    "source": [
-      [
-        "ef617449-d86f-4a54-a3ce-81997cd7cb09",
-        20
-      ],
-      [
-        "ef617449-d86f-4a54-a3ce-81997cd7cb09",
-        20
-      ]
-    ]
-  },
-  {
-    "id": "url-a4fb4590",
-    "kind": "external_resource",
-    "query": "Какие внешние адреса использовались в проекте Tarasusrus__lesson-ledger?",
-    "expect": [
-      "localhost:5008"
-    ],
-    "forbid": [],
-    "repeated": true,
-    "occurrences": 2,
-    "source": [
-      [
-        "d654bd7e-41d8-451d-898a-e945b0ec9bcf",
-        12
-      ],
-      [
-        "d654bd7e-41d8-451d-898a-e945b0ec9bcf",
-        18
-      ]
-    ]
-  },
-  {
-    "id": "url-33591d7e",
-    "kind": "external_resource",
-    "query": "Какие внешние адреса использовались в проекте person?",
-    "expect": [
-      "github.com"
-    ],
-    "forbid": [],
-    "repeated": true,
-    "occurrences": 2,
-    "source": [
-      [
-        "6c857447-0ba0-4709-951f-7204b0b6b1a0",
-        12
-      ],
-      [
-        "e2e3ea09-917e-43db-89fa-23faf5268fa8",
-        31
-      ]
-    ]
-  },
-  {
-    "id": "url-8ed4d240",
-    "kind": "external_resource",
-    "query": "Какие внешние адреса использовались в проекте person?",
-    "expect": [
-      "localhost:5008"
-    ],
-    "forbid": [],
-    "repeated": true,
-    "occurrences": 1,
-    "source": [
-      [
-        "23ece2e2-1b3d-47cf-bc46-5dc0d8cb67dd",
-        20
-      ]
-    ]
-  },
-  {
-    "id": "url-c0b7bafb",
-    "kind": "external_resource",
-    "query": "Какие внешние адреса использовались в проекте job-hunt?",
-    "expect": [
-      "github.com"
-    ],
-    "forbid": [],
-    "repeated": false,
-    "occurrences": 3,
-    "source": [
-      [
-        "f2a66fdd-5253-4f43-9ef0-9a17be0d8a17",
-        5
-      ],
-      [
-        "f2a66fdd-5253-4f43-9ef0-9a17be0d8a17",
-        6
-      ],
-      [
-        "f2a66fdd-5253-4f43-9ef0-9a17be0d8a17",
-        7
-      ]
-    ]
-  },
-  {
-    "id": "url-e5606f41",
-    "kind": "external_resource",
-    "query": "Какие внешние адреса использовались в проекте person?",
-    "expect": [
-      "arxiv.org"
-    ],
-    "forbid": [],
-    "repeated": false,
-    "occurrences": 2,
-    "source": [
-      [
-        "e2e3ea09-917e-43db-89fa-23faf5268fa8",
-        1
-      ],
-      [
-        "e2e3ea09-917e-43db-89fa-23faf5268fa8",
-        22
-      ]
-    ]
-  },
-  {
-    "id": "url-fcbd8ba1",
-    "kind": "external_resource",
-    "query": "Какие внешние адреса использовались в проекте person?",
-    "expect": [
-      "arxiv.org"
-    ],
-    "forbid": [],
-    "repeated": false,
-    "occurrences": 2,
-    "source": [
-      [
-        "e2e3ea09-917e-43db-89fa-23faf5268fa8",
-        1
-      ],
-      [
-        "e2e3ea09-917e-43db-89fa-23faf5268fa8",
-        19
-      ]
-    ]
-  },
-  {
-    "id": "url-39735638",
-    "kind": "external_resource",
-    "query": "Какие внешние адреса использовались в проекте person?",
-    "expect": [
-      "arxiv.org"
-    ],
-    "forbid": [],
-    "repeated": false,
-    "occurrences": 2,
-    "source": [
-      [
-        "e2e3ea09-917e-43db-89fa-23faf5268fa8",
-        1
-      ],
-      [
-        "e2e3ea09-917e-43db-89fa-23faf5268fa8",
-        18
-      ]
-    ]
-  },
-  {
-    "id": "url-67d9a9ed",
-    "kind": "external_resource",
-    "query": "Какие внешние адреса использовались в проекте scripts?",
-    "expect": [
-      "Quala.dev"
-    ],
-    "forbid": [],
-    "repeated": false,
-    "occurrences": 1,
-    "source": [
-      [
-        "77f69361-ad5c-4d1e-949c-ae6a02c507b2",
-        2
-      ]
-    ]
-  },
-  {
-    "id": "url-a25dcc8f",
-    "kind": "external_resource",
-    "query": "Какие внешние адреса использовались в проекте person?",
-    "expect": [
-      "localhost:11434"
-    ],
-    "forbid": [],
-    "repeated": false,
-    "occurrences": 1,
-    "source": [
-      [
-        "e4e1b55b-dc6a-4e07-b8ac-eabdb9e4fdeb",
-        1
-      ]
-    ]
-  },
-  {
-    "id": "url-cb309456",
-    "kind": "external_resource",
-    "query": "Какие внешние адреса использовались в проекте mcp-grafana?",
-    "expect": [
-      "localhost:5008**"
-    ],
-    "forbid": [],
-    "repeated": false,
-    "occurrences": 1,
-    "source": [
-      [
-        "23ece2e2-1b3d-47cf-bc46-5dc0d8cb67dd",
-        19
-      ]
-    ]
-  },
-  {
-    "id": "url-28fb6726",
-    "kind": "external_resource",
-    "query": "Какие внешние адреса использовались в проекте app?",
-    "expect": [
-      "localhost:5008"
-    ],
-    "forbid": [],
-    "repeated": false,
-    "occurrences": 1,
-    "source": [
-      [
-        "23ece2e2-1b3d-47cf-bc46-5dc0d8cb67dd",
-        25
-      ]
-    ]
-  },
-  {
-    "id": "url-bd4fe299",
-    "kind": "external_resource",
-    "query": "Какие внешние адреса использовались в проекте 7244f639974b42ba976115e3e7f7a819?",
-    "expect": [
-      "localhost:5008"
-    ],
-    "forbid": [],
-    "repeated": false,
-    "occurrences": 1,
-    "source": [
-      [
-        "1af83bc7-09a4-4795-9a56-74a0b8d6286c",
-        3
-      ]
-    ]
-  },
-  {
-    "id": "url-d20fec31",
-    "kind": "external_resource",
-    "query": "Какие внешние адреса использовались в проекте 3e45437580b845d1be65184f68038a65?",
-    "expect": [
-      "api.telegram.org"
-    ],
-    "forbid": [],
-    "repeated": false,
-    "occurrences": 1,
-    "source": [
-      [
-        "9780a4d1-5eae-4444-8e87-d3aac02e258d",
-        1
-      ]
-    ]
-  },
-  {
-    "id": "link-b1bbf99f",
-    "kind": "association",
-    "query": "Что правилось вместе в проекте job-hunt в одной задаче?",
-    "expect": [
-      "0001-facts-verdicts-identity.md",
-      "0006-foreign-sources.md"
-    ],
-    "forbid": [],
-    "repeated": true,
-    "occurrences": 15,
-    "source": [
-      [
-        "0793ffe5-bba5-4e53-a958-0441d623cc92",
-        8
-      ]
-    ]
-  },
-  {
-    "id": "link-ff75c89d",
-    "kind": "association",
-    "query": "Что правилось вместе в проекте job-hunt в одной задаче?",
-    "expect": [
-      "CONTEXT.md",
-      "architecture.puml"
-    ],
-    "forbid": [],
-    "repeated": true,
-    "occurrences": 3,
-    "source": [
-      [
-        "0793ffe5-bba5-4e53-a958-0441d623cc92",
-        14
-      ]
-    ]
-  },
-  {
-    "id": "link-0fed9697",
-    "kind": "association",
-    "query": "Что правилось вместе в проекте job-hunt в одной задаче?",
-    "expect": [
-      "db.py",
-      "dedup.py"
-    ],
-    "forbid": [],
-    "repeated": true,
-    "occurrences": 7,
-    "source": [
-      [
-        "0bf3ba2a-8784-4889-8c97-a9d553c1d2f6",
-        1
-      ]
-    ]
-  },
-  {
-    "id": "link-83d5dcc0",
-    "kind": "association",
-    "query": "Что правилось вместе в проекте job-hunt в одной задаче?",
-    "expect": [
-      "CONTEXT.md",
-      "dedup.py"
-    ],
-    "forbid": [],
-    "repeated": true,
-    "occurrences": 4,
-    "source": [
-      [
-        "0bf3ba2a-8784-4889-8c97-a9d553c1d2f6",
-        2
-      ]
-    ]
-  },
-  {
-    "id": "link-bdf3ffae",
-    "kind": "association",
-    "query": "Что правилось вместе в проекте job-hunt в одной задаче?",
-    "expect": [
-      "CONTEXT.md",
-      "config.yml"
-    ],
-    "forbid": [],
-    "repeated": true,
-    "occurrences": 14,
-    "source": [
-      [
-        "0bf3ba2a-8784-4889-8c97-a9d553c1d2f6",
-        3
-      ]
-    ]
-  },
-  {
-    "id": "link-e774810c",
-    "kind": "association",
-    "query": "Что правилось вместе в проекте job-hunt в одной задаче?",
-    "expect": [
-      "CONTEXT.md",
-      "run.py"
-    ],
-    "forbid": [],
-    "repeated": true,
-    "occurrences": 7,
-    "source": [
-      [
-        "1506b41b-daae-400c-a834-2ff3880a5d58",
-        1
-      ]
-    ]
-  },
-  {
-    "id": "link-2be7763e",
-    "kind": "association",
-    "query": "Что правилось вместе в проекте job-hunt в одной задаче?",
-    "expect": [
-      "architecture.puml",
-      "dataflow.puml"
-    ],
-    "forbid": [],
-    "repeated": true,
-    "occurrences": 13,
-    "source": [
-      [
-        "1bf5dc9d-839c-4d52-a980-a0da4aa3392f",
-        3
-      ]
-    ]
-  },
-  {
-    "id": "link-91a2b3d8",
-    "kind": "association",
-    "query": "Что правилось вместе в проекте job-hunt в одной задаче?",
-    "expect": [
-      "0001-identity-facts-verdicts.md",
-      "CONTEXT.md"
-    ],
-    "forbid": [],
-    "repeated": true,
-    "occurrences": 7,
-    "source": [
-      [
-        "1bf5dc9d-839c-4d52-a980-a0da4aa3392f",
-        5
-      ]
-    ]
-  },
-  {
-    "id": "link-8dab4e0c",
-    "kind": "association",
-    "query": "Что правилось вместе в проекте person в одной задаче?",
-    "expect": [
-      "mcpgrafana.go",
-      "validate_url_test.go"
-    ],
-    "forbid": [],
-    "repeated": true,
-    "occurrences": 2,
-    "source": [
-      [
-        "23ece2e2-1b3d-47cf-bc46-5dc0d8cb67dd",
-        5
-      ]
-    ]
-  },
-  {
-    "id": "link-c446be02",
-    "kind": "association",
-    "query": "Что правилось вместе в проекте mcp-grafana в одной задаче?",
-    "expect": [
-      "README.md",
-      "command-line-flags.md"
-    ],
-    "forbid": [],
-    "repeated": true,
-    "occurrences": 4,
-    "source": [
-      [
-        "23ece2e2-1b3d-47cf-bc46-5dc0d8cb67dd",
-        6
-      ]
-    ]
-  },
-  {
-    "id": "link-06a5d7b6",
-    "kind": "association",
-    "query": "Что правилось вместе в проекте mcp-grafana в одной задаче?",
-    "expect": [
-      "CHANGELOG.md",
-      "main_test.go"
-    ],
-    "forbid": [],
-    "repeated": true,
-    "occurrences": 2,
-    "source": [
-      [
-        "23ece2e2-1b3d-47cf-bc46-5dc0d8cb67dd",
-        7
-      ]
-    ]
-  },
-  {
-    "id": "link-fa32deb1",
-    "kind": "association",
-    "query": "Что правилось вместе в проекте mcp-grafana в одной задаче?",
-    "expect": [
-      "README.md",
-      "command-line-flags.md"
-    ],
-    "forbid": [],
-    "repeated": true,
-    "occurrences": 6,
-    "source": [
-      [
-        "443261a2-4bd1-475b-ac40-a68480bb1021",
-        1
-      ]
-    ]
-  },
-  {
-    "id": "link-592ad730",
-    "kind": "association",
-    "query": "Что правилось вместе в проекте mcp-grafana в одной задаче?",
-    "expect": [
-      "CHANGELOG.md",
-      "main_test.go"
-    ],
-    "forbid": [],
-    "repeated": true,
-    "occurrences": 2,
-    "source": [
-      [
-        "443261a2-4bd1-475b-ac40-a68480bb1021",
-        2
-      ]
-    ]
-  },
-  {
-    "id": "link-cbf333cb",
-    "kind": "association",
-    "query": "Что правилось вместе в проекте mcp-grafana в одной задаче?",
-    "expect": [
-      "CHANGELOG.md",
-      "client_cache.go"
-    ],
-    "forbid": [],
-    "repeated": true,
-    "occurrences": 3,
-    "source": [
-      [
-        "443261a2-4bd1-475b-ac40-a68480bb1021",
-        10
-      ]
-    ]
-  },
-  {
-    "id": "link-33f18e0d",
-    "kind": "association",
-    "query": "Что правилось вместе в проекте mcp-grafana в одной задаче?",
-    "expect": [
-      "client_cache.go",
-      "mcpgrafana_test.go"
-    ],
-    "forbid": [],
-    "repeated": true,
-    "occurrences": 4,
-    "source": [
-      [
-        "443261a2-4bd1-475b-ac40-a68480bb1021",
-        12
-      ]
-    ]
-  },
-  {
-    "id": "ctx-1f6a2369",
-    "kind": "context",
-    "query": "В какой ветке шла работа над проектом person?",
-    "expect": [
-      "HEAD"
-    ],
-    "forbid": [],
-    "repeated": true,
-    "occurrences": 1,
-    "source": [
-      [
-        "030b861c-4790-4b32-a0dd-40b2793fbadb",
-        1
-      ]
-    ]
-  },
-  {
-    "id": "ctx-5383c5c1",
-    "kind": "context",
-    "query": "В какой ветке шла работа над проектом 9a7eadfb3be04f11a8127e5cf02c451b?",
-    "expect": [
-      "HEAD"
-    ],
-    "forbid": [],
-    "repeated": true,
-    "occurrences": 1,
-    "source": [
-      [
-        "03442ee4-e8c5-4fb1-bfe1-0b173d024208",
-        1
-      ]
-    ]
-  },
-  {
-    "id": "ctx-de6aecb5",
-    "kind": "context",
-    "query": "В какой ветке шла работа над проектом 9a7eadfb3be04f11a8127e5cf02c451b?",
-    "expect": [
-      "HEAD"
-    ],
-    "forbid": [],
-    "repeated": true,
-    "occurrences": 1,
-    "source": [
-      [
-        "03442ee4-e8c5-4fb1-bfe1-0b173d024208",
-        2
-      ]
-    ]
-  },
-  {
-    "id": "ctx-f4a2d7c1",
-    "kind": "context",
-    "query": "В какой ветке шла работа над проектом 9a7eadfb3be04f11a8127e5cf02c451b?",
-    "expect": [
-      "HEAD"
-    ],
-    "forbid": [],
-    "repeated": true,
-    "occurrences": 1,
-    "source": [
-      [
-        "03442ee4-e8c5-4fb1-bfe1-0b173d024208",
-        3
-      ]
-    ]
-  },
-  {
-    "id": "ctx-fb678ab1",
-    "kind": "context",
-    "query": "В какой ветке шла работа над проектом 9a7eadfb3be04f11a8127e5cf02c451b?",
-    "expect": [
-      "HEAD"
-    ],
-    "forbid": [],
-    "repeated": true,
-    "occurrences": 1,
-    "source": [
-      [
-        "03442ee4-e8c5-4fb1-bfe1-0b173d024208",
-        4
-      ]
-    ]
-  },
-  {
-    "id": "ctx-6619cbed",
-    "kind": "context",
-    "query": "В какой ветке шла работа над проектом 9a7eadfb3be04f11a8127e5cf02c451b?",
-    "expect": [
-      "HEAD"
-    ],
-    "forbid": [],
-    "repeated": true,
-    "occurrences": 1,
-    "source": [
-      [
-        "03442ee4-e8c5-4fb1-bfe1-0b173d024208",
-        5
-      ]
-    ]
-  },
-  {
-    "id": "ctx-95bb2992",
-    "kind": "context",
-    "query": "В какой ветке шла работа над проектом Tarasusrus__simpleAI?",
-    "expect": [
-      "HEAD"
-    ],
-    "forbid": [],
-    "repeated": true,
-    "occurrences": 1,
-    "source": [
-      [
-        "03442ee4-e8c5-4fb1-bfe1-0b173d024208",
-        6
-      ]
-    ]
-  },
-  {
-    "id": "ctx-4d3166b2",
-    "kind": "context",
-    "query": "В какой ветке шла работа над проектом Tarasusrus__simpleAI?",
-    "expect": [
-      "HEAD"
-    ],
-    "forbid": [],
-    "repeated": true,
-    "occurrences": 1,
-    "source": [
-      [
-        "03442ee4-e8c5-4fb1-bfe1-0b173d024208",
-        7
-      ]
-    ]
-  },
-  {
-    "id": "ctx-a585e301",
-    "kind": "context",
-    "query": "В какой ветке шла работа над проектом Tarasusrus__simpleAI?",
-    "expect": [
-      "HEAD"
-    ],
-    "forbid": [],
-    "repeated": true,
-    "occurrences": 1,
-    "source": [
-      [
-        "03442ee4-e8c5-4fb1-bfe1-0b173d024208",
-        8
-      ]
-    ]
-  },
-  {
-    "id": "ctx-c09e634f",
-    "kind": "context",
-    "query": "В какой ветке шла работа над проектом f5ff102a88a1493ba05cb0116dce322a?",
-    "expect": [
-      "HEAD"
-    ],
-    "forbid": [],
-    "repeated": true,
-    "occurrences": 1,
-    "source": [
-      [
-        "03cbaa9e-cb8d-42a2-9fdf-e47fb5f253f8",
-        1
-      ]
-    ]
-  },
-  {
-    "id": "absent-1",
-    "kind": "absence",
-    "query": "Что известно про проект sirius-quantum-ledger?",
-    "expect": [],
-    "forbid": [
-      "sirius-quantum-ledger"
-    ],
-    "repeated": false,
-    "occurrences": 0,
-    "source": []
-  },
-  {
-    "id": "absent-2",
-    "kind": "absence",
-    "query": "Какие файлы правились в проекте helios-payments?",
-    "expect": [],
-    "forbid": [
-      "helios-payments"
-    ],
-    "repeated": false,
-    "occurrences": 0,
-    "source": []
-  },
-  {
-    "id": "absent-3",
-    "kind": "absence",
-    "query": "Что пользователь просил про работу с камерами наблюдения?",
-    "expect": [],
-    "forbid": [
-      "камер"
-    ],
-    "repeated": false,
-    "occurrences": 0,
-    "source": []
-  },
-  {
-    "id": "absent-4",
-    "kind": "absence",
-    "query": "Какие адреса использовались для проекта tundra-crm?",
-    "expect": [],
-    "forbid": [
-      "tundra-crm"
-    ],
-    "repeated": false,
-    "occurrences": 0,
-    "source": []
-  },
-  {
-    "id": "absent-5",
-    "kind": "absence",
-    "query": "В какой ветке шла работа над проектом obsidian-mill?",
-    "expect": [],
-    "forbid": [
-      "obsidian-mill"
-    ],
-    "repeated": false,
-    "occurrences": 0,
-    "source": []
-  },
-  {
-    "id": "fact-1bc292ff",
-    "kind": "fact",
-    "query": "Какие файлы правились в проекте job-hunt?",
-    "expect": [
-      "test_latest_verdict.py"
-    ],
-    "forbid": [],
-    "repeated": false,
-    "occurrences": 3,
-    "source": [
-      [
-        "d89c0d47-8424-4293-a02b-a04cf79b6954",
-        3
-      ],
-      [
-        "d89c0d47-8424-4293-a02b-a04cf79b6954",
-        4
-      ],
-      [
-        "ef617449-d86f-4a54-a3ce-81997cd7cb09",
-        5
-      ]
-    ]
-  },
-  {
-    "id": "fact-6621ce95",
-    "kind": "fact",
-    "query": "Какие файлы правились в проекте job-hunt?",
-    "expect": [
-      "test_parsing.py"
-    ],
-    "forbid": [],
-    "repeated": false,
-    "occurrences": 3,
-    "source": [
-      [
-        "6da422ef-baa9-4a01-bfb5-9dd3f631871c",
-        2
-      ],
-      [
-        "e04e2c52-f1a4-4f5f-9399-1566112d287b",
-        2
-      ],
-      [
-        "e04e2c52-f1a4-4f5f-9399-1566112d287b",
-        7
-      ]
-    ]
-  },
-  {
-    "id": "fact-34d2f2fe",
-    "kind": "fact",
-    "query": "Какие файлы правились в проекте job-hunt?",
-    "expect": [
-      "test_predicate.py"
-    ],
-    "forbid": [],
-    "repeated": false,
-    "occurrences": 3,
-    "source": [
-      [
-        "d04342e7-0051-4a5e-b5e5-5d4956010983",
-        12
-      ],
-      [
-        "e04e2c52-f1a4-4f5f-9399-1566112d287b",
-        7
-      ],
-      [
-        "e04e2c52-f1a4-4f5f-9399-1566112d287b",
-        14
-      ]
-    ]
-  },
-  {
-    "id": "fact-219a9eb3",
-    "kind": "fact",
-    "query": "Какие файлы правились в проекте job-hunt?",
-    "expect": [
-      "test_profile.py"
-    ],
-    "forbid": [],
-    "repeated": false,
-    "occurrences": 3,
-    "source": [
-      [
-        "d04342e7-0051-4a5e-b5e5-5d4956010983",
-        12
-      ],
-      [
-        "e04e2c52-f1a4-4f5f-9399-1566112d287b",
-        7
-      ],
-      [
-        "e04e2c52-f1a4-4f5f-9399-1566112d287b",
-        14
-      ]
-    ]
-  },
-  {
-    "id": "fact-50c260a4",
-    "kind": "fact",
-    "query": "Какие файлы правились в проекте job-hunt?",
-    "expect": [
-      "test_property_session.py"
-    ],
-    "forbid": [],
-    "repeated": false,
-    "occurrences": 3,
-    "source": [
-      [
-        "0793ffe5-bba5-4e53-a958-0441d623cc92",
-        8
-      ],
-      [
-        "6da422ef-baa9-4a01-bfb5-9dd3f631871c",
-        1
-      ],
-      [
-        "6da422ef-baa9-4a01-bfb5-9dd3f631871c",
-        2
-      ]
-    ]
-  },
-  {
-    "id": "fact-4016a898",
-    "kind": "fact",
-    "query": "Какие файлы правились в проекте job-hunt?",
-    "expect": [
-      "test_remoteok.py"
-    ],
-    "forbid": [],
-    "repeated": false,
-    "occurrences": 3,
-    "source": [
-      [
-        "0793ffe5-bba5-4e53-a958-0441d623cc92",
-        8
-      ],
-      [
-        "6da422ef-baa9-4a01-bfb5-9dd3f631871c",
-        1
-      ],
-      [
-        "6da422ef-baa9-4a01-bfb5-9dd3f631871c",
-        2
-      ]
-    ]
-  },
-  {
-    "id": "fact-9dd99d66",
-    "kind": "fact",
-    "query": "Какие файлы правились в проекте job-hunt?",
-    "expect": [
-      "test_risk.py"
-    ],
-    "forbid": [],
-    "repeated": false,
-    "occurrences": 3,
-    "source": [
-      [
-        "bd85fb51-3304-4bb0-84aa-52e7f4b64731",
-        3
-      ],
-      [
-        "bd85fb51-3304-4bb0-84aa-52e7f4b64731",
-        18
-      ],
-      [
-        "e04e2c52-f1a4-4f5f-9399-1566112d287b",
-        17
-      ]
-    ]
-  },
-  {
-    "id": "fact-72b6ea45",
-    "kind": "fact",
-    "query": "Какие файлы правились в проекте job-hunt?",
-    "expect": [
-      "test_score_stage.py"
-    ],
-    "forbid": [],
-    "repeated": false,
-    "occurrences": 3,
-    "source": [
-      [
-        "0793ffe5-bba5-4e53-a958-0441d623cc92",
-        8
-      ],
-      [
-        "d89c0d47-8424-4293-a02b-a04cf79b6954",
-        4
-      ],
-      [
-        "ef617449-d86f-4a54-a3ce-81997cd7cb09",
-        5
-      ]
-    ]
-  },
-  {
-    "id": "fact-d4f4434b",
-    "kind": "fact",
-    "query": "Какие файлы правились в проекте job-hunt?",
-    "expect": [
-      "test_telegram.py"
-    ],
-    "forbid": [],
-    "repeated": false,
-    "occurrences": 3,
-    "source": [
-      [
-        "6da422ef-baa9-4a01-bfb5-9dd3f631871c",
-        2
-      ],
-      [
-        "e04e2c52-f1a4-4f5f-9399-1566112d287b",
-        2
-      ],
-      [
-        "e04e2c52-f1a4-4f5f-9399-1566112d287b",
-        7
-      ]
-    ]
-  },
-  {
-    "id": "fact-bd73f7a2",
-    "kind": "fact",
-    "query": "Какие файлы правились в проекте mcp-grafana?",
-    "expect": [
-      "CHANGELOG.md"
-    ],
-    "forbid": [],
-    "repeated": false,
-    "occurrences": 3,
-    "source": [
-      [
-        "23ece2e2-1b3d-47cf-bc46-5dc0d8cb67dd",
-        7
-      ],
-      [
-        "443261a2-4bd1-475b-ac40-a68480bb1021",
-        2
-      ],
-      [
-        "443261a2-4bd1-475b-ac40-a68480bb1021",
-        10
-      ]
-    ]
-  }
-]
+{
+  "version": 2,
+  "kind": "cases",
+  "identity": "file-path",
+  "built_at": "2026-08-31T02:43:36+00:00",
+  "count": 100,
+  "split": "2026-08-09",
+  "target": 100,
+  "items": [
+    {
+      "id": "fact-3ad5190f",
+      "kind": "fact",
+      "query": "Какие файлы правились в проекте job-hunt?",
+      "expect": [
+        "db.py"
+      ],
+      "forbid": [],
+      "repeated": true,
+      "occurrences": 13,
+      "source": [
+        [
+          "0793ffe5-bba5-4e53-a958-0441d623cc92",
+          8
+        ],
+        [
+          "708fe7a1-9655-49f6-8fd5-87afd900ad48",
+          6
+        ],
+        [
+          "99b23e19-5b1d-4cff-8654-296db299a42c",
+          6
+        ],
+        [
+          "99b23e19-5b1d-4cff-8654-296db299a42c",
+          7
+        ],
+        [
+          "99b23e19-5b1d-4cff-8654-296db299a42c",
+          10
+        ],
+        [
+          "99b23e19-5b1d-4cff-8654-296db299a42c",
+          11
+        ],
+        [
+          "bd85fb51-3304-4bb0-84aa-52e7f4b64731",
+          16
+        ],
+        [
+          "cf29fec6-76be-4f73-853a-4c17309fe021",
+          6
+        ],
+        [
+          "d89c0d47-8424-4293-a02b-a04cf79b6954",
+          4
+        ],
+        [
+          "e04e2c52-f1a4-4f5f-9399-1566112d287b",
+          2
+        ],
+        [
+          "e04e2c52-f1a4-4f5f-9399-1566112d287b",
+          6
+        ],
+        [
+          "ef617449-d86f-4a54-a3ce-81997cd7cb09",
+          5
+        ],
+        [
+          "ef617449-d86f-4a54-a3ce-81997cd7cb09",
+          10
+        ]
+      ]
+    },
+    {
+      "id": "fact-ac164c04",
+      "kind": "fact",
+      "query": "Какие файлы правились в проекте job-hunt?",
+      "expect": [
+        "run.py"
+      ],
+      "forbid": [],
+      "repeated": true,
+      "occurrences": 13,
+      "source": [
+        [
+          "c7864fdd-5ab9-4174-9bbc-0baaec5bdedf",
+          1
+        ],
+        [
+          "c7864fdd-5ab9-4174-9bbc-0baaec5bdedf",
+          2
+        ],
+        [
+          "0793ffe5-bba5-4e53-a958-0441d623cc92",
+          8
+        ],
+        [
+          "708fe7a1-9655-49f6-8fd5-87afd900ad48",
+          6
+        ],
+        [
+          "99b23e19-5b1d-4cff-8654-296db299a42c",
+          7
+        ],
+        [
+          "bd85fb51-3304-4bb0-84aa-52e7f4b64731",
+          16
+        ],
+        [
+          "bd85fb51-3304-4bb0-84aa-52e7f4b64731",
+          19
+        ],
+        [
+          "cf29fec6-76be-4f73-853a-4c17309fe021",
+          3
+        ],
+        [
+          "cf29fec6-76be-4f73-853a-4c17309fe021",
+          4
+        ],
+        [
+          "d89c0d47-8424-4293-a02b-a04cf79b6954",
+          3
+        ],
+        [
+          "d89c0d47-8424-4293-a02b-a04cf79b6954",
+          4
+        ],
+        [
+          "e04e2c52-f1a4-4f5f-9399-1566112d287b",
+          6
+        ],
+        [
+          "ef617449-d86f-4a54-a3ce-81997cd7cb09",
+          5
+        ]
+      ]
+    },
+    {
+      "id": "fact-8a9409a5",
+      "kind": "fact",
+      "query": "Какие файлы правились в проекте job-hunt?",
+      "expect": [
+        "CONTEXT.md"
+      ],
+      "forbid": [],
+      "repeated": true,
+      "occurrences": 7,
+      "source": [
+        [
+          "0793ffe5-bba5-4e53-a958-0441d623cc92",
+          8
+        ],
+        [
+          "0793ffe5-bba5-4e53-a958-0441d623cc92",
+          14
+        ],
+        [
+          "bd85fb51-3304-4bb0-84aa-52e7f4b64731",
+          4
+        ],
+        [
+          "bd85fb51-3304-4bb0-84aa-52e7f4b64731",
+          16
+        ],
+        [
+          "bd85fb51-3304-4bb0-84aa-52e7f4b64731",
+          18
+        ],
+        [
+          "bd85fb51-3304-4bb0-84aa-52e7f4b64731",
+          19
+        ],
+        [
+          "e04e2c52-f1a4-4f5f-9399-1566112d287b",
+          11
+        ]
+      ]
+    },
+    {
+      "id": "fact-3f403cfa",
+      "kind": "fact",
+      "query": "Какие файлы правились в проекте job-hunt?",
+      "expect": [
+        "ownership.py"
+      ],
+      "forbid": [],
+      "repeated": true,
+      "occurrences": 3,
+      "source": [
+        [
+          "bd85fb51-3304-4bb0-84aa-52e7f4b64731",
+          16
+        ],
+        [
+          "d04342e7-0051-4a5e-b5e5-5d4956010983",
+          12
+        ],
+        [
+          "e04e2c52-f1a4-4f5f-9399-1566112d287b",
+          6
+        ]
+      ]
+    },
+    {
+      "id": "fact-6977b575",
+      "kind": "fact",
+      "query": "Какие файлы правились в проекте job-hunt?",
+      "expect": [
+        "suspicious_phrases.yml"
+      ],
+      "forbid": [],
+      "repeated": true,
+      "occurrences": 3,
+      "source": [
+        [
+          "6768f8dc-a363-4751-a39c-45203b274588",
+          2
+        ],
+        [
+          "6768f8dc-a363-4751-a39c-45203b274588",
+          3
+        ],
+        [
+          "d89c0d47-8424-4293-a02b-a04cf79b6954",
+          4
+        ]
+      ]
+    },
+    {
+      "id": "fact-8c05e414",
+      "kind": "fact",
+      "query": "Какие файлы правились в проекте job-hunt?",
+      "expect": [
+        "test_adr_refs.py"
+      ],
+      "forbid": [],
+      "repeated": true,
+      "occurrences": 3,
+      "source": [
+        [
+          "0793ffe5-bba5-4e53-a958-0441d623cc92",
+          8
+        ],
+        [
+          "99b23e19-5b1d-4cff-8654-296db299a42c",
+          6
+        ],
+        [
+          "d04342e7-0051-4a5e-b5e5-5d4956010983",
+          12
+        ]
+      ]
+    },
+    {
+      "id": "fact-d8ebb49b",
+      "kind": "fact",
+      "query": "Какие файлы правились в проекте job-hunt?",
+      "expect": [
+        "test_topic_send.py"
+      ],
+      "forbid": [],
+      "repeated": true,
+      "occurrences": 3,
+      "source": [
+        [
+          "bd85fb51-3304-4bb0-84aa-52e7f4b64731",
+          19
+        ],
+        [
+          "e04e2c52-f1a4-4f5f-9399-1566112d287b",
+          6
+        ],
+        [
+          "e04e2c52-f1a4-4f5f-9399-1566112d287b",
+          14
+        ]
+      ]
+    },
+    {
+      "id": "fact-f69cd950",
+      "kind": "fact",
+      "query": "Какие файлы правились в проекте job-hunt?",
+      "expect": [
+        "bot_onboarding.py"
+      ],
+      "forbid": [],
+      "repeated": true,
+      "occurrences": 2,
+      "source": [
+        [
+          "bd85fb51-3304-4bb0-84aa-52e7f4b64731",
+          16
+        ],
+        [
+          "bd85fb51-3304-4bb0-84aa-52e7f4b64731",
+          19
+        ]
+      ]
+    },
+    {
+      "id": "fact-06610b3e",
+      "kind": "fact",
+      "query": "Какие файлы правились в проекте job-hunt?",
+      "expect": [
+        "topic_send.py"
+      ],
+      "forbid": [],
+      "repeated": true,
+      "occurrences": 2,
+      "source": [
+        [
+          "bd85fb51-3304-4bb0-84aa-52e7f4b64731",
+          19
+        ],
+        [
+          "e04e2c52-f1a4-4f5f-9399-1566112d287b",
+          6
+        ]
+      ]
+    },
+    {
+      "id": "fact-0657ec6f",
+      "kind": "fact",
+      "query": "Какие файлы правились в проекте job-hunt?",
+      "expect": [
+        "remoteok.py"
+      ],
+      "forbid": [],
+      "repeated": true,
+      "occurrences": 2,
+      "source": [
+        [
+          "0793ffe5-bba5-4e53-a958-0441d623cc92",
+          8
+        ],
+        [
+          "6da422ef-baa9-4a01-bfb5-9dd3f631871c",
+          1
+        ]
+      ]
+    },
+    {
+      "id": "fact-622ebf18",
+      "kind": "fact",
+      "query": "Какие файлы правились в проекте 3f7007322eef470086a1fc3e35f517a6?",
+      "expect": [
+        "test_suspicion_corpus.py"
+      ],
+      "forbid": [],
+      "repeated": true,
+      "occurrences": 2,
+      "source": [
+        [
+          "6768f8dc-a363-4751-a39c-45203b274588",
+          2
+        ],
+        [
+          "6768f8dc-a363-4751-a39c-45203b274588",
+          3
+        ]
+      ]
+    },
+    {
+      "id": "fact-6c4581fa",
+      "kind": "fact",
+      "query": "Какие файлы правились в проекте job-hunt?",
+      "expect": [
+        "test_telegram_targets.py"
+      ],
+      "forbid": [],
+      "repeated": true,
+      "occurrences": 2,
+      "source": [
+        [
+          "e04e2c52-f1a4-4f5f-9399-1566112d287b",
+          6
+        ],
+        [
+          "e04e2c52-f1a4-4f5f-9399-1566112d287b",
+          14
+        ]
+      ]
+    },
+    {
+      "id": "fact-0c0c606d",
+      "kind": "fact",
+      "query": "Какие файлы правились в проекте mcp-grafana?",
+      "expect": [
+        "main.go"
+      ],
+      "forbid": [],
+      "repeated": true,
+      "occurrences": 1,
+      "source": [
+        [
+          "23ece2e2-1b3d-47cf-bc46-5dc0d8cb67dd",
+          6
+        ]
+      ]
+    },
+    {
+      "id": "fact-d6157989",
+      "kind": "fact",
+      "query": "Какие файлы правились в проекте mcp-grafana?",
+      "expect": [
+        "main_test.go"
+      ],
+      "forbid": [],
+      "repeated": true,
+      "occurrences": 1,
+      "source": [
+        [
+          "23ece2e2-1b3d-47cf-bc46-5dc0d8cb67dd",
+          7
+        ]
+      ]
+    },
+    {
+      "id": "fact-28e30287",
+      "kind": "fact",
+      "query": "Какие файлы правились в проекте job-hunt?",
+      "expect": [
+        "telegram_targets.py"
+      ],
+      "forbid": [],
+      "repeated": true,
+      "occurrences": 1,
+      "source": [
+        [
+          "e04e2c52-f1a4-4f5f-9399-1566112d287b",
+          6
+        ]
+      ]
+    },
+    {
+      "id": "fact-e685f456",
+      "kind": "fact",
+      "query": "Какие файлы правились в проекте job-hunt?",
+      "expect": [
+        "telegram_targets.yml"
+      ],
+      "forbid": [],
+      "repeated": true,
+      "occurrences": 1,
+      "source": [
+        [
+          "e04e2c52-f1a4-4f5f-9399-1566112d287b",
+          6
+        ]
+      ]
+    },
+    {
+      "id": "fact-0b9d242a",
+      "kind": "fact",
+      "query": "Какие файлы правились в проекте job-hunt?",
+      "expect": [
+        "topics.yml"
+      ],
+      "forbid": [],
+      "repeated": true,
+      "occurrences": 1,
+      "source": [
+        [
+          "ef617449-d86f-4a54-a3ce-81997cd7cb09",
+          20
+        ]
+      ]
+    },
+    {
+      "id": "fact-e1786790",
+      "kind": "fact",
+      "query": "Какие файлы правились в проекте job-hunt?",
+      "expect": [
+        "embeddings.py"
+      ],
+      "forbid": [],
+      "repeated": true,
+      "occurrences": 1,
+      "source": [
+        [
+          "d89c0d47-8424-4293-a02b-a04cf79b6954",
+          4
+        ]
+      ]
+    },
+    {
+      "id": "fact-cc3c6b87",
+      "kind": "fact",
+      "query": "Какие файлы правились в проекте job-hunt?",
+      "expect": [
+        "stack_vocab.py"
+      ],
+      "forbid": [],
+      "repeated": true,
+      "occurrences": 1,
+      "source": [
+        [
+          "d04342e7-0051-4a5e-b5e5-5d4956010983",
+          12
+        ]
+      ]
+    },
+    {
+      "id": "fact-5751deef",
+      "kind": "fact",
+      "query": "Какие файлы правились в проекте job-hunt?",
+      "expect": [
+        "stats.py"
+      ],
+      "forbid": [],
+      "repeated": true,
+      "occurrences": 1,
+      "source": [
+        [
+          "d89c0d47-8424-4293-a02b-a04cf79b6954",
+          4
+        ]
+      ]
+    },
+    {
+      "id": "fact-e156909e",
+      "kind": "fact",
+      "query": "Какие файлы правились в проекте job-hunt?",
+      "expect": [
+        "suspicion.py"
+      ],
+      "forbid": [],
+      "repeated": true,
+      "occurrences": 1,
+      "source": [
+        [
+          "d89c0d47-8424-4293-a02b-a04cf79b6954",
+          4
+        ]
+      ]
+    },
+    {
+      "id": "fact-847f0020",
+      "kind": "fact",
+      "query": "Какие файлы правились в проекте job-hunt?",
+      "expect": [
+        "autonomous-prompt.md"
+      ],
+      "forbid": [],
+      "repeated": true,
+      "occurrences": 1,
+      "source": [
+        [
+          "99b23e19-5b1d-4cff-8654-296db299a42c",
+          5
+        ]
+      ]
+    },
+    {
+      "id": "fact-5a253a4e",
+      "kind": "fact",
+      "query": "Какие файлы правились в проекте job-hunt?",
+      "expect": [
+        "test_bot_onboarding.py"
+      ],
+      "forbid": [],
+      "repeated": true,
+      "occurrences": 1,
+      "source": [
+        [
+          "bd85fb51-3304-4bb0-84aa-52e7f4b64731",
+          16
+        ]
+      ]
+    },
+    {
+      "id": "fact-cd3743b5",
+      "kind": "fact",
+      "query": "Какие файлы правились в проекте job-hunt?",
+      "expect": [
+        "test_digest.py"
+      ],
+      "forbid": [],
+      "repeated": true,
+      "occurrences": 1,
+      "source": [
+        [
+          "bd85fb51-3304-4bb0-84aa-52e7f4b64731",
+          19
+        ]
+      ]
+    },
+    {
+      "id": "fact-93f481f5",
+      "kind": "fact",
+      "query": "Какие файлы правились в проекте job-hunt?",
+      "expect": [
+        "test_routing.py"
+      ],
+      "forbid": [],
+      "repeated": true,
+      "occurrences": 1,
+      "source": [
+        [
+          "ef617449-d86f-4a54-a3ce-81997cd7cb09",
+          20
+        ]
+      ]
+    },
+    {
+      "id": "fact-66ff507d",
+      "kind": "fact",
+      "query": "Какие файлы правились в проекте job-hunt?",
+      "expect": [
+        "test_stats_slices.py"
+      ],
+      "forbid": [],
+      "repeated": true,
+      "occurrences": 1,
+      "source": [
+        [
+          "d89c0d47-8424-4293-a02b-a04cf79b6954",
+          4
+        ]
+      ]
+    },
+    {
+      "id": "fact-90a2baa3",
+      "kind": "fact",
+      "query": "Какие файлы правились в проекте AI_1?",
+      "expect": [
+        "Решение.ipynb"
+      ],
+      "forbid": [],
+      "repeated": false,
+      "occurrences": 10,
+      "source": [
+        [
+          "c1a7ff50-11b2-4869-98b9-2661ce41a74e",
+          4
+        ],
+        [
+          "c1a7ff50-11b2-4869-98b9-2661ce41a74e",
+          5
+        ],
+        [
+          "c1a7ff50-11b2-4869-98b9-2661ce41a74e",
+          6
+        ],
+        [
+          "c1a7ff50-11b2-4869-98b9-2661ce41a74e",
+          7
+        ],
+        [
+          "c1a7ff50-11b2-4869-98b9-2661ce41a74e",
+          8
+        ],
+        [
+          "c1a7ff50-11b2-4869-98b9-2661ce41a74e",
+          9
+        ],
+        [
+          "c1a7ff50-11b2-4869-98b9-2661ce41a74e",
+          10
+        ],
+        [
+          "c1a7ff50-11b2-4869-98b9-2661ce41a74e",
+          15
+        ],
+        [
+          "c1a7ff50-11b2-4869-98b9-2661ce41a74e",
+          16
+        ],
+        [
+          "c1a7ff50-11b2-4869-98b9-2661ce41a74e",
+          17
+        ]
+      ]
+    },
+    {
+      "id": "fact-3b526c85",
+      "kind": "fact",
+      "query": "Какие файлы правились в проекте job-hunt?",
+      "expect": [
+        "CONTEXT.md"
+      ],
+      "forbid": [],
+      "repeated": false,
+      "occurrences": 9,
+      "source": [
+        [
+          "1bf5dc9d-839c-4d52-a980-a0da4aa3392f",
+          2
+        ],
+        [
+          "1bf5dc9d-839c-4d52-a980-a0da4aa3392f",
+          5
+        ],
+        [
+          "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
+          2
+        ],
+        [
+          "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
+          3
+        ],
+        [
+          "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
+          5
+        ],
+        [
+          "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
+          8
+        ],
+        [
+          "0bf3ba2a-8784-4889-8c97-a9d553c1d2f6",
+          2
+        ],
+        [
+          "0bf3ba2a-8784-4889-8c97-a9d553c1d2f6",
+          3
+        ],
+        [
+          "6011cf1e-80d0-4979-93f5-658b3ec89037",
+          7
+        ]
+      ]
+    },
+    {
+      "id": "fact-b9b89d5d",
+      "kind": "fact",
+      "query": "Какие файлы правились в проекте job-hunt?",
+      "expect": [
+        "db.py"
+      ],
+      "forbid": [],
+      "repeated": false,
+      "occurrences": 9,
+      "source": [
+        [
+          "1bf5dc9d-839c-4d52-a980-a0da4aa3392f",
+          3
+        ],
+        [
+          "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
+          1
+        ],
+        [
+          "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
+          2
+        ],
+        [
+          "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
+          3
+        ],
+        [
+          "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
+          5
+        ],
+        [
+          "0bf3ba2a-8784-4889-8c97-a9d553c1d2f6",
+          1
+        ],
+        [
+          "6011cf1e-80d0-4979-93f5-658b3ec89037",
+          3
+        ],
+        [
+          "6011cf1e-80d0-4979-93f5-658b3ec89037",
+          7
+        ],
+        [
+          "6ec2778b-40a2-456f-aed7-02136355e1db",
+          2
+        ]
+      ]
+    },
+    {
+      "id": "fact-ad8b28a1",
+      "kind": "fact",
+      "query": "Какие файлы правились в проекте job-hunt?",
+      "expect": [
+        "run.py"
+      ],
+      "forbid": [],
+      "repeated": false,
+      "occurrences": 9,
+      "source": [
+        [
+          "1bf5dc9d-839c-4d52-a980-a0da4aa3392f",
+          3
+        ],
+        [
+          "1bf5dc9d-839c-4d52-a980-a0da4aa3392f",
+          5
+        ],
+        [
+          "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
+          1
+        ],
+        [
+          "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
+          3
+        ],
+        [
+          "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
+          5
+        ],
+        [
+          "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
+          7
+        ],
+        [
+          "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
+          8
+        ],
+        [
+          "0bf3ba2a-8784-4889-8c97-a9d553c1d2f6",
+          3
+        ],
+        [
+          "6011cf1e-80d0-4979-93f5-658b3ec89037",
+          7
+        ]
+      ]
+    },
+    {
+      "id": "fact-18eb07ac",
+      "kind": "fact",
+      "query": "Какие файлы правились в проекте job-hunt?",
+      "expect": [
+        "risk.py"
+      ],
+      "forbid": [],
+      "repeated": false,
+      "occurrences": 9,
+      "source": [
+        [
+          "0793ffe5-bba5-4e53-a958-0441d623cc92",
+          8
+        ],
+        [
+          "bd85fb51-3304-4bb0-84aa-52e7f4b64731",
+          3
+        ],
+        [
+          "bd85fb51-3304-4bb0-84aa-52e7f4b64731",
+          4
+        ],
+        [
+          "bd85fb51-3304-4bb0-84aa-52e7f4b64731",
+          18
+        ],
+        [
+          "d89c0d47-8424-4293-a02b-a04cf79b6954",
+          4
+        ],
+        [
+          "e04e2c52-f1a4-4f5f-9399-1566112d287b",
+          17
+        ],
+        [
+          "ef617449-d86f-4a54-a3ce-81997cd7cb09",
+          3
+        ],
+        [
+          "ef617449-d86f-4a54-a3ce-81997cd7cb09",
+          4
+        ],
+        [
+          "ef617449-d86f-4a54-a3ce-81997cd7cb09",
+          5
+        ]
+      ]
+    },
+    {
+      "id": "fact-6bee50bd",
+      "kind": "fact",
+      "query": "Какие файлы правились в проекте job-hunt?",
+      "expect": [
+        "gateway.py"
+      ],
+      "forbid": [],
+      "repeated": false,
+      "occurrences": 7,
+      "source": [
+        [
+          "1bf5dc9d-839c-4d52-a980-a0da4aa3392f",
+          3
+        ],
+        [
+          "1bf5dc9d-839c-4d52-a980-a0da4aa3392f",
+          5
+        ],
+        [
+          "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
+          1
+        ],
+        [
+          "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
+          5
+        ],
+        [
+          "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
+          8
+        ],
+        [
+          "0bf3ba2a-8784-4889-8c97-a9d553c1d2f6",
+          3
+        ],
+        [
+          "fe3b9dc3-6d54-4c39-bdca-d70e1b6bef88",
+          1
+        ]
+      ]
+    },
+    {
+      "id": "fact-4262d1c5",
+      "kind": "fact",
+      "query": "Какие файлы правились в проекте dev?",
+      "expect": [
+        "test_db.py"
+      ],
+      "forbid": [],
+      "repeated": false,
+      "occurrences": 6,
+      "source": [
+        [
+          "1bf5dc9d-839c-4d52-a980-a0da4aa3392f",
+          3
+        ],
+        [
+          "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
+          1
+        ],
+        [
+          "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
+          2
+        ],
+        [
+          "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
+          3
+        ],
+        [
+          "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
+          4
+        ],
+        [
+          "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
+          5
+        ]
+      ]
+    },
+    {
+      "id": "fact-03e01f6b",
+      "kind": "fact",
+      "query": "Какие файлы правились в проекте job-hunt?",
+      "expect": [
+        "test_gateway.py"
+      ],
+      "forbid": [],
+      "repeated": false,
+      "occurrences": 6,
+      "source": [
+        [
+          "1bf5dc9d-839c-4d52-a980-a0da4aa3392f",
+          3
+        ],
+        [
+          "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
+          1
+        ],
+        [
+          "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
+          5
+        ],
+        [
+          "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
+          8
+        ],
+        [
+          "0bf3ba2a-8784-4889-8c97-a9d553c1d2f6",
+          3
+        ],
+        [
+          "6011cf1e-80d0-4979-93f5-658b3ec89037",
+          2
+        ]
+      ]
+    },
+    {
+      "id": "fact-2924f9c5",
+      "kind": "fact",
+      "query": "Какие файлы правились в проекте job-hunt?",
+      "expect": [
+        "test_golden_eval.py"
+      ],
+      "forbid": [],
+      "repeated": false,
+      "occurrences": 5,
+      "source": [
+        [
+          "6768f8dc-a363-4751-a39c-45203b274588",
+          2
+        ],
+        [
+          "bd85fb51-3304-4bb0-84aa-52e7f4b64731",
+          3
+        ],
+        [
+          "cf29fec6-76be-4f73-853a-4c17309fe021",
+          5
+        ],
+        [
+          "e04e2c52-f1a4-4f5f-9399-1566112d287b",
+          14
+        ],
+        [
+          "e04e2c52-f1a4-4f5f-9399-1566112d287b",
+          17
+        ]
+      ]
+    },
+    {
+      "id": "fact-5589cf50",
+      "kind": "fact",
+      "query": "Какие файлы правились в проекте person?",
+      "expect": [
+        "STATE.md"
+      ],
+      "forbid": [],
+      "repeated": false,
+      "occurrences": 4,
+      "source": [
+        [
+          "6c857447-0ba0-4709-951f-7204b0b6b1a0",
+          8
+        ],
+        [
+          "e2e3ea09-917e-43db-89fa-23faf5268fa8",
+          9
+        ],
+        [
+          "e2e3ea09-917e-43db-89fa-23faf5268fa8",
+          10
+        ],
+        [
+          "e2e3ea09-917e-43db-89fa-23faf5268fa8",
+          30
+        ]
+      ]
+    },
+    {
+      "id": "fact-166c44a8",
+      "kind": "fact",
+      "query": "Какие файлы правились в проекте job-hunt?",
+      "expect": [
+        "models.py"
+      ],
+      "forbid": [],
+      "repeated": false,
+      "occurrences": 4,
+      "source": [
+        [
+          "1bf5dc9d-839c-4d52-a980-a0da4aa3392f",
+          3
+        ],
+        [
+          "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
+          1
+        ],
+        [
+          "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
+          3
+        ],
+        [
+          "0bf3ba2a-8784-4889-8c97-a9d553c1d2f6",
+          1
+        ]
+      ]
+    },
+    {
+      "id": "fact-6d3430fa",
+      "kind": "fact",
+      "query": "Какие файлы правились в проекте job-hunt?",
+      "expect": [
+        "taxonomy.yml"
+      ],
+      "forbid": [],
+      "repeated": false,
+      "occurrences": 4,
+      "source": [
+        [
+          "e04e2c52-f1a4-4f5f-9399-1566112d287b",
+          2
+        ],
+        [
+          "e04e2c52-f1a4-4f5f-9399-1566112d287b",
+          7
+        ],
+        [
+          "ef617449-d86f-4a54-a3ce-81997cd7cb09",
+          9
+        ],
+        [
+          "ef617449-d86f-4a54-a3ce-81997cd7cb09",
+          20
+        ]
+      ]
+    },
+    {
+      "id": "fact-af3379d5",
+      "kind": "fact",
+      "query": "Какие файлы правились в проекте job-hunt?",
+      "expect": [
+        "pipeline.puml"
+      ],
+      "forbid": [],
+      "repeated": false,
+      "occurrences": 4,
+      "source": [
+        [
+          "0793ffe5-bba5-4e53-a958-0441d623cc92",
+          9
+        ],
+        [
+          "0793ffe5-bba5-4e53-a958-0441d623cc92",
+          10
+        ],
+        [
+          "0793ffe5-bba5-4e53-a958-0441d623cc92",
+          14
+        ],
+        [
+          "99b23e19-5b1d-4cff-8654-296db299a42c",
+          6
+        ]
+      ]
+    },
+    {
+      "id": "fact-a9a36e1a",
+      "kind": "fact",
+      "query": "Какие файлы правились в проекте job-hunt?",
+      "expect": [
+        "test_source_markup_guards.py"
+      ],
+      "forbid": [],
+      "repeated": false,
+      "occurrences": 4,
+      "source": [
+        [
+          "708fe7a1-9655-49f6-8fd5-87afd900ad48",
+          5
+        ],
+        [
+          "708fe7a1-9655-49f6-8fd5-87afd900ad48",
+          6
+        ],
+        [
+          "e04e2c52-f1a4-4f5f-9399-1566112d287b",
+          2
+        ],
+        [
+          "e04e2c52-f1a4-4f5f-9399-1566112d287b",
+          7
+        ]
+      ]
+    },
+    {
+      "id": "pref-b4fecc8b",
+      "kind": "preference",
+      "query": "О чём пользователь просил в связи с темой «отвечать коротко, длинные ответы человек не читает»?",
+      "expect": [
+        "отвечать коротко, длинные ответы человек не читает"
+      ],
+      "forbid": [],
+      "repeated": true,
+      "occurrences": 20,
+      "source": [
+        [
+          "e2e3ea09-917e-43db-89fa-23faf5268fa8",
+          8
+        ],
+        [
+          "9780a4d1-5eae-4444-8e87-d3aac02e258d",
+          1
+        ],
+        [
+          "d654bd7e-41d8-451d-898a-e945b0ec9bcf",
+          6
+        ],
+        [
+          "6e9b5133-a4e2-436f-a058-227d5bad6091",
+          3
+        ],
+        [
+          "6e9b5133-a4e2-436f-a058-227d5bad6091",
+          6
+        ],
+        [
+          "c1a7ff50-11b2-4869-98b9-2661ce41a74e",
+          6
+        ],
+        [
+          "c1a7ff50-11b2-4869-98b9-2661ce41a74e",
+          7
+        ],
+        [
+          "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
+          1
+        ],
+        [
+          "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
+          1
+        ],
+        [
+          "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
+          1
+        ],
+        [
+          "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
+          1
+        ],
+        [
+          "77f69361-ad5c-4d1e-949c-ae6a02c507b2",
+          1
+        ],
+        [
+          "bd85fb51-3304-4bb0-84aa-52e7f4b64731",
+          3
+        ],
+        [
+          "bd85fb51-3304-4bb0-84aa-52e7f4b64731",
+          7
+        ],
+        [
+          "d04342e7-0051-4a5e-b5e5-5d4956010983",
+          4
+        ],
+        [
+          "e04e2c52-f1a4-4f5f-9399-1566112d287b",
+          1
+        ],
+        [
+          "ef617449-d86f-4a54-a3ce-81997cd7cb09",
+          12
+        ],
+        [
+          "ef617449-d86f-4a54-a3ce-81997cd7cb09",
+          14
+        ],
+        [
+          "ef617449-d86f-4a54-a3ce-81997cd7cb09",
+          15
+        ],
+        [
+          "ef617449-d86f-4a54-a3ce-81997cd7cb09",
+          16
+        ]
+      ]
+    },
+    {
+      "id": "pref-90270f60",
+      "kind": "preference",
+      "query": "О чём пользователь просил в связи с темой «проверять факты, не выдумывать, не утверждать непроверенное»?",
+      "expect": [
+        "проверять факты, не выдумывать, не утверждать непроверенное"
+      ],
+      "forbid": [],
+      "repeated": true,
+      "occurrences": 12,
+      "source": [
+        [
+          "6768f8dc-a363-4751-a39c-45203b274588",
+          3
+        ],
+        [
+          "f2a66fdd-5253-4f43-9ef0-9a17be0d8a17",
+          4
+        ],
+        [
+          "c7864fdd-5ab9-4174-9bbc-0baaec5bdedf",
+          2
+        ],
+        [
+          "557de9de-327d-44d4-a346-fde6ef3f694f",
+          6
+        ],
+        [
+          "557de9de-327d-44d4-a346-fde6ef3f694f",
+          8
+        ],
+        [
+          "77f69361-ad5c-4d1e-949c-ae6a02c507b2",
+          1
+        ],
+        [
+          "feb24791-a870-480f-b3eb-4ed4707e276d",
+          2
+        ],
+        [
+          "99b23e19-5b1d-4cff-8654-296db299a42c",
+          6
+        ],
+        [
+          "bd85fb51-3304-4bb0-84aa-52e7f4b64731",
+          3
+        ],
+        [
+          "d04342e7-0051-4a5e-b5e5-5d4956010983",
+          2
+        ],
+        [
+          "e04e2c52-f1a4-4f5f-9399-1566112d287b",
+          1
+        ],
+        [
+          "ef617449-d86f-4a54-a3ce-81997cd7cb09",
+          18
+        ]
+      ]
+    },
+    {
+      "id": "pref-1b881221",
+      "kind": "preference",
+      "query": "О чём пользователь просил в связи с темой «сначала показать план, править код после согласования»?",
+      "expect": [
+        "сначала показать план, править код после согласования"
+      ],
+      "forbid": [],
+      "repeated": true,
+      "occurrences": 6,
+      "source": [
+        [
+          "6011cf1e-80d0-4979-93f5-658b3ec89037",
+          6
+        ],
+        [
+          "77f69361-ad5c-4d1e-949c-ae6a02c507b2",
+          1
+        ],
+        [
+          "77f69361-ad5c-4d1e-949c-ae6a02c507b2",
+          6
+        ],
+        [
+          "77f69361-ad5c-4d1e-949c-ae6a02c507b2",
+          8
+        ],
+        [
+          "bd85fb51-3304-4bb0-84aa-52e7f4b64731",
+          16
+        ],
+        [
+          "e04e2c52-f1a4-4f5f-9399-1566112d287b",
+          1
+        ]
+      ]
+    },
+    {
+      "id": "pref-79b4bbda",
+      "kind": "preference",
+      "query": "О чём пользователь просил в связи с темой «задавать вопросы по одному за раз»?",
+      "expect": [
+        "задавать вопросы по одному за раз"
+      ],
+      "forbid": [],
+      "repeated": true,
+      "occurrences": 2,
+      "source": [
+        [
+          "6768f8dc-a363-4751-a39c-45203b274588",
+          1
+        ],
+        [
+          "6011cf1e-80d0-4979-93f5-658b3ec89037",
+          1
+        ]
+      ]
+    },
+    {
+      "id": "pref-c447f4c7",
+      "kind": "preference",
+      "query": "О чём пользователь просил в связи с темой «не использовать тире и дефисы в тексте»?",
+      "expect": [
+        "не использовать тире и дефисы в тексте"
+      ],
+      "forbid": [],
+      "repeated": true,
+      "occurrences": 2,
+      "source": [
+        [
+          "6c857447-0ba0-4709-951f-7204b0b6b1a0",
+          11
+        ],
+        [
+          "c1a7ff50-11b2-4869-98b9-2661ce41a74e",
+          10
+        ]
+      ]
+    },
+    {
+      "id": "url-8d979f13",
+      "kind": "external_resource",
+      "query": "Какие внешние адреса использовались в проекте job-hunt?",
+      "expect": [
+        "localhost:11434"
+      ],
+      "forbid": [],
+      "repeated": true,
+      "occurrences": 2,
+      "source": [
+        [
+          "ef617449-d86f-4a54-a3ce-81997cd7cb09",
+          20
+        ],
+        [
+          "ef617449-d86f-4a54-a3ce-81997cd7cb09",
+          20
+        ]
+      ]
+    },
+    {
+      "id": "url-a4fb4590",
+      "kind": "external_resource",
+      "query": "Какие внешние адреса использовались в проекте Tarasusrus__lesson-ledger?",
+      "expect": [
+        "localhost:5008"
+      ],
+      "forbid": [],
+      "repeated": true,
+      "occurrences": 2,
+      "source": [
+        [
+          "d654bd7e-41d8-451d-898a-e945b0ec9bcf",
+          12
+        ],
+        [
+          "d654bd7e-41d8-451d-898a-e945b0ec9bcf",
+          18
+        ]
+      ]
+    },
+    {
+      "id": "url-33591d7e",
+      "kind": "external_resource",
+      "query": "Какие внешние адреса использовались в проекте person?",
+      "expect": [
+        "github.com"
+      ],
+      "forbid": [],
+      "repeated": true,
+      "occurrences": 2,
+      "source": [
+        [
+          "6c857447-0ba0-4709-951f-7204b0b6b1a0",
+          12
+        ],
+        [
+          "e2e3ea09-917e-43db-89fa-23faf5268fa8",
+          31
+        ]
+      ]
+    },
+    {
+      "id": "url-8ed4d240",
+      "kind": "external_resource",
+      "query": "Какие внешние адреса использовались в проекте person?",
+      "expect": [
+        "localhost:5008"
+      ],
+      "forbid": [],
+      "repeated": true,
+      "occurrences": 1,
+      "source": [
+        [
+          "23ece2e2-1b3d-47cf-bc46-5dc0d8cb67dd",
+          20
+        ]
+      ]
+    },
+    {
+      "id": "url-c0b7bafb",
+      "kind": "external_resource",
+      "query": "Какие внешние адреса использовались в проекте job-hunt?",
+      "expect": [
+        "github.com"
+      ],
+      "forbid": [],
+      "repeated": false,
+      "occurrences": 3,
+      "source": [
+        [
+          "f2a66fdd-5253-4f43-9ef0-9a17be0d8a17",
+          5
+        ],
+        [
+          "f2a66fdd-5253-4f43-9ef0-9a17be0d8a17",
+          6
+        ],
+        [
+          "f2a66fdd-5253-4f43-9ef0-9a17be0d8a17",
+          7
+        ]
+      ]
+    },
+    {
+      "id": "url-e5606f41",
+      "kind": "external_resource",
+      "query": "Какие внешние адреса использовались в проекте person?",
+      "expect": [
+        "arxiv.org"
+      ],
+      "forbid": [],
+      "repeated": false,
+      "occurrences": 2,
+      "source": [
+        [
+          "e2e3ea09-917e-43db-89fa-23faf5268fa8",
+          1
+        ],
+        [
+          "e2e3ea09-917e-43db-89fa-23faf5268fa8",
+          22
+        ]
+      ]
+    },
+    {
+      "id": "url-fcbd8ba1",
+      "kind": "external_resource",
+      "query": "Какие внешние адреса использовались в проекте person?",
+      "expect": [
+        "arxiv.org"
+      ],
+      "forbid": [],
+      "repeated": false,
+      "occurrences": 2,
+      "source": [
+        [
+          "e2e3ea09-917e-43db-89fa-23faf5268fa8",
+          1
+        ],
+        [
+          "e2e3ea09-917e-43db-89fa-23faf5268fa8",
+          19
+        ]
+      ]
+    },
+    {
+      "id": "url-39735638",
+      "kind": "external_resource",
+      "query": "Какие внешние адреса использовались в проекте person?",
+      "expect": [
+        "arxiv.org"
+      ],
+      "forbid": [],
+      "repeated": false,
+      "occurrences": 2,
+      "source": [
+        [
+          "e2e3ea09-917e-43db-89fa-23faf5268fa8",
+          1
+        ],
+        [
+          "e2e3ea09-917e-43db-89fa-23faf5268fa8",
+          18
+        ]
+      ]
+    },
+    {
+      "id": "url-67d9a9ed",
+      "kind": "external_resource",
+      "query": "Какие внешние адреса использовались в проекте scripts?",
+      "expect": [
+        "Quala.dev"
+      ],
+      "forbid": [],
+      "repeated": false,
+      "occurrences": 1,
+      "source": [
+        [
+          "77f69361-ad5c-4d1e-949c-ae6a02c507b2",
+          2
+        ]
+      ]
+    },
+    {
+      "id": "url-cb309456",
+      "kind": "external_resource",
+      "query": "Какие внешние адреса использовались в проекте mcp-grafana?",
+      "expect": [
+        "localhost:5008**"
+      ],
+      "forbid": [],
+      "repeated": false,
+      "occurrences": 1,
+      "source": [
+        [
+          "23ece2e2-1b3d-47cf-bc46-5dc0d8cb67dd",
+          19
+        ]
+      ]
+    },
+    {
+      "id": "url-28fb6726",
+      "kind": "external_resource",
+      "query": "Какие внешние адреса использовались в проекте app?",
+      "expect": [
+        "localhost:5008"
+      ],
+      "forbid": [],
+      "repeated": false,
+      "occurrences": 1,
+      "source": [
+        [
+          "23ece2e2-1b3d-47cf-bc46-5dc0d8cb67dd",
+          25
+        ]
+      ]
+    },
+    {
+      "id": "url-bd4fe299",
+      "kind": "external_resource",
+      "query": "Какие внешние адреса использовались в проекте 7244f639974b42ba976115e3e7f7a819?",
+      "expect": [
+        "localhost:5008"
+      ],
+      "forbid": [],
+      "repeated": false,
+      "occurrences": 1,
+      "source": [
+        [
+          "1af83bc7-09a4-4795-9a56-74a0b8d6286c",
+          3
+        ]
+      ]
+    },
+    {
+      "id": "url-d20fec31",
+      "kind": "external_resource",
+      "query": "Какие внешние адреса использовались в проекте 3e45437580b845d1be65184f68038a65?",
+      "expect": [
+        "api.telegram.org"
+      ],
+      "forbid": [],
+      "repeated": false,
+      "occurrences": 1,
+      "source": [
+        [
+          "9780a4d1-5eae-4444-8e87-d3aac02e258d",
+          1
+        ]
+      ]
+    },
+    {
+      "id": "url-03889911",
+      "kind": "external_resource",
+      "query": "Какие внешние адреса использовались в проекте person?",
+      "expect": [
+        "arxiv.org"
+      ],
+      "forbid": [],
+      "repeated": false,
+      "occurrences": 1,
+      "source": [
+        [
+          "e2e3ea09-917e-43db-89fa-23faf5268fa8",
+          1
+        ]
+      ]
+    },
+    {
+      "id": "url-cf024562",
+      "kind": "external_resource",
+      "query": "Какие внешние адреса использовались в проекте cdaf2aeede844bff9fecf9229d7e25e8?",
+      "expect": [
+        "arxiv.org"
+      ],
+      "forbid": [],
+      "repeated": false,
+      "occurrences": 1,
+      "source": [
+        [
+          "d654bd7e-41d8-451d-898a-e945b0ec9bcf",
+          14
+        ]
+      ]
+    },
+    {
+      "id": "link-b1bbf99f",
+      "kind": "association",
+      "query": "Что правилось вместе в проекте job-hunt в одной задаче?",
+      "expect": [
+        "0001-facts-verdicts-identity.md",
+        "0006-foreign-sources.md"
+      ],
+      "forbid": [],
+      "repeated": true,
+      "occurrences": 15,
+      "source": [
+        [
+          "0793ffe5-bba5-4e53-a958-0441d623cc92",
+          8
+        ]
+      ]
+    },
+    {
+      "id": "link-ff75c89d",
+      "kind": "association",
+      "query": "Что правилось вместе в проекте job-hunt в одной задаче?",
+      "expect": [
+        "CONTEXT.md",
+        "architecture.puml"
+      ],
+      "forbid": [],
+      "repeated": true,
+      "occurrences": 3,
+      "source": [
+        [
+          "0793ffe5-bba5-4e53-a958-0441d623cc92",
+          14
+        ]
+      ]
+    },
+    {
+      "id": "link-0fed9697",
+      "kind": "association",
+      "query": "Что правилось вместе в проекте job-hunt в одной задаче?",
+      "expect": [
+        "db.py",
+        "dedup.py"
+      ],
+      "forbid": [],
+      "repeated": true,
+      "occurrences": 7,
+      "source": [
+        [
+          "0bf3ba2a-8784-4889-8c97-a9d553c1d2f6",
+          1
+        ]
+      ]
+    },
+    {
+      "id": "link-83d5dcc0",
+      "kind": "association",
+      "query": "Что правилось вместе в проекте job-hunt в одной задаче?",
+      "expect": [
+        "CONTEXT.md",
+        "dedup.py"
+      ],
+      "forbid": [],
+      "repeated": true,
+      "occurrences": 4,
+      "source": [
+        [
+          "0bf3ba2a-8784-4889-8c97-a9d553c1d2f6",
+          2
+        ]
+      ]
+    },
+    {
+      "id": "link-bdf3ffae",
+      "kind": "association",
+      "query": "Что правилось вместе в проекте job-hunt в одной задаче?",
+      "expect": [
+        "CONTEXT.md",
+        "config.yml"
+      ],
+      "forbid": [],
+      "repeated": true,
+      "occurrences": 14,
+      "source": [
+        [
+          "0bf3ba2a-8784-4889-8c97-a9d553c1d2f6",
+          3
+        ]
+      ]
+    },
+    {
+      "id": "link-e774810c",
+      "kind": "association",
+      "query": "Что правилось вместе в проекте job-hunt в одной задаче?",
+      "expect": [
+        "CONTEXT.md",
+        "run.py"
+      ],
+      "forbid": [],
+      "repeated": true,
+      "occurrences": 7,
+      "source": [
+        [
+          "1506b41b-daae-400c-a834-2ff3880a5d58",
+          1
+        ]
+      ]
+    },
+    {
+      "id": "link-2be7763e",
+      "kind": "association",
+      "query": "Что правилось вместе в проекте job-hunt в одной задаче?",
+      "expect": [
+        "architecture.puml",
+        "dataflow.puml"
+      ],
+      "forbid": [],
+      "repeated": true,
+      "occurrences": 13,
+      "source": [
+        [
+          "1bf5dc9d-839c-4d52-a980-a0da4aa3392f",
+          3
+        ]
+      ]
+    },
+    {
+      "id": "link-91a2b3d8",
+      "kind": "association",
+      "query": "Что правилось вместе в проекте job-hunt в одной задаче?",
+      "expect": [
+        "0001-identity-facts-verdicts.md",
+        "CONTEXT.md"
+      ],
+      "forbid": [],
+      "repeated": true,
+      "occurrences": 7,
+      "source": [
+        [
+          "1bf5dc9d-839c-4d52-a980-a0da4aa3392f",
+          5
+        ]
+      ]
+    },
+    {
+      "id": "link-8dab4e0c",
+      "kind": "association",
+      "query": "Что правилось вместе в проекте person в одной задаче?",
+      "expect": [
+        "mcpgrafana.go",
+        "validate_url_test.go"
+      ],
+      "forbid": [],
+      "repeated": true,
+      "occurrences": 2,
+      "source": [
+        [
+          "23ece2e2-1b3d-47cf-bc46-5dc0d8cb67dd",
+          5
+        ]
+      ]
+    },
+    {
+      "id": "link-c446be02",
+      "kind": "association",
+      "query": "Что правилось вместе в проекте mcp-grafana в одной задаче?",
+      "expect": [
+        "README.md",
+        "command-line-flags.md"
+      ],
+      "forbid": [],
+      "repeated": true,
+      "occurrences": 4,
+      "source": [
+        [
+          "23ece2e2-1b3d-47cf-bc46-5dc0d8cb67dd",
+          6
+        ]
+      ]
+    },
+    {
+      "id": "link-06a5d7b6",
+      "kind": "association",
+      "query": "Что правилось вместе в проекте mcp-grafana в одной задаче?",
+      "expect": [
+        "CHANGELOG.md",
+        "main_test.go"
+      ],
+      "forbid": [],
+      "repeated": true,
+      "occurrences": 2,
+      "source": [
+        [
+          "23ece2e2-1b3d-47cf-bc46-5dc0d8cb67dd",
+          7
+        ]
+      ]
+    },
+    {
+      "id": "link-3d153372",
+      "kind": "association",
+      "query": "Что правилось вместе в проекте f7788445c3a9444383f4df6601483cd4 в одной задаче?",
+      "expect": [
+        "suspicion.py",
+        "suspicious_phrases.yml"
+      ],
+      "forbid": [],
+      "repeated": true,
+      "occurrences": 3,
+      "source": [
+        [
+          "2e150e66-9c6c-47a4-87c0-98faf12d2a76",
+          10
+        ]
+      ]
+    },
+    {
+      "id": "link-3c1855cf",
+      "kind": "association",
+      "query": "Что правилось вместе в проекте simpleAI в одной задаче?",
+      "expect": [
+        "main.go",
+        "main_test.go"
+      ],
+      "forbid": [],
+      "repeated": true,
+      "occurrences": 2,
+      "source": [
+        [
+          "3e991ee3-e25a-4bcd-bf90-d5ddd99d2193",
+          1
+        ]
+      ]
+    },
+    {
+      "id": "link-1c186278",
+      "kind": "association",
+      "query": "Что правилось вместе в проекте e18a4cbf56794efb9567e586d2d36f3f в одной задаче?",
+      "expect": [
+        "db.py",
+        "remoteok.py"
+      ],
+      "forbid": [],
+      "repeated": true,
+      "occurrences": 3,
+      "source": [
+        [
+          "3f75d45d-c01e-4b31-9843-4351a2a2316e",
+          2
+        ]
+      ]
+    },
+    {
+      "id": "link-7aa6f560",
+      "kind": "association",
+      "query": "Что правилось вместе в проекте dev в одной задаче?",
+      "expect": [
+        ".gitignore",
+        "__init__.py"
+      ],
+      "forbid": [],
+      "repeated": true,
+      "occurrences": 12,
+      "source": [
+        [
+          "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
+          1
+        ]
+      ]
+    },
+    {
+      "id": "ctx-1f6a2369",
+      "kind": "context",
+      "query": "В какой ветке шла работа над проектом person?",
+      "expect": [
+        "HEAD"
+      ],
+      "forbid": [],
+      "repeated": true,
+      "occurrences": 1,
+      "source": [
+        [
+          "030b861c-4790-4b32-a0dd-40b2793fbadb",
+          1
+        ]
+      ]
+    },
+    {
+      "id": "ctx-5383c5c1",
+      "kind": "context",
+      "query": "В какой ветке шла работа над проектом 9a7eadfb3be04f11a8127e5cf02c451b?",
+      "expect": [
+        "HEAD"
+      ],
+      "forbid": [],
+      "repeated": true,
+      "occurrences": 1,
+      "source": [
+        [
+          "03442ee4-e8c5-4fb1-bfe1-0b173d024208",
+          1
+        ]
+      ]
+    },
+    {
+      "id": "ctx-de6aecb5",
+      "kind": "context",
+      "query": "В какой ветке шла работа над проектом 9a7eadfb3be04f11a8127e5cf02c451b?",
+      "expect": [
+        "HEAD"
+      ],
+      "forbid": [],
+      "repeated": true,
+      "occurrences": 1,
+      "source": [
+        [
+          "03442ee4-e8c5-4fb1-bfe1-0b173d024208",
+          2
+        ]
+      ]
+    },
+    {
+      "id": "ctx-f4a2d7c1",
+      "kind": "context",
+      "query": "В какой ветке шла работа над проектом 9a7eadfb3be04f11a8127e5cf02c451b?",
+      "expect": [
+        "HEAD"
+      ],
+      "forbid": [],
+      "repeated": true,
+      "occurrences": 1,
+      "source": [
+        [
+          "03442ee4-e8c5-4fb1-bfe1-0b173d024208",
+          3
+        ]
+      ]
+    },
+    {
+      "id": "ctx-fb678ab1",
+      "kind": "context",
+      "query": "В какой ветке шла работа над проектом 9a7eadfb3be04f11a8127e5cf02c451b?",
+      "expect": [
+        "HEAD"
+      ],
+      "forbid": [],
+      "repeated": true,
+      "occurrences": 1,
+      "source": [
+        [
+          "03442ee4-e8c5-4fb1-bfe1-0b173d024208",
+          4
+        ]
+      ]
+    },
+    {
+      "id": "ctx-6619cbed",
+      "kind": "context",
+      "query": "В какой ветке шла работа над проектом 9a7eadfb3be04f11a8127e5cf02c451b?",
+      "expect": [
+        "HEAD"
+      ],
+      "forbid": [],
+      "repeated": true,
+      "occurrences": 1,
+      "source": [
+        [
+          "03442ee4-e8c5-4fb1-bfe1-0b173d024208",
+          5
+        ]
+      ]
+    },
+    {
+      "id": "ctx-95bb2992",
+      "kind": "context",
+      "query": "В какой ветке шла работа над проектом Tarasusrus__simpleAI?",
+      "expect": [
+        "HEAD"
+      ],
+      "forbid": [],
+      "repeated": true,
+      "occurrences": 1,
+      "source": [
+        [
+          "03442ee4-e8c5-4fb1-bfe1-0b173d024208",
+          6
+        ]
+      ]
+    },
+    {
+      "id": "ctx-4d3166b2",
+      "kind": "context",
+      "query": "В какой ветке шла работа над проектом Tarasusrus__simpleAI?",
+      "expect": [
+        "HEAD"
+      ],
+      "forbid": [],
+      "repeated": true,
+      "occurrences": 1,
+      "source": [
+        [
+          "03442ee4-e8c5-4fb1-bfe1-0b173d024208",
+          7
+        ]
+      ]
+    },
+    {
+      "id": "ctx-a585e301",
+      "kind": "context",
+      "query": "В какой ветке шла работа над проектом Tarasusrus__simpleAI?",
+      "expect": [
+        "HEAD"
+      ],
+      "forbid": [],
+      "repeated": true,
+      "occurrences": 1,
+      "source": [
+        [
+          "03442ee4-e8c5-4fb1-bfe1-0b173d024208",
+          8
+        ]
+      ]
+    },
+    {
+      "id": "ctx-c09e634f",
+      "kind": "context",
+      "query": "В какой ветке шла работа над проектом f5ff102a88a1493ba05cb0116dce322a?",
+      "expect": [
+        "HEAD"
+      ],
+      "forbid": [],
+      "repeated": true,
+      "occurrences": 1,
+      "source": [
+        [
+          "03cbaa9e-cb8d-42a2-9fdf-e47fb5f253f8",
+          1
+        ]
+      ]
+    },
+    {
+      "id": "absent-1",
+      "kind": "absence",
+      "query": "Что известно про проект sirius-quantum-ledger?",
+      "expect": [],
+      "forbid": [
+        "sirius-quantum-ledger"
+      ],
+      "repeated": false,
+      "occurrences": 0,
+      "source": []
+    },
+    {
+      "id": "absent-2",
+      "kind": "absence",
+      "query": "Какие файлы правились в проекте helios-payments?",
+      "expect": [],
+      "forbid": [
+        "helios-payments"
+      ],
+      "repeated": false,
+      "occurrences": 0,
+      "source": []
+    },
+    {
+      "id": "absent-3",
+      "kind": "absence",
+      "query": "Что пользователь просил про работу с камерами наблюдения?",
+      "expect": [],
+      "forbid": [
+        "камер"
+      ],
+      "repeated": false,
+      "occurrences": 0,
+      "source": []
+    },
+    {
+      "id": "absent-4",
+      "kind": "absence",
+      "query": "Какие адреса использовались для проекта tundra-crm?",
+      "expect": [],
+      "forbid": [
+        "tundra-crm"
+      ],
+      "repeated": false,
+      "occurrences": 0,
+      "source": []
+    },
+    {
+      "id": "absent-5",
+      "kind": "absence",
+      "query": "В какой ветке шла работа над проектом obsidian-mill?",
+      "expect": [],
+      "forbid": [
+        "obsidian-mill"
+      ],
+      "repeated": false,
+      "occurrences": 0,
+      "source": []
+    },
+    {
+      "id": "fact-4fb2fcbe",
+      "kind": "fact",
+      "query": "Какие файлы правились в проекте cdaf2aeede844bff9fecf9229d7e25e8?",
+      "expect": [
+        "RESEARCH.md"
+      ],
+      "forbid": [],
+      "repeated": false,
+      "occurrences": 3,
+      "source": [
+        [
+          "d654bd7e-41d8-451d-898a-e945b0ec9bcf",
+          13
+        ],
+        [
+          "d654bd7e-41d8-451d-898a-e945b0ec9bcf",
+          14
+        ],
+        [
+          "d654bd7e-41d8-451d-898a-e945b0ec9bcf",
+          15
+        ]
+      ]
+    },
+    {
+      "id": "fact-ee6c6c85",
+      "kind": "fact",
+      "query": "Какие файлы правились в проекте person?",
+      "expect": [
+        "hacker-sprint-memory.md"
+      ],
+      "forbid": [],
+      "repeated": false,
+      "occurrences": 3,
+      "source": [
+        [
+          "e2e3ea09-917e-43db-89fa-23faf5268fa8",
+          9
+        ],
+        [
+          "e2e3ea09-917e-43db-89fa-23faf5268fa8",
+          10
+        ],
+        [
+          "e2e3ea09-917e-43db-89fa-23faf5268fa8",
+          30
+        ]
+      ]
+    },
+    {
+      "id": "fact-bf89176f",
+      "kind": "fact",
+      "query": "Какие файлы правились в проекте job-hunt?",
+      "expect": [
+        "dedup.py"
+      ],
+      "forbid": [],
+      "repeated": false,
+      "occurrences": 3,
+      "source": [
+        [
+          "0bf3ba2a-8784-4889-8c97-a9d553c1d2f6",
+          1
+        ],
+        [
+          "0bf3ba2a-8784-4889-8c97-a9d553c1d2f6",
+          2
+        ],
+        [
+          "6011cf1e-80d0-4979-93f5-658b3ec89037",
+          7
+        ]
+      ]
+    },
+    {
+      "id": "fact-7061f5bf",
+      "kind": "fact",
+      "query": "Какие файлы правились в проекте job-hunt?",
+      "expect": [
+        "runlog.py"
+      ],
+      "forbid": [],
+      "repeated": false,
+      "occurrences": 3,
+      "source": [
+        [
+          "1bf5dc9d-839c-4d52-a980-a0da4aa3392f",
+          3
+        ],
+        [
+          "1bf5dc9d-839c-4d52-a980-a0da4aa3392f",
+          5
+        ],
+        [
+          "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
+          8
+        ]
+      ]
+    },
+    {
+      "id": "fact-97c11a34",
+      "kind": "fact",
+      "query": "Какие файлы правились в проекте job-hunt?",
+      "expect": [
+        "requirements.txt"
+      ],
+      "forbid": [],
+      "repeated": false,
+      "occurrences": 3,
+      "source": [
+        [
+          "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
+          5
+        ],
+        [
+          "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
+          8
+        ],
+        [
+          "0bf3ba2a-8784-4889-8c97-a9d553c1d2f6",
+          3
+        ]
+      ]
+    },
+    {
+      "id": "fact-b0989a7a",
+      "kind": "fact",
+      "query": "Какие файлы правились в проекте job-hunt?",
+      "expect": [
+        "config.yml"
+      ],
+      "forbid": [],
+      "repeated": false,
+      "occurrences": 3,
+      "source": [
+        [
+          "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
+          1
+        ],
+        [
+          "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
+          7
+        ],
+        [
+          "0bf3ba2a-8784-4889-8c97-a9d553c1d2f6",
+          3
+        ]
+      ]
+    },
+    {
+      "id": "fact-504c2c3e",
+      "kind": "fact",
+      "query": "Какие файлы правились в проекте job-hunt?",
+      "expect": [
+        "rss.py"
+      ],
+      "forbid": [],
+      "repeated": false,
+      "occurrences": 3,
+      "source": [
+        [
+          "1bf5dc9d-839c-4d52-a980-a0da4aa3392f",
+          3
+        ],
+        [
+          "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
+          7
+        ],
+        [
+          "45e3974e-fcfa-41f7-aefa-43684ad7f2c2",
+          8
+        ]
+      ]
+    },
+    {
+      "id": "fact-2fd6b165",
+      "kind": "fact",
+      "query": "Какие файлы правились в проекте job-hunt?",
+      "expect": [
+        "test_dedup.py"
+      ],
+      "forbid": [],
+      "repeated": false,
+      "occurrences": 3,
+      "source": [
+        [
+          "0bf3ba2a-8784-4889-8c97-a9d553c1d2f6",
+          1
+        ],
+        [
+          "0bf3ba2a-8784-4889-8c97-a9d553c1d2f6",
+          2
+        ],
+        [
+          "6011cf1e-80d0-4979-93f5-658b3ec89037",
+          7
+        ]
+      ]
+    },
+    {
+      "id": "fact-f5617f25",
+      "kind": "fact",
+      "query": "Какие файлы правились в проекте job-hunt?",
+      "expect": [
+        "test_property.py"
+      ],
+      "forbid": [],
+      "repeated": false,
+      "occurrences": 3,
+      "source": [
+        [
+          "1bf5dc9d-839c-4d52-a980-a0da4aa3392f",
+          3
+        ],
+        [
+          "6ec2778b-40a2-456f-aed7-02136355e1db",
+          2
+        ],
+        [
+          "fe3b9dc3-6d54-4c39-bdca-d70e1b6bef88",
+          1
+        ]
+      ]
+    },
+    {
+      "id": "fact-d10ab7b2",
+      "kind": "fact",
+      "query": "Какие файлы правились в проекте job-hunt?",
+      "expect": [
+        "classify.py"
+      ],
+      "forbid": [],
+      "repeated": false,
+      "occurrences": 3,
+      "source": [
+        [
+          "d89c0d47-8424-4293-a02b-a04cf79b6954",
+          3
+        ],
+        [
+          "d89c0d47-8424-4293-a02b-a04cf79b6954",
+          4
+        ],
+        [
+          "ef617449-d86f-4a54-a3ce-81997cd7cb09",
+          5
+        ]
+      ]
+    }
+  ]
+}
