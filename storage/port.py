@@ -6,6 +6,8 @@
   write(text)              текстовая запись — умеют все
   read(query, mode)        чтение — умеют все
   write_objects(records)   структурная запись, где ключ задан полем
+  contexts(keys)           обстановка фактов: где и когда их видели
+  slice(axes)              срез фактов по осям обстановки
 
 За дверью четыре пути, они выбираются именем:
 
@@ -159,6 +161,25 @@ class StructuredDoor:
         if step is None:
             raise AttributeError("путь %s забывать не умеет" % self.name)
         return step(now, dry=dry)
+
+    def contexts(self, keys):
+        """Обстановки фактов. Умеет не всякий путь наружу.
+
+        Спрашиваем адаптер, а не имя двери: у сетевого читателя такой выборки
+        нет, и уместность обязана считаться без него — по тому, что лежит в
+        самой записи. Отсутствие обхода не должно ронять подсказку.
+        """
+        step = getattr(self.adapter, "contexts", None)
+        if step is None:
+            raise AttributeError("путь %s обстановки факта не читает" % self.name)
+        return step(keys)
+
+    def slice(self, axes, limit=200):
+        """Срез фактов по осям обстановки. Умеет не всякий путь наружу."""
+        step = getattr(self.adapter, "slice_by", None)
+        if step is None:
+            raise AttributeError("путь %s срезов по обстановке не умеет" % self.name)
+        return step(axes, limit=limit)
 
     def deep(self, query, limit=10):
         """Глубокое чтение: к найденному добавляется отложенное."""

@@ -150,6 +150,21 @@ def lapse(now, dry=False, timeout=None):
     return repository().lapse(now, dry=dry)
 
 
+def contexts(keys, timeout=None):
+    """Обстановки названных фактов. У сети такого чтения нет, у базы есть.
+
+    Ветка, каталог и время лежат у эпизода, а не у факта, и добираются связью
+    `episode_facts`. Схему факта ради этого не трогали: обстановок у факта
+    несколько, и колонка оставила бы от них последнюю.
+    """
+    return repository().contexts(list(keys))
+
+
+def slice_by(axes, limit=200, timeout=None):
+    """Срез фактов по осям обстановки. Оси комбинируются, набор произволен."""
+    return repository().slice(dict(axes), limit=limit)
+
+
 def deep(query, limit=10, timeout=None):
     """Глубокое чтение: к найденному добавляется отложенное.
 

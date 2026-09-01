@@ -15,7 +15,7 @@
 import dataclasses, hashlib, json, os, sqlite3, threading
 from pathlib import Path
 
-from domain import lifespan, models
+from domain import context, lifespan, models
 # Слово вопроса — правило одно на поиск и на отсев, см. domain/query.py.
 from domain.query import words
 
@@ -139,7 +139,36 @@ def _v3(conn):
                      (lifespan.until(row[3]), row[0], row[1], row[2]))
 
 
-MIGRATIONS = (_v1, _v2, _v3)
+def _v4(conn):
+    """Связь читается с обоих концов: от эпизода к факту и от факта к эпизоду.
+
+    Первичный ключ связи это (relation, link_id, role) — по нему находится
+    вторая роль той же карточки, но не находится сама карточка по концу.
+    Обстановку факта спрашивают ровно в обратную сторону, и без этого указателя
+    каждый вопрос читал бы таблицу связей целиком. Хук чтения стоит в горячем
+    пути под сроком в 10 секунд.
+    """
+    conn.execute('CREATE INDEX IF NOT EXISTS links_end ON links '
+                 '(relation, role, object_key)')
+
+
+MIGRATIONS = (_v1, _v2, _v3, _v4)
+
+
+# Связь, которой факт достаёт свою обстановку. У самого факта в полях один
+# `project`; ветка, каталог и время лежат у эпизода. Схему факта ради этого не
+# трогаем: обстановок у факта несколько (он встречался не раз), и колонка
+# оставила бы от них последнюю, затирая остальные молча.
+CONTEXT_RELATION = "episode_facts"
+
+
+def _key_json(key):
+    """Ключ строкой ровно так, как его записала связь. Одно правило на оба конца.
+
+    Пиши связь одним способом, а ищи другим — и поиск не найдёт ничего, не
+    сказав об этом ни слова.
+    """
+    return json.dumps(key, sort_keys=True, ensure_ascii=False)
 
 
 def migrate(conn):
@@ -276,7 +305,7 @@ class Repository:
                     "(relation, link_id, role, object_type, object_key) VALUES (?, ?, ?, ?, ?)",
                     (relation, link_id, end["object_name"],
                      models.RELATIONS[relation][end["object_name"]],
-                     json.dumps(end["key"], sort_keys=True, ensure_ascii=False)))
+                     _key_json(end["key"])))
         return link_id
 
     def apply(self, mutations):
@@ -448,6 +477,149 @@ class Repository:
             self.conn.commit()
         return moved
 
+    # --- обстановка и срезы по ней ------------------------------------------
+
+    def _pairs(self, fact_keys=None):
+        """Пары (ключ факта, ключ эпизода) связи `episode_facts`, строками links.
+
+        Один запрос на оба случая — весь граф и его кусок по названным фактам.
+        Разведи их на две выборки, и «факты вторника» разойдётся с «уместно во
+        вторник», оставшись правым поодиночке.
+        """
+        sql = ("SELECT link_id, role, object_key FROM links WHERE relation = ?")
+        params = [CONTEXT_RELATION]
+        if fact_keys is not None:
+            if not fact_keys:
+                return []
+            holes = ", ".join("?" * len(fact_keys))
+            sql += (" AND link_id IN (SELECT link_id FROM links WHERE relation = ? "
+                    "AND role = 'fact' AND object_key IN (%s))" % holes)
+            params += [CONTEXT_RELATION] + list(fact_keys)
+        with self.lock:
+            rows = self.conn.execute(sql, params).fetchall()
+        cards = {}
+        for link_id, role, object_key in rows:
+            cards.setdefault(link_id, {})[role] = object_key
+        return [(card["fact"], card["episode"]) for card in cards.values()
+                if "fact" in card and "episode" in card]
+
+    def _episodes(self, keys):
+        """Строки эпизодов по их ключам в той же записи, что лежит в links."""
+        want = {}
+        for raw in keys:
+            try:
+                key = json.loads(raw)
+            except ValueError:
+                continue        # чужая строка в таблице связей — не наша забота
+            want.setdefault((key.get("session_id"), key.get("episode_number")), raw)
+        out = {}
+        for (session_id, number), raw in want.items():
+            with self.lock:
+                row = self.conn.execute(
+                    'SELECT * FROM "episode" WHERE "session_id" = ? '
+                    'AND "episode_number" = ?', (session_id, number)).fetchone()
+            if row is not None:
+                out[raw] = dict(row)
+        return out
+
+    def _fact_rows(self, keys=None):
+        """Строки фактов: {подпись: строка или None}. Ключи не заданы — все.
+
+        Подпись (`fact_type|subject|scope`) — та же строка, какой факт
+        адресует связь. Другой ключ здесь оборвал бы граф молча.
+        """
+        out = {}
+        if keys is None:
+            with self.lock:
+                found = self.conn.execute('SELECT * FROM "fact"').fetchall()
+            for row in found:
+                record = dict(row)
+                out[models.Fact(fact_type=record["fact_type"],
+                                subject=record["subject"],
+                                scope=record["scope"]).identity()] = record
+            return out
+        for key in keys:
+            end = models.Fact.of_identity(key)
+            with self.lock:
+                row = self.conn.execute(
+                    'SELECT * FROM "fact" WHERE "fact_type" = ? AND "subject" = ? '
+                    'AND "scope" = ?',
+                    (end.fact_type, end.subject, end.scope)).fetchone()
+            out[key] = dict(row) if row is not None else None
+        return out
+
+    def _situations(self, rows, whole=False):
+        """Обстановки фактов по уже прочитанным строкам. Одно место на всех.
+
+        Обстановок у факта несколько — он встречался в разных эпизодах, в
+        разных ветках и в разные дни. Своя строка факта идёт в список всегда: в
+        ней есть проект и отметка «когда видели», и это обстановка даже у
+        факта, не связанного ни с одним эпизодом.
+        """
+        by_json = {_key_json(models.Fact.of_identity(key).key()): key for key in rows}
+        pairs = self._pairs(None if whole else list(by_json))
+        episodes = self._episodes({episode for _fact, episode in pairs})
+        out = {key: [] for key in rows}
+        # Глобальный факт — знание про человека, а не про место, и обстановки у
+        # него нет никакой. Связь с эпизодом у него при этом есть: её ставит
+        # разбор хода всем фактам эпизода без разбора. Возьми её обстановку — и
+        # привычка человека окажется заперта в том проекте, где её впервые
+        # заметили, ровно вопреки правилу `context.UNBOUND_SCOPE`.
+        unbound = {key for key, row in rows.items()
+                   if row and row.get("scope") == context.UNBOUND_SCOPE}
+        for fact_key, episode_key in pairs:
+            name = by_json.get(fact_key)
+            row = episodes.get(episode_key)
+            if name is None or row is None or name in unbound:
+                continue        # связь пережила факт или эпизод: строки нет
+            found = context.of(row)
+            if found not in out[name]:
+                out[name].append(found)
+        for key, record in rows.items():
+            if record is None:
+                continue
+            own = context.of(record)
+            if any(value is not None for value in own.values()) and own not in out[key]:
+                out[key].append(own)
+        return out
+
+    def situations(self, keys=None):
+        """Обстановки фактов: {подпись факта: [обстановка, ...]}.
+
+        `keys` не задан — отвечаем про всю базу; это спрашивает срез. Задан —
+        только про названное; это спрашивает чтение в горячем пути.
+        """
+        return self._situations(self._fact_rows(keys), whole=keys is None)
+
+    def contexts(self, keys):
+        """Обстановки названных фактов. Тем же кодом, каким их читает срез."""
+        return self.situations(list(keys)) if keys else {}
+
+    def slice(self, axes, limit=200):
+        """Факты, у которых есть обстановка, сходящаяся по всем названным осям.
+
+        Оси произвольны и комбинируются: «все факты проекта», «все факты
+        вторника», «факты вторника и проекта» — это один механизм с разным
+        набором осей, а не три готовых выборки.
+
+        AND считается внутри одной обстановки, а не по разным: факт, который во
+        вторник видели в одном проекте, а в среду в другом, в совместный срез
+        не попадёт. Поэтому срез по двум осям вложен в пересечение срезов по
+        каждой из них, но им не равен.
+        """
+        want = context.norm(axes)
+        rows = self._fact_rows()
+        found = self._situations(rows, whole=True)
+        out = []
+        for key, record in rows.items():
+            if len(out) >= limit:
+                break
+            if want and not any(context.matches(one, want)
+                                for one in found.get(key, [])):
+                continue
+            out.append({k: v for k, v in record.items() if v not in (None, "")})
+        return out
+
     def counts(self):
         out = {}
         with self.lock:
@@ -471,16 +643,35 @@ def _plain(value):
 
 def main():
     import argparse
-    ap = argparse.ArgumentParser(description="Локальная вторая память")
-    ap.add_argument("command", choices=["migrate", "counts", "search"])
+    ap = argparse.ArgumentParser(
+        description="Локальная вторая память",
+        epilog="срез: python3 -m storage.db slice --project X --day tuesday")
+    ap.add_argument("command", choices=["migrate", "counts", "search", "slice",
+                                        "signals"])
     ap.add_argument("query", nargs="?")
+    # Оси среза комбинируются: любое подмножество, а не список готовых выборок.
+    ap.add_argument("--project")
+    ap.add_argument("--dir", dest="working_directory")
+    ap.add_argument("--branch", dest="git_branch")
+    ap.add_argument("--day", dest="day_of_week")
+    ap.add_argument("--hour", dest="hour_of_day", type=int)
+    ap.add_argument("--limit", type=int, default=200)
     args = ap.parse_args()
+    if args.command == "signals":
+        # Полный список признаков уместности, сделанные и нет вместе.
+        print(context.signals.table())
+        return
     repo = Repository()
     if args.command == "migrate":
         print("база %s, схема версии %d" % (path(), len(MIGRATIONS)))
     elif args.command == "counts":
         for name, number in repo.counts().items():
             print("%-16s %6d" % (name, number))
+    elif args.command == "slice":
+        axes = {name: getattr(args, name) for name in context.AXES
+                if getattr(args, name, None) is not None}
+        print(json.dumps(repo.slice(axes, limit=args.limit),
+                         ensure_ascii=False, indent=2))
     else:
         print(json.dumps(repo.search(args.query or ""), ensure_ascii=False, indent=2))
     repo.close()

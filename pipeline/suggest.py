@@ -10,7 +10,7 @@ import argparse, ast, json, os, re, signal, sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-from domain import lifespan, models
+from domain import context, lifespan, models
 from domain.query import words
 from infra import telemetry
 from pipeline import prompt
@@ -48,6 +48,7 @@ def deadline(seconds=None):
     return cancel
 
 MIN_SCORE = 0.5      # ниже этого факт не подтверждён повторением, см. ADR 0002
+MIN_FIT = 0.5        # ниже этого запись не к месту, см. ADR 0009
 MAX_ITEMS = 5        # больше пяти внимание модели размазывается
 MAX_CHARS = 1200     # потолок на весь кусок, который уходит в контекст агента
 
@@ -56,7 +57,11 @@ SCORE = re.compile(r"Оценка уверенности:\s*([0-9]+(?:\.[0-9]+)?
 # Служебные поля записи: агенту не говорят ничего, а потолок съедают.
 NOISE = ("first_seen_at", "observed_at", "created_at", "updated_at", "id",
          "object_type", "via_graph", "sequence_number", "session_id",
-         "fact_type", "scope", "subject", "valid_until", "lapsed_at")
+         "fact_type", "scope", "subject", "valid_until", "lapsed_at",
+         # Обстановка и уместность печатаются отдельной строкой, разобранными
+         # по осям. Свались они сюда сырым словарём — потолок выдачи съеден,
+         # а прочесть это модели тяжелее, чем не иметь вовсе.
+         "situation", "fit")
 
 
 def _parse(text):
@@ -253,10 +258,137 @@ def knowledge(answer, query):
             len(chunks) - len(kept))
 
 
+def situation_of(payload, at=None):
+    """Обстановка хода из того, что уже приходит в хук. Ни сети, ни модели.
+
+    До сих пор из payload брались только `prompt` и `session_id`, а `cwd` и
+    `permission_mode` выбрасывались — при том, что каталог это и есть главный
+    ответ на вопрос «то же ли это место». Ветку дочитываем с диска, из
+    `.git/HEAD`: подпроцесс в горячем пути стоит дороже всего остального.
+
+    Времени в payload нет вовсе, и «сейчас» подставляем здесь. Без этого день и
+    часть суток у хода всегда пусты, а пустая ось не судится ни с той, ни с
+    другой стороны: две временные оси из пяти молча не работали бы никогда.
+
+    Пустая обстановка — это None, а не словарь из пустых осей: молчание об
+    обстановке не должно читаться как «ничего не подходит».
+    """
+    payload = payload or {}
+    cwd = payload.get("cwd")
+    if not (cwd or payload.get("project")):
+        # Одно время это не обстановка. Часы у хода есть всегда, и подставь мы
+        # их без места — фильтр судил бы факты по одному дню недели, притом что
+        # знать про ход мы не знаем ничего.
+        return None
+    found = context.of(dict(
+        payload,
+        git_branch=payload.get("git_branch")
+        or (context.branch_of(cwd) if cwd else None),
+        occurred_at=payload.get("occurred_at")
+        or at or datetime.now(timezone.utc).isoformat()))
+    return found if any(value is not None for value in found.values()) else None
+
+
+def keys_of_facts(items):
+    """Подписи фактов среди кусков выдачи. Ими спрашивается их обстановка."""
+    out = []
+    for item in items:
+        record = item[2] if len(item) > 2 else None
+        if isinstance(record, dict) and record.get("object_type") == "Fact":
+            out.append(models.Fact(fact_type=record.get("fact_type") or "",
+                                   subject=record.get("subject") or "",
+                                   scope=record.get("scope") or "").identity())
+    return out
+
+
+@telemetry.traced("place_in_context", lambda arg, out: {
+    "in": len(arg["items"]),
+    "fitted": sum(1 for row in out
+                  if isinstance(row[2], dict) and row[2].get("fit") is not None)})
+def place(items, here, door=None):
+    """Приписать каждому куску его обстановку и уместность к обстановке хода.
+
+    Обстановка факта лежит не в нём: ветка, каталог и время принадлежат
+    эпизоду и добираются связью. У эпизода, события и разговора она в самой
+    записи — там же, где её ищет `context.of`. Одна функция на обе стороны,
+    поэтому сравнивать есть что.
+
+    Дверь, которая обстановки не читает, оставляет факту то, что есть в его
+    строке: проект и отметку «когда видели». Этого хватает на главную ось, и
+    сетевой путь не остаётся без уместности вовсе.
+
+    Обстановки хода нет — не трогаем ничего: так ходит замер и все прежние
+    вызовы, и выдача обязана остаться прежней.
+    """
+    if not here:
+        return list(items)
+    known = {}
+    keys = keys_of_facts(items)
+    if keys and door is not None:
+        try:
+            known = door.contexts(keys)
+        except AttributeError:
+            known = {}
+        except Exception:
+            known = {}      # обстановка это добавка: её отказ не роняет выдачу
+    out = []
+    for item in items:
+        score, text = item[0], item[1]
+        record = item[2] if len(item) > 2 else None
+        if not isinstance(record, dict):
+            out.append((score, text, record))
+            continue
+        if record.get("object_type") == "Fact":
+            key = models.Fact(fact_type=record.get("fact_type") or "",
+                              subject=record.get("subject") or "",
+                              scope=record.get("scope") or "").identity()
+            found = known.get(key) or [context.of(record)]
+        else:
+            found = [context.of(record)]
+        closest = max(found, key=lambda one: context.fit(one, here))
+        out.append((score, text, dict(record, situation=closest,
+                                      fit=context.best(found, here))))
+    return out
+
+
+def fit_of(record):
+    """Уместность куска, если её посчитали. Не посчитали — None, а не единица."""
+    return record.get("fit") if isinstance(record, dict) else None
+
+
+def passes(score, record, min_score=MIN_SCORE, min_fit=MIN_FIT):
+    """Прошёл ли кусок порог. Порог судит произведение веса на уместность.
+
+    Веса может не быть вовсе — его дописывает только текстовый путь, а в базе
+    лежат записи. Множителя, на который умножать, тогда не существует, и порог
+    на произведении вырождается в порог на одной уместности. Это и есть
+    основной случай: неуместное режется без всякой оценки.
+
+    Уместности нет — обстановки хода не дали, — судим весом, как судили всегда.
+    """
+    fit = fit_of(record)
+    if score is None:
+        return fit is None or fit >= min_fit
+    return score * (fit if fit is not None else 1.0) >= min_score
+
+
+def rank(score, record):
+    """Чем кусок сильнее. Тем же произведением, каким его судит порог."""
+    fit = fit_of(record)
+    if score is None:
+        return fit if fit is not None else 0.0
+    return score * (fit if fit is not None else 1.0)
+
+
 @telemetry.traced("threshold_filter", lambda arg, out: {
     "in": len(arg["items"]), "out": len(out), "min_score": arg["min_score"]})
-def gate(items, min_score=MIN_SCORE, max_items=MAX_ITEMS, max_chars=MAX_CHARS):
+def gate(items, min_score=MIN_SCORE, max_items=MAX_ITEMS, max_chars=MAX_CHARS,
+         min_fit=MIN_FIT):
     """Порог. Кусок без оценки пропускаем, но ставим после оценённых.
+
+    Судит произведение веса на уместность, а не один вес: частое, но не к
+    месту, до агента доходить не должно, см. ADR 0009. Порядок внутри
+    оценённых — по тому же произведению.
 
     Маркер уверенности дописывает одна функция, `understand.render_fact`, и в
     хранилище ноль его вхождений: всё, что там лежит, записано мимо неё. Пока
@@ -270,30 +402,52 @@ def gate(items, min_score=MIN_SCORE, max_items=MAX_ITEMS, max_chars=MAX_CHARS):
     найденного.
     """
     rows = [(i[0], i[1], i[2] if len(i) > 2 else None) for i in items]
-    scored = sorted(((s, t, r) for s, t, r in rows if s is not None and s >= min_score),
-                    key=lambda item: item[0], reverse=True)
+    kept = [(s, t, r) for s, t, r in rows
+            if passes(s, r, min_score=min_score, min_fit=min_fit)]
+    scored = sorted((row for row in kept if row[0] is not None),
+                    key=lambda row: rank(row[0], row[2]), reverse=True)
     # Проза читателя без оценки это не факт, а его собственные слова: так
     # приходит и «no matching files». Пропускаем только структурные записи.
-    plain = [(None, t, r) for s, t, r in rows if s is None and r]
+    plain = sorted(((None, t, r) for s, t, r in kept if s is None and r),
+                   key=lambda row: rank(row[0], row[2]), reverse=True)
     out, size = [], 0
     for score, text, record in (scored + plain)[:max_items]:
         clean = SCORE.sub("", text).strip()
         if not clean:
             continue
-        if size + len(clean) > max_chars:
+        # Обстановка едет вместе с фактом и место в потолке занимает наравне
+        # с ним: не считать её значило бы тихо раздуть кусок вдвое.
+        room = len(clean) + len(context.describe(
+            record.get("situation") if isinstance(record, dict) else None))
+        if size + room > max_chars:
             continue     # длинный кусок пропускаем, а не обрываем на нём выдачу
         out.append((score, clean, record))
-        size += len(clean)
+        size += room
     return out
 
 
 def render(kept):
-    """Формат под агента: сжатые утверждения, без обращений и предисловий."""
+    """Формат под агента: сжатые утверждения, без обращений и предисловий.
+
+    Факт уходит вместе со своей обстановкой, а не голой строкой: модель должна
+    видеть, откуда факт и когда он верен, и решать сама. Строка обстановки
+    разобрана по осям — сырой словарь читать тяжелее, чем не иметь вовсе.
+
+    Ни обстановку, ни уместность не приписываем там, где их не считали:
+    выдуманное число выглядит измеренным.
+    """
     lines = ["Из памяти прошлых разговоров:"]
-    for score, text, _ in kept:
+    for score, text, record in kept:
         one = " ".join(text.split())
         lines.append("- %s (уверенность %.2f)" % (one, score) if score is not None
                      else "- %s" % one)
+        where = context.describe(record.get("situation")
+                                 if isinstance(record, dict) else None)
+        fit = fit_of(record)
+        if where:
+            lines.append("  обстановка: %s%s"
+                         % (where, "" if fit is None else
+                            " (уместность %.2f)" % fit))
     return "\n".join(lines)
 
 
@@ -362,25 +516,38 @@ def near(kept, door, limit=MAX_NEAR):
 
 @telemetry.traced("pipeline", lambda arg, out: {
     "kept": len(out[1]), "sent_chars": len(out[0]), "silent": not out[0]})
-def suggest(query, mode="single", min_score=MIN_SCORE, door=None):
+def suggest(query, mode="single", min_score=MIN_SCORE, door=None, here=None):
+    """Что всплывает на этот вопрос в этой обстановке.
+
+    `here` — обстановка хода. Не задана (так ходит замер и все прежние вызовы)
+    — уместность не считается, и выдача ровно та, что была до неё.
+    """
     door = door or port.door()
+    here = context.of(here) if here else None
+    if here and not any(value is not None for value in here.values()):
+        here = None
     answer = door.read(query, mode=mode)
     # Отсев до порога: ложная находка не должна ни занимать место в
-    # пятёрке, ни съедать потолок в 1200 символов.
-    kept = gate(sift(pieces(answer), query), min_score=min_score)
+    # пятёрке, ни съедать потолок в 1200 символов. Обстановка приписывается
+    # между ними: порог судит произведение веса на уместность.
+    kept = gate(place(sift(pieces(answer), query), here, door), min_score=min_score)
     # Соседи добираются после порога и ставятся следом: прямое попадание
     # первым, добавка второй. Потолки те же — их считает тот же `gate`.
-    added = near(kept, door)
+    added = place(near(kept, door), here, door)
     if added:
         room = MAX_ITEMS - len(kept)
         if room > 0:
-            size = sum(len(t) for _, t, _ in kept)
+            size = sum(len(t) + len(context.describe(
+                r.get("situation") if isinstance(r, dict) else None))
+                for _, t, r in kept)
             for score, text, record in added[:room]:
                 clean = " ".join(text.split())
-                if size + len(clean) > MAX_CHARS:
+                where = len(context.describe(record.get("situation")
+                                             if isinstance(record, dict) else None))
+                if size + len(clean) + where > MAX_CHARS:
                     continue
                 kept.append((score, clean, record))
-                size += len(clean)
+                size += len(clean) + where
     return render(kept) if kept else "", kept, answer
 
 
@@ -612,13 +779,17 @@ def main():
         print("вставок в журнале %d, пересчитано %d" % (got["seen"], got["settled"]))
         return
 
-    session_id = None
+    session_id, here = None, None
     if args.hook:
         try:
             payload = json.load(sys.stdin)
         except Exception:
             return
         query, session_id = payload.get("prompt") or "", payload.get("session_id")
+        # Обстановка хода снимается со всего payload, а не с одного вопроса.
+        # Прежде `cwd` и `permission_mode` выбрасывались — при том, что каталог
+        # и есть главный ответ на вопрос «то же ли это место».
+        here = situation_of(payload)
         if not query.strip():
             return
         # Просьба разметить факты уходит в запрос до всякой работы с памятью:
@@ -637,7 +808,8 @@ def main():
     door = port.door()
     cancel = deadline() if args.hook else (lambda: None)
     try:
-        text, kept, raw = suggest(query, args.mode, args.min_score, door=door)
+        text, kept, raw = suggest(query, args.mode, args.min_score, door=door,
+                                  here=here)
     except Exception:
         if args.hook:
             return          # молчим: подсказка не имеет права ломать разговор

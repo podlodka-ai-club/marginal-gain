@@ -24,6 +24,13 @@ def main():
         from infra.scrub import redact
     except Exception:
         redact = lambda s: s
+    try:
+        # Ветку читает одна функция на весь проект. Считай её здесь заново — и
+        # обстановка записи разойдётся с обстановкой чтения молча, а сравнивать
+        # их потом будет нечего, см. domain/context.
+        from domain.context import branch_of
+    except Exception:
+        branch_of = lambda cwd: None
     now = datetime.now(timezone.utc)
     cwd = payload.get("cwd") or os.getcwd()
     item = {
@@ -36,20 +43,12 @@ def main():
         "day_of_week": now.strftime("%A").lower(),
         "working_directory": cwd,
         "project": Path(cwd).name,
-        "git_branch": git_branch(cwd),
+        "git_branch": branch_of(cwd),
         "permission_mode": payload.get("permission_mode"),
     }
     QUEUE.parent.mkdir(parents=True, exist_ok=True)
     with QUEUE.open("a", encoding="utf-8") as fh:
         fh.write(json.dumps(item, ensure_ascii=False) + "\n")
-
-def git_branch(cwd):
-    head = Path(cwd) / ".git" / "HEAD"
-    try:
-        ref = head.read_text().strip()
-    except OSError:
-        return None
-    return ref.split("/", 2)[-1] if ref.startswith("ref:") else ref[:8]
 
 if __name__ == "__main__":
     try:
