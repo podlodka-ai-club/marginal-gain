@@ -48,12 +48,16 @@ class Scheme:
     описан в просьбе, разбирается маппером, и разъехаться им нельзя.
     """
 
-    def __init__(self, name, ask, begin, end, unit):
+    def __init__(self, name, ask, begin, end, unit, told=None):
         self.name = name
         self.ask = ask
         self.begin = begin
         self.end = end
         self.unit = unit          # сырая единица -> (кортеж факта | None, причина)
+        # Сырая единица -> сказал ли это человек прямо. По умолчанию нет: схема,
+        # которая источник не различает, указаний не приносит. Молчаливое «да»
+        # сделало бы указанием всё, что модель вообще разметила.
+        self.told = told or (lambda raw: False)
 
 
 # ---------- схема xmd1: JSON по строке на факт ----------
@@ -134,7 +138,18 @@ def xmd1_unit(raw):
     return fact, ""
 
 
-SCHEMES = {"xmd1": Scheme("xmd1", XMD1_ASK, XMD1_BEGIN, XMD1_END, xmd1_unit)}
+def xmd1_told(raw):
+    """Сказано человеком прямо, а не замечено в работе.
+
+    Источник в поле не хранится и работает фильтром на входе (XMD1_SOURCES),
+    но разница между «человек попросил» и «мы это наблюдали» весу не безразлична:
+    указание — утверждение, а не гипотеза, и повторов оно не ждёт.
+    """
+    return str((raw or {}).get("source") or "").strip().lower() == "stated"
+
+
+SCHEMES = {"xmd1": Scheme("xmd1", XMD1_ASK, XMD1_BEGIN, XMD1_END, xmd1_unit,
+                          told=xmd1_told)}
 
 
 # ---------- работа со схемой, выбранной настройкой ----------
@@ -292,6 +307,27 @@ def facts_of(episode, name=None):
         facts.extend(kept)
         dropped += lost
     return facts, dropped
+
+
+def told_of(episode, name=None):
+    """Ключи фактов, которые человек в этом эпизоде сказал прямо.
+
+    Отдельным проходом, а не третьим значением из `facts_of`: указание нужно
+    одному месту — весу, — а факты нужны всем. Разбор чистый и повторяемый,
+    и лишний проход по разметке эпизода дешевле, чем новая арность у функции,
+    которую зовут пять модулей.
+
+    У фактов, вырезанных шаблонами (`archive/extract.py`), источника нет вовсе,
+    и указаний они не приносят: там нечему быть сказанным прямо.
+    """
+    sch = scheme(name)
+    out = []
+    for reply in episode.get("replies") or []:
+        for raw in units(reply, name)[0]:
+            fact, _ = sch.unit(raw)
+            if fact is not None and sch.told(raw):
+                out.append(key(fact))
+    return out
 
 
 def key(fact):

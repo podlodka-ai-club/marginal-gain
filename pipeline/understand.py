@@ -15,8 +15,8 @@
 import argparse, contextlib, json
 from pathlib import Path
 
-from domain import features, lifespan, marks, models
-from domain.measure import score_of
+from domain import features, ledger, lifespan, marks, models
+from domain.measure import score_of, weight_of
 from infra import locks
 from storage import port
 from archive.transcripts import (TRANSCRIPTS, episodes_and_events,
@@ -29,6 +29,7 @@ from infra.scrub import redact
 # `import understand as u`, и ломать его переносом незачем.
 __all__ = ["NOT_CODE", "PREF_TOPICS", "facts_of", "fact_key", "episodes_from_file",
            "outcome_of", "render_episode", "weigh", "features_of", "score_of",
+           "weight_of", "identity_of",
            "render_fact", "parse_time", "marked_or_guessed", "unread", "digest",
            "read_file", "one_episode", "touched", "tail_of", "advance",
            "episode_of", "fact_of", "summary_of", "deliver"]
@@ -417,14 +418,35 @@ def deliver(ep, episode, facts, door):
         door.write(line)
 
 
-def weigh(files):
-    """Мера факта: сколько раз подтверждён, когда в последний раз, в скольких проектах.
+def identity_of(fact):
+    """Ключ факта в той форме, какой его считает лента: fact_type|subject|scope.
 
-    Считается по всему архиву, без сети. Порог отсекает то, что встретилось
-    один раз и давно: такое чаще шум, чем знание.
+    Два ключевых пространства сходятся здесь и только здесь. Узел архива
+    ключуется по-своему (`fact_key`, `marks.key`), а показы лента считает по
+    ключу записи в хранилище — том же, каким её адресуют связи. Без перевода
+    счёт показов достался бы не тому факту.
+    """
+    return models.Fact(*fact[:3]).identity()
+
+
+def weigh(files, use=None):
+    """Узел факта: подтверждения в архиве плюс история обращений к нему.
+
+    Архивная часть — сколько раз подтверждён, когда в последний раз, в скольких
+    проектах — считается без сети. К ней приклеиваются два поля, которых в
+    архиве нет: `use` — счётчики ленты обращений (ADR 0010), `told` — сказал ли
+    это человек прямо. Дальше мера архива и вес по обращениям читают один и тот
+    же узел, и склейка двух ключевых пространств живёт в одном месте.
+
+    Счётчики ленты кладутся по ключам записей, а не суммируются на каждом
+    вхождении: показы лента считает сама, и сложи мы их ещё раз по числу
+    вхождений в архив — вес поехал бы от частоты записи, ровно от которой
+    работа уходит.
     """
     from collections import defaultdict
-    seen = defaultdict(lambda: {"n": 0, "last": "", "projects": set()})
+    use = ledger.tally(ledger.rows()) if use is None else use
+    seen = defaultdict(lambda: {"n": 0, "last": "", "projects": set(),
+                                "told": False, "ids": set()})
     for path in files:
         try:
             episodes = episodes_from_file(path)
@@ -435,13 +457,37 @@ def weigh(files):
             continue
         for ep in episodes:
             project = Path(ep["cwd"]).name if ep["cwd"] else "unknown"
+            told = set(marks.told_of(ep))
             for fact, key in marked_or_guessed(ep)[0]:
                 rec = seen[key]
                 rec["n"] += 1
                 rec["projects"].add(project)
+                rec["ids"].add(identity_of(fact))
+                if key in told:
+                    rec["told"] = True
                 if ep["ended_at"] > rec["last"]:
                     rec["last"] = ep["ended_at"]
+    for rec in seen.values():
+        rec["use"] = sum_use(use.get(one) for one in sorted(rec["ids"]))
     return seen
+
+
+def sum_use(counters):
+    """Счётчики ленты по нескольким записям одного узла в один набор.
+
+    Записей на узел бывает больше одной: шаблонный ключ склеивает факты, у
+    которых разный `subject` в схеме. Пустое остаётся пустым, а не превращается
+    в нули: «обращений не было» и «обращения были и все впустую» — разные вещи,
+    и вес их различает.
+    """
+    out = None
+    for got in counters:
+        if not got:
+            continue
+        out = out or {"shown": 0, "helped": 0, "not_helped": 0, "unknown": 0}
+        for name in out:
+            out[name] += got.get(name, 0)
+    return out
 
 
 def features_of(rec):
@@ -609,7 +655,10 @@ def one_episode(ep, taken, got, weights, newest, dry, min_score, verbose, door):
     for fact, key in found:
         rec = weights.get(key) or {"n": 1, "last": ep["ended_at"],
                                    "projects": set()}
-        score = score_of(rec, newest)
+        # Вес, а не голая мера архива: к подтверждениям добавлен счёт обращений
+        # из ленты и прямое указание человека. Узел без истории обращений даёт
+        # ровно меру ADR 0002 — новый факт от этого не обнуляется.
+        score = weight_of(rec, newest)
         if score < min_score:
             got["skipped"] += 1
             continue
