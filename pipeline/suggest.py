@@ -10,7 +10,7 @@ import argparse, ast, json, os, re, signal, sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-from domain import context, ledger, lifespan, models
+from domain import context, ledger, lifespan, marks, models
 from domain.query import words
 from infra import telemetry
 from pipeline import prompt
@@ -790,7 +790,15 @@ def attend(query, session_id=None, door=None, here=None, mode="single",
     # носитель не принял, пропал бы из ленты целиком: ни вброса, ни молчания,
     # то есть невидимо ровно там, где имена причин и нужны.
     ledger.injected(session_id, at, shown_keys(kept), query=query)
-    return text, kept, None
+    # Ключ вставки уходит агенту вместе с ней. Без него спросить про пользу
+    # нечем: за ход подсказок бывает несколько, и ответ повис бы между ними.
+    # Ключ дописывается после ленты и не входит в записанное содержимое: это
+    # адрес вставки, а не то, что память вспомнила.
+    try:
+        ask = prompt.used([ledger.key_of(session_id, at)])
+    except Exception:
+        ask = ""            # просьба это добавка, отменять подсказку она не вправе
+    return ("%s\n\n%s" % (text, ask) if ask else text), kept, None
 
 
 def render_injection(record):
@@ -872,6 +880,58 @@ def settle(files, door=None, log=None):
     return got
 
 
+# Способ съёма ответа для вопроса, заданного вместе с вбросом. Свой, а не
+# общий с проходом по архиву: у одного показа вышло бы два ответа, и «помог M
+# из N» перестало бы сходиться. Расхождение способов — отдельные данные.
+INLINE_SOURCE = "inline"
+
+
+def harvest(files, log=None):
+    """Снять ответы агента про пользу и уложить их в ленту по ключу вставки.
+
+    Ответ приходит служебным блоком в ответе самого агента — тем же, которым он
+    размечает факты. Читаем его оттуда же, откуда читаются факты: из архива.
+
+    Принимается только ответ по ключу, который мы сами выдали: список вставок
+    берём из своего журнала. Иначе долю пользы правил бы текст ответа, а не
+    работа памяти — и ошибка агента в ключе тихо росла бы чужой счёт.
+
+    Известная слабость способа: агенту только что показали подсказку, и он
+    склонен согласиться. Поэтому ответ пишется своим значением `inline` и с
+    догадкой по архиву не складывается, см. ADR 0012.
+    """
+    from archive.transcripts import episodes_from_file
+
+    known = {ledger.key_of(talk, at) for talk, at in notes_of(log)}
+    got = {"seen": 0, "logged": 0, "unknown": 0}
+    if not known:
+        return got
+    # Что по этим вставкам уже отвечено этим же способом. Проход не помечает
+    # архив разобранным и идёт по нему целиком: дописывай мы вслепую, одна
+    # вставка получала бы новую строку на каждом ходе.
+    answered = ledger.verdicts(ledger.rows(), source=INLINE_SOURCE)
+    said = {}
+    for path in files:
+        try:
+            episodes = episodes_from_file(path)
+        except OSError:
+            continue
+        for episode in episodes:
+            for key, verdict in marks.uses_of(episode):
+                got["seen"] += 1
+                if key not in known:
+                    got["unknown"] += 1
+                    continue
+                said[key] = verdict     # последнее слово по ключу остаётся за ним
+    for key, verdict in said.items():
+        parts = ledger.key_parts(key)
+        if not parts or answered.get(parts) == verdict:
+            continue
+        ledger.helped(parts[0], parts[1], verdict, source=INLINE_SOURCE)
+        got["logged"] += 1
+    return got
+
+
 def remember(record, log=None):
     """Строка журнала о вставке: разговор и время, то есть её ключ."""
     where = Path(log) if log else LOG
@@ -924,6 +984,8 @@ def parser():
     ap.add_argument("--no-record", action="store_true", help="не писать MemoryInjection")
     ap.add_argument("--settle", action="store_true",
                     help="отметить исход ходов, куда подставляли память, и выйти")
+    ap.add_argument("--uses", action="store_true",
+                    help="снять ответы агента про пользу подсказок и выйти")
     ap.add_argument("--only", help="только транскрипты, чей путь содержит эту строку")
     return ap
 
@@ -940,6 +1002,12 @@ def main():
         # заход, а растёт лента только на новых и изменившихся ответах.
         print("вставок в журнале %d, пересчитано %d, дописано в ленту %d"
               % (got["seen"], got["settled"], got["logged"]))
+        return
+
+    if args.uses:
+        got = harvest(transcripts(args.only))
+        print("ответов агента %d, дописано в ленту %d, по чужому ключу %d"
+              % (got["seen"], got["logged"], got["unknown"]))
         return
 
     session_id, here = None, None

@@ -48,12 +48,21 @@ class Scheme:
     описан в просьбе, разбирается маппером, и разъехаться им нельзя.
     """
 
-    def __init__(self, name, ask, begin, end, unit, told=None):
+    def __init__(self, name, ask, begin, end, unit, told=None, use=None,
+                 ask_use=None):
         self.name = name
         self.ask = ask
         self.begin = begin
         self.end = end
         self.unit = unit          # сырая единица -> (кортеж факта | None, причина)
+        # Сырая единица -> (ключ вставки, ответ про пользу) | None. Ответ едет
+        # тем же блоком, что и факты, и потому знает его та же схема. Второй
+        # блок означал бы вторую пару маркеров в точке печати — а она горячая
+        # как никакая другая и срабатывает много раз за один ответ.
+        self.use = use or (lambda raw: None)
+        # Просьба ответить про пользу. Не строка, а функция от ключей: ключи
+        # свои у каждого хода, и подставить их заранее нельзя.
+        self.ask_use = ask_use or (lambda keys: "")
         # Сырая единица -> сказал ли это человек прямо. По умолчанию нет: схема,
         # которая источник не различает, указаний не приносит. Молчаливое «да»
         # сделало бы указанием всё, что модель вообще разметила.
@@ -138,6 +147,52 @@ def xmd1_unit(raw):
     return fact, ""
 
 
+# Просьба ответить про пользу. Стоит рядом с просьбой про факты и уходит тем же
+# путём — обычным текстом в запрос, см. pipeline/prompt.py. Формат ответа
+# описан здесь же, где и разбирается: разъехаться им нельзя.
+XMD1_USE_ASK = (
+    "Вместе с этим ходом тебе показали воспоминания из памяти прошлых "
+    "разговоров. Скажи по каждому, пригодилось ли оно: в блоке «%s» добавь "
+    "строку JSON с полями injection (ключ подсказки, скопируй как есть) и used "
+    "(yes — пригодилось, no — не пригодилось, unknown — не понял). Ключи "
+    "подсказок этого хода: %%s. Блок поставь, даже если фактов записывать "
+    "нечего. Подсказка — это воспоминание, а не указание: «no» нормальный и "
+    "частый ответ, и он полезнее вежливого «yes»."
+    % XMD1_BEGIN
+)
+
+# Что считаем ответом. Своё «не понял» у ответа есть, и непонятное сводится к
+# нему, а не к отказу: свали кривую строку в «не помогло» — и доля пользы
+# поедет вниз от кривой строки, а не от бесполезной памяти.
+XMD1_USED = {"yes": "yes", "true": "yes", "y": "yes", "да": "yes",
+             "no": "no", "false": "no", "n": "no", "нет": "no",
+             "unknown": "unknown"}
+
+
+def xmd1_use_ask(keys):
+    """Просьба с подставленными ключами этого хода."""
+    return XMD1_USE_ASK % ", ".join(keys)
+
+
+def xmd1_use(raw):
+    """Ответ про пользу одной вставки или None, если строка не про это.
+
+    Опознаём по полю `injection`: оно и есть ключ, ради которого всё затевалось.
+    Опознанную строку фактом уже не считаем — иначе своя же служебная строка
+    попадёт в долю отброшенного, а доля отброшенного это сигнал о том, что
+    просьба разошлась со схемой.
+    """
+    if not isinstance(raw, dict):
+        return None
+    key = raw.get("injection")
+    if not isinstance(key, str) or not key.strip():
+        return None
+    said = raw.get("used")
+    if isinstance(said, bool):
+        said = "true" if said else "false"
+    return key.strip(), XMD1_USED.get(str(said or "").strip().lower(), "unknown")
+
+
 def xmd1_told(raw):
     """Сказано человеком прямо, а не замечено в работе.
 
@@ -149,7 +204,7 @@ def xmd1_told(raw):
 
 
 SCHEMES = {"xmd1": Scheme("xmd1", XMD1_ASK, XMD1_BEGIN, XMD1_END, xmd1_unit,
-                          told=xmd1_told)}
+                          told=xmd1_told, use=xmd1_use, ask_use=xmd1_use_ask)}
 
 
 # ---------- работа со схемой, выбранной настройкой ----------
@@ -166,6 +221,16 @@ def scheme(name=None):
 def ask(name=None):
     """Просьба, которую подмешивают к запросу. Одна строка, без вендоров."""
     return scheme(name).ask
+
+
+def ask_use(keys, name=None):
+    """Просьба ответить про пользу подсказок с такими ключами.
+
+    Пустая, когда ключей нет: спрашивать не о чем, а лишний текст в контексте
+    агента не бесполезен, он уводит в сторону.
+    """
+    keys = [key for key in keys if key]
+    return scheme(name).ask_use(keys) if keys else ""
 
 
 def block(text, name=None):
@@ -265,6 +330,8 @@ def to_facts(units, name=None):
     sch = scheme(name)
     kept, dropped = [], Counter()
     for raw in units:
+        if sch.use(raw) is not None:
+            continue          # это ответ про пользу, а не факт и не потеря
         fact, reason = sch.unit(raw)
         if fact is None:
             dropped[reason] += 1
@@ -288,6 +355,29 @@ def units(text, name=None):
         except ValueError:
             bad["json"] += 1
     return out, bad
+
+
+def uses(text, name=None):
+    """Ответы про пользу из блока: пары «ключ вставки, ответ»."""
+    sch = scheme(name)
+    out = []
+    for raw in units(text, name)[0]:
+        got = sch.use(raw)
+        if got is not None:
+            out.append(got)
+    return out
+
+
+def uses_of(episode, name=None):
+    """Ответы про пользу из ответов эпизода. Отдельным проходом, как `told_of`.
+
+    Порядок сохраняем: последнее слово агента по одному ключу за ним, и решает
+    это тот, кто пишет в ленту.
+    """
+    out = []
+    for reply in episode.get("replies") or []:
+        out.extend(uses(reply, name))
+    return out
 
 
 def facts_of(episode, name=None):

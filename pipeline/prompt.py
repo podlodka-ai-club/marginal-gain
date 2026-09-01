@@ -21,11 +21,26 @@ def text(name=None):
     return marks.ask(name)
 
 
+def used(keys, name=None):
+    """Просьба ответить, пригодились ли подсказки с такими ключами.
+
+    Тем же путём, что и просьба разметить факты: печатается сюда, а подмешивает
+    её к запросу тот, кто подмешивает и всё остальное. Разница одна — ключи
+    свои у каждого хода, поэтому просьба берёт их аргументом, а не лежит
+    готовой строкой.
+
+    Ключей нет — пустая строка: подсказок не было, спрашивать не о чем.
+    """
+    return marks.ask_use(keys, name)
+
+
 def main():
     ap = argparse.ArgumentParser(description="Просьба к модели: разметка фактов")
     ap.add_argument("--scheme", help="имя схемы, если не то, что в настройке")
+    ap.add_argument("--used", action="append", default=[], metavar="КЛЮЧ",
+                    help="напечатать просьбу ответить про пользу этой вставки")
     args = ap.parse_args()
-    print(text(args.scheme))
+    print(used(args.used, args.scheme) if args.used else text(args.scheme))
 
 
 if __name__ == "__main__":

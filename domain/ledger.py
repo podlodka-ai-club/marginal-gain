@@ -54,6 +54,10 @@ SOURCES = ("transcript", "turn_end", "inline")
 
 VERDICT_OF = {True: "yes", False: "no", None: "unknown"}
 
+# Чем разговор отделён от времени в ключе вставки. Тот же знак, что и в ключе
+# факта: разделителей в проекте один, а не два.
+KEY_SEP = "|"
+
 # Сколько текста вопроса кладём в строку. Лента растёт быстрее самой памяти,
 # и целый вопрос в каждой строке — то, чем она растёт быстрее всего.
 QUERY_CHARS = 200
@@ -76,6 +80,32 @@ def verdict_of(helped):
     if helped not in VERDICT_OF:
         raise LedgerError("непонятная отметка пользы: %r" % (helped,))
     return VERDICT_OF[helped]
+
+
+def key_of(session_id, injected_at):
+    """Ключ вставки одной строкой. Тот самый, которым лента ключует показ.
+
+    Ключ самодостаточен: по строке видно и разговор, и время, и разобрать её
+    можно, ничего больше не зная. Это не украшение. Ответ агента про пользу
+    приходит текстом его ответа, а текст ходит отдельно от того, кто и когда
+    его написал: ключ, читаемый только рядом со своим разговором, привязать
+    ответ не помог бы.
+    """
+    return "%s%s%s" % (session_id or "unknown", KEY_SEP, injected_at or "")
+
+
+def key_parts(key):
+    """Ключ обратно в пару «разговор, время». Не ключ — None.
+
+    Режем с конца: время вставки разделителя не содержит, а имя разговора его
+    содержать может, и тогда режущий с начала вернул бы обрубок молча.
+    """
+    if not isinstance(key, str) or KEY_SEP not in key:
+        return None
+    talk, at = key.rsplit(KEY_SEP, 1)
+    if not talk or not at:
+        return None
+    return (talk, at)
 
 
 def append(event, log=None, **fields):
@@ -231,8 +261,23 @@ def silences(rows_):
     return dict(out)
 
 
+def answered_ways(rows_):
+    """Способы съёма, которыми в ленте хоть раз ответили.
+
+    Печатать все три незачем: отвечен обычно один, а пустые колонки читаются
+    как «не помогло» — то есть ровно наоборот тому, что случилось.
+    """
+    said = {row.get("source") for row in rows_ if row.get("event") == "helped"}
+    return [source for source in SOURCES if source in said]
+
+
 def report(log=None):
-    """Сводка одной строкой на запись плюс разбивка молчаний."""
+    """Сводка: показы одной строкой, ответы — по строке на способ съёма.
+
+    Способы печатаются порознь и не складываются. Сложи их — и у одного показа
+    вышло бы несколько ответов; а расхождение способов между собой само по себе
+    данные: вопрос вместе с вбросом смещён в согласие, см. ADR 0012.
+    """
     found = rows(log)
     lines = ["строк в ленте: %d" % len(found)]
     mute = silences(found)
@@ -240,11 +285,16 @@ def report(log=None):
         lines.append("молчаний: %d — %s"
                      % (sum(mute.values()),
                         ", ".join("%s %d" % pair for pair in sorted(mute.items()))))
-    counted = tally(found)
-    for key, got in sorted(counted.items(), key=lambda p: -p[1]["shown"]):
-        lines.append("%s: показан %d, помог %d, не помог %d, без ответа %d"
-                     % (key, got["shown"], got["helped"], got["not_helped"],
-                        got["unknown"]))
+    ways = answered_ways(found)
+    counted = {source: tally(found, source) for source in ways}
+    shown = tally(found)
+    for key, got in sorted(shown.items(), key=lambda p: -p[1]["shown"]):
+        lines.append("%s: показан %d" % (key, got["shown"]))
+        for source in ways:
+            one = counted[source][key]
+            lines.append("  %s: помог %d, не помог %d, без ответа %d"
+                         % (source, one["helped"], one["not_helped"],
+                            one["unknown"]))
     return "\n".join(lines)
 
 
