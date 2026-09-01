@@ -7,6 +7,7 @@
   read(query, mode)        чтение — умеют все
   write_objects(records)   структурная запись, где ключ задан полем
   neighbours(keys)         шаг по связям: факты, связанные с названными
+  fold(now)                свёртка дублей и разворот обратно
   contexts(keys)           обстановка фактов: где и когда их видели
   slice(axes)              срез фактов по осям обстановки
 
@@ -164,6 +165,31 @@ class StructuredDoor:
         if step is None:
             raise AttributeError("путь %s забывать не умеет" % self.name)
         return step(now, dry=dry)
+
+    def fold(self, now, dry=False):
+        """Свёртка дублей. Умеет не всякий путь наружу.
+
+        Спрашиваем адаптер, а не имя двери: у сетевого читателя выборки по
+        содержанию нет, и свёртка не имеет права ронять на нём ход.
+        """
+        step = getattr(self.adapter, "fold", None)
+        if step is None:
+            raise AttributeError("путь %s сворачивать не умеет" % self.name)
+        return step(now, dry=dry)
+
+    def folded(self, identity):
+        """Из чего собрана замена. Обратная сторона свёртки."""
+        step = getattr(self.adapter, "folded", None)
+        if step is None:
+            raise AttributeError("путь %s свёртки не помнит" % self.name)
+        return step(identity)
+
+    def unfold(self, identity):
+        """Разворот свёртки: исходные возвращаются в живую таблицу."""
+        step = getattr(self.adapter, "unfold", None)
+        if step is None:
+            raise AttributeError("путь %s разворачивать не умеет" % self.name)
+        return step(identity)
 
     def contexts(self, keys):
         """Обстановки фактов. Умеет не всякий путь наружу.

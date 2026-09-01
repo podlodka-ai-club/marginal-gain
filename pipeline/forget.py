@@ -27,29 +27,45 @@
     python3 -m pipeline.forget --send          переклад
     python3 -m pipeline.forget --recall "..."  глубокое чтение
 """
-import argparse, json
+import argparse, contextlib, json
 
 from domain import lifespan
+from infra import locks
 from storage import port
 
+# Замок общий с остальными проходами по архиву: база одна, и писать в неё
+# вдвоём нельзя. Переклад — это INSERT и DELETE подряд под одной фиксацией,
+# и встреться он в SQLite со вторым писателем, обрыв стоил бы записи.
+LOCK = locks.PASS
 
-def sweep(door=None, now=None, dry=False):
+
+def sweep(door=None, now=None, dry=False, lock=None):
     """Переложить просроченное в отложенное. Отдаёт, сколько и смог ли.
 
     Дверь спрашиваем про умение, а не про имя: у сетевого пути выборки по сроку
     нет, и забывание не имеет права ронять на нём ход. Не умеет — говорит об
     этом числом и признаком, а не исключением наружу.
+
+    Замок неблокирующий и общий, как у остальных проходов. Занято значит «уже
+    пишут»: ждать нечего, конец следующего хода позовёт нас снова.
     """
     door = door or port.door()
     at = now or lifespan.now()
+    got = {"moved": 0, "able": False, "busy": False, "now": at}
     move = getattr(door, "lapse", None)
     if move is None:
-        return {"moved": 0, "able": False, "now": at}
-    try:
-        moved = move(at, dry=dry)
-    except AttributeError:
-        return {"moved": 0, "able": False, "now": at}
-    return {"moved": moved, "able": True, "now": at}
+        return got
+    held = locks.alone(lock) if lock else contextlib.nullcontext(True)
+    with held as mine:
+        if not mine:
+            got["busy"] = True
+            return got
+        try:
+            got["moved"] = move(at, dry=dry)
+        except AttributeError:
+            return got
+        got["able"] = True
+    return got
 
 
 def recall(query, door=None, limit=10):
@@ -82,7 +98,11 @@ def main():
         print(json.dumps(found, ensure_ascii=False, indent=2) if found else "")
         return
 
-    got = sweep(now=lifespan.stamp(args.now) if args.now else None, dry=args.dry)
+    got = sweep(now=lifespan.stamp(args.now) if args.now else None, dry=args.dry,
+                lock=LOCK)
+    if got["busy"]:
+        print("замок занят: разбирают и без нас, этот заход не нужен")
+        return
     if not got["able"]:
         print("путь наружу забывать не умеет, этот заход не нужен")
         return

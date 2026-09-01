@@ -37,7 +37,7 @@ from hypothesis import HealthCheck, given, settings, strategies as st
 os.environ.setdefault("XMEM_INSTANCE_ID", "test-instance")
 
 from domain import lifespan, models
-from infra import config
+from infra import config, locks
 from pipeline import forget, suggest, understand
 from storage import db, local, port
 
@@ -479,6 +479,28 @@ class TestTheDoorThatCannotForget(unittest.TestCase):
                                             door=Deaf(door))
             self.assertTrue(kept)
             self.assertEqual(suggest.renew(kept, door=Deaf(door)), [])
+
+
+class TestTheSweepDoesNotRaceTheSession(unittest.TestCase):
+    """Замок общий с остальными проходами: переклад — тоже запись в базу."""
+
+    def test_a_busy_lock_sends_the_pass_away(self):
+        import fcntl
+        with tempfile.TemporaryDirectory() as tmp, store(tmp) as base:
+            door = port.door()
+            put(door, fact("db.py", T0, mode="short"))
+            lock = Path(tmp) / "save.lock"
+            with lock.open("a") as held:
+                fcntl.flock(held, fcntl.LOCK_EX)
+                got = forget.sweep(door=door, lock=lock,
+                                   now=lifespan.stamp(T0 + timedelta(days=400)))
+            self.assertTrue(got["busy"], "заход не сказал, что замок занят")
+            self.assertEqual(got["moved"], 0)
+            self.assertEqual(rows_of(base, "lapsedfact"), [],
+                             "занятый заход всё же переложил")
+
+    def test_the_pass_takes_the_shared_lock(self):
+        self.assertIs(forget.LOCK, locks.PASS)
 
 
 class TestTheHookCallsTheSweep(unittest.TestCase):

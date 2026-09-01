@@ -154,6 +154,25 @@ def lapse(now, dry=False, timeout=None):
     return repository().lapse(now, dry=dry)
 
 
+def fold(now, dry=False, timeout=None):
+    """Свёртка дублей. Умеет только своя база, и по той же причине, что переклад.
+
+    Правило слияния читает всю таблицу фактов и сравнивает содержание. Сети
+    такого не задать: она отвечает пересказом, а не выборкой.
+    """
+    return repository().fold(now, dry=dry)
+
+
+def folded(identity, timeout=None):
+    """Из чего собрана замена: записи, свернувшиеся в названную."""
+    return repository().folded(identity)
+
+
+def unfold(identity, timeout=None):
+    """Разворот свёртки: исходные возвращаются в живую таблицу."""
+    return repository().unfold(identity)
+
+
 def contexts(keys, timeout=None):
     """Обстановки названных фактов. У сети такого чтения нет, у базы есть.
 

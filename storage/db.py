@@ -15,7 +15,7 @@
 import dataclasses, hashlib, json, os, sqlite3, threading
 from pathlib import Path
 
-from domain import context, lifespan, models
+from domain import context, folding, lifespan, models
 # Слово вопроса — правило одно на поиск и на отсев, см. domain/query.py.
 from domain.query import words
 
@@ -152,7 +152,25 @@ def _v4(conn):
                  '(relation, role, object_key)')
 
 
-MIGRATIONS = (_v1, _v2, _v3, _v4)
+def _v5(conn):
+    """Свёртка: пометка на замене и обратная пометка на отставном.
+
+    Пустая база получает обе от `_v1` — таблицы он выводит из `models`, а там
+    уже и колонки. Поэтому шаг обязан быть терпимым к тому, что всё на месте.
+
+    Указатель по обратной пометке нужен развороту: он ищет группу по замене, и
+    без него каждый разворот читал бы таблицу отставного целиком.
+    """
+    for table, column in (("fact", "merged_from"), ("lapsedfact", "merged_from"),
+                          ("lapsedfact", "merged_into")):
+        have = {row[1] for row in conn.execute('PRAGMA table_info("%s")' % table)}
+        if column not in have:
+            conn.execute('ALTER TABLE "%s" ADD COLUMN "%s" TEXT' % (table, column))
+    conn.execute('CREATE INDEX IF NOT EXISTS lapsedfact_merged_into '
+                 'ON lapsedfact (merged_into)')
+
+
+MIGRATIONS = (_v1, _v2, _v3, _v4, _v5)
 
 
 # Связь, которой факт достаёт свою обстановку. У самого факта в полях один
@@ -476,6 +494,157 @@ class Repository:
             self.conn.execute('DELETE FROM "fact" WHERE %s' % where, (now,))
             self.conn.commit()
         return moved
+
+    # --- свёртка ------------------------------------------------------------
+
+    def _identity(self, row):
+        return models.Fact(fact_type=row["fact_type"], subject=row["subject"],
+                           scope=row["scope"]).identity()
+
+    def fold(self, now, dry=False):
+        """Группы записей про одно и то же сворачиваются в одну. Отдаёт, сколько ушло.
+
+        Правило слияния и выбор замены лежат в `domain.folding` — здесь только
+        SQL. Разложи их по двум местам, и «что считается одним фактом»
+        разъедется с тем, что база сворачивает на самом деле.
+
+        Всё под одним замком и одной фиксацией, как переклад по сроку: оборвись
+        свёртка посередине, запись пропала бы совсем — а вся затея в том, чтобы
+        она осталась цела и её можно было достать глубоким чтением.
+        """
+        shared = [f.name for f in dataclasses.fields(models.Fact)]
+        names = ", ".join('"%s"' % name for name in shared)
+        with self.lock:
+            rows = [dict(row) for row in self.conn.execute('SELECT * FROM "fact"')]
+            moved = 0
+            for group in folding.groups(rows):
+                keep = folding.survivor(group)
+                others = [row for row in group if row is not keep]
+                moved += len(others)
+                if dry:
+                    continue
+                keep_key, dead = self._identity(keep), []
+                for row in others:
+                    dead.append(self._identity(row))
+                    self.conn.execute(
+                        'INSERT OR REPLACE INTO "lapsedfact" (%s, "lapsed_at", '
+                        '"merged_into") VALUES (%s, ?, ?)'
+                        % (names, ", ".join("?" * len(shared))),
+                        [row.get(name) for name in shared] + [now, keep_key])
+                    self.conn.execute(
+                        'DELETE FROM "fact" WHERE "fact_type" = ? AND "subject" = ? '
+                        'AND "scope" = ?',
+                        (row["fact_type"], row["subject"], row["scope"]))
+                self._mark(keep, dead)
+                self._rewire(dead, keep_key)
+            if not dry:
+                self.conn.commit()
+        return moved
+
+    def _mark(self, keep, dead):
+        """На замене — подписи всех, кто в неё свернулся. Накапливая, не затирая.
+
+        Свернуть в одну и ту же запись могут двумя заходами: дубли приезжают
+        разбором архива и после первой свёртки. Затри пометку — и первая
+        половина группы стала бы неотличима от выбывшей по сроку.
+        """
+        was = [line for line in (keep.get("merged_from") or "").splitlines() if line]
+        self.conn.execute(
+            'UPDATE "fact" SET "merged_from" = ? WHERE "fact_type" = ? '
+            'AND "subject" = ? AND "scope" = ?',
+            ("\n".join(sorted(set(was) | set(dead))), keep["fact_type"],
+             keep["subject"], keep["scope"]))
+
+    def _rewire(self, dead, keep_key):
+        """Концы связей со свёрнутых записей переезжают на замену.
+
+        Связь адресует факт подписью (ADR 0004), и снесённая подпись оставила
+        бы связь висеть в пустоте: обход по графу такой конец молча пропускает,
+        то есть сосед свёрнутого факта пропал бы вместе с ним.
+
+        Веса при столкновении складываются: карточка считает наблюдения, а
+        наблюдали обе половины. Связь, у которой оба конца свернулись в один,
+        выбрасывается — сама на себя запись не ссылается.
+        """
+        if not dead:
+            return
+        holes = ", ".join("?" * len(dead))
+        # Связь с эпизодом и вброс адресуют факт через таблицу links; там
+        # подпись лежит записью ключа, и правило её записи одно на всех.
+        for key in dead:
+            self.conn.execute(
+                "UPDATE links SET object_key = ? WHERE object_type = 'Fact' "
+                "AND object_key = ?",
+                (_key_json(models.Fact.of_identity(keep_key).key()),
+                 _key_json(models.Fact.of_identity(key).key())))
+        rows = [dict(row) for row in self.conn.execute(
+            'SELECT * FROM "association" WHERE "source_key" IN (%s) '
+            'OR "target_key" IN (%s)' % (holes, holes), list(dead) * 2)]
+        for row in rows:
+            self.conn.execute(
+                'DELETE FROM "association" WHERE "source_key" = ? '
+                'AND "target_key" = ? AND "cue" = ?',
+                (row["source_key"], row["target_key"], row["cue"]))
+        gone = set(dead)
+        for row in rows:
+            source = keep_key if row["source_key"] in gone else row["source_key"]
+            target = keep_key if row["target_key"] in gone else row["target_key"]
+            if source == target:
+                continue
+            self.conn.execute(
+                'INSERT INTO "association" ("source_key", "target_key", "cue", '
+                '"weight", "observed_at", "first_seen_at") VALUES (?, ?, ?, ?, ?, ?) '
+                'ON CONFLICT ("source_key", "target_key", "cue") DO UPDATE SET '
+                '"weight" = COALESCE("weight", 0) + COALESCE(excluded."weight", 0), '
+                '"observed_at" = MAX(COALESCE("observed_at", excluded."observed_at"), '
+                'COALESCE(excluded."observed_at", "observed_at")), '
+                '"first_seen_at" = MIN(COALESCE("first_seen_at", excluded."first_seen_at"), '
+                'COALESCE(excluded."first_seen_at", "first_seen_at"))',
+                (source, target, row["cue"], row["weight"], row["observed_at"],
+                 row["first_seen_at"]))
+
+    def folded(self, identity):
+        """Записи, свернувшиеся в названную. То, из чего собрана замена."""
+        with self.lock:
+            rows = self.conn.execute(
+                'SELECT * FROM "lapsedfact" WHERE "merged_into" = ?',
+                (identity,)).fetchall()
+        return [dict(row) for row in rows]
+
+    def unfold(self, identity):
+        """Разворот: исходные возвращаются в живую таблицу, пометка снимается.
+
+        Трогает только своё — отставное с пометкой свёртки. Выбывшее по сроку
+        разворот воскрешать не вправе: у него другой повод и другой способ
+        вернуться, см. `pipeline.forget`.
+
+        Строку, которая за это время завелась заново, не затираем: разбор
+        архива мог записать тот же факт после свёртки, и он свежее нашей копии.
+        Содержание у них совпадает — на том и стоит правило слияния.
+
+        Связи назад не расходятся: они переехали на замену и там остаются.
+        Обратимость обещана записям, а не графу, см. ADR 0013.
+        """
+        shared = [f.name for f in dataclasses.fields(models.Fact)]
+        names = ", ".join('"%s"' % name for name in shared)
+        end = models.Fact.of_identity(identity)
+        with self.lock:
+            rows = self.conn.execute(
+                'SELECT * FROM "lapsedfact" WHERE "merged_into" = ?',
+                (identity,)).fetchall()
+            for row in rows:
+                self.conn.execute(
+                    'INSERT OR IGNORE INTO "fact" (%s) VALUES (%s)'
+                    % (names, ", ".join("?" * len(shared))),
+                    [row[name] for name in shared])
+            self.conn.execute('DELETE FROM "lapsedfact" WHERE "merged_into" = ?',
+                              (identity,))
+            self.conn.execute(
+                'UPDATE "fact" SET "merged_from" = NULL WHERE "fact_type" = ? '
+                'AND "subject" = ? AND "scope" = ?',
+                (end.fact_type, end.subject, end.scope))
+            self.conn.commit()
+        return len(rows)
 
     # --- обстановка и срезы по ней ------------------------------------------
 
