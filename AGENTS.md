@@ -42,6 +42,7 @@ XMEM_HOOK_SECONDS=10   # срок чтения в горячем пути
 | `~/.local/state/memory-encoder/live-projects` | ворота: где память живая. Понимание на конце хода сужено до архива названного проекта |
 | `~/.local/state/memory-encoder/suggest.log`, `save.log`, `queue.log` | ошибки хуков; в разговор они не попадают |
 | `~/.local/state/memory-encoder/suggest-log.jsonl` | что спрашивали и сколько прошло порог |
+| `~/.local/state/memory-encoder/ledger.jsonl` | лента обращений: показ, польза, молчание с причиной; разбор `python3 -m domain.ledger` |
 | `~/.local/state/memory-encoder/memory.db` | локальная база |
 
 Хук молчит и в разговоре, и при поломке. Если кажется, что память не работает,

@@ -264,11 +264,16 @@ class TestTheFitIsANumberBetweenZeroAndOne(unittest.TestCase):
 
     @FAST
     @given(a=st.tuples(PROJECTS, BRANCHES, MOMENTS),
-           b=st.tuples(PROJECTS, BRANCHES, MOMENTS))
-    def test_a_matched_project_alone_is_enough(self, a, b):
-        """Совпадение по проекту проходит порог само, без остальных осей."""
-        there, here = context.of(turn_source(*a)), context.of(turn_source(*b))
-        assume(there["project"] == here["project"])
+           branch=BRANCHES, moment=MOMENTS)
+    def test_a_matched_project_alone_is_enough(self, a, branch, moment):
+        """Совпадение по проекту проходит порог само, без остальных осей.
+
+        Совпадающий проект берём готовым, а не отсевом пар: отсев выбрасывал
+        девять примеров из десяти, и на неудачном зерне проверка падала жалобой
+        генератора, не сказав ничего о самом свойстве.
+        """
+        there = context.of(turn_source(*a))
+        here = context.of(turn_source(a[0], branch, moment))
         self.assertGreaterEqual(context.fit(there, here), suggest.MIN_FIT)
 
     @FAST
@@ -592,10 +597,10 @@ class TestTheSituationCostsNothingToTake(unittest.TestCase):
 
         def spy(query, mode="single", min_score=0.5, door=None, here=None):
             seen["query"], seen["here"] = query, here
-            return "", [], ""
+            return "", [], "", "not_found"
 
         with tempfile.TemporaryDirectory() as tmp, store(tmp), \
-             mock.patch.object(suggest, "suggest", spy), \
+             mock.patch.object(suggest, "consult", spy), \
              mock.patch("sys.stdin", _Stdin(json.dumps(payload))), \
              mock.patch("sys.argv", ["suggest", "--hook"]):
             suggest.main()

@@ -10,7 +10,7 @@ import argparse, ast, json, os, re, signal, sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-from domain import context, lifespan, models
+from domain import context, ledger, lifespan, models
 from domain.query import words
 from infra import telemetry
 from pipeline import prompt
@@ -380,6 +380,34 @@ def rank(score, record):
     return score * (fit if fit is not None else 1.0)
 
 
+def winnow(items, min_score=MIN_SCORE, min_fit=MIN_FIT):
+    """Куски, прошедшие порог. Потолки тут не считаются — это следующий шаг.
+
+    Отдельно от `gate` потому, что молчание нужно уметь назвать: «не прошло
+    порог» и «не влезло в потолок» — разные причины и разная починка. Держать
+    правило порога в двух местах нельзя, оно разъедется молча, поэтому `gate`
+    зовёт эту же функцию.
+    """
+    rows = [(i[0], i[1], i[2] if len(i) > 2 else None) for i in items]
+    return [(s, t, r) for s, t, r in rows
+            if passes(s, r, min_score=min_score, min_fit=min_fit)]
+
+
+def eligible(items, min_score=MIN_SCORE, min_fit=MIN_FIT):
+    """Прошедшие порог, из которых порог вообще может собрать выдачу.
+
+    Проза читателя без оценки и без записи — его собственные слова, а не факт;
+    так приходит «no matching files found». Кусок, пустеющий после снятия
+    маркера, тоже не факт. Правило одно на двоих: по нему `gate` собирает
+    выдачу, по нему же называется молчание. Держи их порознь — и проза,
+    отсеянная порогом, назвалась бы «не влезло в потолок», то есть самая
+    частая причина молчания уехала бы в чужую колонку.
+    """
+    return [(s, t, r) for s, t, r in winnow(items, min_score=min_score,
+                                            min_fit=min_fit)
+            if (s is not None or r) and SCORE.sub("", t).strip()]
+
+
 @telemetry.traced("threshold_filter", lambda arg, out: {
     "in": len(arg["items"]), "out": len(out), "min_score": arg["min_score"]})
 def gate(items, min_score=MIN_SCORE, max_items=MAX_ITEMS, max_chars=MAX_CHARS,
@@ -401,20 +429,16 @@ def gate(items, min_score=MIN_SCORE, max_items=MAX_ITEMS, max_chars=MAX_CHARS,
     порог отдавал пустоту, имея за спиной пятьдесят пять тысяч символов
     найденного.
     """
-    rows = [(i[0], i[1], i[2] if len(i) > 2 else None) for i in items]
-    kept = [(s, t, r) for s, t, r in rows
-            if passes(s, r, min_score=min_score, min_fit=min_fit)]
+    kept = eligible(items, min_score=min_score, min_fit=min_fit)
     scored = sorted((row for row in kept if row[0] is not None),
                     key=lambda row: rank(row[0], row[2]), reverse=True)
-    # Проза читателя без оценки это не факт, а его собственные слова: так
-    # приходит и «no matching files». Пропускаем только структурные записи.
-    plain = sorted(((None, t, r) for s, t, r in kept if s is None and r),
+    # Проза читателя без оценки отсеяна раньше, здесь остаётся только порядок:
+    # оценённые впереди, структурные записи без оценки следом.
+    plain = sorted(((None, t, r) for s, t, r in kept if s is None),
                    key=lambda row: rank(row[0], row[2]), reverse=True)
     out, size = [], 0
     for score, text, record in (scored + plain)[:max_items]:
         clean = SCORE.sub("", text).strip()
-        if not clean:
-            continue
         # Обстановка едет вместе с фактом и место в потолке занимает наравне
         # с ним: не считать её значило бы тихо раздуть кусок вдвое.
         room = len(clean) + len(context.describe(
@@ -515,22 +539,51 @@ def near(kept, door, limit=MAX_NEAR):
 
 
 @telemetry.traced("pipeline", lambda arg, out: {
-    "kept": len(out[1]), "sent_chars": len(out[0]), "silent": not out[0]})
-def suggest(query, mode="single", min_score=MIN_SCORE, door=None, here=None):
-    """Что всплывает на этот вопрос в этой обстановке.
+    "kept": len(out[1]), "sent_chars": len(out[0]), "silent": not out[0],
+    "reason": out[3]})
+def consult(query, mode="single", min_score=MIN_SCORE, door=None, here=None):
+    """То же, что `suggest`, но с именем причины, по которой память промолчала.
 
-    `here` — обстановка хода. Не задана (так ходит замер и все прежние вызовы)
-    — уместность не считается, и выдача ровно та, что была до неё.
+    Причина берётся не догадкой поверх пустого ответа, а с той ступени, где
+    выдача опустела: не нашли, всё оказалось ложной находкой, не прошло порог,
+    не влезло в потолок. Догадка снаружи их не различает, а разбирать разрыв
+    между «нашли» и «отдали» можно только по именам.
+
+    Отдаёт четвёркой: текст, куски, сырой ответ, причина. Причина у говорящего
+    захода — None.
     """
     door = door or port.door()
     here = context.of(here) if here else None
     if here and not any(value is not None for value in here.values()):
         here = None
     answer = door.read(query, mode=mode)
+    chunks = pieces(answer)
+    if not chunks:
+        # Выключенная память отвечает пустотой ровно так же, как ненашедшая, и
+        # не назови мы это отдельно — рубильник читался бы как «в памяти пусто».
+        # Спрашиваем после чтения, а не вместо: половина сравнения «без памяти»
+        # обязана идти той же дорогой, что рабочая, и отличаться лишь исходом.
+        off = getattr(door, "name", None) == port.SilentDoor.name
+        return "", [], answer, "disabled" if off else "not_found"
     # Отсев до порога: ложная находка не должна ни занимать место в
     # пятёрке, ни съедать потолок в 1200 символов. Обстановка приписывается
     # между ними: порог судит произведение веса на уместность.
-    kept = gate(place(sift(pieces(answer), query), here, door), min_score=min_score)
+    honest = sift(chunks, query)
+    if not honest:
+        return "", [], answer, "incidental"
+    placed = place(honest, here, door)
+    kept = gate(placed, min_score=min_score)
+    if not kept:
+        # Порог зовём вторым, а не первым: иначе на пустой выдаче ступень
+        # порога не отработала бы вовсе и пропала из замера. Здесь он только
+        # разводит три случая, которые снаружи выглядят одинаково пусто.
+        if not winnow(placed, min_score=min_score):
+            return "", [], answer, "below_threshold"
+        if not eligible(placed, min_score=min_score):
+            # Порог прошли, а записей среди прошедшего нет: хранилище ответило
+            # словами. Это «не нашли», а не «не влезло».
+            return "", [], answer, "not_found"
+        return "", [], answer, "over_budget"
     # Соседи добираются после порога и ставятся следом: прямое попадание
     # первым, добавка второй. Потолки те же — их считает тот же `gate`.
     added = place(near(kept, door), here, door)
@@ -548,7 +601,19 @@ def suggest(query, mode="single", min_score=MIN_SCORE, door=None, here=None):
                     continue
                 kept.append((score, clean, record))
                 size += len(clean) + where
-    return render(kept) if kept else "", kept, answer
+    return render(kept), kept, answer, None
+
+
+def suggest(query, mode="single", min_score=MIN_SCORE, door=None, here=None):
+    """Что всплывает на этот вопрос в этой обстановке.
+
+    `here` — обстановка хода. Не задана (так ходит замер и все прежние вызовы)
+    — уместность не считается, и выдача ровно та, что была до неё.
+
+    Причину молчания не отдаёт: её спрашивают у `consult`. Так замер и прежние
+    вызовы остаются с той же тройкой, что была до ленты.
+    """
+    return consult(query, mode, min_score, door=door, here=here)[:3]
 
 
 def sources_of(kept):
@@ -578,6 +643,23 @@ def sources_of(kept):
         except models.SchemaError:
             continue          # запись без половины ключа в связь не поставить
         out.append(found)
+    return out
+
+
+def shown_keys(kept):
+    """Ключи записей, которые агент увидел в подсказке. Ими лента их и считает.
+
+    Ключ ставится в момент вброса и уходит вместе с ним. Без него ответ про
+    пользу повиснет между показанными записями и достанется не той: за ход
+    агент получает несколько подсказок и делает много шагов.
+    """
+    out = []
+    for source in sources_of(kept):
+        if source.OBJECT == "Fact":
+            out.append(source.identity())
+        else:
+            out.append("%s|%s|%s" % (source.OBJECT, source.session_id,
+                                     source.episode_number))
     return out
 
 
@@ -651,6 +733,66 @@ def note_injection(session_id, text, kept=(), door=None, at=None):
     return record
 
 
+def mute(reason, session_id, query, note=None):
+    """Записать молчание и вернуть его причину. Одна дверь для всех отказов.
+
+    Имя причины ставится там, где молчание случилось, а не догадкой снаружи:
+    догадка видит только пустую строку и все шесть причин сливает в одну.
+    """
+    ledger.silence(reason, session_id=session_id, query=query, note=note)
+    return reason
+
+
+def attend(query, session_id=None, door=None, here=None, mode="single",
+           min_score=MIN_SCORE, hot=False, record=True, at=None):
+    """Заход подсказки целиком: спросить память, отдать найденное и оставить
+    в ленте ровно один исход — вброс или молчание с названной причиной.
+
+    Собрано в одну функцию, потому что исход у захода один, а решается он в
+    разных местах: срок, отказ носителя, четыре ступени отсева. Раздай их по
+    вызывающим — и каждый назовёт молчание по-своему, а половина не назовёт
+    никак. Разрыв «нашли 32, отдали 25» разбирается только по именам.
+
+    `hot` — горячий путь, тот самый, где действует срок. `record` — писать ли
+    запись о вставке; замер и проверки ходят без неё.
+
+    Отдаёт тройкой: текст, куски, причина молчания. У говорящего захода — None.
+    """
+    door = door or port.door()
+    cancel = deadline() if hot else (lambda: None)
+    try:
+        text, kept, _raw, why = consult(query, mode, min_score, door=door,
+                                        here=here)
+    except Overdue:
+        return "", [], mute("overdue", session_id, query)
+    except port.BackendError as bad:
+        return "", [], mute("backend_error", session_id, query, note=str(bad))
+    except Exception as bad:
+        # Своя поломка называется своей причиной. Свали её на носитель — и
+        # колонка отказов начнёт расти от наших же ошибок, а разбивка по
+        # причинам, ради которой всё и затевалось, начнёт врать.
+        return "", [], mute("pipeline_error", session_id, query,
+                            note="%s: %s" % (type(bad).__name__, bad))
+    finally:
+        cancel()
+    if not text:
+        return "", [], mute(why or "not_found", session_id, query)
+    at = at or datetime.now(timezone.utc).isoformat()
+    if record:
+        try:
+            note_injection(session_id, text, kept, door=door, at=at)
+        except Exception:
+            # Подсказка уже собрана и уйдёт агенту: неудачная запись о ней
+            # права её отменить не имеет.
+            pass
+    # Лента пишется от показа, а не от записи: показ случился ровно тогда,
+    # когда текст ушёл агенту. Привяжи её к записи — и заход, чью запись
+    # носитель не принял, пропал бы из ленты целиком: ни вброса, ни молчания,
+    # то есть невидимо ровно там, где имена причин и нужны.
+    ledger.injected(session_id, at, shown_keys(kept), query=query)
+    return text, kept, None
+
+
 def render_injection(record):
     """Та же запись прозой — для двери, которая структурной записи не умеет."""
     return "\n".join([
@@ -660,6 +802,11 @@ def render_injection(record):
         "injected_content: %s" % (record.injected_content or ""),
         "notes: %s" % (record.notes or ""),
     ])
+
+
+# Каким способом снят ответ про пользу в этом проходе. Способов три, и они
+# считаются порознь; проход по архиву — догадка без участия агента.
+SETTLE_SOURCE = "transcript"
 
 
 def settle(files, door=None, log=None):
@@ -679,7 +826,7 @@ def settle(files, door=None, log=None):
 
     known = notes_of(log)
     if not known:
-        return {"seen": 0, "settled": 0}
+        return {"seen": 0, "settled": 0, "logged": 0}
     ends = {}
     for path in files:
         try:
@@ -694,8 +841,13 @@ def settle(files, door=None, log=None):
         pairs.sort()
 
     door = door or port.door()
-    got = {"seen": len(known), "settled": 0}
-    records = []
+    got = {"seen": len(known), "settled": 0, "logged": 0}
+    # Что по этим вставкам уже отвечено. Проход не помечает журнал разобранным
+    # и каждый заход идёт по нему целиком: дописывай мы вслепую, одна вставка
+    # получала бы новую строку пользы на каждом проходе, и доля поехала бы
+    # вверх на ровном месте.
+    answered = ledger.verdicts(ledger.rows(), source=SETTLE_SOURCE)
+    door_written, marks = [], []
     for talk, at in known:
         outcome = "unknown"
         for started, found in ends.get(talk, []):
@@ -703,12 +855,20 @@ def settle(files, door=None, log=None):
                 outcome = found
                 break
         helped = {"done": True, "blocked": False}.get(outcome)
-        records.append(models.MemoryInjection(
+        door_written.append(models.MemoryInjection(
             session_id=talk, injected_at=at,
             session_outcome=outcome, helped=helped))
+        verdict = ledger.verdict_of(helped)
+        if answered.get((talk, at)) != verdict:
+            marks.append((talk, at, verdict))
         got["settled"] += 1
-    if records and hasattr(door, "write_objects"):
-        door.write_objects(records)
+    if door_written and hasattr(door, "write_objects"):
+        door.write_objects(door_written)
+    # Лента после хранилища, тем же порядком, что и всюду: ответ про пользу
+    # вставки, которой в хранилище нет, считать нельзя.
+    for talk, at, verdict in marks:
+        ledger.helped(talk, at, verdict, source=SETTLE_SOURCE)
+        got["logged"] += 1
     return got
 
 
@@ -776,7 +936,10 @@ def main():
         # «Пересчитано», а не «отмечено»: журнал не помечается разобранным, и
         # каждый заход проходит его целиком. Запись идёт по ключу, поверх, так
         # что вреда нет — но и числа новых отметок это не даёт.
-        print("вставок в журнале %d, пересчитано %d" % (got["seen"], got["settled"]))
+        # «Дописано в ленту» отдельным числом: пересчитано столько же каждый
+        # заход, а растёт лента только на новых и изменившихся ответах.
+        print("вставок в журнале %d, пересчитано %d, дописано в ленту %d"
+              % (got["seen"], got["settled"], got["logged"]))
         return
 
     session_id, here = None, None
@@ -806,33 +969,27 @@ def main():
     # Одна дверь на чтение и на отметку: две открывали бы два пути наружу,
     # и отметка могла лечь не туда, откуда читали.
     door = port.door()
-    cancel = deadline() if args.hook else (lambda: None)
     try:
-        text, kept, raw = suggest(query, args.mode, args.min_score, door=door,
-                                  here=here)
+        # Заход целиком, вместе с записью о вставке: ключ вставки в журнал
+        # пишет сама отметка, а молчание уходит в ленту со своим именем.
+        text, kept, why = attend(query, session_id=session_id, door=door,
+                                 here=here, mode=args.mode,
+                                 min_score=args.min_score, hot=args.hook,
+                                 record=not args.no_record)
     except Exception:
         if args.hook:
             return          # молчим: подсказка не имеет права ломать разговор
         raise
-    finally:
-        cancel()
 
     LOG.parent.mkdir(parents=True, exist_ok=True)
     with LOG.open("a", encoding="utf-8") as fh:
         fh.write(json.dumps({"query": query[:300], "kept": len(kept),
-                             "sent": bool(text), "raw_chars": len(raw)},
+                             "sent": bool(text), "reason": why},
                             ensure_ascii=False) + "\n")
 
     if not text:
         return              # нечему всплывать, молчим
     print(text)
-    if not args.no_record:
-        try:
-            # Ключ вставки в журнал пишет сама отметка: молчание журнальной
-            # строки не оставляет, а вставка без ключа не находится потом.
-            note_injection(session_id, text, kept, door=door)
-        except Exception:
-            pass
 
 
 if __name__ == "__main__":
