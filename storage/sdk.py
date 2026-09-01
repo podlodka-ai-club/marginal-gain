@@ -7,6 +7,8 @@
 """
 import json, os, threading
 
+from storage import graph
+
 # Пустая переменная в окружении значит «не задано», см. .env.example.
 BASE = os.environ.get("XMEM_API_URL") or ""
 TIMEOUT = float(os.environ.get("XMEM_TIMEOUT") or 180)
@@ -80,6 +82,17 @@ def read(query, mode="single-answer", timeout=None):
     if answer is None:
         return ""
     return answer if isinstance(answer, str) else json.dumps(answer, ensure_ascii=False)
+
+
+def neighbours(keys, limit=10, timeout=None):
+    """Соседи по графу связей. Шаг тот же, что у прямого HTTP.
+
+    Разойдись эти два пути вопросом или разбором — выдача поехала бы от
+    того, каким клиентом сегодня подпёрта дверь. Поэтому шаг один на оба.
+    """
+    return graph.neighbours(
+        lambda query, mode: read(query, mode=mode, timeout=timeout),
+        keys, limit=limit)
 
 
 def schema(timeout=None):

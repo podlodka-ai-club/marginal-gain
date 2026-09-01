@@ -6,6 +6,8 @@
 """
 import json, os, socket, urllib.error, urllib.request
 
+from storage import graph
+
 # Пустая переменная в окружении значит «не задано», поэтому `or`, а не второй
 # аргумент get: .env.example разрешает оставить строку пустой.
 BASE = (os.environ.get("XMEM_API_URL") or "https://api.xmemory.ai").rstrip("/")
@@ -77,6 +79,17 @@ def read(query, mode="single-answer", timeout=None):
     if answer is None:
         return ""
     return answer if isinstance(answer, str) else json.dumps(answer, ensure_ascii=False)
+
+
+def neighbours(keys, limit=10, timeout=None):
+    """Соседи по графу связей. Шаг общий с клиентом, см. storage/graph.py.
+
+    Читателя отдаём по имени модуля, а не ссылкой на функцию: так подмена
+    читателя доезжает до шага, а не обходится им стороной.
+    """
+    return graph.neighbours(
+        lambda query, mode: read(query, mode=mode, timeout=timeout),
+        keys, limit=limit)
 
 
 def schema(timeout=None):

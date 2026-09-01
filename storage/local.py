@@ -136,7 +136,11 @@ def read(query, mode="single-answer", timeout=None):
 
 
 def neighbours(keys, limit=10, timeout=None):
-    """Соседи по графу связей. У сети такого чтения нет, у базы есть."""
+    """Соседи по графу связей. У базы это SQL, у сети — два чтения.
+
+    Правило одно на обе двери, и сравнивать их выдачу можно построчно, см.
+    `storage/graph.py` и `tests/test_graph_network.py`.
+    """
     return repository().neighbours(list(keys), limit=limit)
 
 
