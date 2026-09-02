@@ -920,6 +920,20 @@ class Repository:
             out.append({k: v for k, v in record.items() if v not in (None, "")})
         return out
 
+    def injections(self, session_id):
+        """Что память отдала в этот разговор, по порядку вставок.
+
+        Спрашивает замер: разбирая, помогла подсказка или нет, надо знать не
+        только «вбросили», но и что именно вбросили. Строку с этим держит
+        `MemoryInjection`, и вычитывать её мимо этого модуля значило бы завести
+        второе место, где память знает про SQL.
+        """
+        with self.lock:
+            rows = self.conn.execute(
+                'SELECT * FROM "memoryinjection" WHERE "session_id" = ? '
+                'ORDER BY "injected_at"', (session_id,)).fetchall()
+        return [dict(row) for row in rows]
+
     def counts(self):
         out = {}
         with self.lock:
