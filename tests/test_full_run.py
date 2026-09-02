@@ -260,7 +260,30 @@ class TestEveryCaseLandsInOneBucket(unittest.TestCase):
     def test_a_passed_case_is_never_called_a_loss(self, rows):
         for row in rows:
             if row["ok"] and not row["error"] and not row["intruded"]:
-                self.assertEqual(live.APPLIED, live.bucket(row))
+                self.assertIn(live.bucket(row), (live.APPLIED, live.COINCIDED))
+
+    @given(reason=st.sampled_from([None, "not_found", "below_threshold",
+                                   "over_budget", "incidental"]))
+    @SLOW
+    def test_a_pass_on_a_silent_memory_is_not_memorys_win(self, reason):
+        """Ответ сошёлся, а память промолчала — это совпадение, а не память.
+
+        Случай не выдуман: на первом же живом прогоне агент написал в список
+        покупок овсянку просто потому, что овсянка — обычный завтрак. Память
+        при этом не сказала ничего (`not_found`). Засчитай это применением — и
+        цифра растёт от того, что вопросы набора угадываются без памяти, а
+        корзина «ничего не нашла» пустеет ровно на эти случаи.
+        """
+        row = {"ok": True, "injected": False, "reason": reason,
+               "intruded": False, "error": None}
+        self.assertEqual(live.COINCIDED, live.bucket(row))
+
+    @given(reason=st.sampled_from([None, "not_found", "below_threshold"]))
+    @SLOW
+    def test_a_pass_with_a_hint_is_memorys_win(self, reason):
+        row = {"ok": True, "injected": True, "reason": reason,
+               "intruded": False, "error": None}
+        self.assertEqual(live.APPLIED, live.bucket(row))
 
     @given(reason=st.sampled_from([None, "not_found", "below_threshold", "over_budget"]))
     @SLOW
