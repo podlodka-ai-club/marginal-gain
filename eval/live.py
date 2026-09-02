@@ -642,7 +642,7 @@ class Replay:
 
     def transcript(self, cwd, talk):
         """Тот же адрес, по которому разговор кладёт харнесс."""
-        return TRANSCRIPTS / flat(cwd) / ("%s.jsonl" % talk)
+        return transcript_of(cwd, talk)
 
     def write(self, target, talk, cwd, when, kind, blocks):
         target.parent.mkdir(parents=True, exist_ok=True)
@@ -728,6 +728,16 @@ def flat(where):
     return re.sub(r"[^A-Za-z0-9]", "-", str(where))
 
 
+def transcript_of(cwd, talk):
+    """Адрес разговора в архиве. Тот же, по которому его кладёт харнесс.
+
+    Одним местом на весь модуль: проигрыватель пишет разговор сюда, а разбор
+    цепочки читает его отсюда, и разъехаться этим двум нельзя — разбор молча
+    не нашёл бы ни одного блока разметки и назвал бы обрывом первую ступень.
+    """
+    return TRANSCRIPTS / flat(cwd) / ("%s.jsonl" % talk)
+
+
 def mark_of(cwd):
     got = subprocess.run(["git", "rev-parse", "--abbrev-ref", "HEAD"],
                          cwd=str(cwd), capture_output=True, text=True)
@@ -737,18 +747,25 @@ def mark_of(cwd):
 # --- что память сказала в этот разговор -------------------------------------
 
 def verdict_of(box, talk):
-    """Исход захода подсказки по ленте: вбросили или промолчали и почему.
+    """Исход захода подсказки по ленте: вбросили или промолчали, почему и на чём.
 
     Спрашиваем ленту, а не догадываемся по ответу агента: имена причин ставит
     та ступень, где выдача опустела, и снаружи все они выглядят одинаково
     пусто.
+
+    Третьим — счёт кандидатов: сколько поиск отдал кусков до отсева. Имя
+    причины говорит, где опустело, счёт говорит, было ли чему пустеть. Ноль
+    кандидатов и тридцать срезанных порогом чинятся в разных местах.
     """
     rows = ledger.rows(box.state / "ledger.jsonl")
     mine = [row for row in rows if row.get("session_id") == talk]
     injected = any(row.get("event") == "injected" for row in mine)
     reason = next((row.get("reason") for row in reversed(mine)
                    if row.get("event") == "silent"), None)
-    return injected, reason
+    found = next((row.get("found") for row in reversed(mine)
+                  if row.get("event") in ("injected", "silent")
+                  and row.get("found") is not None), None)
+    return injected, reason, found
 
 
 def given_to(box, talk):
@@ -759,6 +776,223 @@ def given_to(box, talk):
                          for row in repo.injections(talk))
     finally:
         repo.close()
+
+
+# --- где обрыв --------------------------------------------------------------
+#
+# Итог «память ничего не нашла» одинаково выглядит у пяти разных поломок:
+# просьбы о разметке не было, модель блок не поставила, блок отбросил маппер,
+# факт не доехал до базы, поиск его не нашёл. Первый живой прогон дал ровно
+# такой ноль, и чинить по нему было нечего. Поэтому у каждой пары спрашивается
+# цепочка целиком, а называется в ней первый «нет».
+
+# Ступени в том порядке, в каком через них проходит знание. Порядок и есть
+# правило: чинить надо там, где порвалось раньше, а не там, где заметили.
+STEPS = ("разметка", "факт в БД", "кандидат", "вброс")
+
+# Как те же ступени названы в строке отчёта. Держим отдельно: в строке они
+# стоят с числами («фактов: 1»), а обрыв называется одним словом.
+STEPS_IN_LINE = ("разметка", "фактов", "кандидатов", "вброс")
+
+
+def replies_of(path):
+    """Ответы агента из файла разговора. Нет файла — нет ответов, не падение.
+
+    Разговор пишет харнесс, и читаем мы его в том же виде: строка на сообщение,
+    текст лежит блоками в `message.content`. Битую строку пропускаем — файл
+    дописывается на ходу, и последняя строка может быть половиной.
+    """
+    out = []
+    try:
+        lines = Path(path).read_text(encoding="utf-8").splitlines()
+    except OSError:
+        return out
+    for line in lines:
+        try:
+            row = json.loads(line)
+        except ValueError:
+            continue
+        if not isinstance(row, dict) or row.get("type") != "assistant":
+            continue
+        content = ((row.get("message") or {}).get("content")) or []
+        if isinstance(content, str):
+            out.append(content)
+            continue
+        for block in content:
+            if isinstance(block, dict) and block.get("type") == "text":
+                out.append(block.get("text") or "")
+    return out
+
+
+def marking(paths):
+    """Была ли разметка в этих разговорах и что с ней сделал маппер.
+
+    Спрашиваем сам разговор, а не ответ агента и не базу: блок служебный, его
+    срезают с экрана, и по тому, что увидел человек, о нём судить нельзя.
+
+    Отдаёт тремя числами: стоял ли блок, сколько единиц пережило маппер,
+    сколько он отбросил и по каким причинам. Блок, отброшенный целиком, — это
+    не «модель не разметила»: чинится он текстом просьбы, а не промптом, и
+    свались он в «нет», починка ушла бы не туда.
+    """
+    seen, units, dropped = False, 0, Counter()
+    for path in paths:
+        for reply in replies_of(path):
+            if marks.block(reply) is None:
+                continue
+            seen = True
+            raw, bad = marks.units(reply)
+            dropped += bad
+            kept, lost = marks.to_facts(raw)
+            units += len(kept)
+            dropped += lost
+    return {"marked": seen, "units": units, "dropped": dropped}
+
+
+def mark_word(probe):
+    """Разметка одним словом: да, нет или отброшено с причинами маппера."""
+    if not probe.get("marked"):
+        return "нет"
+    dropped = probe.get("dropped") or Counter()
+    if probe.get("units") or not dropped:
+        return "да"
+    return "отброшено: %s" % ", ".join("%s×%d" % (name, count)
+                                       for name, count in sorted(dropped.items()))
+
+
+def facts_with(where, words):
+    """Сколько фактов базы упоминают хоть одно из этих слов. Живых и просроченных.
+
+    Считаем порознь, потому что это разные починки: ноль живых при живом
+    просроченном означает не «факт не доехал», а «доехал и вышел срок».
+    Сложи их — и отчёт назвал бы обрывом запись, которая была исправна.
+
+    Слова набор даёт стеблями («овсян», «Казан»), поэтому сравниваем вхождением
+    и в нижнем регистре: судить о доезде факта по совпадению словоформы значит
+    мерить морфологию.
+    """
+    words = [w.strip().lower() for w in (words or []) if w and w.strip()]
+    if not words:
+        return None, 0
+    conn = db.connect(where)
+    try:
+        out = []
+        for table in ("fact", "lapsedfact"):
+            where_sql = " OR ".join(["lower(subject) LIKE ? OR lower(content) LIKE ?"]
+                                    * len(words))
+            params = [p for word in words for p in ("%%%s%%" % word,) * 2]
+            try:
+                got = conn.execute('SELECT count(*) FROM "%s" WHERE %s'
+                                   % (table, where_sql), params).fetchone()[0]
+            except Exception:
+                got = 0        # таблицы ещё нет — считаем, что и записей нет
+            out.append(got)
+        return out[0], out[1]
+    finally:
+        conn.close()
+
+
+def break_of(probe):
+    """Первая ступень цепочки, ответившая «нет». Целая цепочка — пусто.
+
+    Первая, а не любая: после обрыва все следующие ступени пусты по
+    построению, и назови мы последнюю — починка ушла бы туда, где ничего не
+    ломалось.
+
+    У отрицательной пары ждать в базе нечего: ей нужен как раз пустой ответ, и
+    обрыва у неё не бывает вовсе.
+    """
+    if not probe.get("expected", True):
+        return ""
+    passed = (probe.get("marked"), probe.get("facts"),
+              probe.get("candidates"), probe.get("injected"))
+    return next((name for name, ok in zip(STEPS, passed) if not ok), "")
+
+
+def probe_line(probe):
+    """Цепочка одной пары строкой. Все четыре ступени, всегда и в одном порядке."""
+    facts = "—" if not probe.get("expected", True) else probe.get("facts")
+    lapsed = probe.get("lapsed") or 0
+    if lapsed and not probe.get("facts"):
+        facts = "%s (просрочен: %d)" % (facts, lapsed)
+    hit = probe.get("candidates")
+    if probe.get("injected"):
+        said = "да"
+    else:
+        said = "нет (%s)" % (probe.get("reason") or "причина не названа")
+    return "разметка: %s | фактов: %s | кандидатов: %s | вброс: %s" % (
+        mark_word(probe), facts, "—" if hit is None else hit, said)
+
+
+# --- руки -------------------------------------------------------------------
+#
+# Рука — это один прогон одного и того же набора при одной настройке контура.
+# Рука без нашей памяти нужна отрицательным контролем: что угадывается без
+# факта, видно сразу, и цифра МВП это разница между руками, а не одно число.
+# Встроенную память Claude Code при этом не отрезаем — она часть «руки как
+# есть», и отрезать её значило бы мерить не то, чем человек пользуется.
+
+# Порядок закреплён: рука с памятью идёт первой, с неё снимается цифра МВП.
+ARMS = ("memory", "bare")
+
+# Пока факт не доезжает до базы, сравнивать нечего, и голая рука только жжёт
+# деньги. Умолчание — одна рука с памятью; `both` включается явно.
+DEFAULT_ARMS = "memory"
+
+
+def arms_of(name):
+    """Какие руки играть по имени флага."""
+    return ARMS if name == "both" else (name,)
+
+
+def hooks_of_arm(arm):
+    """Живы ли наши хуки в этой руке. Голая рука — выключенный рубильник."""
+    return arm != "bare"
+
+
+def keep_after(passed, done, asked=False):
+    """Оставлять ли песочницу после прогона.
+
+    Ноль на досчитанном прогоне оставляем: разбирать обрыв иначе не по чему —
+    ни базы, ни ленты, ни разговоров. Оборванный прогон уносим: он не досчитал,
+    и хранить полпрогона значит хранить непонятно что.
+    """
+    return bool(asked) or (bool(done) and passed == 0)
+
+
+class Bout:
+    """Итог по рукам: цифра каждой и разница между ними.
+
+    Руки не складываются. Сумма рук не значит ничего: одна из них нарочно
+    играет с выключенным контуром, и общее число смешало бы замер с контролем.
+    """
+
+    def __init__(self, reports):
+        self.reports = OrderedDict(reports)
+
+    def passed(self, arm):
+        return self.reports[arm].passed
+
+    @property
+    def diff(self):
+        """Цифра МВП: насколько наша память прибавила к руке без неё.
+
+        Одна рука — разницы нет вовсе. Ноль вместо неё читался бы как «не
+        прибавила», то есть как измеренное.
+        """
+        if not all(arm in self.reports for arm in ARMS):
+            return None
+        return self.reports["memory"].passed - self.reports["bare"].passed
+
+    def text(self):
+        out = []
+        for arm, report in self.reports.items():
+            out.append("--- рука %s ---" % arm)
+            out.append(report.text())
+            out.append("")
+        if self.diff is not None:
+            out.append("разница (память минус без памяти): %+d" % self.diff)
+        return "\n".join(out).rstrip()
 
 
 # --- отчёт ------------------------------------------------------------------
@@ -774,6 +1008,9 @@ class Report:
         self.settled_at = None
         self.stalled = []
         self.cost = 0.0
+        # Цепочка ступеней по каждой паре: id пары -> где что нашлось.
+        self.probe = OrderedDict()
+        self.kept = False
 
     @property
     def total(self):
@@ -823,7 +1060,28 @@ class Report:
             for row in missed[:10]:
                 lines.append("  %-18s не хватило: %s"
                              % (row["id"], ", ".join(row["missed"]) or "—"))
+        lines.extend(self.chain())
+        if self.kept:
+            lines.append("")
+            lines.append("песочница сохранена: %s" % self.root)
         return "\n".join(lines)
+
+    def chain(self):
+        """Цепочка ступеней по каждой паре и первый «нет» в ней.
+
+        Стоит после разбивки, а не вместо неё: разбивка отвечает «сколько»,
+        цепочка — «где порвалось». Первое без второго и было тем отчётом, по
+        которому чинить нечего.
+        """
+        if not self.probe:
+            return []
+        out = ["", "где обрыв:"]
+        for name, probe in self.probe.items():
+            broke = break_of(probe)
+            out.append("  %-18s %s%s"
+                       % (name, probe_line(probe),
+                          "   обрыв: %s" % broke if broke else ""))
+        return out
 
 
 # --- прогон -----------------------------------------------------------------
@@ -834,9 +1092,16 @@ def talk_id():
 
 def run(pairs=None, root=None, player="replay", limit=None, only=None,
         keep=False, live_hooks=True, model=None, budget=None, quiet=2.0,
-        echo=None):
-    """Обе сессии каждой пары подряд, в своей песочнице. Отдаёт отчёт."""
+        echo=None, arm=None):
+    """Обе сессии каждой пары подряд, в своей песочнице. Отдаёт отчёт.
+
+    `arm` — рука прогона: `memory` играет с нашим контуром, `bare` с
+    выключенным. Названа рука — она и решает судьбу рубильника; не названа —
+    решает `live_hooks`, как было.
+    """
     say = echo or (lambda *_: None)
+    if arm is not None:
+        live_hooks = hooks_of_arm(arm)
     items = list(pairs or [])
     if only:
         items = [pair for pair in items if only in pair["id"]]
@@ -848,14 +1113,16 @@ def run(pairs=None, root=None, player="replay", limit=None, only=None,
     made = PLAYERS[player](box, **({"model": model, "budget": budget}
                                    if player == Agent.name else {}))
     report = Report(box, player, items)
+    done = False
     try:
         say("--- сессии 1: %d реплик, проигрыватель %s ---" % (len(turns), player))
-        places = {}
+        places, talks = {}, {}
         for number, turn in enumerate(turns, 1):
             where = ground(box, turn)
             places[key_of(turn)] = where
             talk = talk_id()
             box.talks.append(talk)
+            talks[key_of(turn)] = (where, talk)
             reply = made.play(turn["say"], where, talk, turn=turn, tools=NO_SHELL)
             when, stalled = settled(box.state, extra=[box.db], quiet=quiet)
             if stalled:
@@ -874,6 +1141,14 @@ def run(pairs=None, root=None, player="replay", limit=None, only=None,
         if stalled:
             report.stalled.append(0)
 
+        # Половина цепочки, которую можно спросить только сейчас: разметка
+        # лежит в разговорах первой сессии, факт — в базе, наполненной ими.
+        # Спроси позже — разговоры уже унесены из архива, спроси раньше —
+        # фоновая половина хода ещё не дописала.
+        if box.live_hooks:
+            for pair in items:
+                report.probe[pair["id"]] = first_half(box, pair, talks)
+
         say("")
         say("--- сессии 2: %d задач, каждая со своей сессии ---" % len(items))
         for number, pair in enumerate(items, 1):
@@ -883,12 +1158,38 @@ def run(pairs=None, root=None, player="replay", limit=None, only=None,
             where.mkdir(parents=True, exist_ok=True)
             reply = made.play(pair["task"]["say"], where, talk, tools=NO_TOOLS)
             report.cost += reply.cost
-            report.note("ask", judge_one(box, pair, reply))
+            row = judge_one(box, pair, reply)
+            report.note("ask", row)
+            if pair["id"] in report.probe:
+                report.probe[pair["id"]].update(
+                    {"candidates": row["candidates"], "injected": row["injected"],
+                     "reason": row["reason"]})
             say("  %3d/%-3d %-18s %s"
                 % (number, len(items), pair["id"], bucket(report.asked[-1])))
+        done = True
     finally:
-        box.close(keep=keep)
+        report.kept = keep_after(report.passed, done, asked=keep)
+        box.close(keep=report.kept)
     return report
+
+
+def first_half(box, pair, talks):
+    """Первые две ступени цепочки: разметка в разговорах и факт в базе.
+
+    Спрашиваем по парам, а не по ходам: один ход кормит несколько пар (`ref`),
+    и разметка у них общая, а слова, которых ждёт каждая, свои.
+    """
+    seen = []
+    for turn in pair.get("tell") or []:
+        got = talks.get(key_of(turn))
+        if got:
+            seen.append(transcript_of(*got))
+    probe = marking(seen)
+    alive, lapsed = facts_with(box.db, pair.get("expect"))
+    probe.update({"facts": alive, "lapsed": lapsed,
+                  "expected": bool(pair.get("expect")),
+                  "candidates": None, "injected": False, "reason": None})
+    return probe
 
 
 def judge_one(box, pair, reply):
@@ -900,14 +1201,14 @@ def judge_one(box, pair, reply):
     агент; «нашла или не нашла» говорит лента, по имени причины.
     """
     said = marks.strip(reply.text or "")
-    injected, reason = verdict_of(box, reply.session_id)
+    injected, reason, found = verdict_of(box, reply.session_id)
     known = given_to(box, reply.session_id)
     verdict = evaluate.judge(pair, said, known, reply.error, raw=known)
     return {"id": pair["id"], "kind": pair.get("kind", ""),
             "aim": pair.get("aim", "apply"),
             "session_id": reply.session_id, "at": time.time(),
             "task": pair["task"]["say"], "ok": verdict["ok"],
-            "injected": injected, "reason": reason,
+            "injected": injected, "reason": reason, "candidates": found,
             "intruded": bool(verdict["false_hits"]),
             "hits": verdict["hits"], "missed": verdict["missed"],
             "false_hits": verdict["false_hits"], "answer": said,
@@ -927,6 +1228,10 @@ def parser():
                     help="реплики прежнего набора, если идём через мост")
     ap.add_argument("--player", default=Agent.name, choices=sorted(PLAYERS),
                     help="claude — настоящий агент; replay — без модели, для отладки")
+    ap.add_argument("--arms", default=DEFAULT_ARMS,
+                    choices=("both", "memory", "bare"),
+                    help="memory — с нашей памятью; bare — с выключенным "
+                         "контуром, отрицательный контроль; both — обе и разница")
     ap.add_argument("--limit", type=int, help="взять только первые N пар")
     ap.add_argument("--only", help="только пары, чей id содержит эту строку")
     ap.add_argument("--model", help="модель хода, например haiku")
@@ -957,11 +1262,19 @@ def main(argv=None):
         except (pairs.PairSetError, OSError, ValueError) as bad:
             print(bad, file=sys.stderr)
             return 1
+        played, arms = OrderedDict(), arms_of(args.arms)
         try:
-            report = run(pairs=items, root=args.root, player=args.player,
-                         limit=args.limit, only=args.only, keep=args.keep,
-                         model=args.model, budget=args.budget,
-                         echo=lambda line: print(line, flush=True))
+            for arm in arms:
+                print("\n=== рука %s ===" % arm, flush=True)
+                # Каждой руке своя песочница: общая означала бы, что рука без
+                # памяти отвечает на базе, набитой рукой с памятью. Названный
+                # каталог на две руки поэтому делится по имени руки.
+                root = (str(Path(args.root) / arm)
+                        if args.root and len(arms) > 1 else args.root)
+                played[arm] = run(pairs=items, root=root, player=args.player,
+                                  limit=args.limit, only=args.only, keep=args.keep,
+                                  model=args.model, budget=args.budget, arm=arm,
+                                  echo=lambda line: print(line, flush=True))
         except UnsafeRun as bad:
             print(bad, file=sys.stderr)
             return 2
@@ -972,10 +1285,11 @@ def main(argv=None):
         signal.signal(signal.SIGTERM, was)
 
     print()
-    print(report.text())
+    print(Bout(played).text())
     if args.out:
         Path(args.out).write_text(
-            json.dumps(report.asked, ensure_ascii=False, indent=1), encoding="utf-8")
+            json.dumps({arm: report.asked for arm, report in played.items()},
+                       ensure_ascii=False, indent=1), encoding="utf-8")
         print("\nпострочный итог -> %s" % args.out)
     return 0
 

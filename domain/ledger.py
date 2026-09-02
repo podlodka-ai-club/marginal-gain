@@ -146,19 +146,24 @@ def rows(log=None):
     return out
 
 
-def injected(session_id, injected_at, keys=(), query="", log=None, at=None):
+def injected(session_id, injected_at, keys=(), query="", log=None, at=None,
+             found=None):
     """Вброс и всё, что в нём показали: строка на вставку плюс строка на запись.
 
     Показ ключуется парой «вставка плюс запись», а не одной вставкой: без ключа
     записи ответ про пользу повиснет между показанными фактами и достанется не
     тому. Ключ ставится здесь, в момент вброса.
+
+    `found` — сколько кусков отдал поиск до всякого отсева, см. `silence`. На
+    вбросе он нужен ровно затем же: «нашли 32, отдали 25» это одна строка, а
+    не две цифры из разных мест.
     """
     key = {"session_id": session_id or "unknown", "injected_at": injected_at}
     # Список сразу: ключи считаются и перебираются, а генератор после счёта
     # опустеет — строка о вбросе объявит N записей, а показов не будет ни одного.
     keys = list(keys)
     out = [append("injected", log=log, at=at, query=(query or "")[:QUERY_CHARS],
-                  items=len(keys), **key)]
+                  items=len(keys), **dict(key, **_found(found)))]
     for one in keys:
         out.append(append("shown", log=log, at=at, key=one, **key))
     return out
@@ -176,7 +181,19 @@ def helped(session_id, injected_at, verdict, source="transcript", log=None, at=N
                   session_id=session_id or "unknown", injected_at=injected_at)
 
 
-def silence(reason, session_id=None, query="", log=None, at=None, note=None):
+def _found(found):
+    """Счёт кандидатов в поля строки. Не названо — поля нет вовсе.
+
+    Ноль и «не считали» — разные вещи: ноль говорит, что поиск сходил и ничего
+    не принёс, отсутствие поля — что заход шёл дорогой, где считать было нечего
+    (отказ носителя, вышедший срок). Свали их в один ноль — и отчёт назвал бы
+    обрывом поиск там, где до поиска не дошло.
+    """
+    return {} if found is None else {"found": int(found)}
+
+
+def silence(reason, session_id=None, query="", log=None, at=None, note=None,
+            found=None):
     """Молчание с названной причиной. Пишется наравне с вбросом, а не пропускается.
 
     Молчание — это и есть ответ на вопрос, почему память не сработала. Из ста
@@ -185,11 +202,18 @@ def silence(reason, session_id=None, query="", log=None, at=None, note=None):
 
     `note` — подробность к причине, когда имени мало: отказ носителя бывает
     разный, и без имени ошибки своя же поломка прячется под чужой.
+
+    `found` — сколько кусков отдал поиск до всякого отсева. Имя причины говорит,
+    на какой ступени выдача опустела, но не говорит, было ли чему опустевать:
+    «не прошло порог» на одном кандидате и на тридцати чинится в разных местах.
+    Число ставит та же ступень, что и имя, — снаружи по пустой выдаче его не
+    восстановить.
     """
     if reason not in REASONS:
         raise LedgerError("нет такой причины молчания: %r, допустимо %s"
                           % (reason, ", ".join(REASONS)))
     extra = {"note": note[:QUERY_CHARS]} if note else {}
+    extra.update(_found(found))
     return append("silent", log=log, at=at, reason=reason,
                   session_id=session_id or "unknown",
                   query=(query or "")[:QUERY_CHARS], **extra)

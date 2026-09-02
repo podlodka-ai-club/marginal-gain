@@ -545,7 +545,7 @@ def near(kept, door, limit=MAX_NEAR):
 
 @telemetry.traced("pipeline", lambda arg, out: {
     "kept": len(out[1]), "sent_chars": len(out[0]), "silent": not out[0],
-    "reason": out[3]})
+    "reason": out[3], "found": out[4]})
 def consult(query, mode="single", min_score=MIN_SCORE, door=None, here=None):
     """То же, что `suggest`, но с именем причины, по которой память промолчала.
 
@@ -554,8 +554,13 @@ def consult(query, mode="single", min_score=MIN_SCORE, door=None, here=None):
     не влезло в потолок. Догадка снаружи их не различает, а разбирать разрыв
     между «нашли» и «отдали» можно только по именам.
 
-    Отдаёт четвёркой: текст, куски, сырой ответ, причина. Причина у говорящего
-    захода — None.
+    Отдаёт пятёркой: текст, куски, сырой ответ, причина, счёт кандидатов.
+    Причина у говорящего захода — None.
+
+    Счёт кандидатов — сколько кусков вернул поиск до всякого отсева. Имя
+    причины говорит, где выдача опустела, но не говорит, было ли чему пустеть:
+    «не прошло порог» на одном кандидате и на тридцати чинится в разных местах.
+    Снаружи это число не восстановить — пустая выдача выглядит одинаково.
     """
     door = door or port.door()
     here = context.of(here) if here else None
@@ -563,19 +568,23 @@ def consult(query, mode="single", min_score=MIN_SCORE, door=None, here=None):
         here = None
     answer = door.read(query, mode=mode)
     chunks = pieces(answer)
+    # Столько поиск и нашёл. Считаем здесь, до всякого отсева: дальше по ходу
+    # каждая ступень режет своё, и цифра «сколько было» после них уже не
+    # собирается.
+    found = len(chunks)
     if not chunks:
         # Выключенная память отвечает пустотой ровно так же, как ненашедшая, и
         # не назови мы это отдельно — рубильник читался бы как «в памяти пусто».
         # Спрашиваем после чтения, а не вместо: половина сравнения «без памяти»
         # обязана идти той же дорогой, что рабочая, и отличаться лишь исходом.
         off = getattr(door, "name", None) == port.SilentDoor.name
-        return "", [], answer, "disabled" if off else "not_found"
+        return "", [], answer, "disabled" if off else "not_found", found
     # Отсев до порога: ложная находка не должна ни занимать место в
     # пятёрке, ни съедать потолок в 1200 символов. Обстановка приписывается
     # между ними: порог судит произведение веса на уместность.
     honest = sift(chunks, query)
     if not honest:
-        return "", [], answer, "incidental"
+        return "", [], answer, "incidental", found
     placed = place(honest, here, door)
     kept = gate(placed, min_score=min_score)
     if not kept:
@@ -583,12 +592,12 @@ def consult(query, mode="single", min_score=MIN_SCORE, door=None, here=None):
         # порога не отработала бы вовсе и пропала из замера. Здесь он только
         # разводит три случая, которые снаружи выглядят одинаково пусто.
         if not winnow(placed, min_score=min_score):
-            return "", [], answer, "below_threshold"
+            return "", [], answer, "below_threshold", found
         if not eligible(placed, min_score=min_score):
             # Порог прошли, а записей среди прошедшего нет: хранилище ответило
             # словами. Это «не нашли», а не «не влезло».
-            return "", [], answer, "not_found"
-        return "", [], answer, "over_budget"
+            return "", [], answer, "not_found", found
+        return "", [], answer, "over_budget", found
     # Соседи добираются после порога и ставятся следом: прямое попадание
     # первым, добавка второй. Потолки те же — их считает тот же `gate`.
     added = place(near(kept, door), here, door)
@@ -606,7 +615,7 @@ def consult(query, mode="single", min_score=MIN_SCORE, door=None, here=None):
                     continue
                 kept.append((score, clean, record))
                 size += len(clean) + where
-    return render(kept), kept, answer, None
+    return render(kept), kept, answer, None, found
 
 
 def suggest(query, mode="single", min_score=MIN_SCORE, door=None, here=None):
@@ -738,13 +747,18 @@ def note_injection(session_id, text, kept=(), door=None, at=None):
     return record
 
 
-def mute(reason, session_id, query, note=None):
+def mute(reason, session_id, query, note=None, found=None):
     """Записать молчание и вернуть его причину. Одна дверь для всех отказов.
 
     Имя причины ставится там, где молчание случилось, а не догадкой снаружи:
     догадка видит только пустую строку и все шесть причин сливает в одну.
+
+    `found` — счёт кандидатов той же ступени. Не назван — поля в ленте не
+    будет: отказ носителя и вышедший срок до поиска не доходят, и ноль у них
+    означал бы «поиск сходил впустую», то есть указывал бы не на ту ступень.
     """
-    ledger.silence(reason, session_id=session_id, query=query, note=note)
+    ledger.silence(reason, session_id=session_id, query=query, note=note,
+                   found=found)
     return reason
 
 
@@ -766,8 +780,8 @@ def attend(query, session_id=None, door=None, here=None, mode="single",
     door = door or port.door()
     cancel = deadline() if hot else (lambda: None)
     try:
-        text, kept, _raw, why = consult(query, mode, min_score, door=door,
-                                        here=here)
+        text, kept, _raw, why, found = consult(query, mode, min_score, door=door,
+                                               here=here)
     except Overdue:
         return "", [], mute("overdue", session_id, query)
     except port.BackendError as bad:
@@ -781,7 +795,7 @@ def attend(query, session_id=None, door=None, here=None, mode="single",
     finally:
         cancel()
     if not text:
-        return "", [], mute(why or "not_found", session_id, query)
+        return "", [], mute(why or "not_found", session_id, query, found=found)
     at = at or datetime.now(timezone.utc).isoformat()
     if record:
         try:
@@ -794,7 +808,7 @@ def attend(query, session_id=None, door=None, here=None, mode="single",
     # когда текст ушёл агенту. Привяжи её к записи — и заход, чью запись
     # носитель не принял, пропал бы из ленты целиком: ни вброса, ни молчания,
     # то есть невидимо ровно там, где имена причин и нужны.
-    ledger.injected(session_id, at, shown_keys(kept), query=query)
+    ledger.injected(session_id, at, shown_keys(kept), query=query, found=found)
     # Ключ вставки уходит агенту вместе с ней. Без него спросить про пользу
     # нечем: за ход подсказок бывает несколько, и ответ повис бы между ними.
     # Ключ дописывается после ленты и не входит в записанное содержимое: это
