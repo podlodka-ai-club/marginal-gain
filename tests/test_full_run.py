@@ -40,6 +40,13 @@
   * порождать детей не своей группой               → TestTheRunLeavesNothingBehind
   * склеивать повторы по содержанию реплики        → TestTheFlowCanActuallyPass
   * принять пару без исхода или без первой сессии  → TestThePairSetIsData
+  * снять сторожа живого состояния                 → TestNothingLivesOutsideTheSandbox
+  * ждать фон один раз в конце, а не на каждом ходе → TestTheQuestionsWaitForTheFirstStage
+
+Каждая из них прогнана: код ломается точечно, названная проверка краснеет.
+Две последние появились как раз оттого, что мутация не покраснела — сторожа
+живого состояния заслонял отсев служебных путей, а ожидание на ходу держало
+только одно ожидание в конце.
 """
 import json, os, shutil, signal, subprocess, sys, tempfile, time, unittest, uuid
 from pathlib import Path
@@ -168,8 +175,35 @@ class TestNothingLivesOutsideTheSandbox(Base):
         self.assertEqual(str(box.state), out.stdout.strip())
 
     def test_the_live_state_dir_is_refused_as_a_sandbox(self):
-        with self.assertRaises(live.UnsafeRun):
-            live.Sandbox(LIVE_STATE.parent).open()
+        """Отказ обязан быть именно про живое состояние, а не про служебный путь.
+
+        Сторожа два, и один заслоняет другого: `~/.local/state/…` попадает и
+        под отсев служебных путей. Проверка «упало» проходит и с вырезанным
+        сторожем живого состояния — падает-то второй. Поэтому спрашиваем, чем
+        отказано, и берём путь, который ловит только первый сторож.
+        """
+        for where in (LIVE_STATE, LIVE_STATE.parent):
+            with self.assertRaises(live.UnsafeRun) as bad:
+                live.Sandbox(where).open()
+            self.assertIn("живое состояние", str(bad.exception),
+                          "%s отказан не как живое состояние: %s"
+                          % (where, bad.exception))
+
+    def test_a_directory_holding_the_live_state_is_refused(self):
+        """Каталог выше живого состояния: служебным путём он не выглядит вовсе.
+
+        `~/.local` под отсев не попадает — маркер `/.local/state/` в нём не
+        встречается, — а снести его прогон уборкой имеет полное право. Ловит
+        такой путь только сторож живого состояния, и это единственный случай,
+        где видно, что сторож вообще есть.
+        """
+        above = LIVE_STATE.parent.parent
+        self.assertFalse([bad for bad in extract.NOT_CODE
+                          if bad in "%s/places/" % above],
+                         "путь и так отсеивается как служебный — проверять нечем")
+        with self.assertRaises(live.UnsafeRun) as bad:
+            live.Sandbox(above).open()
+        self.assertIn("живое состояние", str(bad.exception))
 
 
 class TestThePlayGroundIsNotAServicePath(Base):
@@ -451,6 +485,53 @@ class TestTheQuestionsWaitForTheFirstStage(Base):
         first = min(row["at"] for row in report.asked)
         self.assertLessEqual(report.settled_at, first,
                              "вопрос задан раньше, чем осела запись хода")
+
+    def test_every_played_turn_waits_for_its_own_background_half(self):
+        """Ждать один раз в конце первого этапа мало.
+
+        Проверка выше держит только последнее ожидание: вырежи ожидание внутри
+        цикла — она всё равно зеленеет, потому что перед вторым этапом прогон
+        ждёт ещё раз. А без ожидания на ходу следующая реплика стартует, пока
+        предыдущая ещё пишет: база одна и открыта без журнала упреждающей
+        записи, писателей двое.
+
+        Смотрим не на счётчик вызовов, а на их чередование: за каждым ходом
+        первого этапа обязано идти своё ожидание, и только потом следующий ход.
+        Настоящие ход и ожидание при этом выполняются — обёртка их не подменяет.
+        """
+        cases = a_set(self.sets, {"альфа": names(2), "бета": names(2),
+                                  "гамма": names(2)})
+        items = a_load(cases)
+        turns = len(live.script_of(items))
+        self.assertGreater(turns, 1, "на одном ходе разницы не видно")
+
+        order = []
+        real_wait, real_play = live.settled, live.Replay.play
+
+        def watched_wait(*a, **kw):
+            order.append("ждём")
+            return real_wait(*a, **kw)
+
+        def watched_play(self_, *a, **kw):
+            order.append("ход")
+            return real_play(self_, *a, **kw)
+
+        live.settled = watched_wait
+        live.Replay.play = watched_play
+        try:
+            report = live.run(pairs=items, player="replay", root=self.root)
+        finally:
+            live.settled = real_wait
+            live.Replay.play = real_play
+
+        self.assertEqual(turns, len(report.played))
+        # Первый этап: ход, ожидание, ход, ожидание… и одно ожидание перед
+        # вторым этапом. Дальше идут только задачи, им ждать нечего.
+        head = order[:turns * 2 + 1]
+        self.assertEqual(["ход", "ждём"] * turns + ["ждём"], head,
+                         "ход и ожидание не чередуются: %s" % head)
+        self.assertNotIn("ждём", order[turns * 2 + 1:],
+                         "ожидание затесалось во второй этап: %s" % order)
 
 
 class TestTheBenchDoesNotKnowTheDomain(Base):
