@@ -39,7 +39,7 @@ class TestRegistryIsARegistry(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             new = switch.Switch("пробный", "проба", "XMEM_PROBE", "probe", "нет",
                                 values=("да", "нет"))
-            with mock.patch.object(config, "STATE_DIR", Path(tmp)), \
+            with mock.patch.dict(os.environ, {"XMEM_STATE_DIR": tmp}), \
                  mock.patch.dict(switch.SWITCHES, {"probe": new}), \
                  mock.patch.object(switch, "NAMES", switch.NAMES + ["probe"]):
                 self.assertEqual(switch.main(["probe", "да"]), 0)
@@ -49,7 +49,7 @@ class TestRegistryIsARegistry(unittest.TestCase):
 
     def test_unknown_value_is_refused_not_written(self):
         with tempfile.TemporaryDirectory() as tmp:
-            with mock.patch.object(config, "STATE_DIR", Path(tmp)):
+            with mock.patch.dict(os.environ, {"XMEM_STATE_DIR": tmp}):
                 with self.assertRaises(ValueError):
                     switch.SWITCHES["backend"].set("почтой")
                 self.assertFalse((Path(tmp) / "backend").exists())
@@ -60,7 +60,7 @@ class TestSwitchReachesTheOneWhoReadsIt(unittest.TestCase):
 
     def test_marks_switch_changes_what_config_reports(self):
         with tempfile.TemporaryDirectory() as tmp:
-            with mock.patch.object(config, "STATE_DIR", Path(tmp)):
+            with mock.patch.dict(os.environ, {"XMEM_STATE_DIR": tmp}):
                 switch.SWITCHES["marks"].set("show")
                 self.assertFalse(config.hide_marks())
                 switch.SWITCHES["marks"].set("hide")
@@ -121,7 +121,7 @@ class TestStatusNamesItsSource(unittest.TestCase):
 
     def test_environment_is_named_and_marked_as_stronger(self):
         with tempfile.TemporaryDirectory() as tmp:
-            with mock.patch.object(config, "STATE_DIR", Path(tmp)):
+            with mock.patch.dict(os.environ, {"XMEM_STATE_DIR": tmp}):
                 switch.SWITCHES["backend"].set("sdk")
                 value, where = switch.SWITCHES["backend"].read()
                 self.assertEqual((value, where), ("sdk", "файл backend"))
@@ -134,7 +134,7 @@ class TestStatusNamesItsSource(unittest.TestCase):
 
     def test_status_says_whether_memory_is_live_here(self):
         with tempfile.TemporaryDirectory() as tmp:
-            with mock.patch.object(config, "STATE_DIR", Path(tmp)), \
+            with mock.patch.dict(os.environ, {"XMEM_STATE_DIR": tmp}), \
                  mock.patch.object(switch, "live_here", lambda where=None: False):
                 text = switch.status(tmp)
         self.assertIn("память здесь: молчит", text)

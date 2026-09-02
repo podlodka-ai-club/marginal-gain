@@ -64,7 +64,7 @@ class Switch:
 
     def _file_value(self):
         try:
-            return (config.STATE_DIR / self.file_name).read_text(
+            return (config.state_dir() / self.file_name).read_text(
                 encoding="utf-8").splitlines()[0].strip()
         except (OSError, IndexError):
             return ""
@@ -98,13 +98,13 @@ class Switch:
         return "%s: %s" % (self.name, value)
 
     def _write(self, value):
-        config.STATE_DIR.mkdir(parents=True, exist_ok=True)
-        (config.STATE_DIR / self.file_name).write_text("%s\n" % value,
+        config.state_dir().mkdir(parents=True, exist_ok=True)
+        (config.state_dir() / self.file_name).write_text("%s\n" % value,
                                                        encoding="utf-8")
 
     def _drop(self):
         try:
-            (config.STATE_DIR / self.file_name).unlink()
+            (config.state_dir() / self.file_name).unlink()
         except OSError:
             pass
 
@@ -121,7 +121,7 @@ class Presence(Switch):
         if got:
             return ("off" if got in ("0", "no", "off") else "on",
                     "окружение (%s)" % self.env)
-        if (config.STATE_DIR / self.file_name).exists():
+        if (config.state_dir() / self.file_name).exists():
             return "off", "файл %s" % self.file_name
         return self.default, "умолчание"
 
@@ -132,8 +132,8 @@ class Presence(Switch):
             raise ValueError("%s: %r не из %s"
                              % (self.name, value, ", ".join(self.values)))
         if value == "off":
-            config.STATE_DIR.mkdir(parents=True, exist_ok=True)
-            (config.STATE_DIR / self.file_name).touch()
+            config.state_dir().mkdir(parents=True, exist_ok=True)
+            (config.state_dir() / self.file_name).touch()
             return "%s: выключено, молчат все хуки во всех проектах" % self.name
         self._drop()
         return "%s: включено, дальше решают ворота" % self.name
@@ -148,7 +148,7 @@ class Listing(Switch):
 
     def items(self):
         try:
-            lines = (config.STATE_DIR / self.file_name).read_text(
+            lines = (config.state_dir() / self.file_name).read_text(
                 encoding="utf-8").splitlines()
         except OSError:
             return []
@@ -240,7 +240,7 @@ def status(where=None):
              "память здесь: %s" % {True: "живая", False: "молчит",
                                    None: "не удалось спросить ворота"}[alive]]
     lines += [SWITCHES[name].show() for name in NAMES]
-    lines.append("состояние: %s" % config.STATE_DIR)
+    lines.append("состояние: %s" % config.state_dir())
     return "\n".join(lines)
 
 

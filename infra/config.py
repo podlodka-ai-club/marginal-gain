@@ -30,9 +30,6 @@ def state_dir():
     return Path(named) if named else Path.home() / ".local" / "state" / "memory-encoder"
 
 
-STATE_DIR = state_dir()
-
-
 def only():
     """Граница обхода архива: `XMEM_ONLY`, иначе пусто — обходим весь.
 
@@ -72,7 +69,9 @@ def setting(env, file_name, default):
     got = (os.environ.get(env) or "").strip()
     if got:
         return got
-    target = STATE_DIR / file_name
+    # Каталог спрашиваем в момент чтения, а не при импорте: иначе половина
+    # настроек уезжает в песочницу прогона, а половина остаётся в живом.
+    target = state_dir() / file_name
     try:
         got = target.read_text(encoding="utf-8").splitlines()[0].strip()
     except (OSError, IndexError):
