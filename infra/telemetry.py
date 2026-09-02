@@ -25,10 +25,10 @@ from collections import defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
 
+from infra import config
 from infra.scrub import SECRETS
 
-LOG = Path(os.environ.get("MEM_TRACE_LOG") or
-           Path.home() / ".local" / "state" / "memory-encoder" / "trace.jsonl")
+LOG = Path(os.environ.get("MEM_TRACE_LOG") or config.state_dir() / "trace.jsonl")
 
 # Пишем только когда просят. Хук в разговоре не должен платить за замер.
 ENABLED = bool(os.environ.get("MEM_TRACE"))

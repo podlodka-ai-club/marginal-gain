@@ -18,7 +18,7 @@ from pathlib import Path
 from domain import lifespan
 from eval import goldenset
 from pipeline import suggest
-from infra import telemetry
+from infra import config, telemetry
 from storage import port
 
 # Набор лежит в корне репозитория, а не внутри пакета: его собирают, читают и
@@ -26,7 +26,7 @@ from storage import port
 # из хука, и из планировщика — текущий каталог у всех троих разный.
 ROOT = Path(__file__).resolve().parent.parent
 CASES = ROOT / "eval-cases.json"
-RESULTS = Path.home() / ".local" / "state" / "memory-encoder" / "eval-results.jsonl"
+RESULTS = config.state_dir() / "eval-results.jsonl"
 
 
 def state_line(as_of):

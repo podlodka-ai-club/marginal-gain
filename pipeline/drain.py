@@ -13,17 +13,16 @@
 import argparse, json, os
 from pathlib import Path
 
-from infra import locks
+from infra import config, locks
 from pipeline import save
 
-STATE_DIR = Path.home() / ".local" / "state" / "memory-encoder"
+STATE_DIR = config.state_dir()
 
 # Тот же замок, под которым работает хук конца хода. Иначе два прохода делят
 # один файл отметок: каждый читает его целиком и перезаписывает целиком, и
 # проигравший откатывает продвижение победителя.
 
-QUEUE = Path(os.environ.get("XMEM_QUEUE_PATH")
-             or Path.home() / ".local" / "state" / "memory-encoder" / "queue.jsonl")
+QUEUE = Path(os.environ.get("XMEM_QUEUE_PATH") or STATE_DIR / "queue.jsonl")
 
 
 def read_queue(path=None):

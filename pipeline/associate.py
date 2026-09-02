@@ -28,6 +28,7 @@ from pathlib import Path
 
 from archive.transcripts import TRANSCRIPTS, episodes_from_file
 from domain import models
+from infra import config
 from pipeline import understand
 from storage import port
 
@@ -41,7 +42,7 @@ BATCH = 200
 # Отметка о состоянии архива на прошлом проходе. Своя книжка, как у сохранения и
 # понимания, и по той же причине: хранилище у каждого прохода своё, и «сделано
 # для одного» не значит «сделано для всех».
-STATE = Path.home() / ".local" / "state" / "memory-encoder" / "associate-state.json"
+STATE = config.state_dir() / "associate-state.json"
 
 
 def state_path():

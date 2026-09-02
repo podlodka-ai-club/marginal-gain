@@ -8,6 +8,8 @@
 import contextlib, fcntl
 from pathlib import Path
 
+from infra import config
+
 # Один замок на оба прохода, а не по замку на проход. Дело не только в книжке
 # учёта: очередь и понимание пишут в одну базу, а SQLite открыт без журнала
 # упреждающей записи. Замки врозь означали бы двух писателей разом — хук конца
@@ -15,7 +17,7 @@ from pathlib import Path
 # следующий уже запускает свою очередь.
 #
 # Имя историческое: замок завёлся у сохранения и переименовывать его незачем.
-PASS = Path.home() / ".local" / "state" / "memory-encoder" / "save.lock"
+PASS = config.state_dir() / "save.lock"
 
 
 @contextlib.contextmanager

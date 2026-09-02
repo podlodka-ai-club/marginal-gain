@@ -16,10 +16,11 @@ import dataclasses, hashlib, json, os, sqlite3, threading
 from pathlib import Path
 
 from domain import context, folding, lifespan, models
+from infra import config
 # Слово вопроса — правило одно на поиск и на отсев, см. domain/query.py.
 from domain.query import words
 
-DEFAULT_PATH = Path.home() / ".local" / "state" / "memory-encoder" / "memory.db"
+DEFAULT_PATH = config.state_dir() / "memory.db"
 
 # Питоновский тип поля -> тип колонки. Чего нет в таблице, кладём текстом:
 # SQLite к типам относится свободно, а терять значение нельзя.

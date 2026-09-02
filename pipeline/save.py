@@ -15,12 +15,13 @@ import argparse, json, os
 from pathlib import Path
 
 from domain import models
+from infra import config
 from storage import port
 from archive.transcripts import TRANSCRIPTS, read_new, when
 
 # Книжка учёта своя: что уже прочитано и доставлено. Разбор транскрипта
 # лежит в archive, состояния там нет.
-STATE = Path.home() / ".local" / "state" / "memory-encoder" / "save-state.json"
+STATE = config.state_dir() / "save-state.json"
 
 
 def state_path():

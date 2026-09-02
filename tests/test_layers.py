@@ -180,7 +180,10 @@ class TestNoImportRing(unittest.TestCase):
         """Журнал берёт шаблоны у scrub, а не у пути записи через кольцо."""
         reached = ours_reached_by("infra.telemetry")
         self.assertNotIn("storage.port", reached)
-        self.assertEqual(reached, {"infra.telemetry", "infra.scrub"})
+        # infra.config назван здесь намеренно: каталог состояния у журнала
+        # тот же, что у всего прочего, и считать его второй раз означало бы
+        # журнал, уехавший мимо песочницы прогона.
+        self.assertEqual(reached, {"infra.telemetry", "infra.scrub", "infra.config"})
 
     def test_telemetry_patterns_come_from_scrub(self):
         from infra import scrub

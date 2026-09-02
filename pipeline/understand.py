@@ -17,7 +17,7 @@ from pathlib import Path
 
 from domain import features, ledger, lifespan, marks, models
 from domain.measure import score_of, weight_of
-from infra import locks
+from infra import config, locks
 from storage import port
 from archive.transcripts import (TRANSCRIPTS, episodes_and_events,
                                  episodes_from_file, parse_time, when)
@@ -36,7 +36,7 @@ __all__ = ["NOT_CODE", "PREF_TOPICS", "facts_of", "fact_key", "episodes_from_fil
 
 # Своя книжка учёта: докуда архив разобран пониманием. Отметка сохранения не
 # годится — оно читает файл построчно, а понимание режет его на эпизоды.
-STATE = Path.home() / ".local" / "state" / "memory-encoder" / "understand-state.json"
+STATE = config.state_dir() / "understand-state.json"
 
 
 def state_path():

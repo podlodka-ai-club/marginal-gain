@@ -12,7 +12,9 @@ except Exception:
     # импорта производитель и потребитель разошлись бы по разным файлам,
     # и молча: хук глотает любое исключение и выходит с нулём.
     QUEUE = Path(os.environ.get("XMEM_QUEUE_PATH")
-                 or Path.home() / ".local" / "state" / "memory-encoder" / "queue.jsonl")
+                 or Path(os.environ.get("XMEM_STATE_DIR")
+                         or Path.home() / ".local" / "state" / "memory-encoder")
+                 / "queue.jsonl")
 
 def main():
     try:

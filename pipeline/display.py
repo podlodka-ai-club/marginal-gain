@@ -29,7 +29,7 @@ from pathlib import Path
 from domain import marks
 from infra import config
 
-STATE = Path.home() / ".local" / "state" / "memory-encoder" / "display"
+STATE = config.state_dir() / "display"
 
 # Сколько живёт забытая отметка. Ответ обрывается, `final` не приходит, и
 # файл остаётся навсегда; следующий ответ с тем же message_id невозможен, так

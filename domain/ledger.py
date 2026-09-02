@@ -24,8 +24,9 @@ from collections import defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
 
-LOG = Path(os.environ.get("XMEM_LEDGER") or
-           Path.home() / ".local" / "state" / "memory-encoder" / "ledger.jsonl")
+from infra import config
+
+LOG = Path(os.environ.get("XMEM_LEDGER") or config.state_dir() / "ledger.jsonl")
 
 # Что случилось. Вброс и молчание — исходы захода, их ровно по одному на заход;
 # показ и польза висят на вбросе и приходят пачкой.

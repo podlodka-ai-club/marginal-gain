@@ -12,11 +12,11 @@ from pathlib import Path
 
 from domain import context, ledger, lifespan, marks, models
 from domain.query import words
-from infra import telemetry
+from infra import config, telemetry
 from pipeline import prompt
 from storage import port
 
-LOG = Path.home() / ".local" / "state" / "memory-encoder" / "suggest-log.jsonl"
+LOG = config.state_dir() / "suggest-log.jsonl"
 
 # Срок в горячем пути. Держим его здесь, а не внешней командой: timeout(1)
 # есть не везде, и его отсутствие выглядело как молчаливый успех.
