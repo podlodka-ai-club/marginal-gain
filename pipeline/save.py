@@ -221,8 +221,9 @@ def main():
     args = ap.parse_args()
 
     files = sorted(TRANSCRIPTS.rglob("*.jsonl"))
-    if args.only:
-        files = [f for f in files if args.only in str(f)]
+    scope = args.only or config.only()
+    if scope:
+        files = [f for f in files if scope in str(f)]
     got = ingest(files, limit=args.limit, dry=args.dry,
                  reset=args.reset, verbose=args.verbose)
 

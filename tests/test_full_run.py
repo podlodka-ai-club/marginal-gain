@@ -600,6 +600,131 @@ class TestTheBenchDoesNotKnowTheDomain(Base):
                         "в примере нет отрицательной пары — проверять нечего")
 
 
+class TestTheRunReadsOnlyItsOwnArchive(Base):
+    """Прогон не читает чужие разговоры, даже когда проход обходит архив весь.
+
+    Разговоры прогона пишет харнесс, и пишет он их в архив пользователя: увести
+    их оттуда нечем, не отобрав у агента учётные данные. Значит хук конца хода
+    стоит посреди настоящего архива, а связи он считает по всему архиву разом —
+    так задумано, вес карточки это число наблюдений.
+
+    Для работы это верно, для замера — нет. Прогон, читающий чужие разговоры,
+    кладёт к себе в базу карточки, собранные из чужой переписки: цифра начинает
+    зависеть от того, чья машина, и меняется сама собой от разговора к
+    разговору. Поэтому прогон называет себе границу обхода, и она у него одна на
+    все каталоги ходов.
+    """
+
+    def test_the_run_names_a_scope_inside_its_own_sandbox(self):
+        with live.Sandbox(self.root) as box:
+            scope = box.env().get("XMEM_ONLY") or ""
+        self.assertTrue(scope, "прогон не сузил обход архива")
+        self.assertIn(live.flat(box.places), scope,
+                      "граница обхода не про каталоги ходов: %s" % scope)
+
+    def test_the_scope_matches_every_place_of_the_run_and_nothing_else(self):
+        with live.Sandbox(self.root) as box:
+            scope = box.env()["XMEM_ONLY"]
+            ours = [live.flat(live.ground(box, {"place": name}))
+                    for name in ("альфа", "бета", "гамма")]
+        for one in ours:
+            self.assertIn(scope, one, "свой каталог ходов не попал в границу")
+        for alien in (live.flat(Path.home() / ".claude" / "projects" / "чужой"),
+                      live.flat(Path("/Users/кто-то/dev/проект"))):
+            self.assertNotIn(scope, alien, "чужой каталог попал в границу: %s" % alien)
+
+    def test_a_walk_over_the_archive_honours_the_scope(self):
+        """Граница названа окружением — значит проход, идущий по всему архиву,
+        обязан её увидеть без ключа в командной строке."""
+        yard = self.root / "архив"
+        (yard / "ours").mkdir(parents=True)
+        (yard / "alien").mkdir(parents=True)
+        (yard / "ours" / "a.jsonl").write_text("", encoding="utf-8")
+        (yard / "alien" / "b.jsonl").write_text("", encoding="utf-8")
+        env = dict(os.environ, PYTHONPATH=str(HERE), XMEM_ONLY="ours")
+        code = ("import json,sys;"
+                "from infra import config;"
+                "print(json.dumps(config.only()))")
+        out = subprocess.run([sys.executable, "-c", code], cwd=str(HERE),
+                             env=env, capture_output=True, text=True)
+        self.assertEqual(0, out.returncode, out.stderr[-300:])
+        self.assertEqual("ours", json.loads(out.stdout))
+
+
+class TestTheBackgroundHalfIsDoneBeforeTheAnswer(Base):
+    """База наполнена к моменту вопроса, а не «скорее всего наполнена».
+
+    Ожидание по тишине — догадка: цепочка конца хода стартует питон и читает
+    архив, ничего при этом не записывая, и тихое окно наступает раньше, чем она
+    напишет первую строку. Прогон отпускал ход через две секунды, а факт ложился
+    на шестой; в конце прогона уборка гасила цепочку на полудороге.
+
+    Поэтому цепочка прогона идёт не в фоне, а на его глазах: ход возвращается
+    тогда, когда конец хода отработал целиком. Проверяем это прямо — сводим
+    ожидание к нулю и смотрим, наполнилась ли база.
+    """
+
+    def test_the_base_is_filled_without_leaning_on_the_wait(self):
+        cases = a_set(self.sets, {"альфа": names(2)})
+        report = live.run(pairs=a_load(cases), player="replay",
+                          root=self.root, keep=True, quiet=0.0)
+        self.addCleanup(shutil.rmtree, report.root, ignore_errors=True)
+        repo = db.Repository(report.root / "memory.db")
+        try:
+            self.assertTrue(repo.search("альфа"),
+                            "ход вернулся, а конец хода ещё ничего не записал")
+        finally:
+            repo.close()
+
+    def test_the_whole_chain_runs_and_is_not_cut_short(self):
+        """Цепочка доходит до конца, а не гасится уборкой на полудороге.
+
+        Признак — отметка связей: они стоят предпоследним звеном, и её
+        отсутствие значит, что до конца цепочка не дошла ни разу.
+        """
+        cases = a_set(self.sets, {"альфа": names(2)})
+        report = live.run(pairs=a_load(cases), player="replay",
+                          root=self.root, keep=True, quiet=0.0)
+        self.addCleanup(shutil.rmtree, report.root, ignore_errors=True)
+        left = sorted(p.name for p in (report.root / "state").glob("associate-state*"))
+        self.assertTrue(left, "связи не считались ни разу: цепочка обрывалась")
+
+
+class TestTheSecondStageDoesNotWrite(Base):
+    """Вопрос второго этапа не должен попадать в базу, которую он меряет.
+
+    Задача ставится из того же места, где сказали, — иначе уместность срежет
+    выдачу. Значит и разбор конца хода у неё тот же, и текст задачи вместе с
+    ответом лёг бы в память: пара N подсказывала бы паре N+1. Отсюда и цифра,
+    которая ползёт от порядка пар, и отрицательные случаи, которые то проходят,
+    то нет. На втором этапе точка конца хода не занята вовсе.
+    """
+
+    def test_the_task_text_never_lands_in_the_base(self):
+        cases = a_set(self.sets, {"альфа": names(2), "бета": names(2)})
+        report = live.run(pairs=a_load(cases), player="replay",
+                          root=self.root, keep=True)
+        self.addCleanup(shutil.rmtree, report.root, ignore_errors=True)
+        repo = db.Repository(report.root / "memory.db")
+        try:
+            asked = {row["session_id"] for row in report.asked}
+            rows = repo.search("правились")
+            said = [r for r in rows if (r.get("session_id") or "") in asked]
+            self.assertEqual([], said,
+                             "вопрос второго этапа осел в базе: %s" % said[:2])
+        finally:
+            repo.close()
+
+    def test_the_second_stage_wiring_has_no_end_of_turn_point(self):
+        with live.Sandbox(self.root) as box:
+            self.assertIn("Stop", box.wiring()["hooks"],
+                          "на первом этапе конец хода обязан быть занят")
+            self.assertNotIn("Stop", box.wiring(asking=True)["hooks"],
+                             "на втором этапе конец хода занят — вопрос осядет в базе")
+            self.assertIn("UserPromptSubmit", box.wiring(asking=True)["hooks"],
+                          "на втором этапе чтение обязано остаться")
+
+
 class TestThePairSetIsData(unittest.TestCase):
     """Набор пар — вход, а не часть кода. Форма проверяется, домен не знается."""
 

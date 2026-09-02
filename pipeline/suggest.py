@@ -999,7 +999,7 @@ def main():
     args = parser().parse_args()
 
     if args.settle:
-        got = settle(transcripts(args.only))
+        got = settle(transcripts(args.only or config.only()))
         # «Пересчитано», а не «отмечено»: журнал не помечается разобранным, и
         # каждый заход проходит его целиком. Запись идёт по ключу, поверх, так
         # что вреда нет — но и числа новых отметок это не даёт.
@@ -1010,7 +1010,7 @@ def main():
         return
 
     if args.uses:
-        got = harvest(transcripts(args.only))
+        got = harvest(transcripts(args.only or config.only()))
         print("ответов агента %d, дописано в ленту %d, по чужому ключу %d"
               % (got["seen"], got["logged"], got["unknown"]))
         return

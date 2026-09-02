@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Точка 5: конец хода агента. Два дела подряд, оба в фоне.
+# Точка 5: конец хода агента. Цепочка проходов подряд, в фоне.
 #
 # Первое — очередь: разбираем ТОЛЬКО её и текущий разговор, а не весь архив.
 # Зовём потребителя очереди, а не сохранение напрямую: иначе очередь, которую
@@ -59,23 +59,42 @@
 # Книжка учёта у каждого своя, а замок общий — база одна, и писать
 # в неё вдвоём нельзя. Ходов много: пока понимание дописывает, следующий ход
 # уже запускает свою очередь, и без общего замка они встретились бы в SQLite.
+#
+# Фон отключаем одним ключом, XMEM_SYNC. Просит об этом замер, и не из
+# аккуратности: ждать конца цепочки по тишине нельзя. Она стартует питон и
+# читает архив, ничего при этом не записывая, — тихое окно наступает раньше,
+# чем она напишет первую строку, и вопрос уходит в пустую базу. В работе ключ
+# не ставят: разговор не должен ждать конца хода.
 source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
 live || { cat >/dev/null; exit 0; }
+# Пусто — обычный фон; иначе цепочка идёт здесь же и ход ждёт её. Ветвим
+# целиком, а не подставляем «&» переменной: подставленный амперсанд bash
+# оператором не считает, он уехал бы аргументом, и фон молча стал бы ожиданием.
+SYNC=1
+case "${XMEM_SYNC:-}" in ""|0|no|off|false) SYNC=0 ;; esac
 PAYLOAD=$(cat)
 TRANSCRIPT=$(printf '%s' "$PAYLOAD" | python3 -c \
   "import json,sys; print((json.load(sys.stdin).get('transcript_path') or ''))" 2>/dev/null)
 ARGS=(--send --limit 200)
 if [ -n "$TRANSCRIPT" ]; then
   ARGS+=(--transcript "$TRANSCRIPT")
-  nohup bash -c 'only=$1; shift
-                 python3 -m pipeline.drain "$@"
-                 python3 -m pipeline.understand --send --limit 100 --only "$only"
-                 python3 -m pipeline.associate --send
-                 python3 -m pipeline.suggest --settle --only "$only"
-                 python3 -m pipeline.suggest --uses --only "$only"
-                 python3 -m pipeline.forget --send
-                 python3 -m pipeline.consolidate --send' \
-    _ "$(dirname "$TRANSCRIPT")/" "${ARGS[@]}" >> "$STATE_DIR/save.log" 2>&1 &
+  CHAIN='only=$1; shift
+         python3 -m pipeline.drain "$@"
+         python3 -m pipeline.understand --send --limit 100 --only "$only"
+         python3 -m pipeline.associate --send
+         python3 -m pipeline.suggest --settle --only "$only"
+         python3 -m pipeline.suggest --uses --only "$only"
+         python3 -m pipeline.forget --send
+         python3 -m pipeline.consolidate --send'
+  if [ "$SYNC" = 1 ]; then
+    bash -c "$CHAIN" _ "$(dirname "$TRANSCRIPT")/" "${ARGS[@]}" \
+      >> "$STATE_DIR/save.log" 2>&1
+  else
+    nohup bash -c "$CHAIN" _ "$(dirname "$TRANSCRIPT")/" "${ARGS[@]}" \
+      >> "$STATE_DIR/save.log" 2>&1 &
+  fi
+elif [ "$SYNC" = 1 ]; then
+  python3 -m pipeline.drain "${ARGS[@]}" >> "$STATE_DIR/save.log" 2>&1
 else
   nohup python3 -m pipeline.drain "${ARGS[@]}" >> "$STATE_DIR/save.log" 2>&1 &
 fi

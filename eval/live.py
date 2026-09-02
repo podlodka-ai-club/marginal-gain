@@ -81,7 +81,7 @@
     python3 -m eval.live --limit 5                укороченный, для отладки
     python3 -m eval.live --player replay          без модели и без трат
 """
-import argparse, fcntl, json, os, re, shutil, signal, subprocess, sys, time, uuid
+import argparse, fcntl, hashlib, json, os, re, shutil, signal, subprocess, sys, time, uuid
 from collections import Counter, OrderedDict, namedtuple
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -241,6 +241,12 @@ class Sandbox:
         self.places = self.root / "places"
         self.archive = self.root / "archive"
         self.settings = self.root / "settings.json"
+        # Настроек двое. На первом этапе заняты все три точки — память
+        # наполняется ходом. На втором конец хода не занят вовсе: задача
+        # ставится из того же места, где сказали, и её текст вместе с ответом
+        # лёг бы в ту самую базу, которую мы меряем. Пара N подсказывала бы паре
+        # N+1, а цифра ползла бы от порядка пар.
+        self.asking = self.root / "settings-asking.json"
         self.live_hooks = live_hooks
         self.talks = []              # разговоры, заведённые этим прогоном
         self.groups = set()          # группы процессов, порождённые прогоном
@@ -266,17 +272,26 @@ class Sandbox:
         self.check()
         for where in (self.root, self.state, self.places, self.archive):
             where.mkdir(parents=True, exist_ok=True)
-        self.settings.write_text(json.dumps(self.wiring(), ensure_ascii=False,
-                                            indent=1) + "\n", encoding="utf-8")
+        for where, asking in ((self.settings, False), (self.asking, True)):
+            where.write_text(json.dumps(self.wiring(asking=asking),
+                                        ensure_ascii=False, indent=1) + "\n",
+                             encoding="utf-8")
         self.opened = True
         return self
 
-    def wiring(self):
-        """Настройки агента: те же три точки, что занимает человек по SETUP.md."""
+    def wiring(self, asking=False):
+        """Настройки агента: те же точки, что занимает человек по SETUP.md.
+
+        На вопросах второго этапа конец хода снят: он бы дописал в базу сам
+        вопрос и ответ на него, и следующая пара получила бы подсказку из
+        предыдущей. Чтение остаётся — им подсказка и приходит.
+        """
+        points = {name: hooks for name, hooks in POINTS.items()
+                  if not (asking and name == "Stop")}
         return {"hooks": {
             event: [{"hooks": [{"type": "command", "command": str(HOOKS / name)}
                                for name in names]}]
-            for event, names in POINTS.items()}}
+            for event, names in points.items()}}
 
     def env(self, base=None):
         """Окружение ходов. Всё своё названо явно, чужое не наследуется.
@@ -302,6 +317,18 @@ class Sandbox:
             "XMEM_MARKS": "",
             "XMEM_MEMORY": "",
             "XMEM_HIDE_MARKS": "hide",
+            # Граница обхода архива. Разговоры прогона пишет харнесс, и пишет
+            # он их в архив пользователя: увести их оттуда нечем, не отобрав у
+            # агента учётные данные. Проход по связям обходит архив целиком —
+            # так задумано, вес карточки это число наблюдений, — и без границы
+            # сложил бы в базу замера карточки из чужой переписки. Границей
+            # берём уплощённый каталог ходов: он общий у всех мест прогона и
+            # ничей больше.
+            "XMEM_ONLY": flat(self.places),
+            # Цепочка конца хода идёт на глазах прогона, а не в фоне. Ждать её
+            # по тишине нельзя: она стартует питон и читает архив, ничего не
+            # записывая, и тихое окно наступает раньше первой записи.
+            "XMEM_SYNC": "1",
         })
         return got
 
@@ -319,6 +346,15 @@ class Sandbox:
         proc = subprocess.Popen(cmd, start_new_session=True, **kw)
         self.groups.add(proc.pid)
         return proc
+
+    def wiring_for(self, turn):
+        """Какими настройками играть ход: с концом хода или без него.
+
+        Ход первого этапа приходит с описанием реплики, вопрос второго — без
+        него. Признак тот же, по которому проигрыватель решает, чем отвечать,
+        и заводить второй незачем.
+        """
+        return self.settings if turn is not None else self.asking
 
     def hush(self):
         """Погасить всё, что прогон породил. Живых сессий за собой не оставляем."""
@@ -454,7 +490,13 @@ def ground(box, turn):
     спрашивает про имя, а полный путь с чужой машины в песочнице всё равно был
     бы выдумкой.
     """
-    named = SAFE.sub("-", (turn.get("place") or "").strip()) or "здесь"
+    plain = (turn.get("place") or "").strip()
+    # Хвост из букв и цифр обязателен: харнесс уплощает путь, выбрасывая всё
+    # не-латинское, и два кириллических имени одной длины дали бы один каталог
+    # архива. Хвост берём от самого имени, чтобы одно место всегда давало один
+    # каталог и прогон был повторяем.
+    tail = hashlib.sha1(plain.encode("utf-8")).hexdigest()[:8]
+    named = "%s-%s" % (SAFE.sub("-", plain) or "здесь", tail)
     where = box.places / named
     fresh = not where.exists()
     where.mkdir(parents=True, exist_ok=True)
@@ -464,6 +506,14 @@ def ground(box, turn):
     if fresh or not (where / ".git").exists():
         subprocess.run(["git", "init", "-q", "-b", mark], cwd=str(where),
                        capture_output=True)
+        # Пустой репозиторий ветки ещё не имеет: `rev-parse --abbrev-ref HEAD`
+        # на нём падает, и пометка обстановки уходит в архив пустой — у всех
+        # ходов сразу, молча. А пометка это взвешенное поле поиска, то есть
+        # целое измерение уместности. Один пустой коммит это чинит.
+        for cmd in (["git", "config", "user.email", "eval@local"],
+                    ["git", "config", "user.name", "eval"],
+                    ["git", "commit", "-q", "--allow-empty", "-m", "начало"]):
+            subprocess.run(cmd, cwd=str(where), capture_output=True)
     for name in turn.get("touched") or []:
         target = where / Path(name).name
         if not target.exists():
@@ -562,7 +612,8 @@ class Replay:
                    "permission_mode": "default",
                    "hook_event_name": "UserPromptSubmit"}
         said = ""
-        for command in hooks_of(self.box.settings, "UserPromptSubmit"):
+        settings = self.box.wiring_for(turn)
+        for command in hooks_of(settings, "UserPromptSubmit"):
             got = self.call(command, payload, env, cwd)
             said = said or got
         blocks = []
@@ -573,7 +624,7 @@ class Replay:
         self.write(target, talk, cwd, when + timedelta(seconds=1), "assistant", blocks)
         stop = {"session_id": talk, "transcript_path": str(target),
                 "cwd": str(cwd), "hook_event_name": "Stop"}
-        for command in hooks_of(self.box.settings, "Stop"):
+        for command in hooks_of(settings, "Stop"):
             self.call(command, stop, env, cwd)
         return Reply(text=blocks[-1]["text"], session_id=talk, cost=0.0, error=None)
 
@@ -591,8 +642,7 @@ class Replay:
 
     def transcript(self, cwd, talk):
         """Тот же адрес, по которому разговор кладёт харнесс."""
-        flat = re.sub(r"[^A-Za-z0-9]", "-", str(cwd))
-        return TRANSCRIPTS / flat / ("%s.jsonl" % talk)
+        return TRANSCRIPTS / flat(cwd) / ("%s.jsonl" % talk)
 
     def write(self, target, talk, cwd, when, kind, blocks):
         target.parent.mkdir(parents=True, exist_ok=True)
@@ -630,7 +680,7 @@ class Agent:
 
     def play(self, prompt, cwd, talk, turn=None, at=None, tools=None):
         cmd = [self.BINARY, "-p", prompt, "--output-format", "json",
-               "--session-id", talk, "--settings", str(self.box.settings),
+               "--session-id", talk, "--settings", str(self.box.wiring_for(turn)),
                "--setting-sources", "", "--strict-mcp-config",
                "--permission-mode", "acceptEdits",
                "--disallowed-tools", tools or NO_SHELL]
@@ -664,6 +714,18 @@ NO_SHELL = ("Bash Task WebSearch WebFetch KillShell BashOutput "
 NO_TOOLS = NO_SHELL + " Read Edit Write Glob Grep MultiEdit"
 
 PLAYERS = {Replay.name: Replay, Agent.name: Agent}
+
+
+def flat(where):
+    """Имя каталога архива по пути: харнесс уплощает путь ровно так.
+
+    Кириллица здесь схлопывается — каждая буква становится чертой, — и два
+    разных места одной длины дают один каталог. Поэтому имя каталога хода несёт
+    хвост из букв и цифр (`ground`): без него `альфа` и `гамма` встретились бы
+    в одном каталоге архива, и разбор, суженный до каталога, склеил бы
+    разговоры, которые прогон нарочно держит порознь.
+    """
+    return re.sub(r"[^A-Za-z0-9]", "-", str(where))
 
 
 def mark_of(cwd):

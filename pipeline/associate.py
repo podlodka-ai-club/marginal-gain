@@ -256,8 +256,11 @@ def main():
     args = parser().parse_args()
 
     files = sorted(TRANSCRIPTS.rglob("*.jsonl"))
-    if args.only:
-        files = [f for f in files if args.only in str(f)]
+    # Ключ сильнее окружения, окружение сильнее «весь архив»: порядок тот же,
+    # что у прочих настроек. Границу ставит замер, см. infra.config.only.
+    scope = args.only or config.only()
+    if scope:
+        files = [f for f in files if scope in str(f)]
     got = build(files, dry=args.dry, limit=args.limit)
     print("карточек %d, записано %d, режим %s"
           % (got["cards"], got["written"], "холостой" if args.dry else "запись"))

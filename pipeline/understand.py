@@ -694,7 +694,8 @@ def main():
     args = ap.parse_args()
 
     every = sorted(TRANSCRIPTS.rglob("*.jsonl"))
-    files = [f for f in every if args.only in str(f)] if args.only else every
+    scope = args.only or config.only()
+    files = [f for f in every if scope in str(f)] if scope else every
 
     got = digest(files, archive=every, limit=args.limit, dry=args.dry,
                  min_score=args.min_score, verbose=args.verbose,
