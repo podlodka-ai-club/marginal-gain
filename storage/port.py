@@ -210,6 +210,17 @@ class StructuredDoor:
             raise AttributeError("путь %s срезов по обстановке не умеет" % self.name)
         return step(axes, limit=limit)
 
+    def state(self, as_of=None):
+        """На каком состоянии хранилища идёт прогон. Умеет не всякий путь наружу.
+
+        Спрашиваем адаптер, а не имя двери: у сетевого читателя такой выборки
+        нет, а замер обязан работать и на нём — просто скажет меньше.
+        """
+        step = getattr(self.adapter, "state", None)
+        if step is None:
+            raise AttributeError("путь %s о своём состоянии не рассказывает" % self.name)
+        return step(as_of)
+
     def deep(self, query, limit=10):
         """Глубокое чтение: к найденному добавляется отложенное."""
         step = getattr(self.adapter, "deep", None)

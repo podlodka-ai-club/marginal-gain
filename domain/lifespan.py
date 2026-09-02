@@ -70,6 +70,17 @@ def now():
     return stamp(None)
 
 
+def as_of():
+    """Момент, на который считают сроки, или None, если считают на сейчас.
+
+    Приводим тем же `stamp`, каким ставится срок: сравнение идёт строками, и
+    момент, записанный иначе, соврал бы молча — ровно как разъехавшийся формат
+    срока, ради которого этот модуль и заведён.
+    """
+    got = config.as_of().strip()
+    return stamp(got) if got else None
+
+
 def until(at=None, name=None):
     """До каких пор факт верен, если считать от `at` по режиму `name`."""
     return stamp(moment(at) + timedelta(days=days(name)))

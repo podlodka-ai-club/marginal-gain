@@ -14,7 +14,7 @@
 import dataclasses, json, re, threading
 from datetime import datetime, timezone
 
-from domain import models
+from domain import lifespan, models
 from storage import db
 
 _REPO = None
@@ -124,24 +124,37 @@ def write_objects(mutations, timeout=None):
     return {"applied": repository().apply(items)}
 
 
-def read(query, mode="single-answer", timeout=None):
+def read(query, mode="single-answer", timeout=None, as_of=None):
     """Возвращает строку, как и сетевые адаптеры: вызывающий ждёт строку.
 
     Найденное отдаём списком записей. Своих слов не добавляем: пустой список
     это пустая строка, то есть молчание, а не «ничего не найдено» текстом —
     иначе фраза поехала бы в контекст агента как факт.
+
+    Момент, на который считаются сроки, спрашиваем у настройки, а не тащим
+    через все слои: чтение зовут из подсказки, из хука и из замера, и первым
+    двум про момент знать нечего. Не задан — выдача та же, что была.
     """
-    found = repository().search(query)
+    found = repository().search(query, as_of=as_of or lifespan.as_of())
     return json.dumps(found, ensure_ascii=False) if found else ""
 
 
-def neighbours(keys, limit=10, timeout=None):
+def state(as_of=None, timeout=None):
+    """На каком состоянии базы сделан прогон. Отвечает замер, спрашивают люди."""
+    return repository().state(as_of if as_of is not None else lifespan.as_of())
+
+
+def neighbours(keys, limit=10, timeout=None, as_of=None):
     """Соседи по графу связей. У базы это SQL, у сети — два чтения.
 
     Правило одно на обе двери, и сравнивать их выдачу можно построчно, см.
     `storage/graph.py` и `tests/test_graph_network.py`.
+
+    Момент спрашиваем у настройки, как и обычное чтение: соседи идут в ту же
+    выдачу, и обойди их момент — цифра замера поехала бы через них.
     """
-    return repository().neighbours(list(keys), limit=limit)
+    return repository().neighbours(list(keys), limit=limit,
+                                   as_of=as_of or lifespan.as_of())
 
 
 def lapse(now, dry=False, timeout=None):
@@ -173,19 +186,20 @@ def unfold(identity, timeout=None):
     return repository().unfold(identity)
 
 
-def contexts(keys, timeout=None):
+def contexts(keys, timeout=None, as_of=None):
     """Обстановки названных фактов. У сети такого чтения нет, у базы есть.
 
     Ветка, каталог и время лежат у эпизода, а не у факта, и добираются связью
     `episode_facts`. Схему факта ради этого не трогали: обстановок у факта
     несколько, и колонка оставила бы от них последнюю.
     """
-    return repository().contexts(list(keys))
+    return repository().contexts(list(keys), as_of=as_of or lifespan.as_of())
 
 
-def slice_by(axes, limit=200, timeout=None):
+def slice_by(axes, limit=200, timeout=None, as_of=None):
     """Срез фактов по осям обстановки. Оси комбинируются, набор произволен."""
-    return repository().slice(dict(axes), limit=limit)
+    return repository().slice(dict(axes), limit=limit,
+                              as_of=as_of or lifespan.as_of())
 
 
 def deep(query, limit=10, timeout=None):

@@ -57,6 +57,15 @@ QUOTA = {"Fact": 6, "LapsedFact": 6, "Episode": 3, "Event": 3, "Session": 1}
 # значило бы помнить про срок в каждом месте, где память спрашивают.
 DEEP = {"LapsedFact": (("subject", 3), ("project", 2), ("content", 1))}
 
+# Отбор по моменту: запись жива, если срок не вышел к названному моменту.
+# Пустой срок не выходит никогда — забывать не по чему (ADR 0007).
+LIVE_AT = ' AND ("valid_until" IS NULL OR "valid_until" = \'\' OR "valid_until" >= ?)'
+
+# Отставное место одно на два повода: срок и свёртка. Момент отменяет только
+# первое. Свёрнутое содержание несёт замена, и поднимать исходники значило бы
+# показать одно утверждение дважды (ADR 0013).
+NOT_MERGED = ' AND ("merged_into" IS NULL OR "merged_into" = \'\')'
+
 
 def path():
     return Path(os.environ.get("XMEM_LOCAL_PATH") or DEFAULT_PATH)
@@ -222,6 +231,39 @@ def like(term):
     return "%" + term + "%"
 
 
+def _columns(object_type):
+    """Колонки, которыми вид уходит в выдачу. Их же перечисляет запрос.
+
+    Нужно там, где вид в выдаче не совпадает с таблицей: отложенное, живое на
+    момент замера, идёт фактом, и отметка переклада на нём выдавала бы, что
+    строка успела съездить в отставку. Заодно это единственная форма, в которой
+    две таблицы складываются одним запросом.
+    """
+    known = models.OBJECTS.get(object_type)
+    if known is None:
+        return "*"
+    return ", ".join('"%s"' % f.name for f in dataclasses.fields(known))
+
+
+def _order(object_type):
+    """Порядок, в котором режется потолок кандидатов. По ключу записи."""
+    known = models.OBJECTS.get(object_type)
+    if known is None:
+        return "1"
+    return ", ".join('"%s"' % name for name in known.KEY)
+
+
+def _sign(object_type, record):
+    """Подпись записи для развода равного веса и отсева повторов.
+
+    Берём саму запись, а не ключ: у видов ключи разные, а сравнивать надо
+    строки из разных таблиц. Одинаковое содержание — одна подпись, где бы оно
+    ни лежало.
+    """
+    return "%s|%s" % (object_type, json.dumps(record, sort_keys=True,
+                                              ensure_ascii=False, default=str))
+
+
 class Repository:
     """Единственное место, где локальная память знает про SQL.
 
@@ -366,7 +408,53 @@ class Repository:
 
     # --- чтение -------------------------------------------------------------
 
-    def search(self, query, limit=10, deep=False):
+    def facts_at(self, as_of=None):
+        """Откуда читать факты. Одно место на все выборки, где факт участвует.
+
+        Момент (`as_of`) отвечает на вопрос «что было живо тогда»: срок лежит на
+        самой записи, переклад двигает её между таблицами и срока не трогает, —
+        значит состав на любой момент восстанавливается сроком и только им.
+
+        Отдаёт кусок SQL на место имени таблицы, а не список найденного. Читают
+        факты четыре выборки — поиск, шаг по графу, обстановка, срез, — и
+        обойди момент хоть одну, цифра замера снова поедет от того, когда в
+        последний раз гоняли забывание.
+
+        Не задан — то же имя таблицы, что было. Работа ходит так.
+        """
+        if not as_of:
+            return '"fact"', []
+        cols = _columns("Fact")
+        return ('(SELECT %s FROM "fact" WHERE 1=1%s UNION ALL '
+                'SELECT %s FROM "lapsedfact" WHERE 1=1%s%s)'
+                % (cols, LIVE_AT, cols, LIVE_AT, NOT_MERGED), [as_of, as_of])
+
+    def sources(self, deep=False, as_of=None):
+        """Откуда берутся строки: вид в выдаче, поля с весами, выборка под ними.
+
+        Поднятое из отложенного идёт видом Fact, а не своим, и приходит тем же
+        запросом, что живые факты. Двумя запросами потолок кандидатов резал бы
+        каждую таблицу отдельно, и после переклада под нож попадали бы другие
+        строки: состав на момент тот же, а выдача другая — то есть цифра снова
+        зависит от часов.
+
+        Глубокое чтение и момент вместе не ходят. Глубокому отложенное нужно
+        всё целиком, и добавь мы к нему поднятое — те же строки пришли бы
+        дважды, под двумя видами.
+        """
+        out = []
+        for object_type, fields in SEARCH.items():
+            if object_type == "Fact" and not deep:
+                source, params = self.facts_at(as_of)
+            else:
+                source, params = '"%s"' % _table(object_type), []
+            out.append((object_type, fields, source, params))
+        if deep:
+            for object_type, fields in DEEP.items():
+                out.append((object_type, fields, '"%s"' % _table(object_type), []))
+        return out
+
+    def search(self, query, limit=10, deep=False, as_of=None):
         """Поиск по словам вопроса. Головы у базы нет, есть совпадения.
 
         Вес складывается по полям: попадание в тему весит больше, чем в текст.
@@ -376,20 +464,29 @@ class Repository:
         Глубокое чтение (`deep`) добавляет к выборке отложенное. Обычное — нет,
         и в этом весь смысл переклада: просроченное выбывает из первой выдачи
         само, а не отсеивается порогом на каждом чтении.
+
+        Момент (`as_of`) отвечает на вопрос «что было живо тогда», см.
+        `facts_at`. Не задан — выдача ровно та, что была до момента.
+
+        Равный вес разводится подписью записи, а не порядком строк в таблице:
+        порядок строк меняется от переклада, от свёртки и от порядка записи, а
+        замер обязан давать одну цифру дважды. По той же причине потолок
+        кандидатов режет по ключу записи, а не по тому, как строки легли.
         """
         terms = words(query)
         if not terms:
             return []
         found = []
-        for object_type, fields in (dict(SEARCH, **DEEP) if deep else SEARCH).items():
+        for object_type, fields, source, source_params in self.sources(deep, as_of):
             names = [name for name, _ in fields]
             where = " OR ".join('"%s" LIKE ? ESCAPE \'\\\'' % name
                                 for name in names for _ in terms)
-            params = [like(term) for _ in names for term in terms]
+            params = list(source_params) + [like(term) for _ in names for term in terms]
             with self.lock:
                 rows = self.conn.execute(
-                    'SELECT * FROM "%s" WHERE %s LIMIT %d'
-                    % (_table(object_type), where, CANDIDATES), params).fetchall()
+                    'SELECT %s FROM %s WHERE (%s) ORDER BY %s LIMIT %d'
+                    % (_columns(object_type), source, where, _order(object_type),
+                       CANDIDATES), params).fetchall()
             for row in rows:
                 score = 0
                 for name, weight in fields:
@@ -398,16 +495,22 @@ class Repository:
                         continue
                     score += weight * sum(1 for t in terms if t in value)
                 if score:
+                    record = dict(row)
                     found.append((score * PRIORITY.get(object_type, 1),
-                                  object_type, dict(row)))
-        found.sort(key=lambda item: item[0], reverse=True)
-        out, taken = [], {}
-        for score, object_type, row in found:
+                                  _sign(object_type, record), object_type, record))
+        found.sort(key=lambda item: (-item[0], item[1]))
+        out, taken, seen = [], {}, set()
+        for score, sign, object_type, row in found:
             if len(out) >= limit:
                 break
+            # Одна и та же запись могла прийти из двух таблиц: переклад её
+            # переложил, а свёртка вернула. Второй раз она бы только съела место.
+            if sign in seen:
+                continue
             if taken.get(object_type, 0) >= QUOTA.get(object_type, limit):
                 continue
             taken[object_type] = taken.get(object_type, 0) + 1
+            seen.add(sign)
             record = {k: v for k, v in row.items() if v not in (None, "")}
             record["object_type"] = object_type
             out.append(record)
@@ -415,17 +518,40 @@ class Repository:
         # место, а не отнимает его. Иначе выдача выходила бы короче потолка при
         # полной базе.
         if len(out) < limit:
-            for score, object_type, row in found:
+            for score, sign, object_type, row in found:
                 if len(out) >= limit:
                     break
+                if sign in seen:
+                    continue
+                seen.add(sign)
                 record = {k: v for k, v in row.items() if v not in (None, "")}
                 record["object_type"] = object_type
-                if any(r == record for r in out):
-                    continue
                 out.append(record)
         return out
 
-    def neighbours(self, keys, limit=10):
+    def state(self, as_of=None):
+        """На каком состоянии базы сделан замер. Чем отвечают на «на чём считали».
+
+        Три числа, а не одно: переклад переливает факты в отложенные, не меняя
+        состава живого на момент. Видно оба берега и то, что между ними не
+        течёт.
+        """
+        live = LIVE_AT if as_of else ""
+        args = [as_of] if as_of else []
+        with self.lock:
+            facts = self.conn.execute('SELECT count(*) FROM "fact"').fetchone()[0]
+            lapsed = self.conn.execute(
+                'SELECT count(*) FROM "lapsedfact" WHERE 1=1%s' % NOT_MERGED).fetchone()[0]
+            alive = self.conn.execute(
+                'SELECT count(*) FROM "fact" WHERE 1=1%s' % live, args).fetchone()[0]
+            if as_of:
+                alive += self.conn.execute(
+                    'SELECT count(*) FROM "lapsedfact" WHERE 1=1%s%s' % (live, NOT_MERGED),
+                    args).fetchone()[0]
+        return {"facts": facts, "lapsed": lapsed, "alive": alive,
+                "as_of": as_of, "path": str(path())}
+
+    def neighbours(self, keys, limit=10, as_of=None):
         """Факты, связанные карточкой с любым из названных.
 
         Обход по ключу, а не поиск словами: связь адресует факт строкой
@@ -455,10 +581,12 @@ class Repository:
             end = models.Fact.of_identity(other)
             if not (end.fact_type and end.subject and end.scope):
                 continue
+            source, params = self.facts_at(as_of)
             with self.lock:
                 found = self.conn.execute(
-                    'SELECT * FROM fact WHERE fact_type = ? AND subject = ? '
-                    'AND scope = ?', (end.fact_type, end.subject, end.scope)).fetchone()
+                    'SELECT %s FROM %s WHERE fact_type = ? AND subject = ? '
+                    'AND scope = ?' % (_columns("Fact"), source),
+                    params + [end.fact_type, end.subject, end.scope]).fetchone()
             if found is None:
                 continue        # связь пережила факт: конец есть, строки нет
             record = {k: v for k, v in dict(found).items() if v not in (None, "")}
@@ -691,16 +819,18 @@ class Repository:
                 out[raw] = dict(row)
         return out
 
-    def _fact_rows(self, keys=None):
+    def _fact_rows(self, keys=None, as_of=None):
         """Строки фактов: {подпись: строка или None}. Ключи не заданы — все.
 
         Подпись (`fact_type|subject|scope`) — та же строка, какой факт
         адресует связь. Другой ключ здесь оборвал бы граф молча.
         """
         out = {}
+        source, params = self.facts_at(as_of)
         if keys is None:
             with self.lock:
-                found = self.conn.execute('SELECT * FROM "fact"').fetchall()
+                found = self.conn.execute(
+                    'SELECT %s FROM %s' % (_columns("Fact"), source), params).fetchall()
             for row in found:
                 record = dict(row)
                 out[models.Fact(fact_type=record["fact_type"],
@@ -711,9 +841,9 @@ class Repository:
             end = models.Fact.of_identity(key)
             with self.lock:
                 row = self.conn.execute(
-                    'SELECT * FROM "fact" WHERE "fact_type" = ? AND "subject" = ? '
-                    'AND "scope" = ?',
-                    (end.fact_type, end.subject, end.scope)).fetchone()
+                    'SELECT %s FROM %s WHERE "fact_type" = ? AND "subject" = ? '
+                    'AND "scope" = ?' % (_columns("Fact"), source),
+                    params + [end.fact_type, end.subject, end.scope]).fetchone()
             out[key] = dict(row) if row is not None else None
         return out
 
@@ -752,19 +882,19 @@ class Repository:
                 out[key].append(own)
         return out
 
-    def situations(self, keys=None):
+    def situations(self, keys=None, as_of=None):
         """Обстановки фактов: {подпись факта: [обстановка, ...]}.
 
         `keys` не задан — отвечаем про всю базу; это спрашивает срез. Задан —
         только про названное; это спрашивает чтение в горячем пути.
         """
-        return self._situations(self._fact_rows(keys), whole=keys is None)
+        return self._situations(self._fact_rows(keys, as_of), whole=keys is None)
 
-    def contexts(self, keys):
+    def contexts(self, keys, as_of=None):
         """Обстановки названных фактов. Тем же кодом, каким их читает срез."""
-        return self.situations(list(keys)) if keys else {}
+        return self.situations(list(keys), as_of) if keys else {}
 
-    def slice(self, axes, limit=200):
+    def slice(self, axes, limit=200, as_of=None):
         """Факты, у которых есть обстановка, сходящаяся по всем названным осям.
 
         Оси произвольны и комбинируются: «все факты проекта», «все факты
@@ -777,7 +907,7 @@ class Repository:
         каждой из них, но им не равен.
         """
         want = context.norm(axes)
-        rows = self._fact_rows()
+        rows = self._fact_rows(as_of=as_of)
         found = self._situations(rows, whole=True)
         out = []
         for key, record in rows.items():

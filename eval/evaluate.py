@@ -11,16 +11,48 @@
 
 Замер включается переменной: MEM_TRACE=1 python3 -m eval.evaluate
 """
-import argparse, json, time
+import argparse, json, os, time
 from collections import defaultdict
 from pathlib import Path
 
+from domain import lifespan
 from eval import goldenset
 from pipeline import suggest
 from infra import telemetry
+from storage import port
 
-CASES = Path(__file__).parent / "eval-cases.json"
+# Набор лежит в корне репозитория, а не внутри пакета: его собирают, читают и
+# коммитят рядом с кодом. Путь абсолютный, потому что замер зовут и из корня, и
+# из хука, и из планировщика — текущий каталог у всех троих разный.
+ROOT = Path(__file__).resolve().parent.parent
+CASES = ROOT / "eval-cases.json"
 RESULTS = Path.home() / ".local" / "state" / "memory-encoder" / "eval-results.jsonl"
+
+
+def state_line(as_of):
+    """На каком состоянии базы сделан прогон. Печатается до первого случая.
+
+    Без этой строки цифра ни с чем не сходится: заработало забывание, шестьдесят
+    семь фактов уехали в отложенное, и итог упал на шесть пунктов без единой
+    правки кода. Три числа показывают, что именно переливается: фактов и
+    отложенных стало иначе, живых на момент — столько же.
+
+    Путь наружу о своём состоянии рассказывать не обязан. Сетевой не умеет, и
+    ронять на нём замер нельзя: скажем то, что знаем, — момент.
+    """
+    at = as_of or "сейчас"
+    door = port.door()
+    tell = getattr(door, "state", None)
+    if tell is None:
+        return "состояние: путь %s о себе не рассказывает, сроки на %s" % (
+            getattr(door, "name", "?"), at)
+    try:
+        got = tell(as_of)
+    except AttributeError:
+        return "состояние: путь %s о себе не рассказывает, сроки на %s" % (
+            getattr(door, "name", "?"), at)
+    return ("состояние базы: фактов %d, отложенных %d, живых на момент %d, "
+            "сроки на %s" % (got["facts"], got["lapsed"], got["alive"], at))
 
 
 def judge(case, answer, known, error, raw=None):
@@ -98,6 +130,8 @@ def main():
     ap.add_argument("--kind", help="только этот вид случаев")
     ap.add_argument("--mode", default="single", choices=["single", "raw", "xresponse"])
     ap.add_argument("--min-score", type=float, default=suggest.MIN_SCORE)
+    ap.add_argument("--as-of", dest="as_of",
+                    help="момент, на который считать сроки; по умолчанию из набора")
     args = ap.parse_args()
 
     path = Path(args.cases)
@@ -113,6 +147,10 @@ def main():
         return
     print("набор версии %d, подпись факта: %s, собран %s"
           % (meta["version"], meta.get("identity"), meta.get("built_at")))
+    # Момент замера ставим в окружение, а не тащим через все слои: чтение зовут
+    # из подсказки и из хука, и им про момент знать нечего.
+    at = pin(args.as_of or goldenset.as_of(meta))
+    print(state_line(at))
     if args.only:
         cases = [c for c in cases if args.only in c["id"]]
     if args.kind:
@@ -151,6 +189,18 @@ def main():
         print("шаги конвейера, журнал %s:" % telemetry.LOG)
         print(telemetry.report(telemetry.read_log(telemetry.LOG),
                                run_id=telemetry.RUN_ID))
+
+
+def pin(as_of):
+    """Закрепить момент на весь прогон. Отдаёт то, что закрепил.
+
+    Через окружение, тем же способом, каким выбирается путь наружу: чтение
+    ходит из подсказки, из хука и отсюда, и передавать момент руками пришлось
+    бы через каждый из трёх.
+    """
+    at = lifespan.stamp(as_of) if as_of else ""
+    os.environ["XMEM_AS_OF"] = at
+    return at
 
 
 def summary(rows):

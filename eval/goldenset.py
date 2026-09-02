@@ -28,6 +28,7 @@ from collections import defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
 
+from domain import lifespan
 from pipeline import understand as u
 from infra.scrub import redact
 
@@ -378,9 +379,9 @@ def envelope(kind, items, **meta):
     if kind not in KINDS:
         raise SetVersionError("неизвестный вид набора: %s, известны %s"
                               % (kind, ", ".join(KINDS)))
+    built = datetime.now(timezone.utc).isoformat(timespec="seconds")
     body = {"version": VERSION, "kind": kind, "identity": IDENTITY,
-            "built_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
-            "count": len(items)}
+            "built_at": built, "as_of": built, "count": len(items)}
     body.update(meta)
     body["items"] = list(items)
     return body
@@ -391,6 +392,21 @@ def dump(path, kind, items, **meta):
     Path(path).write_text(
         json.dumps(envelope(kind, items, **meta), ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8")
+
+
+def as_of(meta):
+    """Момент, на который замер считает сроки. Часть набора, а не прогона.
+
+    Версия набора уже говорит, каким кодом он собран. Момент говорит второе:
+    на каком состоянии базы снята цифра. Без него забывание переливает факты
+    в отложенные между двумя прогонами, и цифра едет сама по себе — своей
+    разницы от хода времени в ней потом не отличить.
+
+    Прежние наборы момента не носят, и отказывать им незачем: сборка — такой же
+    снимок состояния, и она в конверте уже есть.
+    """
+    got = (meta.get("as_of") or meta.get("built_at") or "").strip()
+    return lifespan.stamp(got) if got else ""
 
 
 def load(path, kind=None):

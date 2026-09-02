@@ -20,7 +20,11 @@ import argparse, json, os, time
 from collections import defaultdict
 from pathlib import Path
 
-from eval import goldenset
+from eval import evaluate, goldenset
+
+# Тот же набор и тем же путём, что у одиночного прогона: два места с одним
+# именем файла разъезжаются молча, и половины перестают быть сравнимыми.
+CASES = evaluate.ROOT / "eval-cases.json"
 
 BASELINE = "без памяти"
 ACTIVE = "с памятью"
@@ -64,7 +68,6 @@ def run_phase(phase, cases, disabled, mode, min_score):
     """
     os.environ["XMEM_DISABLED"] = "1" if disabled else ""
     reset_session()
-    from eval import evaluate
     from pipeline import suggest
     from infra import telemetry
 
@@ -146,17 +149,21 @@ def compare(base, active, base_sec, active_sec):
 
 def main():
     ap = argparse.ArgumentParser(description="Сравнение прогонов без памяти и с памятью")
-    ap.add_argument("--cases", default="eval-cases.json")
+    ap.add_argument("--cases", default=str(CASES))
     ap.add_argument("--limit", type=int, help="взять только первые N случаев")
     ap.add_argument("--kind", help="только этот вид случаев")
     ap.add_argument("--mode", default="single", choices=["single", "raw", "xresponse"])
     ap.add_argument("--min-score", type=float, default=0.5)
     ap.add_argument("--out", default="", help="куда сложить построчный итог")
+    ap.add_argument("--as-of", dest="as_of",
+                    help="момент, на который считать сроки; по умолчанию из набора")
     args = ap.parse_args()
 
     load_env()
     meta, cases = goldenset.load(args.cases, "cases")
     print("набор версии %d, подпись факта: %s" % (meta["version"], meta.get("identity")))
+    at = evaluate.pin(args.as_of or goldenset.as_of(meta))
+    print(evaluate.state_line(at))
     if args.kind:
         cases = [c for c in cases if c.get("kind") == args.kind]
     if args.limit:
