@@ -62,7 +62,7 @@ def store(tmp, mode=None):
     env = {"XMEM_BACKEND": "local", "XMEM_DISABLED": "",
            "XMEM_LOCAL_PATH": str(base), "XMEM_MEMORY": mode or ""}
     with mock.patch.dict(os.environ, env), \
-         mock.patch.object(config, "STATE_DIR", Path(tmp) / "state"), \
+         mock.patch.dict(os.environ, {"XMEM_STATE_DIR": str(Path(tmp) / "state")}), \
          mock.patch.object(understand, "STATE", Path(tmp) / "understand.json"), \
          mock.patch.object(suggest, "LOG", Path(tmp) / "suggest-log.jsonl"):
         try:
@@ -158,7 +158,7 @@ class TestTheDeadlineIsAValue(unittest.TestCase):
         from pipeline import switch
         with tempfile.TemporaryDirectory() as tmp:
             with mock.patch.dict(os.environ, {"XMEM_MEMORY": ""}), \
-                 mock.patch.object(config, "STATE_DIR", Path(tmp)):
+                 mock.patch.dict(os.environ, {"XMEM_STATE_DIR": tmp}):
                 switch.SWITCHES["memory"].set(mode)
                 self.assertEqual(config.memory(), mode)
                 self.assertEqual(lifespan.until(T0), lifespan.until(T0, mode))

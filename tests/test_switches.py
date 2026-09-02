@@ -11,7 +11,7 @@
 3. Состояние говорит, **откуда** взято значение. Переменная окружения сильнее
    файла, и молчание об этом уже стоило нам дня разбирательств.
 """
-import json, os, subprocess, sys, tempfile, unittest
+import contextlib, json, os, subprocess, sys, tempfile, unittest
 from pathlib import Path
 from unittest import mock
 
@@ -22,6 +22,24 @@ from pipeline import switch
 
 HERE = Path(__file__).resolve().parent.parent
 HOOKS = HERE / "hooks"
+
+
+@contextlib.contextmanager
+def aside(tmp):
+    """Увести состояние в сторону — и убедиться, что увелось.
+
+    Одной подмены мало. Эти проверки пишут файлы рубильников: сломайся сам
+    рубильник каталога — и они напишут их в живое состояние человека, молча и
+    все разом. Ровно так и вышло на прогоне мутации: в живом каталоге завелись
+    `probe`, `backend` и `memory`, а путь наружу уехал в сеть. Поэтому уводим
+    и сразу проверяем, что увели.
+    """
+    with mock.patch.dict(os.environ, {"XMEM_STATE_DIR": str(tmp)}):
+        if config.state_dir() != Path(tmp):
+            raise AssertionError(
+                "рубильник каталога не сработал: %s вместо %s — проверка писала "
+                "бы в живое состояние" % (config.state_dir(), tmp))
+        yield
 
 
 class TestRegistryIsARegistry(unittest.TestCase):
@@ -39,7 +57,7 @@ class TestRegistryIsARegistry(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             new = switch.Switch("пробный", "проба", "XMEM_PROBE", "probe", "нет",
                                 values=("да", "нет"))
-            with mock.patch.dict(os.environ, {"XMEM_STATE_DIR": tmp}), \
+            with aside(tmp), \
                  mock.patch.dict(switch.SWITCHES, {"probe": new}), \
                  mock.patch.object(switch, "NAMES", switch.NAMES + ["probe"]):
                 self.assertEqual(switch.main(["probe", "да"]), 0)
@@ -49,7 +67,7 @@ class TestRegistryIsARegistry(unittest.TestCase):
 
     def test_unknown_value_is_refused_not_written(self):
         with tempfile.TemporaryDirectory() as tmp:
-            with mock.patch.dict(os.environ, {"XMEM_STATE_DIR": tmp}):
+            with aside(tmp):
                 with self.assertRaises(ValueError):
                     switch.SWITCHES["backend"].set("почтой")
                 self.assertFalse((Path(tmp) / "backend").exists())
@@ -60,7 +78,7 @@ class TestSwitchReachesTheOneWhoReadsIt(unittest.TestCase):
 
     def test_marks_switch_changes_what_config_reports(self):
         with tempfile.TemporaryDirectory() as tmp:
-            with mock.patch.dict(os.environ, {"XMEM_STATE_DIR": tmp}):
+            with aside(tmp):
                 switch.SWITCHES["marks"].set("show")
                 self.assertFalse(config.hide_marks())
                 switch.SWITCHES["marks"].set("hide")
@@ -121,7 +139,7 @@ class TestStatusNamesItsSource(unittest.TestCase):
 
     def test_environment_is_named_and_marked_as_stronger(self):
         with tempfile.TemporaryDirectory() as tmp:
-            with mock.patch.dict(os.environ, {"XMEM_STATE_DIR": tmp}):
+            with aside(tmp):
                 switch.SWITCHES["backend"].set("sdk")
                 value, where = switch.SWITCHES["backend"].read()
                 self.assertEqual((value, where), ("sdk", "файл backend"))
@@ -134,7 +152,7 @@ class TestStatusNamesItsSource(unittest.TestCase):
 
     def test_status_says_whether_memory_is_live_here(self):
         with tempfile.TemporaryDirectory() as tmp:
-            with mock.patch.dict(os.environ, {"XMEM_STATE_DIR": tmp}), \
+            with aside(tmp), \
                  mock.patch.object(switch, "live_here", lambda where=None: False):
                 text = switch.status(tmp)
         self.assertIn("память здесь: молчит", text)

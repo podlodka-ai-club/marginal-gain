@@ -408,7 +408,7 @@ class TestDisplayHookCutsTheBlockOnScreen(unittest.TestCase):
         payload = {"turn_id": "t", "message_id": "m9", "index": 1, "final": False,
                    "delta": "Готово.\n%s\n" % marks.XMD1_BEGIN}
         with tempfile.TemporaryDirectory() as tmp:
-            with mock.patch.object(config, "STATE_DIR", Path(tmp)), \
+            with mock.patch.dict(os.environ, {"XMEM_STATE_DIR": tmp}), \
                  mock.patch.object(display, "STATE", Path(tmp) / "display"):
                 with mock.patch.dict(os.environ, {"XMEM_HIDE_MARKS": "0"}):
                     self.assertIsNone(display.answer(payload))

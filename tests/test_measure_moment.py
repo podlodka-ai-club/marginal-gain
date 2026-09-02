@@ -74,7 +74,7 @@ def store(tmp, as_of=None):
     env = {"XMEM_BACKEND": "local", "XMEM_DISABLED": "",
            "XMEM_LOCAL_PATH": str(base), "XMEM_AS_OF": as_of or ""}
     with mock.patch.dict(os.environ, env), \
-         mock.patch.object(config, "STATE_DIR", Path(tmp) / "state"):
+         mock.patch.dict(os.environ, {"XMEM_STATE_DIR": str(Path(tmp) / "state")}):
         try:
             yield base
         finally:
