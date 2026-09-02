@@ -14,9 +14,9 @@
    отбросил — «отброшено» с причинами маппера, а не «нет».
 2. Цепочка ступеней одна и та же у всех пар и всегда в одном порядке:
    разметка → факт в БД → кандидат → вброс. Строка отчёта называет все четыре.
-3. Обрыв — первый «нет» после последнего «да». Не первый «нет» вообще: до базы
-   знание доезжает двумя дорогами, и молчание одной при работающей второй
-   поломкой не является.
+3. Обрыв спрашивается только у проигравшей пары, и там это первый «нет».
+   У прошедшей пары обрыва нет, какая бы ступень ни молчала: до базы знание
+   доезжает двумя дорогами, и молчание одной при работающей второй не поломка.
 4. Счёт кандидатов не выдумывается снаружи по пустой выдаче, а приезжает с той
    ступени, где поиск ответил: сколько кусков он отдал, столько и в ленте.
 5. Руки считаются порознь и не складываются. Рука без нашей памяти — это
@@ -27,8 +27,8 @@
 Мутации, на которых проверки обязаны краснеть:
   * убрать поиск блока разметки в разговоре   → TestTheMarkingIsReadFromTheTranscript
   * считать отброшенный блок за «нет»         → TestTheMarkingIsReadFromTheTranscript
-  * назвать обрывом ступень, после которой что-то сработало
-                                              → TestTheBreakIsTheFirstNo
+  * назвать обрыв у пары, которая прошла      → TestTheBreakIsTheFirstNo
+  * промолчать про обрыв у проигравшей пары   → TestTheBreakIsTheFirstNo
   * выкинуть ступень из строки отчёта         → TestTheLineNamesEveryStep
   * не проложить счёт кандидатов из consult   → TestTheCandidateCountComesFromTheSearch
   * потерять счёт кандидатов в ленте          → TestTheCandidateCountComesFromTheSearch
@@ -215,11 +215,11 @@ class TestTheMarkingIsReadFromTheTranscript(unittest.TestCase):
 STEPS = st.tuples(st.booleans(), st.booleans(), st.booleans(), st.booleans())
 
 
-def a_probe(marked, facts, candidates, injected, reason=None):
+def a_probe(marked, facts, candidates, injected, reason=None, ok=False):
     return {"marked": marked, "dropped": Counter(),
             "facts": 1 if facts else 0, "lapsed": 0,
             "candidates": 2 if candidates else 0,
-            "injected": injected,
+            "injected": injected, "ok": ok,
             "reason": reason if not injected else None}
 
 
@@ -243,46 +243,45 @@ class TestTheLineNamesEveryStep(unittest.TestCase):
 
 
 class TestTheBreakIsTheFirstNo(unittest.TestCase):
-    """Свойство 3. Обрыв — первый «нет» после последнего «да», а не любой «нет».
+    """Свойство 3. У проигравшей пары обрыв — первый «нет». У прошедшей его нет.
 
-    Первый «нет» вообще здесь не годится, и это выяснилось на живом прогоне.
-    Знание доезжает до базы двумя дорогами — разметкой модели и вырезом по
-    шаблонам, — и пара, где блока не было, а факт доехал и был вброшен, прошла
-    целиком. Отчёт назвал её «обрыв: разметка», то есть обвинил исправное.
+    Первое выяснилось на живом прогоне: пара, чей факт в базу не попал, всё
+    равно получила десять чужих кандидатов и вброс, а ответ вышел без нужного
+    слова. Обрыв там на «факте в БД» — назови мы его «применением», починка
+    ушла бы не туда.
+
+    Второе выяснилось там же, с другой стороны: пара без блока разметки, чей
+    факт доехал вырезом по шаблонам и был применён, прошла целиком. Обрыв на
+    «разметке» обвинял бы исправное.
     """
 
     @SLOW
     @given(steps=STEPS)
-    def test_nothing_worked_after_the_named_step(self, steps):
-        """После названной ступени не сработало ничего: это и есть хвост обрыва."""
-        got = live.break_of(a_probe(*steps))
-        if not got:
+    def test_a_losing_pair_is_broken_at_its_first_no(self, steps):
+        got = live.break_of(a_probe(*steps, ok=False))
+        first = next((name for name, ok in zip(live.STEPS, steps) if not ok), "")
+        self.assertEqual(got, first)
+
+    @SLOW
+    @given(steps=STEPS)
+    def test_a_passing_pair_is_never_called_broken(self, steps):
+        """Пара прошла — обрыва нет, какая бы ступень ни молчала."""
+        self.assertEqual(live.break_of(a_probe(*steps, ok=True)), "")
+
+    @SLOW
+    @given(steps=STEPS)
+    def test_a_losing_pair_with_a_silent_step_always_names_one(self, steps):
+        """Проигравшая пара с молчащей ступенью обрыв называет, а не молчит."""
+        if all(steps):
             return
-        after = list(steps)[live.STEPS.index(got):]
-        self.assertEqual(after, [False] * len(after),
-                         "после обрыва что-то сработало: назвали не ту ступень")
+        self.assertNotEqual(live.break_of(a_probe(*steps, ok=False)), "")
 
     @SLOW
     @given(steps=STEPS)
-    def test_everything_before_the_named_step_is_not_where_it_broke(self, steps):
-        """Ступень перед названной сработала — иначе обрыв был бы раньше."""
-        got = live.break_of(a_probe(*steps))
-        at = live.STEPS.index(got) if got else None
-        if at:
-            self.assertTrue(steps[at - 1],
-                            "перед обрывом тоже «нет»: обрыв назван слишком поздно")
-
-    @SLOW
-    @given(steps=STEPS)
-    def test_a_delivered_hint_names_no_break(self, steps):
-        """Вброс дошёл — обрыва нет, чем бы ни молчали ступени до него.
-
-        Пустая разметка при доехавшем факте это не поломка, а вторая дорога.
-        """
-        if steps[-1]:
-            self.assertEqual(live.break_of(a_probe(*steps)), "")
-        else:
-            self.assertNotEqual(live.break_of(a_probe(*steps)), "")
+    def test_a_whole_chain_names_no_break(self, steps):
+        """Вся цепочка «да» — потеря уже не в доставке, а в применении."""
+        if all(steps):
+            self.assertEqual(live.break_of(a_probe(*steps, ok=False)), "")
 
     @SLOW
     @given(steps=STEPS)
@@ -290,11 +289,34 @@ class TestTheBreakIsTheFirstNo(unittest.TestCase):
         self.assertIn(live.break_of(a_probe(*steps)), ("",) + tuple(live.STEPS))
 
     @SLOW
+    @given(outcome=st.sampled_from(live.BUCKETS),
+           found=st.integers(min_value=0, max_value=9),
+           reason=st.sampled_from(ledger.REASONS))
+    def test_the_chain_learns_the_outcome_from_the_second_session(self, outcome,
+                                                                  found, reason):
+        """Исход пары доезжает до цепочки, а не остаётся в разбивке.
+
+        Не доедет — обрыв назовётся у пары, которая прошла целиком: цепочка без
+        исхода не отличает потерю от второй дороги.
+        """
+        row = {"ok": outcome == live.APPLIED, "injected": outcome != live.NOT_FOUND,
+               "intruded": outcome == live.INTRUDED, "error": None,
+               "reason": reason, "candidates": found}
+        probe = live.second_half(a_probe(True, True, True, True), row)
+        self.assertEqual(probe["ok"], live.bucket(row) == live.APPLIED,
+                         "исход пары не доехал до цепочки")
+        self.assertEqual(probe["candidates"], found)
+        self.assertEqual(probe["injected"], row["injected"])
+        self.assertEqual(probe["reason"], reason)
+
+    @SLOW
     @given(steps=STEPS)
-    def test_a_whole_chain_names_no_break(self, steps):
-        """Все четыре «да» — обрыва нет. Иначе отчёт обвинял бы исправное."""
-        if all(steps):
-            self.assertEqual(live.break_of(a_probe(*steps)), "")
+    def test_a_pair_the_run_called_applied_shows_no_break(self, steps):
+        """Пара, которую разбивка назвала удачей, обрыва не получает."""
+        row = {"ok": True, "injected": True, "intruded": False, "error": None,
+               "reason": None, "candidates": 3}
+        probe = live.second_half(a_probe(*steps), row)
+        self.assertEqual(live.break_of(probe), "")
 
     def test_a_negative_pair_is_not_blamed_for_an_empty_base(self):
         """У отрицательной пары ждать нечего: ступени фактов у неё нет.

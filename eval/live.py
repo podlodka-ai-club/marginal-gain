@@ -898,27 +898,31 @@ def facts_with(where, words):
 
 
 def break_of(probe):
-    """Ступень, на которой знание встало и дальше не пошло. Дошло — пусто.
+    """Первая ступень, ответившая «нет», у пары, которая не прошла.
 
-    Берём первый «нет» после последнего «да», а не первый «нет» вообще, и
-    разница тут не косметическая. Знание доезжает до базы двумя дорогами:
-    разметкой модели и вырезом по шаблонам из переписки (`archive/extract.py`).
-    Пара, где модель блок не поставила, а факт всё равно доехал и был вброшен,
-    прошла целиком — назови мы её «обрыв: разметка», и починка ушла бы туда,
-    где ничего не порвалось. Обрыв — это то место, после которого уже ничего не
-    сработало.
+    Спрашиваем обрыв только у проигравшей пары, и это не мелочь. Ступени
+    цепочки говорят про разное: «фактов» считает записи с нужным словом, а
+    «кандидатов» и «вброс» — про выдачу вообще, чем бы она ни была. Поэтому
+    пара, прошедшая целиком, может показывать «нет» на любой ступени — знание
+    доехало другой дорогой (до базы их две: разметка модели и вырез по
+    шаблонам), — и обрывом это не является. Назови мы там обрыв, починка ушла
+    бы в исправное.
+
+    А у проигравшей пары первый «нет» и есть место потери, даже если дальше
+    что-то сработало: живой прогон дал пару, где нужный факт в базу не попал,
+    поиск всё равно вернул десять чужих кандидатов и вбросил их, а ответ вышел
+    без нужного слова. Обрыв там на «факте в БД», а не на применении.
 
     У отрицательной пары ждать в базе нечего: ей нужен как раз пустой ответ, и
-    обрыва у неё не бывает вовсе.
+    обрыва у неё не бывает вовсе. Целая цепочка у проигравшей пары обрыва тоже
+    не называет: потеря там уже не в доставке, а в применении, и об этом
+    говорит разбивка исходов.
     """
-    if not probe.get("expected", True):
+    if not probe.get("expected", True) or probe.get("ok"):
         return ""
     passed = [bool(probe.get(name)) for name in
               ("marked", "facts", "candidates", "injected")]
-    if passed[-1]:
-        return ""            # вброс дошёл — рваться было нечему
-    last = max((i for i, ok in enumerate(passed) if ok), default=-1)
-    return STEPS[last + 1]
+    return next((name for name, ok in zip(STEPS, passed) if not ok), "")
 
 
 def probe_line(probe):
@@ -1173,9 +1177,7 @@ def run(pairs=None, root=None, player="replay", limit=None, only=None,
             row = judge_one(box, pair, reply)
             report.note("ask", row)
             if pair["id"] in report.probe:
-                report.probe[pair["id"]].update(
-                    {"candidates": row["candidates"], "injected": row["injected"],
-                     "reason": row["reason"]})
+                second_half(report.probe[pair["id"]], row)
             say("  %3d/%-3d %-18s %s"
                 % (number, len(items), pair["id"], bucket(report.asked[-1])))
         done = True
@@ -1199,8 +1201,20 @@ def first_half(box, pair, talks):
     probe = marking(seen)
     alive, lapsed = facts_with(box.db, pair.get("expect"))
     probe.update({"facts": alive, "lapsed": lapsed,
-                  "expected": bool(pair.get("expect")),
+                  "expected": bool(pair.get("expect")), "ok": False,
                   "candidates": None, "injected": False, "reason": None})
+    return probe
+
+
+def second_half(probe, row):
+    """Вторые две ступени цепочки и исход пары — из разбора второй сессии.
+
+    Исход кладём сюда, а не спрашиваем у разбивки в момент печати: обрыв
+    называется только у проигравшей пары, и цепочка, не знающая исхода, назвала
+    бы обрывом ступень у пары, которая прошла целиком другой дорогой.
+    """
+    probe.update({"candidates": row["candidates"], "injected": row["injected"],
+                  "reason": row["reason"], "ok": bucket(row) == APPLIED})
     return probe
 
 
