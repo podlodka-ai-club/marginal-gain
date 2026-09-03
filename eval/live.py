@@ -86,7 +86,7 @@
     python3 -m eval.live --player replay          без модели и без трат
     python3 -m eval.live --arms both              с памятью и без, и разница
 """
-import argparse, fcntl, hashlib, json, os, re, shutil, signal, subprocess, sys, time, uuid
+import argparse, fcntl, hashlib, json, os, re, shutil, signal, sqlite3, subprocess, sys, time, uuid
 from collections import Counter, OrderedDict, namedtuple
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -809,7 +809,11 @@ def replies_of(path):
     """
     out = []
     try:
-        lines = Path(path).read_text(encoding="utf-8").splitlines()
+        # `errors="replace"`, а не строгий разбор: файл дописывается на ходу, и
+        # последняя строка может обрываться посреди буквы. Строгий разбор
+        # уронил бы весь разбор цепочки на таком хвосте.
+        lines = Path(path).read_text(encoding="utf-8",
+                                     errors="replace").splitlines()
     except OSError:
         return out
     for line in lines:
@@ -879,20 +883,40 @@ def facts_with(where, words):
     words = [w.strip().lower() for w in (words or []) if w and w.strip()]
     if not words:
         return None, 0
-    conn = db.connect(where)
     try:
+        conn = db.connect(where)
+    except Exception:
+        return None, 0     # база не открылась — это не «фактов ноль», см. ниже
+    try:
+        # Своя нижняя буква. Встроенный `lower()` в SQLite латинский: `Казань`
+        # он оставляет как есть, и `LIKE '%казан%'` не совпадает с фактом,
+        # который в базе лежит. Отчёт показал бы «фактов: 0» и назвал обрывом
+        # исправную запись — ровно та ошибка, ради которой цепочка и заведена.
+        conn.create_function("lc", 1, lambda text: (text or "").lower())
+        # Образец собирает `db.like`: `_` и `%` в слове набора — буквы, а не
+        # подстановка. Без этого вопрос про `on_prompt` считает за факт
+        # `onXpromptXpy`, то есть цепочка проскакивает настоящий обрыв.
+        marks_ = [db.like(word) for word in words]
+        where_sql = " OR ".join(
+            ["lc(subject) LIKE ? ESCAPE '\\' OR lc(content) LIKE ? ESCAPE '\\'"]
+            * len(words))
+        params = [p for mark in marks_ for p in (mark, mark)]
         out = []
         for table in ("fact", "lapsedfact"):
-            where_sql = " OR ".join(["lower(subject) LIKE ? OR lower(content) LIKE ?"]
-                                    * len(words))
-            params = [p for word in words for p in ("%%%s%%" % word,) * 2]
             try:
                 got = conn.execute('SELECT count(*) FROM "%s" WHERE %s'
                                    % (table, where_sql), params).fetchone()[0]
-            except Exception:
-                got = 0        # таблицы ещё нет — считаем, что и записей нет
+            except sqlite3.OperationalError as bad:
+                if "no such table" not in str(bad):
+                    raise      # сломанный запрос — не то же, что пустая таблица
+                got = 0
             out.append(got)
         return out[0], out[1]
+    except sqlite3.DatabaseError:
+        # База нечитаема. Отдаём «не знаем», а не ноль: ноль означает «искали и
+        # не нашли», и по нему отчёт назвал бы обрывом запись факта, ни разу в
+        # базу не заглянув.
+        return None, 0
     finally:
         conn.close()
 
@@ -920,8 +944,21 @@ def break_of(probe):
     """
     if not probe.get("expected", True) or probe.get("ok"):
         return ""
-    passed = [bool(probe.get(name)) for name in
-              ("marked", "facts", "candidates", "injected")]
+    facts, hit = probe.get("facts"), probe.get("candidates")
+    passed = [
+        # Разметка снимается с обвинения, как только факт в базе есть: вырез по
+        # шаблонам пишет и без всякого блока, и «обрыв: разметка» на доехавшем
+        # факте увёл бы починку в промпт, где всё исправно.
+        bool(probe.get("marked")) or bool(facts),
+        # «Не знаем» — не «нет». База не открылась (facts is None) — назвать
+        # обрывом запись факта значит обвинить её, ни разу в базу не заглянув.
+        facts is None or bool(facts),
+        # То же с поиском: счёта нет вовсе, когда заход оборвался раньше него
+        # (отказ носителя, вышедший срок), и лента поля не пишет — см.
+        # `ledger._found`. Ноль означает «сходил и вернулся пустым».
+        hit is None or bool(hit),
+        bool(probe.get("injected")),
+    ]
     return next((name for name, ok in zip(STEPS, passed) if not ok), "")
 
 
@@ -966,14 +1003,20 @@ def hooks_of_arm(arm):
     return arm != "bare"
 
 
-def keep_after(passed, done, asked=False):
+def keep_after(passed, done, asked=False, arm="memory"):
     """Оставлять ли песочницу после прогона.
 
     Ноль на досчитанном прогоне оставляем: разбирать обрыв иначе не по чему —
     ни базы, ни ленты, ни разговоров. Оборванный прогон уносим: он не досчитал,
     и хранить полпрогона значит хранить непонятно что.
+
+    Обещано это руке с памятью и только ей. Голая рука играет с выключенным
+    контуром, её ноль — ожидаемый исход, а не поломка; оставляй мы и её, каждый
+    прогон `--arms both` копил бы на диске по лишнему каталогу.
     """
-    return bool(asked) or (bool(done) and passed == 0)
+    if asked:
+        return True
+    return arm != "bare" and bool(done) and passed == 0
 
 
 class Bout:
@@ -1163,7 +1206,7 @@ def run(pairs=None, root=None, player="replay", limit=None, only=None,
         # фоновая половина хода ещё не дописала.
         if box.live_hooks:
             for pair in items:
-                report.probe[pair["id"]] = first_half(box, pair, talks)
+                report.probe[pair["id"]] = safe_half(box, pair, talks)
 
         say("")
         say("--- сессии 2: %d задач, каждая со своей сессии ---" % len(items))
@@ -1182,9 +1225,27 @@ def run(pairs=None, root=None, player="replay", limit=None, only=None,
                 % (number, len(items), pair["id"], bucket(report.asked[-1])))
         done = True
     finally:
-        report.kept = keep_after(report.passed, done, asked=keep)
+        report.kept = keep_after(report.passed, done, asked=keep,
+                                 arm=arm or "memory")
         box.close(keep=report.kept)
     return report
+
+
+def safe_half(box, pair, talks):
+    """Первые две ступени цепочки, но без права уронить прогон.
+
+    Цепочка считается после обеих сессий, то есть после всех трат. Дай разбору
+    упасть наружу — и прогон уйдёт в уборку недосчитанным, унеся базу, ленту и
+    разговоры, ради которых всё и затевалось. Оборванный разбор отдаёт
+    «не знаем» (`None`), и обрывом такая ступень не называется.
+    """
+    try:
+        return first_half(box, pair, talks)
+    except Exception:
+        return {"marked": False, "units": 0, "dropped": Counter(),
+                "facts": None, "lapsed": 0,
+                "expected": bool(pair.get("expect")), "ok": False,
+                "candidates": None, "injected": False, "reason": None}
 
 
 def first_half(box, pair, talks):
@@ -1288,7 +1349,7 @@ def main(argv=None):
         except (pairs.PairSetError, OSError, ValueError) as bad:
             print(bad, file=sys.stderr)
             return 1
-        played, arms = OrderedDict(), arms_of(args.arms)
+        played, arms, code = OrderedDict(), arms_of(args.arms), 0
         try:
             for arm in arms:
                 print("\n=== рука %s ===" % arm, flush=True)
@@ -1303,21 +1364,25 @@ def main(argv=None):
                                   echo=lambda line: print(line, flush=True))
         except UnsafeRun as bad:
             print(bad, file=sys.stderr)
-            return 2
+            code = 2
         except KeyboardInterrupt:
             print("\nпрогон оборван, песочница убрана", file=sys.stderr)
-            return 130
+            code = 130
     finally:
         signal.signal(signal.SIGTERM, was)
 
-    print()
-    print(Bout(played).text())
-    if args.out:
-        Path(args.out).write_text(
-            json.dumps({arm: report.asked for arm, report in played.items()},
-                       ensure_ascii=False, indent=1), encoding="utf-8")
-        print("\nпострочный итог -> %s" % args.out)
-    return 0
+    # Досчитанные руки печатаются и на обрыве. Рука стоит живых денег, и
+    # выбросить её итог оттого, что следующая не доиграла, значит заплатить
+    # дважды за одну цифру.
+    if played:
+        print()
+        print(Bout(played).text())
+        if args.out:
+            Path(args.out).write_text(
+                json.dumps({arm: report.asked for arm, report in played.items()},
+                           ensure_ascii=False, indent=1), encoding="utf-8")
+            print("\nпострочный итог -> %s" % args.out)
+    return code
 
 
 if __name__ == "__main__":

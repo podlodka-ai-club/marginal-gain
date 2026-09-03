@@ -47,7 +47,7 @@ os.environ.setdefault("XMEM_INSTANCE_ID", "test-instance")
 from domain import ledger, marks
 from eval import live
 from pipeline import suggest
-from storage import local, port
+from storage import db, local, port
 
 SLOW = settings(deadline=None, max_examples=25,
                 suppress_health_check=[HealthCheck.too_slow,
@@ -257,10 +257,44 @@ class TestTheBreakIsTheFirstNo(unittest.TestCase):
 
     @SLOW
     @given(steps=STEPS)
-    def test_a_losing_pair_is_broken_at_its_first_no(self, steps):
-        got = live.break_of(a_probe(*steps, ok=False))
-        first = next((name for name, ok in zip(live.STEPS, steps) if not ok), "")
-        self.assertEqual(got, first)
+    def test_the_named_step_never_shows_success(self, steps):
+        """Названная ступень не та, у которой на руках доказательство успеха.
+
+        Проверяем по уликам, а не повтором формулы: факт в базе, кандидаты у
+        поиска, вброс в ленте. Обвинить ступень, чью работу видно, — та самая
+        ошибка, из-за которой починка уходит в исправное.
+        """
+        marked, facts, hit, injected = steps
+        probe = a_probe(*steps, ok=False)
+        got = live.break_of(probe)
+        if facts:
+            self.assertNotEqual(got, "факт в БД")
+            self.assertNotEqual(got, "разметка", "факт доехал, разметка ни при чём")
+        if hit:
+            self.assertNotEqual(got, "кандидат")
+        if injected:
+            self.assertNotEqual(got, "вброс")
+        if marked:
+            self.assertNotEqual(got, "разметка")
+
+    @SLOW
+    @given(steps=STEPS)
+    def test_a_step_before_the_named_one_never_shows_failure(self, steps):
+        """Раньше названной ступени всё сработало — иначе обрыв назван поздно."""
+        probe = a_probe(*steps, ok=False)
+        got = live.break_of(probe)
+        if not got:
+            return
+        at = live.STEPS.index(got)
+        evidence = (steps[0] or steps[1], steps[1], steps[2], steps[3])
+        self.assertTrue(all(evidence[:at]),
+                        "перед обрывом тоже «нет»: обрыв назван слишком поздно")
+
+    def test_a_wholly_silent_chain_is_broken_at_the_marking(self):
+        """Всё молчит — обрыв на первой ступени, а не на удобной."""
+        self.assertEqual(
+            live.break_of(a_probe(False, False, False, False, ok=False)),
+            "разметка")
 
     @SLOW
     @given(steps=STEPS)
@@ -271,8 +305,13 @@ class TestTheBreakIsTheFirstNo(unittest.TestCase):
     @SLOW
     @given(steps=STEPS)
     def test_a_losing_pair_with_a_silent_step_always_names_one(self, steps):
-        """Проигравшая пара с молчащей ступенью обрыв называет, а не молчит."""
-        if all(steps):
+        """Проигравшая пара с молчащей ступенью обрыв называет, а не молчит.
+
+        Молчание разметки при доехавшем факте молчанием ступени не считается:
+        знание пришло второй дорогой, и обвинять там нечего.
+        """
+        effective = (steps[0] or steps[1],) + tuple(steps[1:])
+        if all(effective):
             return
         self.assertNotEqual(live.break_of(a_probe(*steps, ok=False)), "")
 
@@ -318,6 +357,46 @@ class TestTheBreakIsTheFirstNo(unittest.TestCase):
         probe = live.second_half(a_probe(*steps), row)
         self.assertEqual(live.break_of(probe), "")
 
+    @SLOW
+    @given(candidates=st.booleans(), injected=st.booleans())
+    def test_a_fact_in_the_base_clears_the_marking_stage(self, candidates,
+                                                         injected):
+        """Факт доехал — разметку обрывом не называем, даже если блока не было.
+
+        До базы знание доезжает двумя дорогами, и вырез по шаблонам работает
+        без всякого блока. Пара, чей факт в базе лежит, а проиграла на поиске,
+        должна отсылать к поиску: «обрыв: разметка» увёл бы починку в промпт,
+        где всё исправно.
+        """
+        probe = a_probe(False, True, candidates, injected, reason="not_found")
+        self.assertNotEqual(live.break_of(probe), "разметка")
+
+    @SLOW
+    @given(marked=st.booleans())
+    def test_a_search_that_never_ran_is_not_blamed_for_finding_nothing(self,
+                                                                      marked):
+        """Счёта кандидатов нет — значит до поиска не дошло, а не «нашли ноль».
+
+        Отказ носителя и вышедший срок обрывают заход раньше поиска, и лента
+        поля `found` в такой строке не пишет вовсе (`ledger._found`). Прими мы
+        его отсутствие за ноль — отчёт послал бы чинить поиск вместо носителя.
+        """
+        probe = a_probe(marked, True, True, False, reason="backend_error")
+        probe["candidates"] = None
+        self.assertNotEqual(live.break_of(probe), "кандидат")
+
+    def test_a_search_that_ran_and_found_nothing_is_still_blamed(self):
+        """Ноль кандидатов — это поиск сходил и вернулся пустым. Обрыв на нём."""
+        probe = a_probe(True, True, False, False, reason="not_found")
+        probe["candidates"] = 0
+        self.assertEqual(live.break_of(probe), "кандидат")
+
+    def test_an_unknown_fact_count_is_not_blamed_either(self):
+        """База не читалась — обрывом называем не запись факта."""
+        probe = a_probe(True, True, False, False, reason="not_found")
+        probe["facts"] = None
+        self.assertNotEqual(live.break_of(probe), "факт в БД")
+
     def test_a_negative_pair_is_not_blamed_for_an_empty_base(self):
         """У отрицательной пары ждать нечего: ступени фактов у неё нет.
 
@@ -327,6 +406,69 @@ class TestTheBreakIsTheFirstNo(unittest.TestCase):
         probe = a_probe(True, False, False, False, reason="not_found")
         probe["expected"] = False
         self.assertEqual(live.break_of(probe), "")
+
+
+class TestTheFactCountReadsTheBase(unittest.TestCase):
+    """Свойство 3а. Счёт фактов ищет слово, а не словоформу и не шаблон.
+
+    Ступень «факт в БД» — та, по которой отчёт решает, доехало ли знание.
+    Соврёт она — обрыв назовётся не там, и починка уйдёт в исправное.
+    """
+
+    def a_base(self, tmp, rows):
+        base = Path(tmp) / "memory.db"
+        conn = db.connect(base)
+        db.migrate(conn)
+        for subject, content in rows:
+            conn.execute(
+                'INSERT INTO "fact" (fact_type, subject, scope, content) '
+                "VALUES ('preference', ?, 'global', ?)", (subject, content))
+        conn.commit()
+        conn.close()
+        return base
+
+    @SLOW
+    @given(word=st.sampled_from(["Казан", "казан", "КАЗАН", "КаЗаН"]))
+    def test_a_capital_cyrillic_word_is_found(self, word):
+        """Кириллица с прописной находится. `lower()` в SQLite её не трогает.
+
+        Слово набор даёт как есть («Казан»), а факт модель пишет как придётся
+        («Казань», «в Казани»). Сравнение, слепое к регистру только в латинице,
+        показало бы «фактов: 0» на факте, который лежит в базе.
+        """
+        with tempfile.TemporaryDirectory() as tmp:
+            base = self.a_base(tmp, [("Казань", "человек живёт в Казани")])
+            alive, _ = live.facts_with(base, [word])
+            self.assertEqual(alive, 1, "факт в базе есть, а счёт его не увидел")
+
+    def test_an_underscore_is_a_letter_and_not_a_wildcard(self):
+        """`_` в слове — буква. Иначе счёт находит факт, которого нет.
+
+        Тот же баг, ради которого в `storage/db.py` живёт `like()`: вопрос про
+        `on_prompt` находил заодно `onXpromptXpy`. Ложная единица здесь хуже
+        нуля — она пропускает настоящий обрыв и винит следующую ступень.
+        """
+        with tempfile.TemporaryDirectory() as tmp:
+            base = self.a_base(tmp, [("onXpromptXpy", "правился onXpromptXpy")])
+            self.assertEqual(live.facts_with(base, ["on_prompt"])[0], 0)
+            self.assertEqual(live.facts_with(base, ["onXprompt"])[0], 1)
+
+    def test_a_percent_sign_is_a_letter_too(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            base = self.a_base(tmp, [("скидка", "цена упала на 20 процентов")])
+            self.assertEqual(live.facts_with(base, ["%"])[0], 0)
+
+    def test_an_unreadable_base_is_not_reported_as_an_empty_one(self):
+        """База не открылась — это не «фактов ноль».
+
+        Ноль здесь означал бы «искали и не нашли», и отчёт назвал бы обрывом
+        запись факта, ни разу в базу не заглянув.
+        """
+        with tempfile.TemporaryDirectory() as tmp:
+            broken = Path(tmp) / "memory.db"
+            broken.write_text("это не база", encoding="utf-8")
+            alive, _ = live.facts_with(broken, ["овсян"])
+            self.assertIsNone(alive, "нечитаемая база выдана за пустую")
 
 
 # --- 4. кандидаты ------------------------------------------------------------
@@ -481,6 +623,44 @@ class TestAZeroKeepsTheSandbox(unittest.TestCase):
         """Обрыв песочницу уносит: сохранять нечего, прогон не досчитал."""
         self.assertFalse(live.keep_after(passed=passed, done=False, asked=False))
         self.assertTrue(live.keep_after(passed=passed, done=False, asked=True))
+
+    @SLOW
+    @given(passed=st.integers(min_value=0, max_value=5))
+    def test_the_bare_arm_leaves_no_sandbox_behind(self, passed):
+        """Голая рука песочницу не копит: её ноль — ожидаемый, а не поломка.
+
+        Рука играет с выключенным контуром и обязана давать около нуля.
+        Оставляй мы её песочницу, каждый прогон `--arms both` копил бы на диске
+        по каталогу, а обещано это только руке с памятью.
+        """
+        self.assertFalse(live.keep_after(passed=passed, done=True, asked=False,
+                                         arm="bare"))
+        self.assertTrue(live.keep_after(passed=passed, done=True, asked=True,
+                                        arm="bare"), "явную просьбу уважаем")
+
+    def test_a_broken_probe_does_not_cost_the_run_its_evidence(self):
+        """Поломка разбора цепочки не уносит песочницу оплаченного прогона.
+
+        Цепочка считается после обеих сессий, то есть после всех трат. Дай ей
+        упасть наружу — и прогон уйдёт в уборку недосчитанным, унеся базу,
+        ленту и разговоры, ради которых всё и затевалось.
+        """
+        class Boom(dict):
+            """Разговоры, на которых разбор спотыкается на полпути."""
+
+            def get(self, *_):
+                raise UnicodeDecodeError("utf-8", b"", 0, 1, "обрубленный хвост")
+
+        with tempfile.TemporaryDirectory() as tmp:
+            box = mock.Mock(db=Path(tmp) / "memory.db")
+            probe = live.safe_half(
+                box, {"id": "пара", "expect": ["овсян"],
+                      "tell": [{"say": "было дело", "place": "кухня"}]}, Boom())
+        self.assertIsNone(probe["facts"], "неизвестное выдано за ноль")
+        self.assertFalse(probe["marked"])
+        # Ступень, про которую разбор ничего не узнал, обрывом не называется:
+        # иначе поломка отчёта читалась бы как поломка памяти.
+        self.assertEqual(live.break_of(dict(probe, ok=False)), "разметка")
 
     def test_a_kept_sandbox_prints_its_path(self):
         """Путь к сохранённой песочнице печатается: иначе её не найти."""
