@@ -835,7 +835,8 @@ python3 -m eval.evaluate              # прогон по набору, моме
 python3 -m eval.evaluate --as-of 2026-08-01   # тот же набор на другом состоянии базы
 python3 -m eval.live --player replay  # прогон замера целиком, без трат
 
-python3 -m pytest                     # вся батарея
+python3 -m pytest -q                  # быстрая батарея, меньше минуты
+XMEM_SLOW=1 python3 -m pytest -q -m slow   # три проверки живого прогона, до четырёх минут
 ```
 
 По умолчанию всё работает вхолостую. Отправка включается ключом `--send`.

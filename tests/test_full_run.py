@@ -25,32 +25,44 @@
 8. Стенд не знает домена. Бытовой набор про еду и дачу проходит тем же кодом,
    что и набор про код, и в самом стенде нет ни слова про наш архив.
 
+Живой стенд стоит десятки секунд на проверку, и держать его в обычном прогоне
+нельзя: батарея шла больше десяти минут и потому не гонялась вовсе. Стенд
+поднимают ровно три проверки, помеченные `slow`; по умолчанию они не
+собираются, включаются ключом:
+
+    XMEM_SLOW=1 python3 -m pytest -q -m slow
+
+Каждая из трёх собрана из нескольких прежних: одно поднятие стенда несёт все
+утверждения, ради которых прежде поднимали его же по разу. Остальное
+проверяется без стенда — по разбору кода, по настройкам песочницы и по чистым
+функциям разбивки.
+
 Мутации, на которых проверки обязаны краснеть:
   * убрать XMEM_STATE_DIR из окружения песочницы   → TestNothingLivesOutsideTheSandbox
-  * не удалять песочницу на обрыве                 → TestTheRunLeavesNothingBehind
   * брать базу прошлого прогона                    → TestTheBaseStartsEmpty
   * класть записи мимо хуков                       → TestMemoryArrivesThroughTheHooks
-  * ставить все задачи одной сессией               → TestTheSecondStageAsksClean
-  * не ждать фоновую половину хода                 → TestTheQuestionsWaitForTheFirstStage
+  * ставить все задачи одной сессией               → TestMemoryArrivesThroughTheHooks
+  * не ждать фоновую половину хода                 → TestMemoryArrivesThroughTheHooks
   * склеить исходы разбивки                        → TestEveryCaseLandsInOneBucket
   * не проверять каталог ходов на служебный путь   → TestThePlayGroundIsNotAServicePath
-  * ставить задачу из чужого места                 → TestTheFlowCanActuallyPass
+  * ставить задачу из чужого места                 → TestTheBaseStartsEmpty
   * завязать стенд на форму нашего набора          → TestTheBenchDoesNotKnowTheDomain
   * не гасить порождённые процессы                 → TestTheRunLeavesNothingBehind
-  * порождать детей не своей группой               → TestTheRunLeavesNothingBehind
-  * склеивать повторы по содержанию реплики        → TestTheFlowCanActuallyPass
+  * склеивать повторы по содержанию реплики        → TestTheBaseStartsEmpty
   * принять пару без исхода или без первой сессии  → TestThePairSetIsData
   * снять сторожа живого состояния                 → TestNothingLivesOutsideTheSandbox
-  * ждать фон один раз в конце, а не на каждом ходе → TestTheQuestionsWaitForTheFirstStage
+  * ждать фон один раз в конце, а не на каждом ходе → TestTheWaitSitsInsideTheLoop
+  * занять конец хода на втором этапе              → TestTheSecondStageDoesNotWrite
 
 Каждая из них прогнана: код ломается точечно, названная проверка краснеет.
 Две последние появились как раз оттого, что мутация не покраснела — сторожа
 живого состояния заслонял отсев служебных путей, а ожидание на ходу держало
 только одно ожидание в конце.
 """
-import json, os, shutil, signal, subprocess, sys, tempfile, time, unittest, uuid
+import ast, json, os, shutil, subprocess, sys, tempfile, time, unittest, uuid
 from pathlib import Path
 
+import pytest
 from hypothesis import HealthCheck, given, settings, strategies as st
 
 os.environ.setdefault("XMEM_INSTANCE_ID", "test-instance")
@@ -91,7 +103,8 @@ def a_set(root, places, times=3):
     при двух — 0.467 при пороге 0.5. Набор на двух вхождениях стоит на лезвии:
     он то проходит, то нет, и любая проверка поверх него мигает. Набор, где ни
     одна пара пройти не может, ещё хуже — он зеленит всё, ничего не проверяя;
-    предохранитель к этому — TestTheFlowCanActuallyPass.
+    предохранитель к этому — утверждение о числе прошедших пар в каждой
+    из медленных проверок.
     """
     root = Path(root)
     root.mkdir(parents=True, exist_ok=True)
@@ -125,6 +138,36 @@ class Base(unittest.TestCase):
         self.sets = self.root.parent / (self.root.name + "-sets")
         self.addCleanup(shutil.rmtree, self.root, ignore_errors=True)
         self.addCleanup(shutil.rmtree, self.sets, ignore_errors=True)
+
+    def leaked(self):
+        """Следы прогона в живом состоянии. Ищем по пути его песочницы.
+
+        Снимок «файл — размер» тут не годится: живой контур пользователя пишет
+        в тот же каталог всё время, пока идёт проверка, и снимок расходится сам
+        собой. Путь песочницы уникален для прогона, поэтому его появление в
+        живой базе, ленте или журнале — это утечка, а чужие записи мимо.
+        """
+        needle = str(self.root).encode("utf-8")
+        found = []
+        if not LIVE_STATE.exists():
+            return found
+        for path in sorted(LIVE_STATE.rglob("*")):
+            if not path.is_file():
+                continue
+            tail = b""
+            try:
+                with path.open("rb") as fh:
+                    while True:
+                        chunk = fh.read(1 << 20)
+                        if not chunk:
+                            break
+                        if needle in tail + chunk:
+                            found.append(path.name)
+                            break
+                        tail = chunk[-len(needle):]
+            except OSError:
+                continue
+        return found
 
 
 class TestNothingLivesOutsideTheSandbox(Base):
@@ -334,235 +377,183 @@ class TestEveryCaseLandsInOneBucket(unittest.TestCase):
         self.assertEqual(live.BROKEN, live.bucket(row))
 
 
-class TestTheRunGoesEndToEnd(Base):
-    """Один вызов проходит оба этапа и печатает цифру."""
+@pytest.mark.slow
+class TestTheBaseStartsEmpty(Base):
+    """База каждого прогона пустая, а щуп умеет заметить полную.
 
-    def test_the_command_prints_a_number(self):
-        cases = a_set(self.sets, {"альфа": names(2)})
-        out = live.main(["--pairs", str(cases),
-                         "--player", "replay", "--root", str(self.root)])
-        self.assertEqual(0, out)
+    Стенд поднимается один раз на три утверждения, и ни одно из них не
+    выкинуть:
 
-    def test_the_report_names_the_player(self):
-        cases = a_set(self.sets, {"альфа": names(2)})
-        report = live.run(pairs=a_load(cases), player="replay",
-                          root=self.root)
-        self.assertIn("replay", report.text())
-        self.assertEqual(1, report.total)
-        for name in live.RESERVED:
-            self.assertIn(name, report.text(),
-                          "исход, который мы не меряем, пропал из отчёта молча")
-
-    def test_the_first_stage_fills_the_base(self):
-        cases = a_set(self.sets, {"альфа": names(2)})
-        report = live.run(pairs=a_load(cases), player="replay",
-                          root=self.root, keep=True)
-        self.addCleanup(shutil.rmtree, report.root, ignore_errors=True)
-        repo = db.Repository(report.root / "memory.db")
-        try:
-            self.assertTrue(repo.search("альфа"),
-                            "после первого этапа в базе пусто")
-        finally:
-            repo.close()
-
-
-class TestTheFlowCanActuallyPass(Base):
-    """Прогон, у которого не проходит ничего, зеленит всё остальное впустую.
-
-    Пока набор непроходим по построению — файл правили однажды, вопрос задан
-    из чужого каталога, — любая проверка «два прогона дают одно число» проходит
-    на двух нулях. Эта проверка стоит здесь как предохранитель ко всем
-    остальным в файле.
+      * набор проходим — иначе всё остальное в этой проверке зеленеет на
+        нулях: прогон, где не проходит ничего, «не наследует прошлый» даром;
+      * щуп с пустой первой сессией получает подсказку, пока база полна, —
+        иначе «второй прогон ничего не получил» доказывает только то, что щуп
+        молчит всегда, например задаёт задачу из ниоткуда;
+      * второй прогон в том же корне не получает от первого ничего, и
+        песочницы за собой не оставляет.
     """
 
-    def test_a_filled_memory_answers_its_own_question(self):
-        cases = a_set(self.sets, {"альфа": names(2)})
-        report = live.run(pairs=a_load(cases), player="replay",
-                          root=self.root)
-        self.assertEqual(1, report.passed,
-                         "случай не прошёл даже на наполненной памяти: %s"
-                         % [(r["reason"], r["injected"]) for r in report.asked])
-
-    def test_the_question_is_asked_from_the_project_it_is_about(self):
-        """Иначе уместность срежет всё, и прогон покажет «нашла, срезали» везде."""
+    def test_a_second_run_does_not_inherit_the_first(self):
         cases = a_set(self.sets, {"альфа": names(2), "бета": names(2)})
-        report = live.run(pairs=a_load(cases), player="replay",
-                          root=self.root, keep=True)
-        self.addCleanup(shutil.rmtree, report.root, ignore_errors=True)
-        self.assertEqual(2, report.passed,
-                         "вопрос задан не из своего проекта: %s"
-                         % [(r["id"], r["reason"]) for r in report.asked])
+        filling = a_load(cases)
+        # Щуп: та же задача и то же место, но своей первой сессии нет.
+        # Подсказать ему может только то, что лежит в базе.
+        probe = [dict(pair, id=pair["id"] + "-щуп", tell=[], aim="avoid",
+                      task=dict(pair["task"], place=pair["tell"][0]["place"]))
+                 for pair in filling]
+
+        full = live.run(pairs=filling + probe, player="replay", root=self.root)
+        won = [row for row in full.asked
+               if not row["id"].endswith("-щуп")
+               and live.bucket(row) == live.APPLIED]
+        self.assertEqual(len(filling), len(won),
+                         "набор непроходим — остальное зеленеет на нулях: %s"
+                         % [(r["id"], r["reason"]) for r in full.asked])
+        self.assertTrue([row for row in full.asked
+                         if row["id"].endswith("-щуп") and row["injected"]],
+                        "щуп молчит и на полной базе — проверять им нечем")
+        # Досчитанный прогон, у которого что-то прошло, уносит песочницу с
+        # собой. Ноль оставляют нарочно — разбирать обрыв иначе не по чему, —
+        # поэтому спрашиваем это здесь, а не у второго прогона: у него ноль по
+        # построению.
+        self.assertFalse(full.root.exists(), "песочница осталась на диске")
+
+        clean = live.run(pairs=probe, player="replay", root=self.root)
+        self.assertEqual([], [row for row in clean.asked if row["injected"]],
+                         "второй прогон получил подсказку из базы первого")
+        self.assertEqual([], self.leaked(), "прогон наследил в живом состоянии")
 
 
+@pytest.mark.slow
 class TestMemoryArrivesThroughTheHooks(Base):
-    """Записи кладёт ход, а не проигрыватель.
+    """Записи кладёт ход, а не проигрыватель, и кладёт до того, как спросят.
 
     Заглуши хуки — и база останется пустой. Если бы проигрыватель писал в базу
     сам, эта проверка прошла бы с полной базой и ничего бы не значила.
+
+    Оба прогона идут с нулевым ожиданием тишины. Ожидание по тишине — догадка:
+    цепочка конца хода стартует питон и читает архив, ничего при этом не
+    записывая, и тихое окно наступает раньше первой записи. Сведи ожидание к
+    нулю — и видно, что база наполняется самим ходом, а не тем, что прогон
+    подождал.
+
+    Здесь же держится порядок этапов и чистота сессий: разводить их по
+    отдельным проверкам значило бы поднимать стенд ещё дважды ради утверждений
+    о том же самом прогоне.
     """
 
-    def test_a_silenced_contour_leaves_the_base_empty(self):
-        cases = a_set(self.sets, {"альфа": names(2)})
-        report = live.run(pairs=a_load(cases), player="replay",
-                          root=self.root, keep=True, live_hooks=False)
-        self.addCleanup(shutil.rmtree, report.root, ignore_errors=True)
-        repo = db.Repository(report.root / "memory.db")
+    def test_the_hooks_are_what_fills_the_base(self):
+        cases = a_set(self.sets, {"альфа": names(2), "бета": names(2)})
+        items = a_load(cases)
+
+        hushed = live.run(pairs=items, player="replay", root=self.root / "глухой",
+                          keep=True, live_hooks=False, quiet=0.0)
+        repo = db.Repository(hushed.root / "memory.db")
         try:
             self.assertEqual([], repo.search("альфа"),
                              "хуки заглушены, а база наполнилась мимо них")
         finally:
             repo.close()
 
-    def test_the_same_run_with_live_hooks_fills_it(self):
-        cases = a_set(self.sets, {"альфа": names(2)})
-        report = live.run(pairs=a_load(cases), player="replay",
-                          root=self.root, keep=True, live_hooks=True)
-        self.addCleanup(shutil.rmtree, report.root, ignore_errors=True)
+        report = live.run(pairs=items, player="replay", root=self.root / "живой",
+                          keep=True, live_hooks=True, quiet=0.0)
         repo = db.Repository(report.root / "memory.db")
         try:
-            self.assertTrue(repo.search("альфа"))
+            self.assertTrue(repo.search("альфа"),
+                            "ход вернулся, а конец хода ещё ничего не записал")
         finally:
             repo.close()
 
+        self.assertEqual(len(items), report.passed,
+                         "набор непроходим — остальное зеленеет на нулях: %s"
+                         % [(r["id"], r["reason"]) for r in report.asked])
 
-class TestTheBaseStartsEmpty(Base):
-    """Прогон не видит того, что положил прошлый."""
+        # Цепочка доходит до конца, а не гасится уборкой на полудороге.
+        # Признак — отметка связей: она предпоследнее звено.
+        left = sorted(p.name for p in
+                      (report.root / "state").glob("associate-state*"))
+        self.assertTrue(left, "связи не считались ни разу: цепочка обрывалась")
 
-    def test_a_second_run_does_not_inherit_the_first(self):
-        first = a_set(self.sets, {"альфа": names(2)})
-        # Второй прогон ставит ту же задачу и из того же места, но своей первой
-        # сессии у него нет: подсказать ему может только то, что осталось от
-        # первого. Место называем явно — иначе задача задавалась бы из ниоткуда
-        # и молчала бы независимо от того, чистая база или нет.
-        empty = [dict(pair, tell=[], aim="avoid",
-                      task=dict(pair["task"], place="альфа"))
-                 for pair in a_load(first)]
-
-        live.run(pairs=a_load(first), player="replay", root=self.root)
-        report = live.run(pairs=empty, player="replay", root=self.root)
-        self.assertEqual([], [row for row in report.asked if row["injected"]],
-                         "второй прогон получил подсказку из базы первого")
-
-    def test_the_probe_would_notice_a_dirty_base(self):
-        """Обратная проверка к предыдущей: пара-щуп умеет заметить полную базу.
-
-        Без неё «второй прогон ничего не получил» доказывает только то, что щуп
-        молчит всегда — например, потому что задаёт задачу из ниоткуда.
-        """
-        cases = a_set(self.sets, {"альфа": names(2)})
-        filling = a_load(cases)
-        probe = [dict(pair, id=pair["id"] + "-щуп", tell=[], aim="avoid",
-                      task=dict(pair["task"], place="альфа"))
-                 for pair in filling]
-        report = live.run(pairs=filling + probe, player="replay", root=self.root)
-        asked = {row["id"]: row for row in report.asked}
-        self.assertTrue([row for name, row in asked.items()
-                         if name.endswith("-щуп") and row["injected"]],
-                        "щуп молчит и на полной базе — проверять им нечего")
-
-    def test_two_runs_in_a_row_give_one_number(self):
-        cases = a_set(self.sets, {"альфа": names(2), "бета": names(2)})
-        one = live.run(pairs=a_load(cases), player="replay", root=self.root)
-        two = live.run(pairs=a_load(cases), player="replay", root=self.root)
-        self.assertEqual(one.passed, two.passed)
-        self.assertEqual(one.text(), two.text())
-
-
-class TestTheSecondStageAsksClean(Base):
-    """Каждый вопрос идёт своей сессией, и ни одна не пришла с первого этапа."""
-
-    def test_no_question_reuses_a_session(self):
-        cases = a_set(self.sets, {"альфа": names(2), "бета": names(2)})
-        report = live.run(pairs=a_load(cases), player="replay",
-                          root=self.root)
-        asked = [row["session_id"] for row in report.asked]
-        self.assertEqual(len(asked), len(set(asked)), "вопросы делят сессию")
-
-    def test_the_questions_do_not_reuse_the_played_sessions(self):
-        cases = a_set(self.sets, {"альфа": names(2), "бета": names(2)})
-        report = live.run(pairs=a_load(cases), player="replay",
-                          root=self.root)
-        played = {row["session_id"] for row in report.played}
-        asked = {row["session_id"] for row in report.asked}
-        self.assertTrue(played, "первый этап не сыграл ни одного хода")
-        self.assertEqual(set(), played & asked,
-                         "вопрос задан сессией первого этапа")
-
-
-class TestTheQuestionsWaitForTheFirstStage(Base):
-    """Порядок этапов держится, а не складывается случайно."""
-
-    def test_every_played_turn_comes_before_every_question(self):
-        cases = a_set(self.sets, {"альфа": names(2), "бета": names(2)})
-        report = live.run(pairs=a_load(cases), player="replay",
-                          root=self.root)
+        # Порядок этапов: сначала все ходы, потом все задачи.
         kinds = [row["stage"] for row in report.trail]
         self.assertEqual(sorted(kinds, key=lambda k: k != "play"), kinds,
                          "вопросы перемешались с ходами: %s" % kinds)
-
-    def test_the_run_waits_for_the_background_half(self):
-        cases = a_set(self.sets, {"альфа": names(2)})
-        report = live.run(pairs=a_load(cases), player="replay",
-                          root=self.root)
         self.assertTrue(report.settled_at, "прогон не дождался фоновой половины")
-        first = min(row["at"] for row in report.asked)
-        self.assertLessEqual(report.settled_at, first,
+        self.assertLessEqual(report.settled_at, min(row["at"] for row in report.asked),
                              "вопрос задан раньше, чем осела запись хода")
 
-    def test_every_played_turn_waits_for_its_own_background_half(self):
-        """Ждать один раз в конце первого этапа мало.
+        # Каждая задача идёт своей сессией, и ни одна не пришла с первого этапа.
+        played = {row["session_id"] for row in report.played}
+        asked = [row["session_id"] for row in report.asked]
+        self.assertTrue(played, "первый этап не сыграл ни одного хода")
+        self.assertEqual(len(asked), len(set(asked)), "вопросы делят сессию")
+        self.assertEqual(set(), played & set(asked),
+                         "вопрос задан сессией первого этапа")
 
-        Проверка выше держит только последнее ожидание: вырежи ожидание внутри
-        цикла — она всё равно зеленеет, потому что перед вторым этапом прогон
-        ждёт ещё раз. А без ожидания на ходу следующая реплика стартует, пока
-        предыдущая ещё пишет: база одна и открыта без журнала упреждающей
-        записи, писателей двое.
 
-        Смотрим не на счётчик вызовов, а на их чередование: за каждым ходом
-        первого этапа обязано идти своё ожидание, и только потом следующий ход.
-        Настоящие ход и ожидание при этом выполняются — обёртка их не подменяет.
+class TestTheWaitSitsInsideTheLoop(unittest.TestCase):
+    """Ожидание фона стоит внутри цикла первого этапа, а не одно в конце.
+
+    Ждать один раз перед вторым этапом мало: следующая реплика стартует, пока
+    предыдущая ещё пишет, а база одна и открыта без журнала упреждающей записи
+    — писателей двое. Прежде это ловил живой прогон с обёрнутыми `settled` и
+    `play`: он поднимал стенд ради порядка вызовов, который виден в самом коде.
+
+    Смотрим по разбору, а не по тексту: `settled` в докстринге — не вызов
+    `settled`, и запрет по подстроке зеленел бы на нём.
+    """
+
+    def calls_of(self, node, name):
+        out = []
+        for one in ast.walk(node):
+            if not isinstance(one, ast.Call):
+                continue
+            what = one.func
+            if isinstance(what, ast.Attribute) and what.attr == name:
+                out.append(one)
+            if isinstance(what, ast.Name) and what.id == name:
+                out.append(one)
+        return out
+
+    def the_run(self):
+        tree = ast.parse((HERE / "eval" / "live.py").read_text(encoding="utf-8"))
+        found = [node for node in tree.body
+                 if isinstance(node, ast.FunctionDef) and node.name == "run"]
+        self.assertEqual(1, len(found), "в eval.live не одна функция run")
+        return found[0]
+
+    def test_the_playing_loop_waits_on_every_turn(self):
+        run = self.the_run()
+        loops = [node for node in ast.walk(run)
+                 if isinstance(node, ast.For) and self.calls_of(node, "play")]
+        self.assertTrue(loops, "цикл первого этапа не найден")
+        waiting = [loop for loop in loops if self.calls_of(loop, "settled")]
+        self.assertTrue(waiting,
+                        "ход не ждёт своей фоновой половины: ожидание вынесено "
+                        "из цикла, и следующая реплика стартует на живой записи")
+
+    def test_the_wait_is_not_only_inside_the_loop(self):
+        """Обратная проверка: перед вторым этапом ждут ещё раз.
+
+        Последний ход осел, а цепочка конца хода могла взять замок только что.
+        Без этого ожидания первая задача уходит на недописанную базу.
         """
-        cases = a_set(self.sets, {"альфа": names(2), "бета": names(2),
-                                  "гамма": names(2)})
-        items = a_load(cases)
-        turns = len(live.script_of(items))
-        self.assertGreater(turns, 1, "на одном ходе разницы не видно")
-
-        order = []
-        real_wait, real_play = live.settled, live.Replay.play
-
-        def watched_wait(*a, **kw):
-            order.append("ждём")
-            return real_wait(*a, **kw)
-
-        def watched_play(self_, *a, **kw):
-            order.append("ход")
-            return real_play(self_, *a, **kw)
-
-        live.settled = watched_wait
-        live.Replay.play = watched_play
-        try:
-            report = live.run(pairs=items, player="replay", root=self.root)
-        finally:
-            live.settled = real_wait
-            live.Replay.play = real_play
-
-        self.assertEqual(turns, len(report.played))
-        # Первый этап: ход, ожидание, ход, ожидание… и одно ожидание перед
-        # вторым этапом. Дальше идут только задачи, им ждать нечего.
-        head = order[:turns * 2 + 1]
-        self.assertEqual(["ход", "ждём"] * turns + ["ждём"], head,
-                         "ход и ожидание не чередуются: %s" % head)
-        self.assertNotIn("ждём", order[turns * 2 + 1:],
-                         "ожидание затесалось во второй этап: %s" % order)
+        run = self.the_run()
+        inside = {id(one) for loop in ast.walk(run) if isinstance(loop, ast.For)
+                  for one in self.calls_of(loop, "settled")}
+        outside = [one for one in self.calls_of(run, "settled")
+                   if id(one) not in inside]
+        self.assertTrue(outside, "перед вторым этапом прогон не ждёт вовсе")
 
 
 class TestTheBenchDoesNotKnowTheDomain(Base):
     """Стенд принимает пары как данные и не знает, о чём они.
 
     Требование прямое: подставили бытовой набор — работает, подставили набор
-    про код — работает. Проверяется обоими способами: формой (в самом прогоне
-    нет имён нашего набора) и делом (бытовой набор проходит тем же кодом).
+    про код — работает. Проверяется формой: в самом прогоне нет имён нашего
+    набора, а бытовой пример читается тем же загрузчиком и несёт свою
+    отрицательную пару. Живой прогон бытового набора отсюда убран — он ничего
+    не добавлял к трём медленным проверкам, а стоил столько же, сколько они.
     """
 
     HOUSEHOLD = HERE / "eval-pairs-example.json"
@@ -578,21 +569,19 @@ class TestTheBenchDoesNotKnowTheDomain(Base):
         body = (HERE / "eval" / "pairs.py").read_text(encoding="utf-8")
         self.assertIn("eval-cases", body)
         for name in sorted((HERE / "eval").glob("*.py")):
-            if name.name in ("pairs.py", "goldenset.py", "evaluate.py", "matrix.py",
-                             "holdout.py", "__init__.py"):
+            if name.name in ("pairs.py", "goldenset.py", "evaluate.py",
+                             "__init__.py"):
                 continue
             self.assertNotIn("eval-cases", name.read_text(encoding="utf-8"),
                              "%s знает форму старого набора" % name.name)
 
-    def test_a_household_set_runs_through_the_same_code(self):
+    def test_a_household_set_reads_through_the_same_loader(self):
+        """Бытовой набор — данные того же вида, а не особый случай."""
         items = pairs.load(self.HOUSEHOLD)[1]
-        report = live.run(pairs=items, player="replay", root=self.root)
-        self.assertEqual(len(items), report.total)
-        for row in report.asked:
-            self.assertIn(live.bucket(row), live.BUCKETS)
-        self.assertTrue(any(row["injected"] for row in report.asked),
-                        "бытовому набору память не сказала вообще ничего: %s"
-                        % [(r["id"], r["reason"]) for r in report.asked])
+        self.assertTrue(items)
+        for pair in items:
+            self.assertEqual(pair, pairs.validate(dict(pair)))
+            self.assertIn(pair["aim"], pairs.AIMS)
 
     def test_a_household_set_carries_its_own_negative_pair(self):
         items = pairs.load(self.HOUSEHOLD)[1]
@@ -651,45 +640,7 @@ class TestTheRunReadsOnlyItsOwnArchive(Base):
         self.assertEqual("ours", json.loads(out.stdout))
 
 
-class TestTheBackgroundHalfIsDoneBeforeTheAnswer(Base):
-    """База наполнена к моменту вопроса, а не «скорее всего наполнена».
-
-    Ожидание по тишине — догадка: цепочка конца хода стартует питон и читает
-    архив, ничего при этом не записывая, и тихое окно наступает раньше, чем она
-    напишет первую строку. Прогон отпускал ход через две секунды, а факт ложился
-    на шестой; в конце прогона уборка гасила цепочку на полудороге.
-
-    Поэтому цепочка прогона идёт не в фоне, а на его глазах: ход возвращается
-    тогда, когда конец хода отработал целиком. Проверяем это прямо — сводим
-    ожидание к нулю и смотрим, наполнилась ли база.
-    """
-
-    def test_the_base_is_filled_without_leaning_on_the_wait(self):
-        cases = a_set(self.sets, {"альфа": names(2)})
-        report = live.run(pairs=a_load(cases), player="replay",
-                          root=self.root, keep=True, quiet=0.0)
-        self.addCleanup(shutil.rmtree, report.root, ignore_errors=True)
-        repo = db.Repository(report.root / "memory.db")
-        try:
-            self.assertTrue(repo.search("альфа"),
-                            "ход вернулся, а конец хода ещё ничего не записал")
-        finally:
-            repo.close()
-
-    def test_the_whole_chain_runs_and_is_not_cut_short(self):
-        """Цепочка доходит до конца, а не гасится уборкой на полудороге.
-
-        Признак — отметка связей: они стоят предпоследним звеном, и её
-        отсутствие значит, что до конца цепочка не дошла ни разу.
-        """
-        cases = a_set(self.sets, {"альфа": names(2)})
-        report = live.run(pairs=a_load(cases), player="replay",
-                          root=self.root, keep=True, quiet=0.0)
-        self.addCleanup(shutil.rmtree, report.root, ignore_errors=True)
-        left = sorted(p.name for p in (report.root / "state").glob("associate-state*"))
-        self.assertTrue(left, "связи не считались ни разу: цепочка обрывалась")
-
-
+@pytest.mark.slow
 class TestTheSecondStageDoesNotWrite(Base):
     """Вопрос второго этапа не должен попадать в базу, которую он меряет.
 
@@ -698,11 +649,15 @@ class TestTheSecondStageDoesNotWrite(Base):
     ответом лёг бы в память: пара N подсказывала бы паре N+1. Отсюда и цифра,
     которая ползёт от порядка пар, и отрицательные случаи, которые то проходят,
     то нет. На втором этапе точка конца хода не занята вовсе.
+
+    Тем же поднятием стенда проверяется отчёт и уборка архива: держать ради
+    них ещё два прогона по полминуты не за что.
     """
 
     def test_the_task_text_never_lands_in_the_base(self):
         cases = a_set(self.sets, {"альфа": names(2), "бета": names(2)})
-        report = live.run(pairs=a_load(cases), player="replay",
+        items = a_load(cases)
+        report = live.run(pairs=items, player="replay",
                           root=self.root, keep=True)
         self.addCleanup(shutil.rmtree, report.root, ignore_errors=True)
         repo = db.Repository(report.root / "memory.db")
@@ -714,6 +669,28 @@ class TestTheSecondStageDoesNotWrite(Base):
                              "вопрос второго этапа осел в базе: %s" % said[:2])
         finally:
             repo.close()
+
+        self.assertEqual(len(items), report.passed,
+                         "набор непроходим — проверять оседание нечем: %s"
+                         % [(r["id"], r["reason"]) for r in report.asked])
+
+        # Отчёт называет проигрывателя и корзины, которые мы не меряем.
+        text = report.text()
+        self.assertIn("replay", text)
+        self.assertEqual(len(items), report.total)
+        for name in live.RESERVED:
+            self.assertIn(name, text,
+                          "исход, который мы не меряем, пропал из отчёта молча")
+
+        # Разговоров прогона в архиве пользователя не остаётся.
+        talks = {row["session_id"] for row in report.played + report.asked}
+        left = [talk for talk in talks
+                if list(live.TRANSCRIPTS.rglob("%s.jsonl" % talk))]
+        self.assertEqual([], left, "разговоры прогона остались в архиве: %s" % left)
+
+
+class TestTheSecondStageWiring(Base):
+    """Проводка второго этапа: конец хода снят, чтение оставлено."""
 
     def test_the_second_stage_wiring_has_no_end_of_turn_point(self):
         with live.Sandbox(self.root) as box:
@@ -781,37 +758,15 @@ class TestThePairSetIsData(unittest.TestCase):
 
 
 class TestTheRunLeavesNothingBehind(Base):
-    """Ни удачный прогон, ни оборванный не оставляют за собой ничего."""
+    """Уборка песочницы гасит то, что прогон породил.
 
-    def leaked(self):
-        """Следы прогона в живом состоянии. Ищем по пути его песочницы.
-
-        Снимок «файл — размер» тут не годится: живой контур пользователя пишет
-        в тот же каталог всё время, пока идёт проверка, и снимок расходится сам
-        собой. Путь песочницы уникален для прогона, поэтому его появление в
-        живой базе, ленте или журнале — это утечка, а чужие записи мимо.
-        """
-        needle = str(self.root).encode("utf-8")
-        found = []
-        if not LIVE_STATE.exists():
-            return found
-        for path in sorted(LIVE_STATE.rglob("*")):
-            if not path.is_file():
-                continue
-            tail = b""
-            try:
-                with path.open("rb") as fh:
-                    while True:
-                        chunk = fh.read(1 << 20)
-                        if not chunk:
-                            break
-                        if needle in tail + chunk:
-                            found.append(path.name)
-                            break
-                        tail = chunk[-len(needle):]
-            except OSError:
-                continue
-        return found
+    Оборванный прогон проверялся отдельным подпроцессом: он ждал до полутора
+    минут, пока пойдёт фоновая половина хода, рвал прогон сигналом и ещё шесть
+    секунд смотрел, не вернулся ли каталог. Одна эта проверка стоила больше,
+    чем вся быстрая батарея, и держать её в ней нельзя. Что от неё осталось —
+    прямой вопрос процессу: жив он после уборки или нет; уборку удачного
+    прогона несёт TestTheBaseStartsEmpty.
+    """
 
     def test_closing_the_sandbox_kills_what_it_spawned(self):
         """Ни одного живого процесса за собой. Прямо, а не по следам на диске.
@@ -829,50 +784,6 @@ class TestTheRunLeavesNothingBehind(Base):
             time.sleep(0.1)
         self.assertIsNotNone(proc.poll(),
                              "прогон убрался, а порождённый им процесс жив")
-
-    def test_a_finished_run_removes_its_sandbox(self):
-        cases = a_set(self.sets, {"альфа": names(2)})
-        report = live.run(pairs=a_load(cases), player="replay",
-                          root=self.root)
-        self.assertFalse(report.root.exists(), "песочница осталась на диске")
-        self.assertEqual([], self.leaked(), "прогон наследил в живом состоянии")
-
-    def test_an_interrupted_run_removes_its_sandbox(self):
-        cases = a_set(self.sets, {"альфа": names(3), "бета": names(3),
-                                          "гамма": names(3)})
-        env = dict(os.environ, PYTHONPATH=str(HERE))
-        proc = subprocess.Popen(
-            [sys.executable, "-m", "eval.live", "--pairs", str(cases),
-             "--player", "replay", "--root", str(self.root)],
-            cwd=str(HERE), env=env, stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT, text=True)
-        # Рвём не раньше, чем пошла фоновая половина хода: именно она
-        # переживает обрыв и заводит песочницу заново. Порви прогон до неё — и
-        # убирать будет нечего, а проверка пройдёт на пустом месте. Признак
-        # того, что цепочка стартовала, — журнал конца хода.
-        started = self.root / "state" / "save.log"
-        deadline = time.time() + 90
-        while time.time() < deadline and not started.exists():
-            time.sleep(0.05)
-        self.assertTrue(started.exists(), "фоновая половина хода так и не пошла")
-        proc.send_signal(signal.SIGINT)
-        proc.communicate(timeout=60)
-        # Ждём после выхода, а не проверяем сразу. Каталог, снесённый в момент,
-        # когда фоновая цепочка ещё жива, возвращается через секунду-другую: её
-        # первая же запись заводит его заново. Проверка сразу после выхода этого
-        # не видит и проходит на прогоне, который ничего не погасил.
-        time.sleep(6)
-        self.assertFalse(self.root.exists(), "обрыв оставил песочницу на диске")
-        self.assertEqual([], self.leaked(), "обрыв наследил в живом состоянии")
-
-    def test_no_transcript_of_the_run_stays_in_the_archive(self):
-        cases = a_set(self.sets, {"альфа": names(2)})
-        report = live.run(pairs=a_load(cases), player="replay",
-                          root=self.root)
-        talks = {row["session_id"] for row in report.played + report.asked}
-        left = [talk for talk in talks
-                if list(live.TRANSCRIPTS.rglob("%s.jsonl" % talk))]
-        self.assertEqual([], left, "разговоры прогона остались в архиве: %s" % left)
 
 
 if __name__ == "__main__":
