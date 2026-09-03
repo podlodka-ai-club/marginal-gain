@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Батарея по умолчанию не поднимает живой стенд.
 
-Запуск: python3 -m unittest tests.test_suite_shape -v
+Запуск: python3 -m pytest tests/test_suite_shape.py
 
 Полный прогон занимал больше десяти минут, и почти всё это время держали
 проверки, гонявшие настоящий стенд: `live.run` поднимает песочницу, играет
@@ -30,6 +30,8 @@
   * добавить четвёртую медленную проверку            → TestTheStandIsHeldToThreeTests
   * прочитать ключ один раз на импорте               → TestTheGateReadsTheEnvironment
   * вернуть eval/matrix.py или eval/holdout.py       → TestTheLabLeftovers
+  * поднять стенд из помощника, мимо пометки         → TestEveryStandTestIsMarked
+  * положить проверку стенда в подкаталог tests/     → TestEveryStandTestIsMarked
 """
 import ast
 import os
@@ -54,9 +56,21 @@ LIMIT = 3
 # разбор, разметка и подсчёт — работает без песочницы и в пометке не нуждается.
 STAND = ("run", "main")
 
+# Стоит стенд ходами: песочница сама по себе поднимается за доли секунды, а
+# каждый ход — это питон, хуки и ожидание фоновой половины. Прогон на пустом
+# наборе не играет ни одного хода и потому пометки не требует; исключение
+# видно в самом вызове, а не в списке имён где-то в стороне.
+EMPTY = "pairs"
+
 
 def modules():
-    return sorted(p for p in HERE.glob("test_*.py"))
+    """Все модули проверок, включая вложенные каталоги.
+
+    Обход по одному уровню оставлял дыру ровно того размера, которую эта
+    проверка закрывает: проверка стенда в `tests/<что-нибудь>/` невидима, и
+    десять минут возвращаются молча.
+    """
+    return sorted(HERE.rglob("test_*.py"))
 
 
 def tree_of(path):
@@ -89,14 +103,42 @@ def module_marked(tree):
     return False
 
 
-def calls_the_stand(node):
-    """Зовёт ли тело `live.run` или `live.main`. По разбору, не по тексту."""
+def on_empty(call):
+    """Прогон на пустом наборе: `live.run(pairs=[])`. Ходов не играет."""
+    for word in call.keywords:
+        if word.arg == EMPTY and isinstance(word.value, ast.List) and not word.value.elts:
+            return True
+    return False
+
+
+def stand_names(tree):
+    """Имена, которыми в этом модуле зовут стенд.
+
+    Смотреть только на `live.run` мало: `from eval.live import run` даёт голое
+    `run(...)`, и проверка стенда прошла бы мимо пометки.
+    """
+    out = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.ImportFrom) and (node.module or "").endswith("live"):
+            for alias in node.names:
+                if alias.name in STAND:
+                    out.add(alias.asname or alias.name)
+    return out
+
+
+def calls_the_stand(node, bare=()):
+    """Зовёт ли тело стенд так, что тот сыграет хоть один ход.
+
+    По разбору, не по тексту: docstring, называющий `live.run`, — не вызов.
+    """
     for one in ast.walk(node):
         if not isinstance(one, ast.Call):
             continue
         what = one.func
-        if (isinstance(what, ast.Attribute) and what.attr in STAND
-                and isinstance(what.value, ast.Name) and what.value.id == "live"):
+        named = (isinstance(what, ast.Attribute) and what.attr in STAND
+                 and isinstance(what.value, ast.Name) and what.value.id == "live")
+        plain = isinstance(what, ast.Name) and what.id in bare
+        if (named or plain) and not on_empty(one):
             return True
     return False
 
@@ -119,10 +161,31 @@ def probes_of(path):
     return out
 
 
+def helpers_of(path):
+    """Всё, что не проверка: подготовка, вспомогательные методы, функции.
+
+    Пометка вешается на проверку, а не на помощника. Помощник, поднимающий
+    стенд, пометке недоступен вовсе — значит поднимать его ему нельзя, и это
+    единственное правило, которым такая дыра закрывается.
+    """
+    tree = tree_of(path)
+    out = []
+    for node in tree.body:
+        if isinstance(node, ast.FunctionDef) and not node.name.startswith("test"):
+            out.append((node.name, node))
+        if isinstance(node, ast.ClassDef):
+            for inner in node.body:
+                if (isinstance(inner, ast.FunctionDef)
+                        and not inner.name.startswith("test")):
+                    out.append(("%s.%s" % (node.name, inner.name), inner))
+    return out
+
+
 def all_tests():
     for path in modules():
+        bare = stand_names(tree_of(path))
         for name, node, is_slow in probes_of(path):
-            yield path.name, name, node, is_slow
+            yield path.name, name, node, is_slow, bare
 
 
 # Нулевой байт в значение переменной окружения положить нельзя — os
@@ -200,8 +263,8 @@ class TestEveryStandTestIsMarked(unittest.TestCase):
 
     def test_no_unmarked_test_raises_the_stand(self):
         loose = ["%s::%s" % (where, name)
-                 for where, name, node, is_slow in all_tests()
-                 if calls_the_stand(node) and not is_slow]
+                 for where, name, node, is_slow, bare in all_tests()
+                 if calls_the_stand(node, bare) and not is_slow]
         self.assertEqual([], loose,
                          "проверки поднимают стенд без пометки slow: %s" % loose)
 
@@ -212,10 +275,21 @@ class TestEveryStandTestIsMarked(unittest.TestCase):
         а помеченное не собирается, и не проверяется ничего.
         """
         idle = ["%s::%s" % (where, name)
-                for where, name, node, is_slow in all_tests()
-                if is_slow and not calls_the_stand(node)]
+                for where, name, node, is_slow, bare in all_tests()
+                if is_slow and not calls_the_stand(node, bare)]
         self.assertEqual([], idle,
                          "пометка slow стоит там, где стенда нет: %s" % idle)
+
+    def test_no_helper_raises_the_stand(self):
+        """Помощник поднять стенд не имеет права: на него пометку не повесить."""
+        loose = []
+        for path in modules():
+            bare = stand_names(tree_of(path))
+            loose += ["%s::%s" % (path.name, name)
+                      for name, node in helpers_of(path)
+                      if calls_the_stand(node, bare)]
+        self.assertEqual([], loose,
+                         "стенд поднимается из помощника, мимо пометки: %s" % loose)
 
 
 class TestTheStandIsHeldToThreeTests(unittest.TestCase):
@@ -223,14 +297,15 @@ class TestTheStandIsHeldToThreeTests(unittest.TestCase):
 
     def test_no_more_than_the_limit(self):
         marked = ["%s::%s" % (where, name)
-                  for where, name, _node, is_slow in all_tests() if is_slow]
+                  for where, name, _node, is_slow, _bare in all_tests() if is_slow]
         self.assertLessEqual(len(marked), LIMIT,
                              "медленных %d, а держим не больше %d: %s"
                              % (len(marked), LIMIT, marked))
 
     def test_at_least_one_stand_test_is_left(self):
         """Ноль медленных — это не быстрая батарея, а невыполняемый прогон."""
-        marked = [name for _where, name, _node, is_slow in all_tests() if is_slow]
+        marked = [name for _where, name, _node, is_slow, _bare in all_tests()
+                  if is_slow]
         self.assertTrue(marked, "живого прогона не проверяет ничто")
 
 
@@ -239,18 +314,27 @@ class TestTheLabLeftovers(unittest.TestCase):
 
     GONE = ("matrix", "holdout", "swecontextbench")
 
+    # Свои каталоги, а не всё под корнем. Виртуальное окружение внутри рабочей
+    # копии — обычное дело, и слово `matrix` в numpy встречается сотнями; обход
+    # всего подряд краснел бы на чужом коде и читал бы тысячи файлов.
+    OURS = ("archive", "domain", "eval", "hooks", "infra", "pipeline",
+            "storage", "tests")
+
     def sources(self):
-        """Все модули репозитория. Ровно тот же обход, что у грепа в задаче.
+        """Модули проекта. Тот же обход, что у грепа в задаче, но без чужого.
 
         Кроме себя самого: список выброшенного здесь и написан, и упоминание
         в нём — не возврат модуля.
         """
         mine = Path(__file__).resolve()
-        for path in sorted(ROOT.rglob("*.py")):
-            rel = path.relative_to(ROOT)
-            if (rel.parts and rel.parts[0] == ".git") or path.resolve() == mine:
-                continue
-            yield rel, path.read_text(encoding="utf-8")
+        wheres = [ROOT / name for name in self.OURS]
+        for where in wheres:
+            for path in sorted(where.rglob("*.py")):
+                if path.resolve() == mine or "site-packages" in path.parts:
+                    continue
+                yield path.relative_to(ROOT), path.read_text(encoding="utf-8")
+        for path in sorted(ROOT.glob("*.py")):
+            yield path.relative_to(ROOT), path.read_text(encoding="utf-8")
 
     @given(word=st.sampled_from(GONE))
     @settings(deadline=None, max_examples=len(GONE))

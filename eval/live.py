@@ -85,8 +85,9 @@
     python3 -m eval.live --limit 5                укороченный, для отладки
     python3 -m eval.live --player replay          без модели и без трат
     python3 -m eval.live --arms both              с памятью и без, и разница
+    python3 -m eval.live --wait 120               если конец хода не успевает
 """
-import argparse, fcntl, hashlib, json, os, re, shutil, signal, sqlite3, subprocess, sys, time, uuid
+import argparse, fcntl, hashlib, inspect, json, os, re, shutil, signal, sqlite3, subprocess, sys, time, uuid
 from collections import Counter, OrderedDict, namedtuple
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -467,13 +468,20 @@ def settled(state, extra=(), quiet=2.0, timeout=30.0):
     перестал меняться. Одного замка мало — между звеньями цепочки он свободен;
     одного отпечатка мало — питон стартует дольше, чем длится тихая секунда.
 
-    Срок назван по замеру, а не с потолка. Прогон из шести ходов: семь
-    ожиданий, все 2.0-2.1 секунды при тихом окне в 2.0 — то есть весь срок
-    уходит на само тихое окно, а цепочка к этому моменту уже отработала.
-    Стоявшие здесь 180 секунд не давали запаса: они означали, что залипший ход
-    держит прогон три минуты, вместо того чтобы честно сказать «не дождались»
-    и пойти дальше. Тридцать — пятнадцатикратный запас к замеренному, а вышел
-    срок или нет, видно в отчёте строкой «не дождались фона на ходах».
+    Срок назван по замеру, а не с потолка. Прогон из шести ходов на
+    проигрывателе `replay`: семь ожиданий, все 2.0-2.1 секунды при тихом окне
+    в 2.0 — то есть весь срок уходит на само тихое окно, а цепочка к этому
+    моменту уже отработала. Стоявшие здесь 180 секунд не давали запаса: они
+    означали, что залипший ход держит прогон три минуты, вместо того чтобы
+    честно сказать «не дождались» и пойти дальше.
+
+    Тридцать — пятнадцатикратный запас к замеренному, и это умолчание, а не
+    предел. Замер снят на отладочном проигрывателе и коротком наборе; на живом
+    агенте разбор конца хода работает с разговором, который вырос от настоящего
+    ответа, и там срок может понадобиться больше. Поднимается он ключом
+    `--wait` и параметром `run(wait=)` — молча упереться в потолок прогон не
+    должен. Вышел срок или нет, видно в отчёте строкой «не дождались фона на
+    ходах».
     """
     end = time.time() + timeout
     calm, last = 0.0, None
@@ -1175,13 +1183,19 @@ def talk_id():
 
 def run(pairs=None, root=None, player="replay", limit=None, only=None,
         keep=False, live_hooks=True, model=None, budget=None, quiet=2.0,
-        echo=None, arm=None):
+        wait=None, echo=None, arm=None):
     """Обе сессии каждой пары подряд, в своей песочнице. Отдаёт отчёт.
 
     `arm` — рука прогона: `memory` играет с нашим контуром, `bare` с
     выключенным. Названа рука — она и решает судьбу рубильника; не названа —
     решает `live_hooks`, как было.
+
+    `wait` — сколько ждать фоновую половину хода. Не назван — умолчание
+    `settled`, снятое замером на отладочном проигрывателе. Живому агенту его
+    может не хватить, и тогда прогон обязан дать поднять срок, а не упереться
+    в него молча.
     """
+    held = {} if wait is None else {"timeout": wait}
     say = echo or (lambda *_: None)
     if arm is not None:
         live_hooks = hooks_of_arm(arm)
@@ -1207,7 +1221,8 @@ def run(pairs=None, root=None, player="replay", limit=None, only=None,
             box.talks.append(talk)
             talks[key_of(turn)] = (where, talk)
             reply = made.play(turn["say"], where, talk, turn=turn, tools=NO_SHELL)
-            when, stalled = settled(box.state, extra=[box.db], quiet=quiet)
+            when, stalled = settled(box.state, extra=[box.db], quiet=quiet,
+                                    **held)
             if stalled:
                 report.stalled.append(number)
             report.cost += reply.cost
@@ -1220,7 +1235,8 @@ def run(pairs=None, root=None, player="replay", limit=None, only=None,
         # Сброс между этапами: база остаётся, сессия обнуляется. Ждём здесь ещё
         # раз, потому что последний ход осел, а цепочка конца хода могла успеть
         # взять замок только что.
-        report.settled_at, stalled = settled(box.state, extra=[box.db], quiet=quiet)
+        report.settled_at, stalled = settled(box.state, extra=[box.db],
+                                            quiet=quiet, **held)
         if stalled:
             report.stalled.append(0)
 
@@ -1350,6 +1366,10 @@ def parser():
     ap.add_argument("--root", help="каталог песочницы; по умолчанию свой на прогон")
     ap.add_argument("--keep", action="store_true", help="не убирать песочницу")
     ap.add_argument("--out", help="куда сложить построчный итог")
+    ap.add_argument("--wait", type=float,
+                    help="сколько секунд ждать конца хода; по умолчанию %g, "
+                         "живому агенту может понадобиться больше"
+                         % inspect.signature(settled).parameters["timeout"].default)
     return ap
 
 
@@ -1385,6 +1405,7 @@ def main(argv=None):
                 played[arm] = run(pairs=items, root=root, player=args.player,
                                   limit=args.limit, only=args.only, keep=args.keep,
                                   model=args.model, budget=args.budget, arm=arm,
+                                  wait=args.wait,
                                   echo=lambda line: print(line, flush=True))
         except UnsafeRun as bad:
             print(bad, file=sys.stderr)
