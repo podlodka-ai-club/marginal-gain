@@ -245,6 +245,22 @@ class TestTheLineCarriesWhatMakesNumbersComparable(unittest.TestCase):
         row = live.journal_row(played, player="claude", model="haiku",
                                pairs_file="n.json", pairs_count=5)
         self.assertIsNone(row["only"])
+        self.assertIsNone(row["limit"])
+
+    @given(limit=st.one_of(st.none(), st.integers(min_value=1, max_value=50)))
+    @FAST
+    def test_a_limited_run_is_told_apart_too(self, limit):
+        """`--limit` сужает набор ровно как `--only`, тем же классом дыры.
+
+        `run()` роняет и `only`, и `limit` одинаковым `if <значение>:`
+        (`eval/live.py`, сборка `items`) — сиблинги, не два разных случая.
+        Пометить одно и промолчать про другое значило бы закрыть дыру
+        наполовину.
+        """
+        played = OrderedDict(memory=FakeReport([a_row()]))
+        row = live.journal_row(played, player="claude", model="haiku",
+                               pairs_file="n.json", pairs_count=5, limit=limit)
+        self.assertEqual(row["limit"], limit)
 
     def test_arms_are_kept_apart_in_the_journal_too(self):
         played = OrderedDict(memory=FakeReport([a_row(ok=True, injected=True)],
@@ -349,7 +365,7 @@ class TestMainThreadsOnlyIntoTheJournal(unittest.TestCase):
     `main` поднимает стенд, живым прогоном в быстрой батарее его не поднять.
     """
 
-    def test_main_calls_append_journal_with_only_by_keyword(self):
+    def _journal_row_kwargs(self):
         tree = ast.parse((ROOT / "eval" / "live.py").read_text(encoding="utf-8"))
         main = next(node for node in ast.walk(tree)
                    if isinstance(node, ast.FunctionDef) and node.name == "main")
@@ -357,11 +373,26 @@ class TestMainThreadsOnlyIntoTheJournal(unittest.TestCase):
                 if isinstance(node, ast.Call)
                 and getattr(node.func, "id", None) == "journal_row"]
         self.assertTrue(calls, "main() не зовёт journal_row вовсе")
-        passed = {kw.arg: ast.unparse(kw.value)
-                 for call in calls for kw in call.keywords}
+        return {kw.arg: ast.unparse(kw.value)
+               for call in calls for kw in call.keywords}
+
+    def test_main_calls_append_journal_with_only_by_keyword(self):
+        passed = self._journal_row_kwargs()
         self.assertIn("only", passed, "main() не передаёт only в journal_row")
-        self.assertIn("args.only", passed["only"],
-                      "only передан не тем значением, каким набор сужался")
+        # Точное равенство, не подстрока: `args.only + ""` тоже содержит
+        # "args.only", но `run()` тем же именем режет набор по `if only:` —
+        # пустая строка там означает «фильтра нет», а прямая передача записала
+        # бы в журнал `""`, отличную от `None` полного прогона.
+        self.assertEqual(passed["only"], "args.only or None",
+                         "only передан не тем значением, каким набор сужался, "
+                         "либо не нормализован под тот же `if only:`, что и `run()`")
+
+    def test_main_calls_append_journal_with_limit_by_keyword(self):
+        passed = self._journal_row_kwargs()
+        self.assertIn("limit", passed, "main() не передаёт limit в journal_row")
+        self.assertEqual(passed["limit"], "args.limit or None",
+                         "limit передан не тем значением, каким набор сужался, "
+                         "либо не нормализован под тот же `if limit:`, что и `run()`")
 
 
 if __name__ == "__main__":
