@@ -1108,13 +1108,17 @@ class Bout:
 class Report:
     """Итог прогона: цифра, разбивка и след, по которому видно порядок."""
 
-    def __init__(self, box, player, items):
+    def __init__(self, box, player, items, model=None):
         self.root = box.root
         self.player = player
         # Форма, которой шли ходы, дословно из песочницы. Не спрашиваем её
         # заново: спрошенная здесь, она пришла бы из рубильника этой машины, а
         # ходы играли своим окружением. Цифра называлась бы чужим именем.
         self.voice = box.voice
+        # Модель хода. Цифры разных моделей не сравнимы между собой, ровно
+        # как и цифры разных форм вброса, — и по той же причине называется в
+        # шапке отчёта, а не молчит.
+        self.model = model
         self.pairs = items
         self.played, self.asked, self.trail = [], [], []
         self.settled_at = None
@@ -1144,6 +1148,7 @@ class Report:
             "цифру им снимать нельзя)")
         lines = ["проигрыватель: %s%s" % (self.player, aside),
                  "форма вброса: %s" % self.voice,
+                 "модель: %s" % (self.model or "не назван"),
                  "сыграно реплик: %d, задач поставлено: %d"
                  % (len(self.played), self.total),
                  "",
@@ -1235,7 +1240,7 @@ def run(pairs=None, root=None, player="replay", limit=None, only=None,
     box = Sandbox(root, live_hooks=live_hooks, voice=voice).open()
     made = PLAYERS[player](box, **({"model": model, "budget": budget}
                                    if player == Agent.name else {}))
-    report = Report(box, player, items)
+    report = Report(box, player, items, model=model)
     done = False
     try:
         say("--- сессии 1: %d реплик, проигрыватель %s ---" % (len(turns), player))
