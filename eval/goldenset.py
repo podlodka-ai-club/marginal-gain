@@ -32,7 +32,7 @@ from domain import lifespan
 from pipeline import understand as u
 from infra.scrub import redact
 
-SPLIT = "2026-08-09"          # та же граница, что в holdout.py и в замерах
+SPLIT = "2026-08-09"          # граница обучения и проверки, та же в замерах
 TARGET = 100                  # размер набора
 
 # Версия набора. Растёт, когда меняется смысл собранного, а не форма файла:

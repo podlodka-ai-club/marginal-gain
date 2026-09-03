@@ -318,22 +318,6 @@ class TestTheMeasureCountsKnowledgeNotSubstrings(unittest.TestCase):
     def raw_of(self, records):
         return json.dumps(records, ensure_ascii=False)
 
-    def test_the_ab_run_asks_the_sift_too(self):
-        """У сравнения «без памяти / с памятью» свой прогон и свой отчёт.
-
-        Разойдись он с оценкой — два отчёта об одном прогоне назвали бы разное
-        число найденного, и оба выглядели бы исправными.
-        """
-        from eval import matrix
-        raw = self.raw_of([event(content='{"command": "grep runlog.py ."}')])
-        case = {"id": "матрица", "kind": "fact", "query": PLAIN,
-                "expect": ["runlog.py"]}
-        with mock.patch.dict(os.environ, {}), \
-             mock.patch.object(suggest, "suggest", return_value=("", [], raw)):
-            rows, _ = matrix.run_phase("с памятью", [case], False, "raw", 0.5)
-        self.assertFalse(rows[0]["found_in_answer"])
-        self.assertTrue(rows[0]["false_find"])
-
     def test_a_word_only_inside_a_command_is_not_a_find(self):
         raw = self.raw_of([event(content='{"command": "grep runlog.py ."}')])
         case = {"id": "x", "query": PLAIN, "expect": ["runlog.py"]}

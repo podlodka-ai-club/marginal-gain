@@ -352,7 +352,7 @@ class TestDoorIsChosenAtCallTime(unittest.TestCase):
     """Путь наружу выбирается при вызове, а не при импорте модуля.
 
     Из импортного выбора росли обе беды сразу: моки в тестах вместо
-    подстановки и importlib.reload в matrix. В matrix при этом перезагружали
+    подстановки и перезагрузка модулей в лаборатории. Перезагружали там
     xmem_api и xmem_sdk, а xmem_local забыли — и его кэш соединения жил
     насквозь через обе половины сравнения.
     """
@@ -383,28 +383,6 @@ class TestDoorIsChosenAtCallTime(unittest.TestCase):
             port.close_all()
         shut_local.assert_called_once()
         shut_sdk.assert_called_once()
-
-
-class TestMatrixNeedsNoReload(unittest.TestCase):
-    """A/B-сравнение переключает половины окружением, а не перезагрузкой модулей."""
-
-    def test_reset_closes_the_local_path_too(self):
-        """Перечисление руками уже забыло xmem_local — его кэш жил через обе половины."""
-        from eval import matrix
-        from storage import local
-        from storage import sdk
-        with mock.patch.object(local, "close") as shut_local, \
-             mock.patch.object(sdk, "close") as shut_sdk:
-            matrix.reset_session()
-        shut_local.assert_called_once()
-        shut_sdk.assert_called_once()
-
-    def test_no_module_reload_left(self):
-        """По разбору, а не по тексту: докстринг про reload — не вызов reload."""
-        tree = ast.parse((ROOT / "eval" / "matrix.py").read_text())
-        calls = [n for n in ast.walk(tree)
-                 if isinstance(n, ast.Attribute) and n.attr == "reload"]
-        self.assertEqual(calls, [], "importlib.reload вернулся в matrix")
 
 
 class TestFallbackByCapability(unittest.TestCase):

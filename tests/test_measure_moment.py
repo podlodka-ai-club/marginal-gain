@@ -43,7 +43,7 @@ from hypothesis import HealthCheck, given, settings, strategies as st
 os.environ.setdefault("XMEM_INSTANCE_ID", "test-instance")
 
 from domain import lifespan, models
-from eval import evaluate, goldenset, matrix
+from eval import evaluate, goldenset
 from infra import config
 from pipeline import forget
 from storage import db, local, port
@@ -378,11 +378,11 @@ class TestTheSetCarriesTheMoment(unittest.TestCase):
 
 
 class TestTheStandardCommandFindsItsSet(unittest.TestCase):
-    """`python3 -m eval.evaluate` и `python3 -m eval.matrix` — без аргументов."""
+    """`python3 -m eval.evaluate` — без аргументов."""
 
-    def test_both_entry_points_point_at_the_shipped_set(self):
+    def test_the_entry_point_points_at_the_shipped_set(self):
         """Мутация: вернуть путь внутрь пакета eval — набор перестаёт находиться."""
-        for where in (evaluate.CASES, matrix.CASES):
+        for where in (evaluate.CASES,):
             path = Path(where)
             self.assertTrue(path.is_absolute(), "%s зависит от текущего каталога" % path)
             self.assertTrue(path.exists(), "штатная команда не находит набор: %s" % path)
@@ -396,7 +396,6 @@ class TestTheStandardCommandFindsItsSet(unittest.TestCase):
             try:
                 os.chdir(tmp)
                 self.assertTrue(Path(evaluate.CASES).exists())
-                self.assertTrue(Path(matrix.CASES).exists())
             finally:
                 os.chdir(here)
 

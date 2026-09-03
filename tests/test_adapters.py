@@ -13,7 +13,6 @@ os.environ.setdefault("XMEM_INSTANCE_ID", "test-instance")
 
 from eval import evaluate
 from eval import goldenset
-from eval import matrix
 from domain import models
 from infra import telemetry
 from pipeline import suggest
@@ -821,41 +820,8 @@ class TestSummary(unittest.TestCase):
         self.assertIn("упало с ошибкой: 1", out)
 
 
-class TestMatrix(unittest.TestCase):
-    """Сравнение двух половин: без него одно число не значит ничего."""
-
-    def rows(self, phase, oks, kinds=None, knew=None):
-        kinds = kinds or ["fact"] * len(oks)
-        knew = knew or [False] * len(oks)
-        return [{"phase": phase, "id": "c%d" % i, "kind": k, "ok": o,
-                 "found_in_answer": m, "missed": [], "false_hits": [],
-                 "kept": 0, "chars": 0, "raw_chars": 0,
-                 "seconds": 0.0, "error": None}
-                for i, (o, k, m) in enumerate(zip(oks, kinds, knew))]
-
-    def test_delta_is_difference_of_two_halves(self):
-        base = self.rows(matrix.BASELINE, [False, False, True])
-        active = self.rows(matrix.ACTIVE, [True, True, True])
-        out = matrix.compare(base, active, 1.0, 2.0)
-        self.assertIn("1 из 3 без памяти, 3 из 3 с памятью", out)
-        self.assertIn("+2 случая", out)
-
-    def test_loss_counted_only_where_memory_knew(self):
-        """Прошедшие на молчании в знаменатель потерь не входят."""
-        # Четвёртый случай провален, но память его и не знала. По общему
-        # знаменателю потерь вышло бы 3, а конвейер потерял только 2.
-        active = self.rows(matrix.ACTIVE, [True, False, False, False],
-                           kinds=["absence", "fact", "fact", "fact"],
-                           knew=[False, True, True, False])
-        out = matrix.compare(self.rows(matrix.BASELINE, [True, False, False, False]),
-                             active, 1.0, 2.0)
-        self.assertIn("память ответила нужным в 2 случаях, из них срезал порог 2 (100%)", out)
-        self.assertNotIn("срезал порог 3", out)
-
-    def test_no_knowledge_says_so_instead_of_dividing(self):
-        active = self.rows(matrix.ACTIVE, [False, False])
-        out = matrix.compare(self.rows(matrix.BASELINE, [False, False]), active, 0.0, 0.0)
-        self.assertIn("терять было нечего", out)
+class TestMemoryOffIsReallyOff(unittest.TestCase):
+    """Половина без памяти обязана не ходить в хранилище вовсе."""
 
     def test_memory_off_returns_nothing_and_touches_nothing(self):
         """Половина без памяти обязана не ходить в хранилище вовсе."""
