@@ -38,9 +38,11 @@
   * `--voice` не доезжает до отчёта            → TestTheRunNamesItsVoice
 """
 import ast
+import contextlib
 import json
 import os
 import re
+import tempfile
 import unittest
 from pathlib import Path
 from unittest import mock
@@ -55,6 +57,25 @@ from domain import context
 from pipeline import suggest, voice
 
 ROOT = Path(__file__).resolve().parent.parent
+
+
+@contextlib.contextmanager
+def aside():
+    """Увести каталог состояния в сторону — и убедиться, что увелось.
+
+    Форма берётся рубильником, а рубильник — это ещё и файл в каталоге
+    состояния. Проверка умолчания, оставленная в живом каталоге, краснеет у
+    всякого, кто этим рубильником пользуется: `./bin/xmem voice directive` —
+    и «умолчание» на его машине читается из файла.
+    """
+    with tempfile.TemporaryDirectory() as tmp:
+        with mock.patch.dict(os.environ, {"XMEM_STATE_DIR": tmp}):
+            if config.state_dir() != Path(tmp):
+                raise AssertionError(
+                    "рубильник каталога не сработал: %s вместо %s"
+                    % (config.state_dir(), tmp))
+            yield Path(tmp)
+
 
 FAST = settings(deadline=None, max_examples=100)
 
@@ -250,10 +271,37 @@ class TestTheChoiceComesFromTheSwitch(unittest.TestCase):
 
         Подсказка идёт в ходе человека: форма, которой нет, обязана дать
         опорную форму, а не исключение посреди разговора.
+
+        Мусор бывает и пустым: пустое значение в окружении настройка читает как
+        «не задано» и идёт в файл. Поэтому каталог состояния уведён — иначе
+        проверка спрашивает рубильник того, кто её запустил.
         """
-        with mock.patch.dict(os.environ, {"XMEM_VOICE": junk}):
+        with aside(), mock.patch.dict(os.environ, {"XMEM_VOICE": junk}):
             self.assertEqual(voice.DEFAULT, voice.name())
             self.assertTrue(voice.render([(0.9, "факт", None)]))
+
+    @given(junk=st.sampled_from(["", "  ", "нет-такой", "PLAIN"]))
+    @settings(deadline=None, max_examples=4)
+    def test_junk_in_the_file_falls_back_too(self, junk):
+        """Тот же мусор, но в файле рубильника: путь до формы у них общий."""
+        with aside() as state, mock.patch.dict(os.environ, {"XMEM_VOICE": ""}):
+            (state / "voice").write_text(junk + "\n", encoding="utf-8")
+            self.assertEqual(voice.DEFAULT, voice.name())
+
+    def test_the_file_switch_names_the_voice(self):
+        """Файл рубильника форму меняет: иначе `./bin/xmem voice` ничего не даёт."""
+        with aside() as state, mock.patch.dict(os.environ, {"XMEM_VOICE": ""}):
+            (state / "voice").write_text("directive\n", encoding="utf-8")
+            self.assertEqual("directive", voice.name())
+
+    def test_the_default_is_named_once(self):
+        """Умолчание записано одно на настройку и реестр.
+
+        Два места разъезжаются молча: `xmem voice` и незаданный рубильник
+        показывали бы новое умолчание, а опечатка в `XMEM_VOICE` давала бы
+        старое.
+        """
+        self.assertEqual(config.DEFAULT_VOICE, voice.DEFAULT)
 
     def test_the_default_is_the_baseline(self):
         """Опора — `plain`: с ней сравниваются остальные."""
@@ -363,14 +411,35 @@ class TestTheRunNamesItsVoice(unittest.TestCase):
         box = live.Sandbox(root="/tmp/не-открывается", voice=name)
         self.assertEqual(name, box.env({})["XMEM_VOICE"])
 
-    def test_without_a_key_the_run_names_the_default(self):
-        """Форму не назвали — прогон идёт опорной и говорит об этом.
+    def test_without_a_key_the_turns_are_told_the_default_by_name(self):
+        """Форму не назвали — ходам всё равно называют её вслух.
 
-        Пустая строка в окружении гасит рубильник, оставшийся в профиле
-        пользователя: иначе цифра меняется молча, от чужой настройки.
+        Пустая строка в окружении означала бы «разбирайся сам», а разбирается
+        ход по своему каталогу состояния — то есть по каталогу песочницы, где
+        рубильника нет. Заодно непустое имя гасит рубильник, оставшийся в
+        профиле пользователя: иначе цифра меняется молча, от чужой настройки.
         """
-        box = live.Sandbox(root="/tmp/не-открывается")
-        self.assertEqual("", box.env({})["XMEM_VOICE"])
+        with aside() as state:
+            (state / "voice").write_text("directive\n", encoding="utf-8")
+            box = live.Sandbox(root="/tmp/не-открывается")
+        self.assertEqual(voice.DEFAULT, box.env({})["XMEM_VOICE"])
+
+    def test_the_report_and_the_turns_never_name_two_voices(self):
+        """Отчёт называет ту же форму, что получили ходы. Одну и ту же.
+
+        Разбери имя дважды — и второй разбор пойдёт по рубильнику той машины,
+        где считают отчёт, а не по окружению ходов: цифра уехала бы под чужим
+        именем. Рубильник здесь нарочно выставлен в чужую форму.
+        """
+        for asked in (None, "inline"):
+            with aside() as state, mock.patch.dict(os.environ,
+                                                   {"XMEM_VOICE": ""}):
+                (state / "voice").write_text("directive\n", encoding="utf-8")
+                box = live.Sandbox(root="/tmp/не-открывается", voice=asked)
+                given_to_turns = box.env({})["XMEM_VOICE"]
+                said = live.Report(box, live.Agent.name, []).text()
+            self.assertIn("форма вброса: %s" % given_to_turns, said,
+                          "ходам одна форма, в отчёте другая: %s" % asked)
 
     @given(name=st.sampled_from(sorted(voice.VOICES)))
     @settings(deadline=None, max_examples=len(voice.VOICES))
@@ -406,6 +475,20 @@ class TestTheRunNamesItsVoice(unittest.TestCase):
                 if word.arg == "voice":
                     out[called] = ast.unparse(word.value)
         return out
+
+    def test_the_report_does_not_resolve_the_name_a_second_time(self):
+        """Отчёт берёт имя из песочницы, а не разбирает его заново.
+
+        Разбор в отчёте идёт по каталогу состояния той машины, где считают
+        отчёт, а ходы играли своим окружением: два разбора расходятся молча, и
+        цифра уезжает под чужим именем. Подменяем разбор так, чтобы он врал, —
+        отчёт обязан его не заметить.
+        """
+        box = live.Sandbox(root="/tmp/не-открывается", voice="plain")
+        with mock.patch.object(live.voices, "name",
+                               side_effect=AssertionError("отчёт разобрал имя заново")):
+            said = live.Report(box, live.Agent.name, []).text()
+        self.assertIn("форма вброса: plain", said)
 
     def test_the_key_reaches_the_run(self):
         """`--voice` доезжает до прогона, а не оседает в разборе.
