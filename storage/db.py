@@ -18,7 +18,8 @@ from pathlib import Path
 from domain import context, folding, lifespan, models
 from infra import config
 # Слово вопроса — правило одно на поиск и на отсев, см. domain/query.py.
-from domain.query import words
+# Оттуда же сведение к основе: обе стороны сравнения размечает одна функция.
+from domain.query import key as normal, words
 
 DEFAULT_PATH = config.state_dir() / "memory.db"
 
@@ -209,6 +210,13 @@ def migrate(conn):
     return len(MIGRATIONS) - have
 
 
+# Имя, под которым сведение к основе доступно из SQL. Своя функция, а не
+# встроенный `lower()`: встроенный знает одну латиницу, и `'в Казани' LIKE
+# '%казани%'` не совпадал ни с чем. Заодно она же режет знак на краю слова и
+# сводит словоформу — тем самым правилом, каким размечен вопрос.
+KEY_SQL = "xkey"
+
+
 def connect(where=None):
     target = Path(where) if where else path()
     target.parent.mkdir(parents=True, exist_ok=True)
@@ -218,6 +226,10 @@ def connect(where=None):
     conn = sqlite3.connect(str(target), check_same_thread=False)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON")
+    # Функция ставится на соединение, а не на запрос: ей пользуется всякий, кто
+    # ищет словами по этой базе, и второй способ разметки означал бы второе
+    # правило поиска.
+    conn.create_function(KEY_SQL, 1, normal, deterministic=True)
     return conn
 
 
@@ -480,7 +492,11 @@ class Repository:
         found = []
         for object_type, fields, source, source_params in self.sources(deep, as_of):
             names = [name for name, _ in fields]
-            where = " OR ".join('"%s" LIKE ? ESCAPE \'\\\'' % name
+            # Сравниваем ключ поля с основой слова вопроса, а не поле со словом.
+            # Прямое сравнение спотыкалось трижды: заглавная русская буква,
+            # точка на конце предложения и чужая словоформа. Ключ снимает все
+            # три сразу и на обеих сторонах одинаково.
+            where = " OR ".join('%s("%s") LIKE ? ESCAPE \'\\\'' % (KEY_SQL, name)
                                 for name in names for _ in terms)
             params = list(source_params) + [like(term) for _ in names for term in terms]
             with self.lock:
@@ -491,7 +507,7 @@ class Repository:
             for row in rows:
                 score = 0
                 for name, weight in fields:
-                    value = (row[name] or "").lower() if row[name] else ""
+                    value = normal(row[name]) if row[name] else ""
                     if not value:
                         continue
                     score += weight * sum(1 for t in terms if t in value)
