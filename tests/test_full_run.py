@@ -53,13 +53,14 @@
   * снять сторожа живого состояния                 → TestNothingLivesOutsideTheSandbox
   * ждать фон один раз в конце, а не на каждом ходе → TestTheWaitSitsInsideTheLoop
   * занять конец хода на втором этапе              → TestTheSecondStageDoesNotWrite
+  * ждать залипший ход по три минуты               → TestTheWaitGivesUpOnTime
 
 Каждая из них прогнана: код ломается точечно, названная проверка краснеет.
 Две последние появились как раз оттого, что мутация не покраснела — сторожа
 живого состояния заслонял отсев служебных путей, а ожидание на ходу держало
 только одно ожидание в конце.
 """
-import ast, json, os, shutil, subprocess, sys, tempfile, time, unittest, uuid
+import ast, fcntl, inspect, json, os, shutil, subprocess, sys, tempfile, time, unittest, uuid
 from pathlib import Path
 
 import pytest
@@ -544,6 +545,50 @@ class TestTheWaitSitsInsideTheLoop(unittest.TestCase):
         outside = [one for one in self.calls_of(run, "settled")
                    if id(one) not in inside]
         self.assertTrue(outside, "перед вторым этапом прогон не ждёт вовсе")
+
+
+class TestTheWaitGivesUpOnTime(unittest.TestCase):
+    """Срок ожидания взят по замеру, а не с потолка.
+
+    Стоял он 180 секунд. Замер на прогоне из шести ходов: семь ожиданий, все
+    ровно 2.0-2.1 секунды, то есть весь срок — это тихое окно, а сама цепочка
+    конца хода к моменту вопроса уже отработала. Срок в три минуты означал
+    другое: залипший ход держит прогон три минуты вместо того, чтобы честно
+    сказать «не дождались» и пойти дальше.
+
+    Проверяем не число, а поведение: ожидание, которому не дают успокоиться,
+    сдаётся в названный срок и говорит об этом. Число сверху держит вторая
+    проверка — чтобы срок не уполз обратно к трём минутам молча.
+    """
+
+    # Замеренный потолок — 2.05 с при тихом окне 2.0 с. Держим срок с
+    # пятнадцатикратным запасом: больше — это уже не запас, а зависание.
+    CEILING = 30.0
+
+    def test_a_state_that_never_calms_is_given_up_on_within_the_timeout(self):
+        """Занятый замок не даёт успокоиться никогда — значит сдаёмся по сроку."""
+        for timeout in (0.2, 0.35, 0.5):
+            with tempfile.TemporaryDirectory() as tmp:
+                lock = Path(tmp) / "save.lock"
+                with lock.open("w") as held:
+                    fcntl.flock(held, fcntl.LOCK_EX)
+                    at = time.time()
+                    when, stalled = live.settled(tmp, quiet=0.05, timeout=timeout)
+                    spent = time.time() - at
+                self.assertTrue(stalled,
+                                "ожидание сказало «дождались» на занятом замке")
+                self.assertLess(spent, timeout + 2.0,
+                                "ожидание переждало свой срок: %.2f при %.2f"
+                                % (spent, timeout))
+                self.assertGreaterEqual(spent, timeout * 0.5,
+                                        "ожидание сдалось раньше срока: %.2f при %.2f"
+                                        % (spent, timeout))
+
+    def test_the_default_timeout_stays_within_the_measured_ceiling(self):
+        got = inspect.signature(live.settled).parameters["timeout"].default
+        self.assertLessEqual(got, self.CEILING,
+                             "срок ожидания %s с назван мимо замера: залипший ход "
+                             "держит прогон дольше, чем идёт весь прогон" % got)
 
 
 class TestTheBenchDoesNotKnowTheDomain(Base):

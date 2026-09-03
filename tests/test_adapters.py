@@ -821,10 +821,12 @@ class TestSummary(unittest.TestCase):
 
 
 class TestMemoryOffIsReallyOff(unittest.TestCase):
-    """Половина без памяти обязана не ходить в хранилище вовсе."""
+    """Выключенная память не ходит в хранилище вовсе.
+
+    Не «не позвала адаптер», а звать нечем: у выключенной двери адаптера нет.
+    """
 
     def test_memory_off_returns_nothing_and_touches_nothing(self):
-        """Половина без памяти обязана не ходить в хранилище вовсе."""
         off = port.door(disabled=True)
         self.assertEqual(off.read("вопрос"), "")
         self.assertEqual(off.write("текст"), "")
