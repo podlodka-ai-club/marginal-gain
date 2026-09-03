@@ -15,7 +15,16 @@
 но много краёв — пустой файл, дописанный файл, подменённый файл, потолок
 посреди файла. Перечислять их руками значит перечислить не все.
 """
-import contextlib, fcntl, json, os, signal, subprocess, sys, tempfile, time, unittest
+import contextlib
+import fcntl
+import json
+import os
+import signal
+import subprocess
+import sys
+import tempfile
+import time
+import unittest
 from pathlib import Path
 from unittest import mock
 

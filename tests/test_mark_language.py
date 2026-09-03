@@ -30,7 +30,12 @@
 объявленный просьбой, проверяется целиком: если контур роняет десятую строку,
 просьба обещает то, чего мы не выполняем.
 """
-import contextlib, json, os, sqlite3, tempfile, unittest
+import contextlib
+import json
+import os
+import sqlite3
+import tempfile
+import unittest
 from pathlib import Path
 from unittest import mock
 

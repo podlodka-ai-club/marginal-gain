@@ -15,7 +15,12 @@
 «сколько эпизодов в архиве, столько строк в хранилище, и номера внутри
 разговора идут подряд, чем бы архив ни был нарезан».
 """
-import contextlib, json, os, sqlite3, tempfile, unittest
+import contextlib
+import json
+import os
+import sqlite3
+import tempfile
+import unittest
 from collections import Counter
 from pathlib import Path
 from unittest import mock
@@ -24,7 +29,6 @@ from hypothesis import HealthCheck, given, settings, strategies as st
 
 os.environ.setdefault("XMEM_INSTANCE_ID", "test-instance")
 
-from domain import models
 from pipeline import save, understand
 from storage import local, port
 
@@ -176,7 +180,6 @@ class TestOneNumberPerEpisodeOfATalk(unittest.TestCase):
             files = archive(tmp, shape)
             digest(files)
             was = set(episodes_in(base))
-            talk = shape[0][0] or "unknown"
             extra = Path(tmp) / "разговор-99.jsonl"
             with extra.open("a", encoding="utf-8") as fh:
                 for line in rows(shape[0][0], more):

@@ -33,7 +33,9 @@
     python3 -m pipeline.consolidate --from "ключ"   из чего собрана замена
     python3 -m pipeline.consolidate --undo "ключ"   развернуть обратно
 """
-import argparse, contextlib, json
+import argparse
+import contextlib
+import json
 
 from domain import lifespan
 from infra import locks

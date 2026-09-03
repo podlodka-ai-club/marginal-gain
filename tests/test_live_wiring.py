@@ -6,7 +6,13 @@
 меряла старый снимок, а не работу. Здесь проверяется ровно стык: заняты ли
 точки, доходит ли до них дело и что происходит, когда вызываемое сломано.
 """
-import json, os, re, subprocess, sys, tempfile, time, unittest
+import json
+import os
+import re
+import subprocess
+import tempfile
+import time
+import unittest
 from pathlib import Path
 from unittest import mock
 

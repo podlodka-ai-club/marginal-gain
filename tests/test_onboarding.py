@@ -18,7 +18,12 @@
 «сработает, как бы ни были записаны чужие хуки в тех же точках и какие бы
 рубильники ни стояли по умолчанию».
 """
-import json, os, re, subprocess, tempfile, unittest
+import json
+import os
+import re
+import subprocess
+import tempfile
+import unittest
 from pathlib import Path
 
 from hypothesis import HealthCheck, given, settings, strategies as st

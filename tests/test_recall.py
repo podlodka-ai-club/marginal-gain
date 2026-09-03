@@ -18,7 +18,9 @@
 Свойствами: важно не «на этом запросе стало лучше», а «факт не вытесняется
 событием никогда» и «кусок не несёт того, что уже сказано его текстом».
 """
-import json, os, tempfile, unittest
+import os
+import tempfile
+import unittest
 from pathlib import Path
 
 from hypothesis import HealthCheck, given, settings, strategies as st

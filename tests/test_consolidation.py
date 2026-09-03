@@ -27,7 +27,12 @@
   * свернуть записи разного вида или охвата → TestTheRuleIsNarrow
   * идти без замка                          → TestTheFoldDoesNotRaceTheSession
 """
-import contextlib, json, os, sqlite3, tempfile, unittest
+import contextlib
+import json
+import os
+import sqlite3
+import tempfile
+import unittest
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from unittest import mock
@@ -37,9 +42,9 @@ from hypothesis import HealthCheck, given, settings, strategies as st
 os.environ.setdefault("XMEM_INSTANCE_ID", "test-instance")
 
 from domain import folding, lifespan, models
-from infra import config, locks
+from infra import locks
 from pipeline import consolidate, forget, suggest, understand
-from storage import db, local, port
+from storage import local, port
 
 HERE = Path(__file__).resolve().parent.parent
 

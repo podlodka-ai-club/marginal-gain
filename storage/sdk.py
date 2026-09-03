@@ -5,7 +5,9 @@
 ответа. Интерфейс тот же, чтобы модули менялись местами без правок вызывающих.
 Пакет ставится отдельно, поэтому импорт отложен: без него остальной код живёт.
 """
-import json, os, threading
+import json
+import os
+import threading
 
 from storage import graph
 

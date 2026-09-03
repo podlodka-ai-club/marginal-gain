@@ -19,7 +19,8 @@
 
 Разбор ленты: python3 -m domain.ledger
 """
-import json, os
+import json
+import os
 from collections import defaultdict
 from datetime import datetime, timezone
 from pathlib import Path

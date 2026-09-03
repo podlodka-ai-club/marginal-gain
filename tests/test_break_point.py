@@ -35,7 +35,11 @@
   * сложить руки в одну цифру                 → TestTheArmsAreCountedApart
   * сносить песочницу при нулевом итоге       → TestAZeroKeepsTheSandbox
 """
-import contextlib, json, os, sqlite3, tempfile, unittest
+import contextlib
+import json
+import os
+import tempfile
+import unittest
 from collections import Counter
 from pathlib import Path
 from unittest import mock
@@ -47,7 +51,7 @@ os.environ.setdefault("XMEM_INSTANCE_ID", "test-instance")
 from domain import ledger, marks
 from eval import live
 from pipeline import suggest
-from storage import db, local, port
+from storage import db, port
 
 SLOW = settings(deadline=None, max_examples=25,
                 suppress_health_check=[HealthCheck.too_slow,

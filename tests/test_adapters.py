@@ -5,7 +5,11 @@
 чтение через адаптер возвращало не строку, и ссылка по ключу требовала полей,
 которых у ссылки нет. Обе закрыты здесь.
 """
-import dataclasses, json, os, tempfile, unittest
+import dataclasses
+import json
+import os
+import tempfile
+import unittest
 from pathlib import Path
 from unittest import mock
 
@@ -618,7 +622,6 @@ class TestTelemetry(unittest.TestCase):
         patch = mock.patch.object(telemetry, "ENABLED", True)
         patch.start()
         self.addCleanup(patch.stop)
-        emit = telemetry.emit
 
         def capture(name, ms, meta=None, count=None):
             tr = telemetry.current()

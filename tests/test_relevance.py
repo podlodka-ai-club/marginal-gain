@@ -20,7 +20,11 @@
 Мутация, которой проверяется непустота: сделать `context.fit` константой.
 Обязан покраснеть класс TestTheSameQuestionInAnotherProject.
 """
-import contextlib, json, math, os, tempfile, unittest
+import contextlib
+import json
+import os
+import tempfile
+import unittest
 from datetime import datetime
 from pathlib import Path
 from unittest import mock

@@ -4,7 +4,11 @@
 Нужен затем, что консольная утилита умеет только текстовую запись: ключ в ней
 выводит экстрактор, и при промахе записи схлопываются. Здесь ключ уходит полем.
 """
-import json, os, socket, urllib.error, urllib.request
+import json
+import os
+import socket
+import urllib.error
+import urllib.request
 
 from storage import graph
 

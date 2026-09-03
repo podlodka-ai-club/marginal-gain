@@ -28,7 +28,11 @@
 живущее только внутри команды, не доходит до агента, и ни один факт от отсева
 не теряется».
 """
-import contextlib, json, os, tempfile, unittest
+import contextlib
+import json
+import os
+import tempfile
+import unittest
 from pathlib import Path
 from unittest import mock
 

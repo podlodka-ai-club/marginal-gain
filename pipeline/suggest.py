@@ -6,7 +6,13 @@
 бесполезен, он засоряет контекст агента и уводит его в сторону. Молчание это
 нормальный и частый исход.
 """
-import argparse, ast, json, os, re, signal, sys
+import argparse
+import ast
+import json
+import os
+import re
+import signal
+import sys
 from datetime import datetime, timezone
 from pathlib import Path
 

@@ -34,7 +34,8 @@
 локальный забыли, и его кэш соединения жил насквозь через обе половины
 сравнения.
 """
-import os, subprocess
+import os
+import subprocess
 
 from infra import telemetry
 

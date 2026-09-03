@@ -9,7 +9,9 @@
 Первый признак — n_log, частота, сглаженная логарифмом. В score_of та же величина
 уже участвует, но в виде repeat, с потолком на десяти вхождениях.
 """
-import math, sys, unittest
+import math
+import sys
+import unittest
 from pathlib import Path
 from unittest import mock
 
@@ -26,8 +28,8 @@ sys.path.append(str(LAB))
 HAS_LAB = (LAB / "feat.py").exists()
 needs_lab = unittest.skipUnless(HAS_LAB, "стенда research/lab/x7 нет в клоне")
 
-from domain import features
-from pipeline import understand
+from domain import features # noqa: E402
+from pipeline import understand # noqa: E402
 
 
 class Formula(unittest.TestCase):

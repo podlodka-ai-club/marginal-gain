@@ -9,7 +9,15 @@
 Наполнять базу в обход конвейера нельзя: тогда замер меряет наполнение, а не
 продукт. Поэтому сначала красный тест, потом починка модуля записи.
 """
-import contextlib, json, os, re, signal, subprocess, sys, tempfile, unittest
+import contextlib
+import json
+import os
+import re
+import signal
+import subprocess
+import sys
+import tempfile
+import unittest
 from pathlib import Path
 from unittest import mock
 
@@ -537,7 +545,8 @@ class TestSecondRunBowsOut(unittest.TestCase):
             signal.signal(signal.SIGALRM, was)
 
     def test_busy_lock_returns_instead_of_waiting(self):
-        import fcntl, time
+        import fcntl
+        import time
         drain.STATE_DIR.mkdir(parents=True, exist_ok=True)
         with locks.PASS.open("a") as held:
             fcntl.flock(held, fcntl.LOCK_EX)

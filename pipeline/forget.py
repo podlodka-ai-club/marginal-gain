@@ -27,7 +27,9 @@
     python3 -m pipeline.forget --send          переклад
     python3 -m pipeline.forget --recall "..."  глубокое чтение
 """
-import argparse, contextlib, json
+import argparse
+import contextlib
+import json
 
 from domain import lifespan
 from infra import locks

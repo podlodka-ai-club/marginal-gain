@@ -11,7 +11,8 @@
 
 Текстовый путь остался запасным: консоль структурной записи не умеет.
 """
-import argparse, json, os
+import argparse
+import json
 from pathlib import Path
 
 from domain import models

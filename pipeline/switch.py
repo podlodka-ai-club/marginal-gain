@@ -22,7 +22,10 @@
     python3 -m pipeline.switch marks           один рубильник
     python3 -m pipeline.switch marks show      переставить
 """
-import argparse, os, subprocess, sys
+import argparse
+import os
+import subprocess
+import sys
 from pathlib import Path
 
 from domain import lifespan, marks
