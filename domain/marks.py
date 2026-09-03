@@ -167,13 +167,26 @@ def xmd1_unit(raw):
     if kind is None:
         return None, "type"
     subject = " ".join(str(raw.get("subject") or "").split())
-    # Предикат и значение склеиваются в одну фразу. Отдельным полем предикат не
-    # становится и в ключ не входит: ключ у нас fact_type|subject|scope.
-    content = " ".join((str(raw.get("predicate") or "") + " "
-                        + str(raw.get("value") or "")).split())
+    predicate = " ".join(str(raw.get("predicate") or "").split())
+    # Предикат и значение склеиваются в одну фразу — это содержание факта.
+    content = " ".join((predicate + " " + str(raw.get("value") or "")).split())
     if not subject or not content:
         return None, "empty"
-    fact = (kind, subject, XMD1_SCOPES[kind], content)
+    # Тема ключа — subject и predicate вместе, а не subject один. Модель
+    # называет subject по общей теме («рабочий ноутбук»), а не по отдельному
+    # утверждению о ней, и разные атрибуты одной темы (модель, память, экран)
+    # часто ложатся под одним subject. Ключ факта — fact_type|subject|scope,
+    # содержание в него не входит: без predicate такие атрибуты делят один
+    # ключ, и запись каждого следующего заменяет предыдущий в хранилище —
+    # дверь на запись каждого отвечает «принято», а строка от этого не
+    # перестаёт быть одной. Живой прогон «макбук» (Throne c9b6cb14/«факт
+    # доезжает до вброса») зафиксировал ровно эту потерю: «модель MacBook
+    # Pro M5» физически пропало, вытесненное «памятью», а её — «диагональю
+    # экрана», хотя все три записи считались успешными. Predicate — тоже
+    # слово модели, и вместе с subject он называет то единственное
+    # утверждение, которое несёт эта строка, точнее, чем subject один.
+    key_subject = "%s: %s" % (subject, predicate) if predicate else subject
+    fact = (kind, key_subject, XMD1_SCOPES[kind], content)
     try:
         models.Fact(*fact).validate()
     except models.SchemaError:

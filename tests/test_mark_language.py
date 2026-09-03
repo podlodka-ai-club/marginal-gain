@@ -213,13 +213,21 @@ class TestTheAskWantsEveryStatement(Asking):
 
 
 class TestTheAskKeepsSubjectsApart(Asking):
-    """Просьба велит разводить темы, потому что иначе обещание невыполнимо.
+    """Просьба велит разводить темы; код больше не полагается на неё одну.
 
-    Ключ факта это `fact_type|subject|scope`, содержание в него не входит. Две
-    строки с одной темой — одна строка в базе. Проси мы «сказал два — пиши два»
-    молча про темы, и разбор «живу в Казани, работаю смотрителем в музее» дал бы
-    две строки про человека, из которых до базы доехала бы одна: город снова
-    пропал бы, только теперь уже после разбора блока и потому невидимо.
+    Раньше здесь стояло другое решение: ключ факта — `fact_type|subject|scope`,
+    содержание в него не входит, и коллизия темы считалась делом только
+    просьбы («сказал два — пиши два» с разными subject), а не кода. Живой
+    прогон «макбук» (Throne c9b6cb14/«факт доезжает до вброса») назвал цену
+    этого решения: дверь на запись каждого факта отвечала «принято», а строка
+    в таблице `fact` физически пропадала — просьба вероятностная, а потеря
+    была верной. Решение снято: `xmd1_unit` вплетает predicate в subject
+    ключа (см. `domain/marks.py`), и разные атрибуты одной темы больше не
+    делят одну строку сами по себе, независимо от того, назвала ли модель им
+    разные subject. Схему ключа `Fact.KEY` это не двигает — `Association.
+    source_key` по-прежнему адресует факт строкой `fact_type|subject|scope`,
+    см. AGENTS.md п.7, — меняется только то, что модель и маппер кладут в
+    поле subject.
     """
 
     def test_the_ask_says_that_two_lines_need_two_subjects(self):
@@ -229,13 +237,12 @@ class TestTheAskKeepsSubjectsApart(Asking):
         self.assertIn("subject", rule,
                       "правило про темы не называет поле, о котором оно")
 
-    def test_two_statements_under_one_subject_are_one_row(self):
-        """Предел, ради которого правило и заведено. Схему ключа не двигаем.
+    def test_two_statements_under_one_subject_become_two_rows(self):
+        """Разные утверждения одной темы — разные строки, ни одно не стёрто.
 
-        Проверка документирующая: она держит не желаемое, а то, что есть, — и
-        краснеет, если ключ факта однажды поменяют. Менять его нельзя не из
-        упрямства: `Association.source_key` адресует факт этой самой строкой,
-        и смена ключа рвёт все связи, см. AGENTS.md п.7.
+        «Живу в Казани, работаю смотрителем в музее» — два факта с одним
+        subject «человек» и разными predicate. До правки один из них молча
+        исчезал бы при записи. Теперь оба остаются, каждый под своим ключом.
         """
         raw = [unit("user", "человек", "живёт в", "Казани"),
                unit("user", "человек", "работает", "смотрителем в музее")]
@@ -243,9 +250,39 @@ class TestTheAskKeepsSubjectsApart(Asking):
             files = transcript(tmp, block_of(raw))
             understand.digest(files, door=port.door(), dry=False)
             got = facts_in(base)
+        self.assertEqual(len(got), 2,
+                         "два разных утверждения одной темы схлопнулись в одну "
+                         "строку — коллизия ключа вернулась")
+        contents = set(got.values())
+        self.assertIn("живёт в Казани", contents, "утверждение про Казань пропало")
+        self.assertIn("работает смотрителем в музее", contents,
+                      "утверждение про музей пропало")
+
+    def test_the_same_statement_repeated_across_episodes_stays_one_row(self):
+        """Повтор того же утверждения — не коллизия: subject тот же, строка одна.
+
+        Мутация, которую этот тест обязан ловить: заставь `xmd1_unit` всегда
+        добавлять к subject что-то новое (например, счётчик вызова) — и
+        повтор того же утверждения в двух отдельных эпизодах разъедется на
+        две строки вместо освежения одной. Ключ обязан зависеть только от
+        subject и predicate, которые назвала модель, а не от того, что ещё
+        происходило до этого вызова.
+        """
+        raw = [unit("user", "человек", "живёт в", "Казани")]
+        with tempfile.TemporaryDirectory() as tmp, store(tmp) as base:
+            first = Path(tmp) / "episode-1"
+            second = Path(tmp) / "episode-2"
+            first.mkdir()
+            second.mkdir()
+            understand.digest(transcript(first, block_of(raw), say="Ход первый."),
+                              door=port.door(), dry=False)
+            understand.digest(transcript(second, block_of(raw),
+                                         say="Ход второй, другой эпизод."),
+                              door=port.door(), dry=False)
+            got = facts_in(base)
         self.assertEqual(len(got), 1,
-                         "две темы разошлись — ключ факта поменяли, и правило "
-                         "просьбы про разные темы больше не нужно")
+                         "повтор того же утверждения в другом эпизоде завёл "
+                         "вторую строку вместо освежения первой")
 
 
 class TestWhatTheModelWroteReachesTheBase(unittest.TestCase):
@@ -276,6 +313,10 @@ class TestWhatTheModelWroteReachesTheBase(unittest.TestCase):
 
         Слово набора ищут вхождением, и любая правка букв по дороге — это
         промах поиска, который снаружи выглядит как «факта нет».
+
+        Ключ в базе — subject и predicate вместе (см. `xmd1_unit`), а не
+        subject один: predicate здесь один и тот же на весь набор («говорит
+        про»), поэтому ключ каждой строки собирается тем же правилом.
         """
         raw = [unit(kind, subject, "говорит про", value)
                for kind, subject, value in units]
@@ -284,9 +325,10 @@ class TestWhatTheModelWroteReachesTheBase(unittest.TestCase):
             understand.digest(files, door=port.door(), dry=False)
             got = facts_in(base)
         for one in raw:
-            self.assertIn(one["subject"], got,
-                          "темы %r в базе нет вовсе" % one["subject"])
-            self.assertIn(one["value"], got[one["subject"]],
+            key_subject = "%s: %s" % (one["subject"], one["predicate"])
+            self.assertIn(key_subject, got,
+                          "темы %r в базе нет вовсе" % key_subject)
+            self.assertIn(one["value"], got[key_subject],
                           "значение %r до базы не доехало" % one["value"])
 
     @SLOW
