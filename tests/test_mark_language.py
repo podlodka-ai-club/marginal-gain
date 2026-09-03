@@ -60,6 +60,14 @@ WORDS = st.sampled_from([
 
 TYPES = st.sampled_from(["preference", "user", "goal", "event", "resource"])
 
+# Темы. Своя у каждой строки и с запасом: ключ факта это `fact_type|subject|scope`,
+# и две строки с одной темой — одна строка в базе, а не две. Набор собирается из
+# тех же слов, но с номером, потому что потолок просьбы поднимут ещё раз, а
+# перебор из пятнадцати слов на потолке в двадцать станет невыполнимым молча —
+# проверка упадёт на подборе примера, ни разу не померив то, ради чего написана.
+SUBJECTS = st.builds("%s-%d".__mod__, st.tuples(
+    WORDS, st.integers(min_value=0, max_value=10 * (marks.XMD1_MAX_UNITS + 1))))
+
 
 def unit(kind, subject, predicate, value):
     """Единица разметки в том виде, в каком её пишет модель."""
@@ -71,8 +79,8 @@ def unit(kind, subject, predicate, value):
 # `fact_type|subject|scope`, и два утверждения об одной теме — одна строка, а не
 # две. Считать их порознь значило бы требовать от схемы того, чего она не
 # обещала.
-UNITS = st.lists(st.tuples(TYPES, WORDS, WORDS), min_size=1, max_size=10,
-                 unique_by=lambda item: item[1])
+UNITS = st.lists(st.tuples(TYPES, SUBJECTS, WORDS), min_size=1,
+                 max_size=marks.XMD1_MAX_UNITS, unique_by=lambda item: item[1])
 
 
 def block_of(units):
@@ -105,8 +113,13 @@ def store(tmp):
     """Своя база на прогон. Адаптер держит репозиторий на процесс — закрываем."""
     base = Path(tmp) / "memory.db"
     local.close()
+    # Каталог состояния уводим тоже, а не только базу. Оттуда читаются имя
+    # схемы разметки и режим памяти: оставь его живым — и проверки судят по
+    # рубильникам того, кто их запустил, а на чужой машине краснеют на пустом
+    # месте. Одна переменная уводит все десять модулей, см. infra/config.py.
     with mock.patch.dict(os.environ, {"XMEM_BACKEND": "local", "XMEM_DISABLED": "",
-                                      "XMEM_LOCAL_PATH": str(base)}), \
+                                      "XMEM_LOCAL_PATH": str(base),
+                                      "XMEM_STATE_DIR": tmp}), \
          mock.patch.object(understand, "STATE", Path(tmp) / "understand.json"):
         try:
             yield base
@@ -124,7 +137,24 @@ def facts_in(base):
         conn.close()
 
 
-class TestTheAskNamesTheLanguage(unittest.TestCase):
+class Asking(unittest.TestCase):
+    """Проверки просьбы на своём каталоге состояния.
+
+    Имя схемы разметки берётся оттуда (`infra.config.marks`), и без развязки
+    проверки судили бы по рубильникам того, кто их запустил: переставь человек
+    схему у себя — и они краснеют, ничего про нашу правку не сказав.
+    """
+
+    def setUp(self):
+        self.state = tempfile.TemporaryDirectory()
+        self.addCleanup(self.state.cleanup)
+        patch = mock.patch.dict(os.environ, {"XMEM_STATE_DIR": self.state.name,
+                                             "XMEM_MARKS": ""})
+        patch.start()
+        self.addCleanup(patch.stop)
+
+
+class TestTheAskNamesTheLanguage(Asking):
     """Просьба велит писать разметку на языке человека, а не на своём.
 
     Прозаическая проверка, и другой тут быть не может: правили мы текст
@@ -154,7 +184,7 @@ class TestTheAskNamesTheLanguage(unittest.TestCase):
                           "правило языка не называет поле %s" % field)
 
 
-class TestTheAskWantsEveryStatement(unittest.TestCase):
+class TestTheAskWantsEveryStatement(Asking):
     """Просьба требует строку на каждое утверждение, а не одну на сообщение."""
 
     def test_the_ask_names_every_statement_of_the_message(self):
@@ -175,6 +205,42 @@ class TestTheAskWantsEveryStatement(unittest.TestCase):
         """
         self.assertGreater(marks.XMD1_MAX_UNITS, 3)
         self.assertIn(str(marks.XMD1_MAX_UNITS), marks.ask())
+
+
+class TestTheAskKeepsSubjectsApart(Asking):
+    """Просьба велит разводить темы, потому что иначе обещание невыполнимо.
+
+    Ключ факта это `fact_type|subject|scope`, содержание в него не входит. Две
+    строки с одной темой — одна строка в базе. Проси мы «сказал два — пиши два»
+    молча про темы, и разбор «живу в Казани, работаю смотрителем в музее» дал бы
+    две строки про человека, из которых до базы доехала бы одна: город снова
+    пропал бы, только теперь уже после разбора блока и потому невидимо.
+    """
+
+    def test_the_ask_says_that_two_lines_need_two_subjects(self):
+        said = marks.ask().lower()
+        self.assertIn("тема", said, "просьба про темы строк не говорит ничего")
+        rule = " ".join(one for one in marks.ask().split(". ") if "тема" in one.lower())
+        self.assertIn("subject", rule,
+                      "правило про темы не называет поле, о котором оно")
+
+    def test_two_statements_under_one_subject_are_one_row(self):
+        """Предел, ради которого правило и заведено. Схему ключа не двигаем.
+
+        Проверка документирующая: она держит не желаемое, а то, что есть, — и
+        краснеет, если ключ факта однажды поменяют. Менять его нельзя не из
+        упрямства: `Association.source_key` адресует факт этой самой строкой,
+        и смена ключа рвёт все связи, см. AGENTS.md п.7.
+        """
+        raw = [unit("user", "человек", "живёт в", "Казани"),
+               unit("user", "человек", "работает", "смотрителем в музее")]
+        with tempfile.TemporaryDirectory() as tmp, store(tmp) as base:
+            files = transcript(tmp, block_of(raw))
+            understand.digest(files, door=port.door(), dry=False)
+            got = facts_in(base)
+        self.assertEqual(len(got), 1,
+                         "две темы разошлись — ключ факта поменяли, и правило "
+                         "просьбы про разные темы больше не нужно")
 
 
 class TestWhatTheModelWroteReachesTheBase(unittest.TestCase):
@@ -227,7 +293,7 @@ class TestWhatTheModelWroteReachesTheBase(unittest.TestCase):
         Урежь его где-нибудь по дороге — обещание станет ложью, а потеря будет
         видна только на длинном сообщении.
         """
-        subjects = data.draw(st.lists(WORDS, min_size=marks.XMD1_MAX_UNITS,
+        subjects = data.draw(st.lists(SUBJECTS, min_size=marks.XMD1_MAX_UNITS,
                                       max_size=marks.XMD1_MAX_UNITS, unique=True))
         raw = [unit("preference", subject, "говорит про", "значение %d" % number)
                for number, subject in enumerate(subjects)]
