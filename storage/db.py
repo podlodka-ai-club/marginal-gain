@@ -668,12 +668,23 @@ class Repository:
             if dry:
                 return self.conn.execute(
                     'SELECT count(*) FROM "fact" WHERE %s' % where, (now,)).fetchone()[0]
+            # Читаем то, что вот-вот перекладываем — иначе аудиту нечего было бы
+            # сказать, кроме числа: «сколько» без «что именно» это та же немота,
+            # которую задача и просит устранить.
+            gone = [dict(row) for row in self.conn.execute(
+                'SELECT %s FROM "fact" WHERE %s' % (names, where), (now,))]
             moved = self.conn.execute(
                 'INSERT OR REPLACE INTO "lapsedfact" (%s, "lapsed_at") '
                 'SELECT %s, ? FROM "fact" WHERE %s' % (names, names, where),
                 (now, now)).rowcount
             self.conn.execute('DELETE FROM "fact" WHERE %s' % where, (now,))
             self.conn.commit()
+        from domain import audit
+        audit.record("forget", input={"now": now},
+                     output={"moved": [{"fact_type": r["fact_type"],
+                                        "subject": r["subject"], "scope": r["scope"],
+                                        "content": r.get("content")} for r in gone]},
+                     ok=True)
         return moved
 
     # --- свёртка ------------------------------------------------------------
@@ -695,6 +706,7 @@ class Repository:
         """
         shared = [f.name for f in dataclasses.fields(models.Fact)]
         names = ", ".join('"%s"' % name for name in shared)
+        merges = []
         with self.lock:
             rows = [dict(row) for row in self.conn.execute('SELECT * FROM "fact"')]
             moved = 0
@@ -718,8 +730,14 @@ class Repository:
                         (row["fact_type"], row["subject"], row["scope"]))
                 self._mark(keep, dead)
                 self._rewire(dead, keep_key)
+                merges.append({"kept": keep_key, "merged": dead,
+                              "content": keep.get("content")})
             if not dry:
                 self.conn.commit()
+        if not dry:
+            from domain import audit
+            audit.record("fold", input={"now": now}, output={"merges": merges},
+                         ok=True)
         return moved
 
     def _mark(self, keep, dead):
