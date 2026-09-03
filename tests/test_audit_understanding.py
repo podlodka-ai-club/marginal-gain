@@ -152,7 +152,7 @@ class TestFactRowsMatchTheOutcome(Base):
         self.assertTrue(rows_[0]["output"]["written"])
         # Ключ — subject и predicate вместе (см. domain/marks.py:xmd1_unit):
         # разные атрибуты одной темы не должны делить ключ факта.
-        self.assertEqual(rows_[0]["input"]["subject"], "город: любит")
+        self.assertEqual(rows_[0]["input"]["subject"], "5:город: любит")
 
     def test_a_fact_below_the_score_threshold_is_refused_with_a_reason(self):
         text = "Готово. %s" % mark_block([unit("город", "Казань")])

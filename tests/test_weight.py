@@ -258,7 +258,7 @@ class Marked(unittest.TestCase):
             "source": "stated", "confidence": 0.9}
     # Ключ — subject и predicate вместе (см. domain/marks.py:xmd1_unit):
     # разные атрибуты одной темы не должны делить один ключ факта.
-    KEY = ("mark", "preference", "длина ответа: человек просит", "global")
+    KEY = ("mark", "preference", "12:длина ответа: человек просит", "global")
 
     def episode(self, *replies):
         return {"session_id": "s1", "number": 1, "request": "сделай коротко",
@@ -311,8 +311,8 @@ class Wiring(unittest.TestCase):
 
     # Ключ — subject и predicate вместе (см. domain/marks.py:xmd1_unit):
     # разные атрибуты одной темы не должны делить один ключ факта.
-    KEY = ("mark", "preference", "длина ответа: человек просит", "global")
-    IDENTITY = "preference|длина ответа: человек просит|global"
+    KEY = ("mark", "preference", "12:длина ответа: человек просит", "global")
+    IDENTITY = "preference|12:длина ответа: человек просит|global"
 
     def weigh(self, reply, use=None):
         with mock.patch.object(understand, "episodes_from_file",
@@ -321,7 +321,7 @@ class Wiring(unittest.TestCase):
 
     def test_identity_matches_the_ledger_key(self):
         """Ключ узла и ключ ленты — один и тот же факт. Иначе счёт не сойдётся."""
-        fact = ("preference", "длина ответа: человек просит", "global",
+        fact = ("preference", "12:длина ответа: человек просит", "global",
                 "человек просит коротко")
         self.assertEqual(understand.identity_of(fact), self.IDENTITY)
 

@@ -325,7 +325,8 @@ class TestWhatTheModelWroteReachesTheBase(unittest.TestCase):
             understand.digest(files, door=port.door(), dry=False)
             got = facts_in(base)
         for one in raw:
-            key_subject = "%s: %s" % (one["subject"], one["predicate"])
+            key_subject = "%d:%s: %s" % (len(one["subject"]), one["subject"],
+                                         one["predicate"])
             self.assertIn(key_subject, got,
                           "темы %r в базе нет вовсе" % key_subject)
             self.assertIn(one["value"], got[key_subject],

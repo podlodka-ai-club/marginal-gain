@@ -135,11 +135,11 @@ class TestFactsComeFromTheBlock(unittest.TestCase):
         которое несёт эта строка.
         """
         facts, dropped = marks.facts_of(episode(block_of(UNIT)))
-        self.assertEqual(facts, [("preference", "длина ответа: человек просит",
+        self.assertEqual(facts, [("preference", "12:длина ответа: человек просит",
                                   "global", "человек просит отвечать коротко")])
         self.assertEqual(dropped, Counter())
         self.assertEqual(marks.key(facts[0]),
-                         ("mark", "preference", "длина ответа: человек просит",
+                         ("mark", "preference", "12:длина ответа: человек просит",
                           "global"))
 
     def test_without_the_block_nothing_is_marked(self):
@@ -169,7 +169,7 @@ class TestFactsComeFromTheBlock(unittest.TestCase):
         """Конвейер: есть разметка — берём её, нет — работают прежние правила."""
         marked, _ = understand.marked_or_guessed(episode(block_of(UNIT)))
         self.assertEqual([f for f, _ in marked],
-                         [("preference", "длина ответа: человек просит", "global",
+                         [("preference", "12:длина ответа: человек просит", "global",
                            "человек просит отвечать коротко")])
         self.assertEqual([k[0] for _, k in marked], ["mark"])
 
@@ -197,7 +197,7 @@ class TestStorageSchemaStaysWhereItWas(unittest.TestCase):
         facts, _ = marks.facts_of(episode(block_of(UNIT)))
         fact = models.Fact(*facts[0]).validate()
         self.assertEqual(fact.identity(),
-                         "preference|длина ответа: человек просит|global")
+                         "preference|12:длина ответа: человек просит|global")
         link = models.Association(source_key=fact.identity(), target_key="x|y|global",
                                   cue="same_episode", weight=1.0)
         self.assertEqual(link.key()["source_key"], fact.identity())
@@ -337,6 +337,42 @@ class TestSubjectKeyIncludesThePredicate(unittest.TestCase):
         self.assertEqual(dropped, Counter())
         identities = {marks.key(f) for f in facts}
         self.assertEqual(len(identities), len(predicates))
+
+    def test_a_colon_inside_subject_or_predicate_does_not_collide(self):
+        """Находка code review: склейка через фиксированный разделитель была
+        неоднозначна. subject «Проект: дедлайн» + predicate «пятница» и
+        subject «Проект» + predicate «дедлайн: пятница» давали одну и ту же
+        строку «Проект: дедлайн: пятница» — двоеточие внутри поля (обычное
+        дело: «16:9», «10:30», «email: рабочий») воспроизводило тот же класс
+        бага, только по другому триггеру, чем «модель не развела subject».
+        """
+        a, _ = marks.xmd1_unit(dict(self.RESOURCE, subject="Проект: дедлайн",
+                                    predicate="пятница", value="важно"))
+        b, _ = marks.xmd1_unit(dict(self.RESOURCE, subject="Проект",
+                                    predicate="дедлайн: пятница", value="важно"))
+        self.assertNotEqual(marks.key(a), marks.key(b))
+
+    @given(st.text(alphabet="aбвгдеABCDE0123456789:", min_size=4, max_size=16),
+          st.data())
+    @settings(max_examples=60, deadline=None)
+    def test_any_split_point_between_subject_and_predicate_gives_a_distinct_key(
+            self, blob, data):
+        """Свойство, обобщающее находку code review.
+
+        Одна и та же строка режется на (subject, predicate) в двух разных
+        местах — ключ обязан различить их независимо от того, где прошла
+        граница и что за символы (включая «:») оказались по обе стороны.
+        """
+        i = data.draw(st.integers(min_value=1, max_value=len(blob) - 1))
+        j = data.draw(st.integers(min_value=1, max_value=len(blob) - 1)
+                      .filter(lambda x: x != i))
+        fact_a, _ = marks.xmd1_unit(dict(self.RESOURCE, subject=blob[:i],
+                                         predicate=blob[i:], value="v"))
+        fact_b, _ = marks.xmd1_unit(dict(self.RESOURCE, subject=blob[:j],
+                                         predicate=blob[j:], value="v"))
+        if fact_a is None or fact_b is None:
+            return
+        self.assertNotEqual(marks.key(fact_a), marks.key(fact_b))
 
 
 class TestRegistryTakesMoreThanOneMapper(unittest.TestCase):
