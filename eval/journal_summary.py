@@ -16,6 +16,7 @@
 """
 import argparse
 import json
+import sys
 from collections import OrderedDict
 from pathlib import Path
 
@@ -25,7 +26,13 @@ DEFAULT_ARM = "memory"
 
 
 def rows_of(journal_path):
-    """Строки журнала, по одной на прогон, в порядке, в котором дописаны."""
+    """Строки журнала, по одной на прогон, в порядке, в котором дописаны.
+
+    Битую строку пропускаем, не роняем весь журнал: файл дописывается на
+    ходу (`append_journal`, без переписи), и на живом прогоне последняя
+    строка может оказаться половиной — тот же риск и тот же приём, что и в
+    `live.replies_of`.
+    """
     path = Path(journal_path)
     if not path.exists():
         return []
@@ -33,20 +40,32 @@ def rows_of(journal_path):
     with path.open(encoding="utf-8") as fh:
         for line in fh:
             line = line.strip()
-            if line:
+            if not line:
+                continue
+            try:
                 out.append(json.loads(line))
+            except ValueError:
+                continue
     return out
 
 
 def runs_of(rows, pair_id, arm=DEFAULT_ARM):
-    """Прогоны, урезанные ровно до этой пары этим ключом, с этой рукой сыгранной.
+    """Прогоны, которые могли урезать набор до этой пары, с этой рукой сыгранной.
 
     `only` — то самое поле, ради которого эта сводка вообще возможна: без
     него урезанный прогон неотличим от полного, и посчитанные вместе они
-    смешали бы знаменатель.
+    смешали бы знаменатель. Полный прогон (`only` пуст) в счёт не идёт ни
+    при какой паре.
+
+    Матчим тем же правилом, каким `run()` резал набор — `only in
+    pair["id"]`, подстрокой, а не равенством: прогон `--only макбук` мог
+    задеть и пару с id вроде «старый-макбук», и её строку терять молча
+    неправильно. Пары внутри прогона по-прежнему находятся точно, по
+    равенству id, в `pair_entries`.
     """
     return [row for row in rows
-           if row.get("only") == pair_id and arm in row.get("arms", {})]
+           if row.get("only") and row["only"] in pair_id
+           and arm in row.get("arms", {})]
 
 
 def pair_entries(runs, pair_id, arm=DEFAULT_ARM):
@@ -80,10 +99,18 @@ def steps_reached(break_field):
     `STEPS`), сама ступень обрыва — нет, а что было после нас не спрашивали:
     цепочка встала раньше, и записывать дальше как «пройдено» значило бы
     выдумать цифру, которой прогон не давал.
+
+    Имя ступени, которого `STEPS` уже не знает (журнал коммитится в
+    репозиторий и переживает код — старую строку могли писать до
+    переименования), — не повод падать на всём журнале: такая строка не
+    подтверждает ни одной ступени, а не роняет сводку по остальным.
     """
     if break_field == "":
         return {step: True for step in live.STEPS}
-    idx = live.STEPS.index(break_field)
+    try:
+        idx = live.STEPS.index(break_field)
+    except ValueError:
+        return {step: False for step in live.STEPS}
     return {step: (i < idx) for i, step in enumerate(live.STEPS)}
 
 
@@ -93,15 +120,22 @@ def summarize(rows, pair_id, arm=DEFAULT_ARM):
     Возвращает `{"total": N, "steps": {ступень: сколько прошли}, "passed": M}`.
     `passed` — то же «засчитана», что в отчёте прогона: `bucket(row) == APPLIED`
     (`Report.passed`), не свой пересчёт удачи.
+
+    Отрицательная пара (`aim == "avoid"`) не идёт в счёт ступеней: `break_of`
+    вовсе не спрашивает у неё обрыв («у отрицательной пары ждать в базе
+    нечего»), и пустой `break` там значит «вопрос не задавался», не
+    «доставила». Засчитать это как «прошла все четыре ступени» значило бы
+    придумать пройденную доставку там, где её и не ждали.
     """
     runs = runs_of(rows, pair_id, arm=arm)
     entries = pair_entries(runs, pair_id, arm=arm)
     steps = OrderedDict((step, 0) for step in live.STEPS)
     passed = 0
     for entry in entries:
-        reached = steps_reached(entry["break"])
-        for step in live.STEPS:
-            steps[step] += int(reached[step])
+        if entry.get("aim") != "avoid":
+            reached = steps_reached(entry["break"])
+            for step in live.STEPS:
+                steps[step] += int(reached[step])
         passed += int(entry["outcome"] == live.APPLIED)
     return {"total": len(entries), "steps": steps, "passed": passed}
 
@@ -131,13 +165,21 @@ def parser():
 def main(argv=None):
     args = parser().parse_args(argv)
     rows = rows_of(args.journal)
+    code = 0
     for pair_id in args.pair:
-        summary = summarize(rows, pair_id, arm=args.arm)
+        try:
+            summary = summarize(rows, pair_id, arm=args.arm)
+        except ValueError as bad:
+            # Грязные данные одной пары не стоят сводки по соседней — иначе
+            # один нечистый прогон убивает весь батч ради пары, которую
+            # даже не спрашивали.
+            print("%s — пропущена: %s" % (pair_id, bad), file=sys.stderr)
+            code = 1
+            continue
         print(text(pair_id, summary))
         print()
-    return 0
+    return code
 
 
 if __name__ == "__main__":
-    import sys
     sys.exit(main())

@@ -191,5 +191,132 @@ class TestAKnownExample(unittest.TestCase):
         self.assertEqual(summary["passed"], 0)
 
 
+# --- отрицательная пара не выдаёт цепочку задним числом -----------------------
+
+class TestNegativePairsDoNotFakeDelivery(unittest.TestCase):
+    """`break_of` не спрашивает обрыв у отрицательной пары вовсе (`aim=avoid`):
+
+    ей нечего ждать в базе, и пустой `break` там значит «вопрос не задавался»,
+    не «доставила». Считать это как «прошла все четыре ступени» — придумать
+    цифру, которой прогон не давал.
+    """
+
+    def test_an_avoid_pair_does_not_report_a_full_chain(self):
+        entry = a_pair_entry(id="забор", aim="avoid", outcome=live.APPLIED,
+                             break_="")
+        row = a_journal_row(only="забор", arm_pairs=[entry])
+        summary = js.summarize([row], "забор")
+        for step, count in summary["steps"].items():
+            self.assertEqual(count, 0, "ступень %r придумана отрицательной паре" % step)
+
+    @given(outcome=OUTCOMES)
+    @FAST
+    def test_avoid_pairs_never_move_a_step_counter(self, outcome):
+        entry = a_pair_entry(id="забор", aim="avoid", outcome=outcome, break_="")
+        row = a_journal_row(only="забор", arm_pairs=[entry])
+        summary = js.summarize([row], "забор")
+        self.assertEqual(sum(summary["steps"].values()), 0)
+
+
+# --- журнал переживает битую строку --------------------------------------------
+
+class TestTheJournalReadSurvivesABrokenLine(unittest.TestCase):
+    """`eval-runs.jsonl` дописывается на ходу — последняя строка может быть
+    половиной. Чтение роняет только её, не весь журнал (тот же приём, что и
+    `live.replies_of`).
+    """
+
+    def test_a_truncated_last_line_does_not_crash_the_read(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "journal.jsonl"
+            good = a_journal_row(only="макбук", arm_pairs=[a_pair_entry(id="макбук")])
+            path.write_text(json.dumps(good, ensure_ascii=False) + "\n"
+                            + '{"only": "макбук", "arms": {"mem', encoding="utf-8")
+            rows = js.rows_of(path)
+            self.assertEqual(rows, [good])
+
+    def test_a_missing_journal_file_reads_as_no_rows(self):
+        self.assertEqual(js.rows_of("/nonexistent/nowhere.jsonl"), [])
+
+
+# --- ступень цепочки, которой в текущем коде уже нет ---------------------------
+
+class TestAnUnknownBreakDoesNotCrashTheSummary(unittest.TestCase):
+    """Журнал коммитится в репозиторий и переживает код: старая строка может
+    называть ступень, которую `live.STEPS` больше не знает (переименовали,
+    расширили). Такая строка не роняет сводку по остальным девятнадцати.
+    """
+
+    def test_an_unrecognized_break_name_is_not_counted_as_reached(self):
+        reached = js.steps_reached("ступень-которой-больше-нет")
+        self.assertEqual(reached, {step: False for step in live.STEPS})
+
+    def test_it_does_not_raise(self):
+        entry = a_pair_entry(break_="ступень-которой-больше-нет")
+        row = a_journal_row(only="макбук", arm_pairs=[entry])
+        summary = js.summarize([row], "макбук")   # не должно бросить ValueError
+        self.assertEqual(summary["total"], 1)
+
+
+# --- `only` матчится тем же правилом, что резало набор в run() ----------------
+
+class TestOnlyMatchesTheSameRuleRunUsedToCut(unittest.TestCase):
+    """`run()` режет набор по `only in pair["id"]` (подстрока), не равенству.
+
+    Прогон `--only макбук` мог задеть и другую пару, чей id содержит
+    «макбук» подстрокой, — и её строку в сводке этой пары терять molча
+    неправильно: `runs_of` обязан узнавать урезанный прогон тем же правилом,
+    каким его резал `run()`, а не своим более строгим.
+    """
+
+    def test_a_substring_only_still_counts_for_the_longer_id(self):
+        entry = a_pair_entry(id="старый-макбук")
+        row = a_journal_row(only="макбук", arm_pairs=[entry])
+        runs = js.runs_of([row], "старый-макбук")
+        self.assertEqual(runs, [row])
+
+    def test_a_full_run_is_still_excluded(self):
+        entry = a_pair_entry(id="макбук")
+        row = a_journal_row(only=None, arm_pairs=[entry])
+        runs = js.runs_of([row], "макбук")
+        self.assertEqual(runs, [])
+
+    def test_an_unrelated_only_value_is_not_counted(self):
+        entry = a_pair_entry(id="макбук")
+        row = a_journal_row(only="город", arm_pairs=[entry])
+        runs = js.runs_of([row], "макбук")
+        self.assertEqual(runs, [])
+
+
+# --- один плохой прогон не роняет сводку по остальным парам ключа -------------
+
+class TestOneBadPairDoesNotAbortTheWholeBatch(unittest.TestCase):
+    """`main --pair a --pair b`: битые данные пары `a` не должны стоить
+    сводки по `b` — иначе один грязный прогон убивает весь батч ради пары,
+    которую даже не спрашивали.
+    """
+
+    def test_main_reports_the_good_pair_when_another_pair_is_broken(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "journal.jsonl"
+            broken = a_journal_row(
+                only="макбук",
+                arm_pairs=[a_pair_entry(id="макбук"), a_pair_entry(id="макбук")])
+            good = a_journal_row(only="город", arm_pairs=[a_pair_entry(id="город")])
+            with path.open("w", encoding="utf-8") as fh:
+                fh.write(json.dumps(broken, ensure_ascii=False) + "\n")
+                fh.write(json.dumps(good, ensure_ascii=False) + "\n")
+
+            import io
+            from contextlib import redirect_stdout, redirect_stderr
+            out, err = io.StringIO(), io.StringIO()
+            with redirect_stdout(out), redirect_stderr(err):
+                code = js.main(["--journal", str(path),
+                               "--pair", "макбук", "--pair", "город"])
+            self.assertNotEqual(code, 0)
+            self.assertIn("город", out.getvalue())
+            self.assertIn("1 из 1", out.getvalue())
+
+
 if __name__ == "__main__":
     unittest.main()
