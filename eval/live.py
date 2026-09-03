@@ -112,6 +112,12 @@ DEFAULT_ROOT = Path.home() / ".local" / "share" / "memory-encoder-eval"
 # Живое состояние. Ни один прогон не имеет права его открыть.
 LIVE_STATE = Path.home() / ".local" / "state" / "memory-encoder"
 
+# Журнал прогонов. В репозитории, не в песочнице: песочница умирает вместе с
+# исполнителем, а история цифр должна пережить прогон и коммититься вместе с
+# набором. Ключ `--journal` меняет только этот путь — писать журнал прогон
+# обязан всегда, без ключа: то, что включается ключом, забудут включить.
+DEFAULT_JOURNAL = ROOT / "eval-runs.jsonl"
+
 # Три точки, те же и в том же порядке, что человек занимает по SETUP.md.
 POINTS = {
     "UserPromptSubmit": ["on_prompt_queue.sh", "on_prompt_read.sh"],
@@ -1026,6 +1032,33 @@ def probe_line(probe):
         mark_word(probe), facts, "—" if hit is None else hit, said)
 
 
+# --- порог руки с памятью ----------------------------------------------------
+#
+# Правило работы сменилось: раньше набор рос до первого провала и вставал,
+# теперь — до тех пор, пока доля руки с памятью не ниже порога. Одиночный
+# провал на плавающем обрыве (ADR 0015: три формы, девять прогонов, один
+# провал не по вине формы) останавливал работу на шуме — окно принимает такой
+# дрейф как данность и не разбирает каждый съехавший ответ.
+
+# Порог не ключ командной строки: значение — решение оператора, и место ему
+# одно, здесь. Прочитан прогоном или ключом — цифра стала бы править себя сама.
+THRESHOLD = 0.7
+
+
+def share_of(report):
+    """Доля руки: применила / всего. Пар не было — доли нет, а не ноль.
+
+    Ноль читался бы как «вышли из окна»: набор с нулём пар ничего не мерил, а
+    не провалился.
+    """
+    return (report.passed / report.total) if report.total else None
+
+
+def in_window(share):
+    """В окне ли доля. Порог входит в окно, а не только то, что строго выше."""
+    return share is not None and share >= THRESHOLD
+
+
 # --- руки -------------------------------------------------------------------
 #
 # Рука — это один прогон одного и того же набора при одной настройке контура.
@@ -1100,7 +1133,24 @@ class Bout:
             out.append("")
         if self.diff is not None:
             out.append("разница (память минус без памяти): %+d" % self.diff)
+        if "memory" in self.reports:
+            out.append(self.window_line())
         return "\n".join(out).rstrip()
+
+    def window_line(self):
+        """Доля руки с памятью и вердикт по ней: в окне или ниже порога.
+
+        Только рука с памятью: голая — отрицательный контроль, её цифра к
+        порогу отношения не имеет и вердикт менять не должна.
+        """
+        report = self.reports["memory"]
+        share = share_of(report)
+        pct = "%d%%" % round(THRESHOLD * 100)
+        if share is None:
+            return "доля руки с памятью: пар не было — порог %s не проверить" % pct
+        verdict = "в окне" if in_window(share) else "ниже порога"
+        return ("доля руки с памятью: %d из %d = %.0f%% — %s (порог %s)"
+               % (report.passed, report.total, share * 100, verdict, pct))
 
 
 # --- отчёт ------------------------------------------------------------------
@@ -1373,6 +1423,65 @@ def judge_one(box, pair, reply):
             "error": reply.error}
 
 
+# --- журнал прогонов ---------------------------------------------------------
+#
+# Порог без истории цифр не работает: «4 из 5» само по себе не говорит, шум
+# это или съезд. Журнал даёт эту историю — по строке на прогон, в репозитории,
+# коммитом вместе с набором.
+
+def pair_row(report, row):
+    """Одна пара строкой журнала: id, aim, исход, ступень обрыва.
+
+    Исход и ступень — те же, что печатает отчёт (`bucket`, `break_of`), не
+    свой пересчёт: разъедься они, журнал говорил бы одно, а отчёт — другое.
+    """
+    probe = (report.probe or {}).get(row["id"])
+    return {"id": row["id"], "aim": row.get("aim", "apply"),
+            "outcome": bucket(row), "break": break_of(probe) if probe else ""}
+
+
+def journal_row(played, player, model, pairs_file, pairs_count):
+    """Строка журнала одного прогона: всё, чем цифры отличаются друг от друга.
+
+    Один вызов — одна строка, сколько бы рук ни играло: руки не складываются
+    (`Bout`), и это правило действует и здесь — каждая рука своим полем внутри
+    одной строки, а не отдельной строкой на руку.
+    """
+    arms = {}
+    for arm, report in played.items():
+        arms[arm] = {
+            "passed": report.passed, "total": report.total,
+            "share": share_of(report), "cost_usd": report.cost,
+            "pairs": [pair_row(report, row) for row in report.asked],
+        }
+    voice = next(iter(played.values())).voice if played else None
+    return {
+        "ts": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
+        "model": model, "player": player, "voice": voice,
+        "pairs_file": str(pairs_file) if pairs_file else None,
+        "pairs_count": pairs_count, "arms": arms,
+    }
+
+
+def append_journal(path, row):
+    """Дописать строку в журнал. Только append — вторая строка не трогает первую.
+
+    Под эксклюзивным замком: строка растёт с числом пар и рук и не всегда
+    влезает в один системный вызов записи, а `O_APPEND` атомарность такой
+    записи не обещает. Без замка два прогона сразу дали бы файл с перемешанными
+    байтами и строкой, которую не разберёт `json.loads`.
+    """
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("a", encoding="utf-8") as fh:
+        fcntl.flock(fh, fcntl.LOCK_EX)
+        try:
+            fh.write(json.dumps(row, ensure_ascii=False) + "\n")
+            fh.flush()
+        finally:
+            fcntl.flock(fh, fcntl.LOCK_UN)
+
+
 # --- команда ----------------------------------------------------------------
 
 def parser():
@@ -1400,6 +1509,9 @@ def parser():
     ap.add_argument("--root", help="каталог песочницы; по умолчанию свой на прогон")
     ap.add_argument("--keep", action="store_true", help="не убирать песочницу")
     ap.add_argument("--out", help="куда сложить построчный итог")
+    ap.add_argument("--journal", help="куда дописать строку журнала прогона; "
+                                      "пишется всегда, ключ меняет только путь "
+                                      "(по умолчанию %s)" % DEFAULT_JOURNAL.name)
     ap.add_argument("--wait", type=float,
                     help="сколько секунд ждать конца хода; по умолчанию %g, "
                          "живому агенту может понадобиться больше"
@@ -1461,6 +1573,14 @@ def main(argv=None):
                 json.dumps({arm: report.asked for arm, report in played.items()},
                            ensure_ascii=False, indent=1), encoding="utf-8")
             print("\nпострочный итог -> %s" % args.out)
+        # Журнал пишется всегда, без ключа: то, что включается ключом, забудут
+        # включить, и цифра пропадёт. `--journal` меняет только путь.
+        journal_path = Path(args.journal) if args.journal else DEFAULT_JOURNAL
+        pairs_file = args.pairs or ("мост: %s + %s" % (args.cases, args.script))
+        append_journal(journal_path, journal_row(
+            played, player=args.player, model=args.model,
+            pairs_file=pairs_file, pairs_count=len(items)))
+        print("журнал -> %s" % journal_path)
     return code
 
 
