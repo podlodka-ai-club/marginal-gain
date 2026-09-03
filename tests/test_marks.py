@@ -23,6 +23,8 @@ from collections import Counter
 from pathlib import Path
 from unittest import mock
 
+from hypothesis import given, settings, strategies as st
+
 os.environ.setdefault("XMEM_INSTANCE_ID", "test-instance")
 
 from domain import marks, models
@@ -120,12 +122,25 @@ class TestFactsComeFromTheBlock(unittest.TestCase):
     """Разбор берёт готовое, а не угадывает регэкспом по тексту."""
 
     def test_marked_unit_becomes_a_fact_with_the_key_the_model_named(self):
+        """Ключ, который назвала модель, — это subject И predicate вместе.
+
+        До живого прогона «макбук» (Throne c9b6cb14/«факт доезжает до
+        вброса») ключом считался subject один: predicate склеивался только в
+        content. Тема у модели называет общую тему («рабочий ноутбук»), а не
+        отдельное утверждение о ней, и разные атрибуты одной темы (модель,
+        память, экран) часто ложатся под одним subject — с одним predicate на
+        ключ такая пара делит одну строку в базе, и upsert следующей заменял
+        предыдущую бесследно. Predicate — тоже слово, которое назвала модель,
+        и вместе с subject он точнее адресует то единственное утверждение,
+        которое несёт эта строка.
+        """
         facts, dropped = marks.facts_of(episode(block_of(UNIT)))
-        self.assertEqual(facts, [("preference", "длина ответа", "global",
-                                  "человек просит отвечать коротко")])
+        self.assertEqual(facts, [("preference", "12:длина ответа: человек просит",
+                                  "global", "человек просит отвечать коротко")])
         self.assertEqual(dropped, Counter())
         self.assertEqual(marks.key(facts[0]),
-                         ("mark", "preference", "длина ответа", "global"))
+                         ("mark", "preference", "12:длина ответа: человек просит",
+                          "global"))
 
     def test_without_the_block_nothing_is_marked(self):
         """Мутация, обязательная для этой ветки: убрать блок из ответа.
@@ -154,7 +169,7 @@ class TestFactsComeFromTheBlock(unittest.TestCase):
         """Конвейер: есть разметка — берём её, нет — работают прежние правила."""
         marked, _ = understand.marked_or_guessed(episode(block_of(UNIT)))
         self.assertEqual([f for f, _ in marked],
-                         [("preference", "длина ответа", "global",
+                         [("preference", "12:длина ответа: человек просит", "global",
                            "человек просит отвечать коротко")])
         self.assertEqual([k[0] for _, k in marked], ["mark"])
 
@@ -181,7 +196,8 @@ class TestStorageSchemaStaysWhereItWas(unittest.TestCase):
         """
         facts, _ = marks.facts_of(episode(block_of(UNIT)))
         fact = models.Fact(*facts[0]).validate()
-        self.assertEqual(fact.identity(), "preference|длина ответа|global")
+        self.assertEqual(fact.identity(),
+                         "preference|12:длина ответа: человек просит|global")
         link = models.Association(source_key=fact.identity(), target_key="x|y|global",
                                   cue="same_episode", weight=1.0)
         self.assertEqual(link.key()["source_key"], fact.identity())
@@ -235,6 +251,130 @@ class TestExternalFormatIsLockedInTheMapper(unittest.TestCase):
         self.assertEqual(kept[0][2], "project")
 
 
+class TestSubjectKeyIncludesThePredicate(unittest.TestCase):
+    """Ключ факта — subject и predicate вместе, а не subject один.
+
+    Живой прогон «макбук» (Throne c9b6cb14/«факт доезжает до вброса»): модель
+    разметила «модель MacBook Pro M5», «память 16 гигабайт» и «диагональ
+    экрана 14 дюймов» одной темой subject="рабочий ноутбук". Ключ факта —
+    `fact_type|subject|scope`, содержание в него не входит — и до этой правки
+    upsert по такому ключу заменял content целиком: три записи подряд оставили
+    в базе только последнюю, первые две физически исчезли, хотя дверь на
+    запись каждой ответила «принято».
+
+    Первая попытка починки (номер по порядку внутри эпизода) не годилась:
+    номер зависит от того, что ещё встретилось в этом же ответе модели, и тот
+    же факт, упомянутый один в другом разговоре, получал бы ключ без суффикса
+    — то есть стирал бы чужой факт задним числом. Починка здесь не
+    порядковая, а содержательная: predicate — тоже слово, которое назвала
+    модель, и он остаётся тем же самым словом в любом разговоре, где о том же
+    атрибуте говорят снова. Проверки — свойствами и на двух отдельных
+    вызовах `facts_of` (как два разных эпизода), а не на одном.
+    """
+
+    RESOURCE = {"type": "resource", "subject": "рабочий ноутбук", "time": "",
+               "source": "stated", "confidence": 1}
+
+    def units(self, *pairs):
+        return [dict(self.RESOURCE, predicate=p, value=v) for p, v in pairs]
+
+    def test_three_attributes_of_one_topic_become_three_rows(self):
+        facts, dropped = marks.facts_of(episode(block_of(*self.units(
+            ("модель", "MacBook Pro M5"),
+            ("память", "16 гигабайт"),
+            ("диагональ экрана", "14 дюймов"),
+        ))))
+        self.assertEqual(dropped, Counter())
+        self.assertEqual(len(facts), 3, facts)
+        identities = {marks.key(f) for f in facts}
+        self.assertEqual(len(identities), 3, "факт лёг бы поверх соседнего")
+        self.assertEqual({f[3] for f in facts},
+                         {"модель MacBook Pro M5", "память 16 гигабайт",
+                          "диагональ экрана 14 дюймов"})
+
+    def test_the_same_predicate_in_a_separate_episode_maps_to_the_same_key(self):
+        """Ровно то, что не выдержала первая починка: два ОТДЕЛЬНЫХ вызова.
+
+        `facts_of` — чистая функция одного эпизода, без памяти о прошлых
+        вызовах. Разговор про диагональ экрана, случившийся один, без братьев
+        по батарее и памяти, обязан получить тот же ключ, что и диагональ,
+        упомянутая вместе с ними, — иначе повтор того же утверждения в другом
+        эпизоде не освежит старую строку, а заведёт новую.
+        """
+        first, _ = marks.facts_of(episode(block_of(*self.units(
+            ("модель", "MacBook Pro M5"),
+            ("диагональ экрана", "14 дюймов")))))
+        second, _ = marks.facts_of(episode(block_of(*self.units(
+            ("диагональ экрана", "14 дюймов")))))
+        diagonal_first = next(f for f in first if "дюймов" in f[3])
+        diagonal_second = second[0]
+        self.assertEqual(marks.key(diagonal_first), marks.key(diagonal_second))
+
+    def test_repeating_the_same_statement_does_not_change_the_key(self):
+        """Повтор того же утверждения — не коллизия: ключ тот же самый."""
+        facts, _ = marks.facts_of(episode(block_of(*self.units(
+            ("модель", "MacBook Pro M5"), ("модель", "MacBook Pro M5")))))
+        self.assertEqual(len(facts), 2)
+        self.assertEqual(marks.key(facts[0]), marks.key(facts[1]))
+
+    def test_told_of_agrees_with_facts_of(self):
+        """Вес по обращениям не должен разъехаться с тем, что реально легло."""
+        ep = episode(block_of(*self.units(
+            ("модель", "MacBook Pro M5"), ("память", "16 гигабайт"),
+            ("диагональ экрана", "14 дюймов"))))
+        facts, _ = marks.facts_of(ep)
+        told = set(marks.told_of(ep))
+        keys = {marks.key(f) for f in facts}
+        self.assertEqual(told, keys, "все три сказаны прямо, source=stated")
+
+    @given(st.lists(st.text(alphabet="абвгдежзийклмнопрст", min_size=3, max_size=8),
+                    min_size=1, max_size=5, unique=True))
+    @settings(max_examples=40, deadline=None)
+    def test_distinct_predicates_never_collapse_into_one_key(self, predicates):
+        """Свойство: сколько разных предикатов — столько разных ключей."""
+        units = [dict(self.RESOURCE, predicate=p, value="значение") for p in predicates]
+        facts, dropped = marks.facts_of(episode(block_of(*units)))
+        self.assertEqual(dropped, Counter())
+        identities = {marks.key(f) for f in facts}
+        self.assertEqual(len(identities), len(predicates))
+
+    def test_a_colon_inside_subject_or_predicate_does_not_collide(self):
+        """Находка code review: склейка через фиксированный разделитель была
+        неоднозначна. subject «Проект: дедлайн» + predicate «пятница» и
+        subject «Проект» + predicate «дедлайн: пятница» давали одну и ту же
+        строку «Проект: дедлайн: пятница» — двоеточие внутри поля (обычное
+        дело: «16:9», «10:30», «email: рабочий») воспроизводило тот же класс
+        бага, только по другому триггеру, чем «модель не развела subject».
+        """
+        a, _ = marks.xmd1_unit(dict(self.RESOURCE, subject="Проект: дедлайн",
+                                    predicate="пятница", value="важно"))
+        b, _ = marks.xmd1_unit(dict(self.RESOURCE, subject="Проект",
+                                    predicate="дедлайн: пятница", value="важно"))
+        self.assertNotEqual(marks.key(a), marks.key(b))
+
+    @given(st.text(alphabet="aбвгдеABCDE0123456789:", min_size=4, max_size=16),
+          st.data())
+    @settings(max_examples=60, deadline=None)
+    def test_any_split_point_between_subject_and_predicate_gives_a_distinct_key(
+            self, blob, data):
+        """Свойство, обобщающее находку code review.
+
+        Одна и та же строка режется на (subject, predicate) в двух разных
+        местах — ключ обязан различить их независимо от того, где прошла
+        граница и что за символы (включая «:») оказались по обе стороны.
+        """
+        i = data.draw(st.integers(min_value=1, max_value=len(blob) - 1))
+        j = data.draw(st.integers(min_value=1, max_value=len(blob) - 1)
+                      .filter(lambda x: x != i))
+        fact_a, _ = marks.xmd1_unit(dict(self.RESOURCE, subject=blob[:i],
+                                         predicate=blob[i:], value="v"))
+        fact_b, _ = marks.xmd1_unit(dict(self.RESOURCE, subject=blob[:j],
+                                         predicate=blob[j:], value="v"))
+        if fact_a is None or fact_b is None:
+            return
+        self.assertNotEqual(marks.key(fact_a), marks.key(fact_b))
+
+
 class TestRegistryTakesMoreThanOneMapper(unittest.TestCase):
     """Мапперов будет несколько: второй добавляется одной записью."""
 
@@ -254,14 +394,18 @@ class TestRegistryTakesMoreThanOneMapper(unittest.TestCase):
         """Одна запись в реестре — и тот же вход идёт через оба маппера.
 
         Ни конвейер, ни хранилище про вторую схему не знают: она называется
-        настройкой, и цифры двух схем на одном входе сравнимы.
+        настройкой, и число фактов на одном входе — тем же путём. Точный вид
+        subject — деталь схемы (xmd1 вплетает в него predicate, чтобы разные
+        атрибуты одной темы не делили ключ, см. `xmd1_unit`; у второй схемы
+        предиката нет вовсе), поэтому сравнимо тут `fact_type` и `scope`, а не
+        subject целиком.
         """
         with mock.patch.dict(marks.SCHEMES, {"other": self.scheme()}), \
              mock.patch.object(marks, "NAMES", marks.NAMES + ["other"]):
             first, _ = marks.to_facts([UNIT], name="xmd1")
             second, _ = marks.to_facts([self.OTHER], name="other")
             self.assertEqual(len(first), len(second))
-            self.assertEqual(first[0][:3], second[0][:3])
+            self.assertEqual((first[0][0], first[0][2]), (second[0][0], second[0][2]))
 
             answer = "текст\n<<<B\n%s\nB>>>" % json.dumps(self.OTHER, ensure_ascii=False)
             with mock.patch.dict(os.environ, {"XMEM_MARKS": "other"}):
