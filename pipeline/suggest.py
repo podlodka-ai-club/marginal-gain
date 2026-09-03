@@ -870,15 +870,24 @@ def settle(files, door=None, log=None):
     """Отметить исход ходов, в которые подставляли память.
 
     Правило. `helped` это не «память помогла» — такого наблюдения у нас нет.
-    Это «ход, в который её подставили, дошёл до конца»: берём первый эпизод
-    того же разговора, начавшийся не раньше вставки, и смотрим его исход.
-    `done` — да, `blocked` — нет, `abandoned` или эпизода нет вовсе — поле не
-    пишем: неизвестное это не отрицательное.
+    Это «ход, в который её подставили, дошёл до конца»: берём эпизод того же
+    разговора, ВНУТРИ которого случилась вставка (начался не позже её и
+    кончился не раньше), а если такого нет — первый эпизод, начавшийся после,
+    и смотрим его исход. Подсказку показывают внутри того же эпизода, которым
+    её и вызвали, — он начался раньше вставки почти всегда, и первое условие
+    здесь обязательно, а не «для полноты»: без него самый частый случай не
+    находится никогда. `done` — да, `blocked` — нет, `abandoned` или эпизода
+    нет вовсе — поле не пишем: неизвестное это не отрицательное.
 
     Список вставок берём из своего журнала, а не из хранилища: читать оттуда мы
     умеем только поиском словами, а перечислить вставки поиск не может.
+
+    Метки сравниваем как моменты (`infra.timeline.parse_time`), не строками:
+    харнесс шлёт метки эпизодов с `Z`, наша же `injected_at` — со смещением
+    `+00:00`, и в одну секунду строки расходятся на символе конца не так,
+    как были на самом деле.
     """
-    from archive.transcripts import episodes_from_file
+    from archive.transcripts import episodes_from_file, parse_time
     from pipeline import understand
 
     known = notes_of(log)
@@ -893,9 +902,11 @@ def settle(files, door=None, log=None):
         for ep in episodes:
             talk = ep["session_id"] or "unknown"
             ends.setdefault(talk, []).append(
-                (ep["started_at"] or "", understand.outcome_of(ep)))
+                (parse_time(ep["started_at"]), parse_time(ep["ended_at"]),
+                 understand.outcome_of(ep)))
+    epoch = datetime.min.replace(tzinfo=timezone.utc)
     for pairs in ends.values():
-        pairs.sort()
+        pairs.sort(key=lambda item: item[0] or epoch)
 
     door = door or port.door()
     got = {"seen": len(known), "settled": 0, "logged": 0}
@@ -907,10 +918,18 @@ def settle(files, door=None, log=None):
     door_written, marks = [], []
     for talk, at in known:
         outcome = "unknown"
-        for started, found in ends.get(talk, []):
-            if started >= at:
-                outcome = found
-                break
+        at_moment = parse_time(at)
+        pairs = ends.get(talk, []) if at_moment is not None else []
+        containing = next((found for started, ended, found in pairs
+                           if started is not None and ended is not None
+                           and started <= at_moment <= ended), None)
+        if containing is not None:
+            outcome = containing
+        else:
+            after = next((found for started, ended, found in pairs
+                          if started is not None and started > at_moment), None)
+            if after is not None:
+                outcome = after
         helped = {"done": True, "blocked": False}.get(outcome)
         door_written.append(models.MemoryInjection(
             session_id=talk, injected_at=at,
