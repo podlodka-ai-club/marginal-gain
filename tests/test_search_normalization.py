@@ -219,6 +219,37 @@ class TestOneRuleOnBothSides(unittest.TestCase):
     def test_the_sift_asks_the_same_words_as_the_search(self, question):
         self.assertEqual(suggest.terms_of(question), query.words(question))
 
+    @given(lemma=paradigm, first=st.integers(), second=st.integers())
+    def test_the_sift_judges_a_word_form_the_same_as_its_stem(
+            self, lemma, first, second):
+        """Отсев судит по тем же основам: иначе он режет свою же находку.
+
+        Поиск нашёл запись по основе — значит и отсев обязан узнать в поле ту
+        же основу. Сравнивай он поле как есть, вопрос в чужой форме («что было
+        в ветках») выбрасывал бы находку, которую поиск только что вернул.
+        """
+        forms = PARADIGMS[lemma].split()
+        one, two = forms[first % len(forms)], forms[second % len(forms)]
+        assume(query.words(one) and query.words(two))
+        record = {"object_type": "Event", "tool_name": "Bash", "project": "demo",
+                  "git_branch": one}
+        self.assertEqual(suggest.incidental(record, query.words(two)),
+                         suggest.incidental(record, query.words(one)),
+                         "отсев судит форму %r иначе, чем %r" % (two, one))
+
+    def test_the_sift_keeps_an_event_the_search_found_by_its_key(self):
+        """Отсев обязан узнать в поле ту же букву, какой поиск запись нашёл.
+
+        Событие в ветке `чёрный`, вопрос — «что делали в черный». Поиск находит
+        по ключу, где `ё` сведена; сравнивай отсев поле как есть — он не увидел
+        бы в нём слова вопроса и выбросил бы свою же находку.
+        """
+        record = {"object_type": "Event", "tool_name": "Bash", "project": "demo",
+                  "git_branch": "чёрный"}
+        self.assertFalse(
+            suggest.incidental(record, query.words("что делали в черный")),
+            "отсев выбросил находку, которую поиск вернул")
+
 
 if __name__ == "__main__":
     unittest.main()

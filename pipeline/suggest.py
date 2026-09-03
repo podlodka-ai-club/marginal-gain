@@ -11,7 +11,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from domain import context, ledger, lifespan, marks, models
-from domain.query import words
+from domain.query import key as normal, words
 from infra import config, telemetry
 from pipeline import prompt
 from storage import port
@@ -220,8 +220,11 @@ def incidental(record, terms, verbatim=False):
         return False
     if record.get("object_type") not in RAW_MATERIAL or verbatim:
         return False
-    place = " ".join(str(record.get(name) or "") for name in PLACE).lower()
-    deed = " ".join(str(record.get(name) or "") for name in DEED).lower()
+    # Тем же ключом, каким поиск нашёл запись. Слова вопроса приходят сюда
+    # основами, и сравнивай мы их с полем как есть — отсев не узнавал бы в поле
+    # ту самую находку и резал бы её как случайную.
+    place = normal(" ".join(str(record.get(name) or "") for name in PLACE))
+    deed = normal(" ".join(str(record.get(name) or "") for name in DEED))
     # Слово, объяснимое именем места, обращением по делу не считается: ветка
     # почти всегда носит имя проекта, и попадание в неё — то же совпадение,
     # что и попадание в сам проект.
