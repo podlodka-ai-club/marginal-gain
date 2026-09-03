@@ -15,11 +15,19 @@
 
 **Правило отметки, записанное до кода.** `helped` — не «память помогла»;
 такого наблюдения у нас нет. Это «ход, в который её подставили, дошёл до
-конца»: берём первый эпизод того же разговора, начавшийся не раньше вставки,
-и смотрим его исход. `done` — True, `blocked` — False, `abandoned` или эпизода
-нет вовсе — поле не пишем: неизвестное это не отрицательное.
+конца»: берём эпизод того же разговора, ВНУТРИ которого случилась вставка, а
+если такого нет — первый эпизод, начавшийся после, и смотрим его исход.
+`done` — True, `blocked` — False, `abandoned` или эпизода нет вовсе — поле не
+пишем: неизвестное это не отрицательное.
+
+Первое условие обязательно: подсказку показывают внутри того же эпизода,
+которым её и вызвали, а он по метке начала стартовал раньше вставки почти
+всегда. Прежняя версия правила искала только эпизод, начавшийся не раньше
+вставки, — и свой собственный эпизод не находила никогда, см.
+TestAnInjectionInsideItsOwnEpisodeIsFound ниже.
 """
 import contextlib
+import datetime as dt
 import json
 import os
 import sqlite3
@@ -87,6 +95,50 @@ def archive(root, specs, session=TALK):
     path = Path(root) / "разговор.jsonl"
     with path.open("a", encoding="utf-8") as fh:
         for line in episode_rows(session, specs):
+            fh.write(json.dumps(line, ensure_ascii=False) + "\n")
+    return [path]
+
+
+BASE_TIME = dt.datetime(2026, 8, 28, 0, 0, 0, tzinfo=dt.timezone.utc)
+
+
+def ts(offset_seconds):
+    """Метка времени, сортируемая как строка — тем же способом, что архив."""
+    return (BASE_TIME + dt.timedelta(seconds=offset_seconds)).strftime(
+        "%Y-%m-%dT%H:%M:%SZ")
+
+
+def spanning_episode_rows(session, start_at, end_at, outcome):
+    """Эпизод с раздельными метками начала и конца — чтобы внутри него было
+    настоящее «внутри», а не одна и та же секунда на обеих репликах.
+
+    `episode_rows` выше кладёт начало и конец хода на одну метку, и вставке
+    внутри такого эпизода просто негде оказаться: начало и конец совпадают.
+    Здесь они раздвинуты нарочно.
+    """
+    head = {"sessionId": session, "cwd": CWD, "gitBranch": BRANCH}
+    out = [dict(head, timestamp=start_at, type="user",
+                message={"content": "Посмотри, что там с базой"})]
+    if outcome == "done":
+        blocks = [{"type": "tool_use", "name": "Edit",
+                   "input": {"file_path": "%s/db.py" % CWD}},
+                  {"type": "text", "text": "Готово."}]
+    elif outcome == "blocked":
+        blocks = [{"type": "tool_result", "is_error": True,
+                   "content": "FileNotFoundError: db.py"},
+                  {"type": "text", "text": "Не вышло."}]
+    else:
+        return out
+    out.append(dict(head, timestamp=end_at, type="assistant",
+                    message={"content": blocks}))
+    return out
+
+
+def archive_spanning(root, session, start_at, end_at, outcome,
+                     name="разговор.jsonl"):
+    path = Path(root) / name
+    with path.open("a", encoding="utf-8") as fh:
+        for line in spanning_episode_rows(session, start_at, end_at, outcome):
             fh.write(json.dumps(line, ensure_ascii=False) + "\n")
     return [path]
 
@@ -281,6 +333,57 @@ class TestTheOutcomeIsSettledFromTheArchive(unittest.TestCase):
             suggest.settle(files, door=door)
             for row in injections_in(base).values():
                 self.assertIn(row["session_outcome"], models.INJECTION_OUTCOMES)
+
+
+SPANNING_OUTCOMES = st.sampled_from(["done", "blocked"])
+
+
+@st.composite
+def injection_inside_its_episode(draw):
+    """Начало эпизода, его длина и точка вставки строго внутри — в секундах.
+
+    Вставку показывают внутри того же эпизода, которым её и вызвали: эпизод
+    по метке начала стартовал раньше вставки, а по метке конца кончился не
+    раньше её. `span >= 2` и `1 <= inside <= span - 1` держат вставку строго
+    между началом и концом при любом случайном раскладе меток.
+    """
+    start = draw(st.integers(min_value=0, max_value=5000))
+    span = draw(st.integers(min_value=2, max_value=1000))
+    inside = draw(st.integers(min_value=1, max_value=span - 1))
+    outcome = draw(SPANNING_OUTCOMES)
+    return start, span, inside, outcome
+
+
+class TestAnInjectionInsideItsOwnEpisodeIsFound(unittest.TestCase):
+    """Общий баг, не случай одной пары.
+
+    Подсказку показывают внутри того эпизода, которым её и вызвали: эпизод
+    стартовал раньше, чем сработал поиск вставки внутри него. Старое правило
+    искало первый эпизод, начавшийся НЕ РАНЬШЕ вставки, — и потому не
+    находило свой же эпизод никогда, при любом соотношении меток начала,
+    вставки и конца. Проверено на широком разбросе меток, без единого
+    живого прогона: баг общий для любой вставки, показанной внутри
+    вызвавшего её эпизода, а не только для пары «макбук».
+    """
+
+    @SLOW
+    @given(injection_inside_its_episode())
+    def test_settle_finds_the_episode_that_contains_the_injection(self, spec):
+        start, span, inside, outcome = spec
+        talk = "разговор-внутри"
+        with tempfile.TemporaryDirectory() as tmp, store(tmp) as base:
+            files = archive_spanning(tmp, talk, ts(start), ts(start + span),
+                                     outcome)
+            fill(files)
+            door = port.door()
+            suggest.note_injection(talk, "Из памяти: что-то было", (), door=door,
+                                   at=ts(start + inside))
+            suggest.settle(files, door=door)
+            row = list(injections_in(base).values())[0]
+            self.assertEqual(row["session_outcome"], outcome,
+                             "вставка внутри своего же эпизода не нашла его")
+            expect_helped = {"done": True, "blocked": False}[outcome]
+            self.assertEqual(bool(row["helped"]), expect_helped)
 
 
 class TestTheJournalIsTheListOfInjections(unittest.TestCase):

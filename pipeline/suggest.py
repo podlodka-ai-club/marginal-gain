@@ -870,10 +870,14 @@ def settle(files, door=None, log=None):
     """Отметить исход ходов, в которые подставляли память.
 
     Правило. `helped` это не «память помогла» — такого наблюдения у нас нет.
-    Это «ход, в который её подставили, дошёл до конца»: берём первый эпизод
-    того же разговора, начавшийся не раньше вставки, и смотрим его исход.
-    `done` — да, `blocked` — нет, `abandoned` или эпизода нет вовсе — поле не
-    пишем: неизвестное это не отрицательное.
+    Это «ход, в который её подставили, дошёл до конца»: берём эпизод того же
+    разговора, ВНУТРИ которого случилась вставка (начался не позже её и
+    кончился не раньше), а если такого нет — первый эпизод, начавшийся после,
+    и смотрим его исход. Подсказку показывают внутри того же эпизода, которым
+    её и вызвали, — он начался раньше вставки почти всегда, и первое условие
+    здесь обязательно, а не «для полноты»: без него самый частый случай не
+    находится никогда. `done` — да, `blocked` — нет, `abandoned` или эпизода
+    нет вовсе — поле не пишем: неизвестное это не отрицательное.
 
     Список вставок берём из своего журнала, а не из хранилища: читать оттуда мы
     умеем только поиском словами, а перечислить вставки поиск не может.
@@ -893,7 +897,8 @@ def settle(files, door=None, log=None):
         for ep in episodes:
             talk = ep["session_id"] or "unknown"
             ends.setdefault(talk, []).append(
-                (ep["started_at"] or "", understand.outcome_of(ep)))
+                (ep["started_at"] or "", ep["ended_at"] or "",
+                 understand.outcome_of(ep)))
     for pairs in ends.values():
         pairs.sort()
 
@@ -907,10 +912,16 @@ def settle(files, door=None, log=None):
     door_written, marks = [], []
     for talk, at in known:
         outcome = "unknown"
-        for started, found in ends.get(talk, []):
-            if started >= at:
-                outcome = found
-                break
+        pairs = ends.get(talk, [])
+        containing = next((found for started, ended, found in pairs
+                           if started <= at <= ended), None)
+        if containing is not None:
+            outcome = containing
+        else:
+            after = next((found for started, ended, found in pairs
+                          if started > at), None)
+            if after is not None:
+                outcome = after
         helped = {"done": True, "blocked": False}.get(outcome)
         door_written.append(models.MemoryInjection(
             session_id=talk, injected_at=at,
