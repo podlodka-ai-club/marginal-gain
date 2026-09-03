@@ -40,6 +40,7 @@ from hypothesis import HealthCheck, given, settings, strategies as st
 
 os.environ.setdefault("XMEM_INSTANCE_ID", "test-instance")
 
+from archive.transcripts import parse_time
 from domain import models
 from pipeline import suggest, understand
 from storage import local, port
@@ -69,12 +70,20 @@ def store(tmp):
 
 
 def episode_rows(session, specs):
-    """Строки транскрипта: эпизод на просьбу, исход задаётся ответом и ошибкой."""
+    """Строки транскрипта: эпизод на просьбу, исход задаётся ответом и ошибкой.
+
+    `ended_at` — своей меткой, если задана, иначе той же, что и начало
+    (`at`). Раздельные метки нужны там, где важно настоящее «внутри»
+    эпизода: на одной метке для начала и конца вставке внутри него просто
+    негде оказаться.
+    """
     out = []
     for spec in specs:
-        head = {"sessionId": session, "timestamp": spec["at"], "cwd": CWD,
-                "gitBranch": BRANCH}
-        out.append(dict(head, type="user", message={"content": spec["request"]}))
+        start = {"sessionId": session, "timestamp": spec["at"], "cwd": CWD,
+                 "gitBranch": BRANCH}
+        out.append(dict(start, type="user",
+                        message={"content": spec.get("request", "Посмотри, "
+                                 "что там с базой")}))
         if spec["outcome"] == "done":
             blocks = [{"type": "tool_use", "name": "Edit",
                        "input": {"file_path": "%s/db.py" % CWD}},
@@ -87,12 +96,13 @@ def episode_rows(session, specs):
             # Брошенный ход — это ход без ответа вовсе. Пустая реплика не
             # брошенный: она попадает в список ответов и делает эпизод удавшимся.
             continue
-        out.append(dict(head, type="assistant", message={"content": blocks}))
+        end = dict(start, timestamp=spec.get("ended_at", spec["at"]))
+        out.append(dict(end, type="assistant", message={"content": blocks}))
     return out
 
 
-def archive(root, specs, session=TALK):
-    path = Path(root) / "разговор.jsonl"
+def archive(root, specs, session=TALK, name="разговор.jsonl"):
+    path = Path(root) / name
     with path.open("a", encoding="utf-8") as fh:
         for line in episode_rows(session, specs):
             fh.write(json.dumps(line, ensure_ascii=False) + "\n")
@@ -106,41 +116,6 @@ def ts(offset_seconds):
     """Метка времени, сортируемая как строка — тем же способом, что архив."""
     return (BASE_TIME + dt.timedelta(seconds=offset_seconds)).strftime(
         "%Y-%m-%dT%H:%M:%SZ")
-
-
-def spanning_episode_rows(session, start_at, end_at, outcome):
-    """Эпизод с раздельными метками начала и конца — чтобы внутри него было
-    настоящее «внутри», а не одна и та же секунда на обеих репликах.
-
-    `episode_rows` выше кладёт начало и конец хода на одну метку, и вставке
-    внутри такого эпизода просто негде оказаться: начало и конец совпадают.
-    Здесь они раздвинуты нарочно.
-    """
-    head = {"sessionId": session, "cwd": CWD, "gitBranch": BRANCH}
-    out = [dict(head, timestamp=start_at, type="user",
-                message={"content": "Посмотри, что там с базой"})]
-    if outcome == "done":
-        blocks = [{"type": "tool_use", "name": "Edit",
-                   "input": {"file_path": "%s/db.py" % CWD}},
-                  {"type": "text", "text": "Готово."}]
-    elif outcome == "blocked":
-        blocks = [{"type": "tool_result", "is_error": True,
-                   "content": "FileNotFoundError: db.py"},
-                  {"type": "text", "text": "Не вышло."}]
-    else:
-        return out
-    out.append(dict(head, timestamp=end_at, type="assistant",
-                    message={"content": blocks}))
-    return out
-
-
-def archive_spanning(root, session, start_at, end_at, outcome,
-                     name="разговор.jsonl"):
-    path = Path(root) / name
-    with path.open("a", encoding="utf-8") as fh:
-        for line in spanning_episode_rows(session, start_at, end_at, outcome):
-            fh.write(json.dumps(line, ensure_ascii=False) + "\n")
-    return [path]
 
 
 def injections_in(base):
@@ -372,8 +347,8 @@ class TestAnInjectionInsideItsOwnEpisodeIsFound(unittest.TestCase):
         start, span, inside, outcome = spec
         talk = "разговор-внутри"
         with tempfile.TemporaryDirectory() as tmp, store(tmp) as base:
-            files = archive_spanning(tmp, talk, ts(start), ts(start + span),
-                                     outcome)
+            files = archive(tmp, [{"outcome": outcome, "at": ts(start),
+                                   "ended_at": ts(start + span)}], session=talk)
             fill(files)
             door = port.door()
             suggest.note_injection(talk, "Из памяти: что-то было", (), door=door,
@@ -384,6 +359,57 @@ class TestAnInjectionInsideItsOwnEpisodeIsFound(unittest.TestCase):
                              "вставка внутри своего же эпизода не нашла его")
             expect_helped = {"done": True, "blocked": False}[outcome]
             self.assertEqual(bool(row["helped"]), expect_helped)
+
+
+class TestTimestampFormatsCompareAsMomentsNotStrings(unittest.TestCase):
+    """Найдено /code-review при разборе фикса выше.
+
+    Харнесс шлёт метки эпизодов с `Z`, без дробной части. Наша же
+    `injected_at` (см. `injection_of`) — со смещением `+00:00` и
+    микросекундами. В одну и ту же секунду строки расходятся на символе
+    конца: `.` меньше `Z`, и наивное сравнение строк даёт не тот порядок,
+    который был на самом деле. Сравнивать нужно моменты, а не строки.
+    """
+
+    def test_a_bare_second_still_orders_before_a_fractional_one(self):
+        """Пример ревьюера как есть: без `parse_time` сравнение строк лжёт —
+        эпизод, кончившийся раньше вставки, строкой выглядит кончившимся
+        позже неё."""
+        ended = "2026-09-03T12:34:56Z"
+        at = "2026-09-03T12:34:56.500000+00:00"
+        self.assertTrue(ended >= at,
+                        "сам пример должен ломать сравнение строк (наивно "
+                        "«Z» кажется позже дроби) — иначе тест ничего не "
+                        "проверяет")
+        self.assertLess(parse_time(ended), parse_time(at),
+                        "момент из `Z`-метки должен упорядочиться раньше "
+                        "момента с микросекундами в ту же секунду")
+
+    def test_settle_does_not_claim_an_episode_that_already_ended(self):
+        """Сквозной случай той же путаницы: эпизод кончился ДО вставки, но
+        строкой конец («Z», без дроби) кажется позже вставки (с дробью) —
+        и наивное сравнение засчитывает его как «содержащий», хотя вставка
+        пришла уже после конца. Правильный ответ — соседний эпизод,
+        начавшийся позже вставки по-настоящему."""
+        talk = "разговор-граница"
+        with tempfile.TemporaryDirectory() as tmp, store(tmp) as base:
+            files = archive(tmp, [
+                {"outcome": "blocked", "at": "2026-09-03T12:34:50Z",
+                 "ended_at": "2026-09-03T12:34:56Z"},
+                {"outcome": "done", "at": "2026-09-03T12:35:00Z",
+                 "ended_at": "2026-09-03T12:35:10Z"},
+            ], session=talk)
+            fill(files)
+            door = port.door()
+            # Вставка — на полсекунды позже конца ПЕРВОГО эпизода: тот уже
+            # закрылся, вставка ему не принадлежит.
+            suggest.note_injection(talk, "Из памяти: что-то было", (), door=door,
+                                   at="2026-09-03T12:34:56.500000+00:00")
+            suggest.settle(files, door=door)
+            row = list(injections_in(base).values())[0]
+            self.assertEqual(row["session_outcome"], "done",
+                             "вставку после конца эпизода засчитали в этот "
+                             "уже закрытый эпизод")
 
 
 class TestTheJournalIsTheListOfInjections(unittest.TestCase):

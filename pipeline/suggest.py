@@ -881,8 +881,13 @@ def settle(files, door=None, log=None):
 
     Список вставок берём из своего журнала, а не из хранилища: читать оттуда мы
     умеем только поиском словами, а перечислить вставки поиск не может.
+
+    Метки сравниваем как моменты (`infra.timeline.parse_time`), не строками:
+    харнесс шлёт метки эпизодов с `Z`, наша же `injected_at` — со смещением
+    `+00:00`, и в одну секунду строки расходятся на символе конца не так,
+    как были на самом деле.
     """
-    from archive.transcripts import episodes_from_file
+    from archive.transcripts import episodes_from_file, parse_time
     from pipeline import understand
 
     known = notes_of(log)
@@ -897,10 +902,11 @@ def settle(files, door=None, log=None):
         for ep in episodes:
             talk = ep["session_id"] or "unknown"
             ends.setdefault(talk, []).append(
-                (ep["started_at"] or "", ep["ended_at"] or "",
+                (parse_time(ep["started_at"]), parse_time(ep["ended_at"]),
                  understand.outcome_of(ep)))
+    epoch = datetime.min.replace(tzinfo=timezone.utc)
     for pairs in ends.values():
-        pairs.sort()
+        pairs.sort(key=lambda item: item[0] or epoch)
 
     door = door or port.door()
     got = {"seen": len(known), "settled": 0, "logged": 0}
@@ -912,14 +918,16 @@ def settle(files, door=None, log=None):
     door_written, marks = [], []
     for talk, at in known:
         outcome = "unknown"
-        pairs = ends.get(talk, [])
+        at_moment = parse_time(at)
+        pairs = ends.get(talk, []) if at_moment is not None else []
         containing = next((found for started, ended, found in pairs
-                           if started <= at <= ended), None)
+                           if started is not None and ended is not None
+                           and started <= at_moment <= ended), None)
         if containing is not None:
             outcome = containing
         else:
             after = next((found for started, ended, found in pairs
-                          if started > at), None)
+                          if started is not None and started > at_moment), None)
             if after is not None:
                 outcome = after
         helped = {"done": True, "blocked": False}.get(outcome)
