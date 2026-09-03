@@ -186,7 +186,25 @@ def _v5(conn):
                  'ON lapsedfact (merged_into)')
 
 
-MIGRATIONS = (_v1, _v2, _v3, _v4, _v5)
+def _v6(conn):
+    """Журнал аудита: строка на каждое действие конвейера, в этой же базе.
+
+    Отдельная таблица, а не поле на существующих объектах схемы: строка аудита
+    несёт вход и выход шага, а не состояние записи, и не привязана первичным
+    ключом ни к одной из них — один факт проходит несколько шагов (разметка,
+    запись, забывание), и у каждого свой вход и выход, свой успех или отказ.
+    См. `domain.audit`.
+    """
+    conn.execute("""CREATE TABLE IF NOT EXISTS audit (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        ts TEXT NOT NULL, run_id TEXT, session_id TEXT, step TEXT NOT NULL,
+        ok INTEGER NOT NULL, input TEXT, output TEXT)""")
+    conn.execute('CREATE INDEX IF NOT EXISTS audit_run ON audit (run_id)')
+    conn.execute('CREATE INDEX IF NOT EXISTS audit_session ON audit (session_id)')
+    conn.execute('CREATE INDEX IF NOT EXISTS audit_step ON audit (step)')
+
+
+MIGRATIONS = (_v1, _v2, _v3, _v4, _v5, _v6)
 
 
 # Связь, которой факт достаёт свою обстановку. У самого факта в полях один
