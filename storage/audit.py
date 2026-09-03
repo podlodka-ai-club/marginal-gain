@@ -30,11 +30,11 @@ import threading
 from datetime import datetime, timezone
 
 from storage import db as storage_db
-
-# Шаги цепочки. Имя произвольно не берётся: отчёт по журналу группирует строки
-# по нему, и опечатка в имени значила бы для отчёта незамеченный шаг.
-STEPS = ("intercept", "drain", "mark", "reply", "fact", "link",
-         "forget", "fold", "search", "inject", "judge")
+# Шаги цепочки — одна запись на оба писателя (сюда и в Repository._audit).
+# `storage/db.py` не может импортировать этот модуль обратно (см. его же
+# докстринг про кольцо storage.db ↔ storage.audit), поэтому имя живёт там, а
+# здесь только берётся: направление разрешено — audit уже зависит от db.
+from storage.db import STEPS
 
 _LOCAL = threading.local()
 
@@ -66,6 +66,13 @@ def _connection(where=None):
     conn = cache.get(target)
     if conn is None:
         conn = storage_db.connect(where)
+        # Своё соединение конкурирует с `Repository.conn` за один файл. Срок
+        # ожидания короткий и нарочно: запись стоит в горячем пути хука на
+        # чтение (`pipeline.suggest`, под `HOOK_SECONDS`), и долгая заявка на
+        # занятый файл там недопустима так же, как и где угодно ещё в этом
+        # хуке — молчаливый отказ по истечении короткого срока лучше, чем
+        # растянутое ожидание чужой блокировки.
+        conn.execute("PRAGMA busy_timeout = 200")
         storage_db.migrate(conn)
         cache[target] = conn
     return conn
@@ -84,7 +91,16 @@ def reset(where=None):
 
 
 def _dump(value):
-    """Вход и выход — в текст. Что не сериализуется, ложится своим `str`.
+    """Вход и выход — в текст, всегда через JSON, даже голую строку.
+
+    Строку когда-то клали как есть, без кавычек JSON — читалась глазами
+    в сыром SQL проще. Расплата обнаружилась ревью: `rows()` разбирает
+    сохранённый текст обратно тем же `json.loads` для всех типов разом, и
+    строка, которая сама выглядит валидным JSON («123», «null», «true»),
+    возвращалась бы не строкой, а числом, None или булевым — ровно то
+    искажение, которого аудит и заведён не допускать. Значит писать нужно
+    единообразно: тогда `json.loads` при чтении всегда попадает туда, откуда
+    вышел `json.dumps`, и двух путей для одного типа не остаётся.
 
     `default=str` — не небрежность, а часть довода «запись не бросает»: объект
     без представления в JSON (множество, чужой класс) не должен ронять строку
@@ -93,15 +109,13 @@ def _dump(value):
     """
     if value is None:
         return None
-    if isinstance(value, str):
-        return value
     try:
         return json.dumps(value, ensure_ascii=False, default=str)
     except (TypeError, ValueError, RecursionError):
         try:
-            return str(value)
+            return json.dumps(str(value), ensure_ascii=False)
         except Exception:
-            return "<не показано>"
+            return json.dumps("<не показано>")
 
 
 def record(step, input=None, output=None, session_id=None, ok=True, where=None,
@@ -142,6 +156,7 @@ def rows(where=None, run=None, step=None, session_id=None):
     """
     conn = storage_db.connect(where)
     try:
+        conn.execute("PRAGMA busy_timeout = 200")
         storage_db.migrate(conn)
         clauses, params = [], []
         if run is not None:

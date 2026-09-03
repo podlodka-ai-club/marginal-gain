@@ -11,6 +11,7 @@
   * не писать строку аудита, когда просрочивать/сворачивать было нечего  → TestForgetIsAuditedEvenWhenEmpty, TestFoldIsAuditedEvenWhenEmpty
   * писать аудит и на холостом прогоне (dry=True)                       → TestDryRunWritesNoAudit
   * не называть в выходе, какие именно записи выбыли/свернулись          → TestForgetNamesTheMovedFacts, TestFoldNamesTheMergedFacts
+  * писать строку аудита в обход общего замка репозитория (найдено ревью) → TestAuditTakesTheRepositoryLock
 """
 import contextlib
 import os
@@ -24,7 +25,7 @@ from hypothesis import HealthCheck, given, settings, strategies as st
 
 os.environ.setdefault("XMEM_INSTANCE_ID", "test-instance")
 
-from storage import audit
+from storage import audit, db
 from domain import lifespan, models
 from pipeline import consolidate, forget, suggest, understand
 from storage import local, port
@@ -145,6 +146,46 @@ class TestFoldNamesTheMergedFacts(unittest.TestCase):
             self.assertIn(merge["kept"], (one.identity(), two.identity()))
             self.assertEqual(len(merge["merged"]), 1)
             self.assertEqual(merge["content"], "одно и то же")
+
+
+class TestAuditTakesTheRepositoryLock(unittest.TestCase):
+    """Найдено ревью: `_audit` писала в общее соединение мимо общего замка.
+
+    Прямая проверка гонки нестабильна по определению — здесь структурная:
+    строка аудита обязана лечь под тем же `self.lock`, каким репозиторий
+    охраняет любую другую запись в `self.conn`. Подменяем замок шпионом и
+    смотрим, что `_audit` его действительно берёт, а не просто существует
+    рядом с ним.
+    """
+
+    def test_lapse_takes_the_lock_while_writing_the_audit_row(self):
+        with tempfile.TemporaryDirectory() as tmp, store(tmp):
+            door = port.door()
+            put(door, fact("db.py", T0, mode="short"))
+            repo = local.repository()
+            spy = mock.MagicMock(wraps=repo.lock)
+            with mock.patch.object(repo, "lock", spy):
+                forget.sweep(door=door, now=lifespan.stamp(T0 + timedelta(days=400)))
+            # Один вход даёт сам переклад (своя `with self.lock:`), второй —
+            # только строка аудита: без него счёт остался бы единицей.
+            self.assertGreaterEqual(spy.__enter__.call_count, 2,
+                                    "запись аудита прошла мимо self.lock")
+
+    def test_an_unknown_step_name_is_rejected_here_too(self):
+        """Опечатка в имени шага не должна проходить молча и здесь.
+
+        `Repository._audit` сверяется с тем же `STEPS`, что и общий путь
+        (`storage.audit.record`) — одна константа на обоих писателей,
+        см. `storage/db.py`.
+        """
+        with tempfile.TemporaryDirectory() as tmp, store(tmp):
+            door = port.door()
+            repo = local.repository()
+            with self.assertRaises(ValueError):
+                repo._audit("выдуманный-шаг")
+
+    def test_the_two_writers_share_one_steps_constant(self):
+        self.assertIs(db.STEPS, audit.STEPS)
 
 
 if __name__ == "__main__":

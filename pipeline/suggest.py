@@ -539,13 +539,20 @@ def consult(query, mode="single", min_score=MIN_SCORE, door=None, here=None):
     не влезло в потолок. Догадка снаружи их не различает, а разбирать разрыв
     между «нашли» и «отдали» можно только по именам.
 
-    Отдаёт пятёркой: текст, куски, сырой ответ, причина, счёт кандидатов.
-    Причина у говорящего захода — None.
+    Отдаёт шестёркой: текст, куски, сырой ответ, причина, счёт кандидатов,
+    все кандидаты до всякого отсева (`pieces(answer)`, посчитанные один раз
+    здесь же). Причина у говорящего захода — None.
 
     Счёт кандидатов — сколько кусков вернул поиск до всякого отсева. Имя
     причины говорит, где выдача опустела, но не говорит, было ли чему пустеть:
     «не прошло порог» на одном кандидате и на тридцати чинится в разных местах.
     Снаружи это число не восстановить — пустая выдача выглядит одинаково.
+
+    Сырые куски отдаются вместе с остальным, а не пересчитываются заново
+    вызывающим (аудит ступени «поиск» в `attend` — ровно такой вызывающий):
+    второй разбор того же `answer` был бы не только лишней работой на
+    горячем пути, но и вторым источником того же числа, которому предстоит
+    разойтись с первым в день, когда кто-то поправит один из них.
     """
     door = door or port.door()
     here = context.of(here) if here else None
@@ -563,13 +570,13 @@ def consult(query, mode="single", min_score=MIN_SCORE, door=None, here=None):
         # Спрашиваем после чтения, а не вместо: половина сравнения «без памяти»
         # обязана идти той же дорогой, что рабочая, и отличаться лишь исходом.
         off = getattr(door, "name", None) == port.SilentDoor.name
-        return "", [], answer, "disabled" if off else "not_found", found
+        return "", [], answer, "disabled" if off else "not_found", found, chunks
     # Отсев до порога: ложная находка не должна ни занимать место в
     # пятёрке, ни съедать потолок в 1200 символов. Обстановка приписывается
     # между ними: порог судит произведение веса на уместность.
     honest = sift(chunks, query)
     if not honest:
-        return "", [], answer, "incidental", found
+        return "", [], answer, "incidental", found, chunks
     placed = place(honest, here, door)
     kept = gate(placed, min_score=min_score)
     if not kept:
@@ -577,12 +584,12 @@ def consult(query, mode="single", min_score=MIN_SCORE, door=None, here=None):
         # порога не отработала бы вовсе и пропала из замера. Здесь он только
         # разводит три случая, которые снаружи выглядят одинаково пусто.
         if not winnow(placed, min_score=min_score):
-            return "", [], answer, "below_threshold", found
+            return "", [], answer, "below_threshold", found, chunks
         if not eligible(placed, min_score=min_score):
             # Порог прошли, а записей среди прошедшего нет: хранилище ответило
             # словами. Это «не нашли», а не «не влезло».
-            return "", [], answer, "not_found", found
-        return "", [], answer, "over_budget", found
+            return "", [], answer, "not_found", found, chunks
+        return "", [], answer, "over_budget", found, chunks
     # Соседи добираются после порога и ставятся следом: прямое попадание
     # первым, добавка второй. Потолки те же — их считает тот же `gate`.
     added = place(near(kept, door), here, door)
@@ -600,7 +607,7 @@ def consult(query, mode="single", min_score=MIN_SCORE, door=None, here=None):
                     continue
                 kept.append((score, clean, record))
                 size += len(clean) + where
-    return voice.render(kept), kept, answer, None, found
+    return voice.render(kept), kept, answer, None, found, chunks
 
 
 def suggest(query, mode="single", min_score=MIN_SCORE, door=None, here=None):
@@ -732,16 +739,17 @@ def note_injection(session_id, text, kept=(), door=None, at=None):
     return record
 
 
-def _candidates_of(answer):
-    """Все кандидаты поиска с их оценкой — для аудита ступени «поиск».
+def _candidates_of(chunks):
+    """Кандидаты поиска — в компактную форму для аудита ступени «поиск».
 
-    Дёшево: `answer` уже лежит в памяти, здесь только разбор той же строки,
-    каким её уже разобрал `pieces` внутри `consult`. Отдельно, потому что
-    вызывающий (`mute`) видит только причину молчания, а не сам ответ
-    хранилища — причину и разбор ответа считают разные ступени.
+    Принимает уже разобранные `chunks` (тот самый шестой элемент, который
+    отдаёт `consult`), а не сырой ответ хранилища: второй разбор той же
+    строки на горячем пути — лишняя работа и лишний повод разойтись с тем,
+    что реально сосчитал `consult`, если один из двух разборов поправят, а
+    другой забудут.
     """
     out = []
-    for score, text, record in pieces(answer):
+    for score, text, record in chunks:
         kind = record.get("object_type") if isinstance(record, dict) else None
         out.append({"score": score, "kind": kind, "text": (text or "")[:200]})
     return out
@@ -789,8 +797,8 @@ def attend(query, session_id=None, door=None, here=None, mode="single",
     door = door or port.door()
     cancel = deadline() if hot else (lambda: None)
     try:
-        text, kept, _raw, why, found = consult(query, mode, min_score, door=door,
-                                               here=here)
+        text, kept, _raw, why, found, chunks = consult(
+            query, mode, min_score, door=door, here=here)
     except Overdue:
         return "", [], mute("overdue", session_id, query)
     except port.BackendError as bad:
@@ -803,7 +811,7 @@ def attend(query, session_id=None, door=None, here=None, mode="single",
                             note="%s: %s" % (type(bad).__name__, bad))
     finally:
         cancel()
-    candidates = _candidates_of(_raw)
+    candidates = _candidates_of(chunks)
     if not text:
         return "", [], mute(why or "not_found", session_id, query, found=found,
                             candidates=candidates)

@@ -89,12 +89,43 @@ class TestTheRecordSurvivesTheRoundTrip(unittest.TestCase):
             self.assertEqual(row["input"], payload)
             self.assertEqual(row["output"], payload)
 
-    def test_a_plain_string_is_kept_as_is_not_re_quoted(self):
-        """Строка на входе — строка и на выходе, не строка в кавычках JSON."""
+    def test_a_plain_string_comes_back_as_the_same_string(self):
         with tempfile.TemporaryDirectory() as tmp:
             base = Path(tmp) / "memory.db"
             audit.record("mark", input="дословный ответ модели", where=base)
             self.assertEqual(audit.rows(where=base)[0]["input"], "дословный ответ модели")
+
+    def test_a_string_that_looks_like_json_still_comes_back_as_a_string(self):
+        """Найдено ревью: строка «123» не должна вернуться числом 123.
+
+        Раньше строка ложилась в столбец без кавычек JSON — для читаемости
+        сырого SQL, — а чтение разбирало столбец тем же `json.loads` для
+        всех типов разом. Строка, которая сама выглядит валидным JSON, читалась
+        обратно уже не строкой: «123» — числом, «null» — `None`, «true» —
+        булевым. Перехваченное сообщение человека («42», «да» после
+        нормализации, буквально «null») искажалось бы каждый раз при чтении.
+
+        Мутация: вернуть в `_dump` особый случай «голая строка — как есть,
+        без кавычек JSON» — эта проверка и следующая обязаны покраснеть.
+        """
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp) / "memory.db"
+            for literal in ("123", "null", "true", "false", "[1, 2]", '{"a": 1}'):
+                audit.record("mark", input=literal, where=base)
+                got = audit.rows(where=base)[-1]["input"]
+                self.assertEqual(got, literal, literal)
+                self.assertIsInstance(got, str, literal)
+
+    @SLOW
+    @given(text=TEXT)
+    def test_any_string_round_trips_as_that_exact_string(self, text):
+        with tempfile.TemporaryDirectory() as tmp:
+            base = Path(tmp) / "memory.db"
+            audit.reset(base)
+            audit.record("mark", input=text, where=base)
+            got = audit.rows(where=base)[0]["input"]
+            self.assertEqual(got, text)
+            self.assertIsInstance(got, str)
 
     def test_none_stays_none(self):
         with tempfile.TemporaryDirectory() as tmp:
