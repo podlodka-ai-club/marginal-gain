@@ -17,7 +17,7 @@ import contextlib
 import json
 from pathlib import Path
 
-from domain import features, ledger, lifespan, marks, models
+from domain import audit, features, ledger, lifespan, marks, models
 from domain.measure import score_of, weight_of
 from infra import config, locks
 from storage import port
@@ -653,7 +653,7 @@ def one_episode(ep, taken, got, weights, newest, dry, min_score, verbose, door):
               % (ep["number"], episode.outcome, redact(episode.title or "")[:70]))
     found, dropped = marked_or_guessed(ep)
     got["lost"] += sum(dropped.values())           # разметка была, писать нельзя
-    chosen = []
+    chosen, judged = [], []
     for fact, key in found:
         rec = weights.get(key) or {"n": 1, "last": ep["ended_at"],
                                    "projects": set()}
@@ -663,10 +663,12 @@ def one_episode(ep, taken, got, weights, newest, dry, min_score, verbose, door):
         score = weight_of(rec, newest)
         if score < min_score:
             got["skipped"] += 1
+            judged.append((fact, score, None))
             continue
         record = fact_of(ep, fact, mode)
         chosen.append((record, render_fact(*fact, score=score, rec=rec,
                                            until=record.valid_until)))
+        judged.append((fact, score, record))
         if verbose:
             feats = features_of(rec)
             print("   FACT %.2f [%s/%s] x%d %s %s"
@@ -674,11 +676,41 @@ def one_episode(ep, taken, got, weights, newest, dry, min_score, verbose, door):
                      " ".join("%s=%.3f" % (k, v) for k, v in feats.items())))
     if not dry:
         deliver(ep, episode, chosen, door)
+        audit_episode(episode, ep, dropped, judged, min_score)
     # Счётчики двигаются вместе с отметкой и по той же причине: оборвись запись,
     # эпизод не записан целиком и считать его — вместе с фактами — нечестно.
     got["facts"] += len(chosen)
     got["episodes"] += 1
     return taken + 1
+
+
+def audit_episode(episode, ep, dropped, judged, min_score):
+    """Аудит одного записанного эпизода: ответ дословно, разметка, каждый факт.
+
+    Зовётся только на настоящей записи (`one_episode` при `not dry`) — холостой
+    прогон ничего не делает, и строка о несделанном была бы неправдой. Три шага
+    — три разных вопроса: что модель сказала дословно («ответ агента»), что из
+    этого маппер оставил и отбросил и почему («разметка»), и что случилось с
+    каждым отдельным фактом-кандидатом — записан или отклонён порогом веса
+    («факты»).
+    """
+    session_id = episode.session_id
+    audit.record("reply", session_id=session_id,
+                 input={"episode": episode.episode_number},
+                 output={"replies": list(ep.get("replies") or [])})
+    audit.record("mark", session_id=session_id,
+                 input={"episode": episode.episode_number},
+                 output={"kept": len(judged), "dropped": dict(dropped)},
+                 ok=bool(judged) or not any(dropped.values()))
+    for fact, score, record in judged:
+        written = record is not None
+        out = ({"written": True, "valid_until": record.valid_until} if written
+              else {"written": False,
+                    "reason": "score %.4f below min_score %.4f" % (score, min_score)})
+        audit.record("fact", session_id=session_id,
+                     input={"fact_type": fact[0], "subject": fact[1],
+                            "scope": fact[2], "content": fact[3], "score": score},
+                     output=out, ok=written)
 
 
 def main():
