@@ -93,7 +93,7 @@ from pathlib import Path
 
 from archive.extract import NOT_CODE
 from archive.transcripts import TRANSCRIPTS
-from domain import ledger, marks
+from domain import ledger, marks, query
 from eval import evaluate, pairs
 from storage import db
 
@@ -876,30 +876,38 @@ def facts_with(where, words):
     просроченном означает не «факт не доехал», а «доехал и вышел срок».
     Сложи их — и отчёт назвал бы обрывом запись, которая была исправна.
 
-    Слова набор даёт стеблями («овсян», «Казан»), поэтому сравниваем вхождением
-    и в нижнем регистре: судить о доезде факта по совпадению словоформы значит
-    мерить морфологию.
+    Поле размечаем той же разметкой, какой поиск ищет кандидатов, — `query.key`.
+    Разойдись они, и цепочка соврала бы про исправное с другой стороны: поиск
+    нашёл факт по ключу, где `ё` сведена, а счёт сравнил поле как есть и
+    показал «фактов: 0». Ступени обязаны мерить одно, иначе отчёт называет
+    обрывом место, где всё работает.
+
+    Слова набор даёт стеблями («овсян», «Казан»), и по ним стеммер второй раз не
+    гоняем: Snowball не идемпотентен, «Казан» стал бы «каза» и нашёлся бы в
+    «казак». Им хватает регистра, `ё` и краевых знаков — дальше сравнение идёт
+    вхождением, как и раньше.
     """
-    words = [w.strip().lower() for w in (words or []) if w and w.strip()]
+    asked = [w for w in (words or []) if w and w.strip()]
+    if not asked:
+        return None, 0     # набор ничего не ждал — это «не знаем», а не ноль
+    words = [w for w in (query.fold(w) for w in asked) if w]
     if not words:
-        return None, 0
+        # Набор ждал чего-то, в чём нет ни одной буквы: `%`, тире, пустой знак.
+        # Это честный ноль, а не «не знаем»: искать нечего, и найтись не могло.
+        # Отдай мы здесь None, отчёт снял бы с записи факта всякий спрос.
+        return 0, 0
     try:
         conn = db.connect(where)
     except Exception:
         return None, 0     # база не открылась — это не «фактов ноль», см. ниже
     try:
-        # Своя нижняя буква. Встроенный `lower()` в SQLite латинский: `Казань`
-        # он оставляет как есть, и `LIKE '%казан%'` не совпадает с фактом,
-        # который в базе лежит. Отчёт показал бы «фактов: 0» и назвал обрывом
-        # исправную запись — ровно та ошибка, ради которой цепочка и заведена.
-        conn.create_function("lc", 1, lambda text: (text or "").lower())
         # Образец собирает `db.like`: `_` и `%` в слове набора — буквы, а не
         # подстановка. Без этого вопрос про `on_prompt` считает за факт
         # `onXpromptXpy`, то есть цепочка проскакивает настоящий обрыв.
         marks_ = [db.like(word) for word in words]
         where_sql = " OR ".join(
-            ["lc(subject) LIKE ? ESCAPE '\\' OR lc(content) LIKE ? ESCAPE '\\'"]
-            * len(words))
+            ['{k}(subject) LIKE ? ESCAPE \'\\\' OR {k}(content) LIKE ? ESCAPE \'\\\''
+             .format(k=db.KEY_SQL)] * len(words))
         params = [p for mark in marks_ for p in (mark, mark)]
         out = []
         for table in ("fact", "lapsedfact"):

@@ -441,6 +441,45 @@ class TestTheFactCountReadsTheBase(unittest.TestCase):
             alive, _ = live.facts_with(base, [word])
             self.assertEqual(alive, 1, "факт в базе есть, а счёт его не увидел")
 
+    @SLOW
+    @given(form=st.sampled_from(["Казань", "в Казани", "из Казани", "КАЗАНЬ",
+                                 "Казанью", "казани"]))
+    def test_a_word_form_in_the_fact_is_found_by_the_stem_of_the_set(self, form):
+        """Ожидание набора — основа, и любая форма слова в факте по ней видна."""
+        with tempfile.TemporaryDirectory() as tmp:
+            base = self.a_base(tmp, [("город", "человек живёт %s" % form)])
+            alive, _ = live.facts_with(base, ["Казан"])
+            self.assertEqual(alive, 1,
+                             "форма %r не нашлась по основе набора" % form)
+
+    @SLOW
+    @given(spelling=st.sampled_from(["живёт", "живет"]))
+    def test_yo_in_the_fact_does_not_hide_it_from_the_count(self, spelling):
+        """Ступень «фактов» размечает поле той же разметкой, что и кандидаты.
+
+        Иначе цепочка врёт про исправное с другой стороны: кандидаты сходятся
+        по ключу, где `ё` сведена, а счёт фактов сравнивал поле как есть — и
+        отчёт показывал «фактов: 0» там, где поиск факт нашёл и вбросил. Тот же
+        класс лжи, что чинили в db7b25b, только зеркальный.
+        """
+        with tempfile.TemporaryDirectory() as tmp:
+            base = self.a_base(tmp, [("город", "человек %s в Казани" % spelling)])
+            alive, _ = live.facts_with(base, ["живет"])
+            self.assertEqual(alive, 1,
+                             "запись %r спряталась от счёта фактов" % spelling)
+
+    def test_the_stem_of_the_set_is_not_stemmed_again(self):
+        """«Казан» не должен укоротиться до «каза» и найти «казак».
+
+        Ожидание набора — уже основа. Snowball не идемпотентен, и второй проход
+        по нему увёл бы счёт вширь: ложная единица здесь хуже нуля, она
+        пропускает настоящий обрыв и винит следующую ступень.
+        """
+        with tempfile.TemporaryDirectory() as tmp:
+            base = self.a_base(tmp, [("казак", "человек видел казака")])
+            self.assertEqual(live.facts_with(base, ["Казан"])[0], 0,
+                             "ожидание набора прогнали через стеммер второй раз")
+
     def test_an_underscore_is_a_letter_and_not_a_wildcard(self):
         """`_` в слове — буква. Иначе счёт находит факт, которого нет.
 
