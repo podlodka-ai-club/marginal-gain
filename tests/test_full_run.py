@@ -945,5 +945,25 @@ class TestTheRunLeavesNothingBehind(Base):
                              "прогон убрался, а порождённый им процесс жив")
 
 
+class TestTheRunNamesItselfForTheAudit(Base):
+    """Номер прогона (`XMEM_RUN_ID`) — чтобы строки аудита не путались.
+
+    `storage.audit` кладёт этот номер в каждую строку; без него две песочницы,
+    писавшие в одну и ту же базу (например, обе руки замера на общем `--root`),
+    оставили бы аудит, по которому нельзя понять, чей это ход.
+    """
+
+    def test_the_run_id_reaches_the_hooks_environment(self):
+        with live.Sandbox(self.root) as box:
+            got = box.env().get("XMEM_RUN_ID")
+        self.assertTrue(got, "номер прогона пуст")
+
+    def test_two_sandboxes_never_share_a_run_id(self):
+        with live.Sandbox(self.root) as one, \
+             live.Sandbox(self.root.parent / (self.root.name + "-2")) as two:
+            self.assertNotEqual(one.env()["XMEM_RUN_ID"], two.env()["XMEM_RUN_ID"])
+        shutil.rmtree(self.root.parent / (self.root.name + "-2"), ignore_errors=True)
+
+
 if __name__ == "__main__":
     unittest.main()

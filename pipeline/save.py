@@ -17,7 +17,7 @@ from pathlib import Path
 
 from domain import models
 from infra import config
-from storage import port
+from storage import audit, port
 from archive.transcripts import TRANSCRIPTS, read_new, when
 
 # Книжка учёта своя: что уже прочитано и доставлено. Разбор транскрипта
@@ -96,7 +96,7 @@ def send(items, door=None):
     Разговор пишется раньше своих событий: связь ссылается на обе стороны по
     ключу, и порядок в списке мутаций сохраняется.
     """
-    records, relations, seen = [], [], {}
+    records, relations, seen, grouped = [], [], {}, {}
     for item in items:
         event = event_of(item)
         session = seen.get(event.session_id)
@@ -105,9 +105,16 @@ def send(items, door=None):
             records.append(session)
         records.append(event)
         relations.append(models.link("session_events", session=session, event=event))
+        grouped.setdefault(event.session_id, []).append(item)
     if not records:
         return 0
     (door or port.door()).write_objects(records, relations)
+    for session_id, batch in grouped.items():
+        audit.record("drain", session_id=session_id,
+                     input={"items": len(batch)},
+                     output={"events": [{"role": it["role"], "seq": it["seq"],
+                                         "text": (it["text"] or "")[:300]}
+                                        for it in batch]})
     return len(records)
 
 

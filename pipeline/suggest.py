@@ -20,7 +20,7 @@ from domain import context, ledger, lifespan, marks, models
 from domain.query import key as normal, stem, words
 from infra import config, telemetry
 from pipeline import prompt, voice
-from storage import port
+from storage import audit, port
 
 LOG = config.state_dir() / "suggest-log.jsonl"
 
@@ -539,13 +539,20 @@ def consult(query, mode="single", min_score=MIN_SCORE, door=None, here=None):
     не влезло в потолок. Догадка снаружи их не различает, а разбирать разрыв
     между «нашли» и «отдали» можно только по именам.
 
-    Отдаёт пятёркой: текст, куски, сырой ответ, причина, счёт кандидатов.
-    Причина у говорящего захода — None.
+    Отдаёт шестёркой: текст, куски, сырой ответ, причина, счёт кандидатов,
+    все кандидаты до всякого отсева (`pieces(answer)`, посчитанные один раз
+    здесь же). Причина у говорящего захода — None.
 
     Счёт кандидатов — сколько кусков вернул поиск до всякого отсева. Имя
     причины говорит, где выдача опустела, но не говорит, было ли чему пустеть:
     «не прошло порог» на одном кандидате и на тридцати чинится в разных местах.
     Снаружи это число не восстановить — пустая выдача выглядит одинаково.
+
+    Сырые куски отдаются вместе с остальным, а не пересчитываются заново
+    вызывающим (аудит ступени «поиск» в `attend` — ровно такой вызывающий):
+    второй разбор того же `answer` был бы не только лишней работой на
+    горячем пути, но и вторым источником того же числа, которому предстоит
+    разойтись с первым в день, когда кто-то поправит один из них.
     """
     door = door or port.door()
     here = context.of(here) if here else None
@@ -563,13 +570,13 @@ def consult(query, mode="single", min_score=MIN_SCORE, door=None, here=None):
         # Спрашиваем после чтения, а не вместо: половина сравнения «без памяти»
         # обязана идти той же дорогой, что рабочая, и отличаться лишь исходом.
         off = getattr(door, "name", None) == port.SilentDoor.name
-        return "", [], answer, "disabled" if off else "not_found", found
+        return "", [], answer, "disabled" if off else "not_found", found, chunks
     # Отсев до порога: ложная находка не должна ни занимать место в
     # пятёрке, ни съедать потолок в 1200 символов. Обстановка приписывается
     # между ними: порог судит произведение веса на уместность.
     honest = sift(chunks, query)
     if not honest:
-        return "", [], answer, "incidental", found
+        return "", [], answer, "incidental", found, chunks
     placed = place(honest, here, door)
     kept = gate(placed, min_score=min_score)
     if not kept:
@@ -577,12 +584,12 @@ def consult(query, mode="single", min_score=MIN_SCORE, door=None, here=None):
         # порога не отработала бы вовсе и пропала из замера. Здесь он только
         # разводит три случая, которые снаружи выглядят одинаково пусто.
         if not winnow(placed, min_score=min_score):
-            return "", [], answer, "below_threshold", found
+            return "", [], answer, "below_threshold", found, chunks
         if not eligible(placed, min_score=min_score):
             # Порог прошли, а записей среди прошедшего нет: хранилище ответило
             # словами. Это «не нашли», а не «не влезло».
-            return "", [], answer, "not_found", found
-        return "", [], answer, "over_budget", found
+            return "", [], answer, "not_found", found, chunks
+        return "", [], answer, "over_budget", found, chunks
     # Соседи добираются после порога и ставятся следом: прямое попадание
     # первым, добавка второй. Потолки те же — их считает тот же `gate`.
     added = place(near(kept, door), here, door)
@@ -600,7 +607,7 @@ def consult(query, mode="single", min_score=MIN_SCORE, door=None, here=None):
                     continue
                 kept.append((score, clean, record))
                 size += len(clean) + where
-    return voice.render(kept), kept, answer, None, found
+    return voice.render(kept), kept, answer, None, found, chunks
 
 
 def suggest(query, mode="single", min_score=MIN_SCORE, door=None, here=None):
@@ -732,7 +739,23 @@ def note_injection(session_id, text, kept=(), door=None, at=None):
     return record
 
 
-def mute(reason, session_id, query, note=None, found=None):
+def _candidates_of(chunks):
+    """Кандидаты поиска — в компактную форму для аудита ступени «поиск».
+
+    Принимает уже разобранные `chunks` (тот самый шестой элемент, который
+    отдаёт `consult`), а не сырой ответ хранилища: второй разбор той же
+    строки на горячем пути — лишняя работа и лишний повод разойтись с тем,
+    что реально сосчитал `consult`, если один из двух разборов поправят, а
+    другой забудут.
+    """
+    out = []
+    for score, text, record in chunks:
+        kind = record.get("object_type") if isinstance(record, dict) else None
+        out.append({"score": score, "kind": kind, "text": (text or "")[:200]})
+    return out
+
+
+def mute(reason, session_id, query, note=None, found=None, candidates=None):
     """Записать молчание и вернуть его причину. Одна дверь для всех отказов.
 
     Имя причины ставится там, где молчание случилось, а не догадкой снаружи:
@@ -741,9 +764,18 @@ def mute(reason, session_id, query, note=None, found=None):
     `found` — счёт кандидатов той же ступени. Не назван — поля в ленте не
     будет: отказ носителя и вышедший срок до поиска не доходят, и ноль у них
     означал бы «поиск сходил впустую», то есть указывал бы не на ту ступень.
+
+    `candidates` — то же самое, но для аудита ступени «поиск»: не только
+    сколько, а что именно и с каким весом. Не назван — значит заход оборвался
+    до того, как поиск вообще ответил (срок, отказ носителя), и разбирать
+    нечего — это тоже данные, а не пропуск.
     """
     ledger.silence(reason, session_id=session_id, query=query, note=note,
                    found=found)
+    audit.record("search", session_id=session_id, ok=False,
+                 input={"query": query},
+                 output={"reason": reason, "found": found,
+                         "note": note, "candidates": candidates or []})
     return reason
 
 
@@ -765,8 +797,8 @@ def attend(query, session_id=None, door=None, here=None, mode="single",
     door = door or port.door()
     cancel = deadline() if hot else (lambda: None)
     try:
-        text, kept, _raw, why, found = consult(query, mode, min_score, door=door,
-                                               here=here)
+        text, kept, _raw, why, found, chunks = consult(
+            query, mode, min_score, door=door, here=here)
     except Overdue:
         return "", [], mute("overdue", session_id, query)
     except port.BackendError as bad:
@@ -779,8 +811,13 @@ def attend(query, session_id=None, door=None, here=None, mode="single",
                             note="%s: %s" % (type(bad).__name__, bad))
     finally:
         cancel()
+    candidates = _candidates_of(chunks)
     if not text:
-        return "", [], mute(why or "not_found", session_id, query, found=found)
+        return "", [], mute(why or "not_found", session_id, query, found=found,
+                            candidates=candidates)
+    audit.record("search", session_id=session_id, ok=True,
+                 input={"query": query},
+                 output={"found": found, "candidates": candidates, "kept": len(kept)})
     at = at or datetime.now(timezone.utc).isoformat()
     if record:
         try:
@@ -802,7 +839,15 @@ def attend(query, session_id=None, door=None, here=None, mode="single",
         ask = prompt.used([ledger.key_of(session_id, at)])
     except Exception:
         ask = ""            # просьба это добавка, отменять подсказку она не вправе
-    return ("%s\n\n%s" % (text, ask) if ask else text), kept, None
+    out = ("%s\n\n%s" % (text, ask) if ask else text)
+    # «Вброс» — что именно подано агенту и какой формой. Форма здесь не
+    # называется отдельным полем: пайплайн знает у `voice` только точку входа
+    # `render` (см. `tests/test_voice.py::TestANewVoiceCostsOneFile`), а форма
+    # и так видна по очертанию самого текста — она затем, чтобы различаться на
+    # глаз. Имя формы, которым шёл прогон целиком, называет отчёт замера.
+    audit.record("inject", session_id=session_id, input={"kept": len(kept)},
+                 output={"text": out})
+    return out, kept, None
 
 
 def render_injection(record):
@@ -880,8 +925,24 @@ def settle(files, door=None, log=None):
     # вставки, которой в хранилище нет, считать нельзя.
     for talk, at, verdict in marks:
         ledger.helped(talk, at, verdict, source=SETTLE_SOURCE)
+        _audit_judge(talk, at, verdict, SETTLE_SOURCE)
         got["logged"] += 1
     return got
+
+
+def _audit_judge(session_id, injected_at, verdict, source):
+    """«Оценка» — применена подсказка или нет и по какому признаку решено.
+
+    Признак — это и есть способ съёма (`source`): транскрипт, конец хода или
+    вопрос вместе с вбросом, три несклады­ваемых довода, см. ADR 0012. Вызов
+    один на оба способа съёма (`settle`, `harvest`), потому что вопрос
+    «применено или нет» у них общий, а признак — то немногое, чем они
+    различаются.
+    """
+    audit.record("judge", session_id=session_id,
+                input={"injection": ledger.key_of(session_id, injected_at),
+                       "source": source},
+                output={"verdict": verdict}, ok=(verdict == "yes"))
 
 
 # Способ съёма ответа для вопроса, заданного вместе с вбросом. Свой, а не
@@ -932,6 +993,7 @@ def harvest(files, log=None):
         if not parts or answered.get(parts) == verdict:
             continue
         ledger.helped(parts[0], parts[1], verdict, source=INLINE_SOURCE)
+        _audit_judge(parts[0], parts[1], verdict, INLINE_SOURCE)
         got["logged"] += 1
     return got
 

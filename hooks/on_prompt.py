@@ -8,6 +8,10 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 try:
+    from storage import audit
+except Exception:
+    audit = None
+try:
     from pipeline.drain import QUEUE          # адрес очереди задаёт её потребитель
 except Exception:
     # Тот же адрес и та же переменная, что у потребителя. Иначе при сбое
@@ -53,6 +57,12 @@ def main():
     QUEUE.parent.mkdir(parents=True, exist_ok=True)
     with QUEUE.open("a", encoding="utf-8") as fh:
         fh.write(json.dumps(item, ensure_ascii=False) + "\n")
+    if audit is not None:
+        audit.record("intercept", session_id=item["session_id"],
+                     input={"cwd": cwd, "permission_mode": item["permission_mode"]},
+                     output={"content": item["content"], "project": item["project"],
+                             "git_branch": item["git_branch"],
+                             "occurred_at": item["occurred_at"]})
 
 if __name__ == "__main__":
     try:

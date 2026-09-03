@@ -359,8 +359,8 @@ class TestANewVoiceCostsOneFile(unittest.TestCase):
                       "content": "переехал в Казань"}])
         with mock.patch.dict(voice.VOICES, {"stub": stub}), \
                 mock.patch.dict(os.environ, {"XMEM_VOICE": "stub"}):
-            text, kept, _raw, why, _found = suggest.consult("город", door=door,
-                                                            min_score=0.0)
+            text, kept, _raw, why, _found, _chunks = suggest.consult(
+                "город", door=door, min_score=0.0)
         self.assertIsNone(why)
         self.assertEqual("заглушка: %d" % len(kept), text)
 
@@ -371,8 +371,8 @@ class TestANewVoiceCostsOneFile(unittest.TestCase):
                       "subject": "город", "scope": "global",
                       "content": "переехал в Казань"}])
         with mock.patch.dict(os.environ, {"XMEM_VOICE": name}):
-            text, kept, _raw, why, _found = suggest.consult("город", door=door,
-                                                            min_score=0.0)
+            text, kept, _raw, why, _found, _chunks = suggest.consult(
+                "город", door=door, min_score=0.0)
         self.assertIsNone(why)
         self.assertEqual(voice.render(kept, name), text)
 

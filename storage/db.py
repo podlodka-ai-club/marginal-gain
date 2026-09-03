@@ -18,6 +18,7 @@ import json
 import os
 import sqlite3
 import threading
+from datetime import datetime, timezone
 from pathlib import Path
 
 from domain import context, folding, lifespan, models
@@ -186,7 +187,35 @@ def _v5(conn):
                  'ON lapsedfact (merged_into)')
 
 
-MIGRATIONS = (_v1, _v2, _v3, _v4, _v5)
+# Шаги журнала аудита. Имя здесь и только здесь: `storage.audit.record`
+# (общий писатель) и `Repository._audit` (свой, у lapse/fold — через уже
+# открытое соединение, чтобы не заводить кольцо storage.db ↔ storage.audit)
+# сверяются с одним и тем же кортежем, а не с двумя одинаковыми на вид.
+# Имя произвольно не берётся: отчёт по журналу группирует строки по нему, и
+# опечатка в имени значила бы для отчёта незамеченный шаг.
+STEPS = ("intercept", "drain", "mark", "reply", "fact", "link",
+         "forget", "fold", "search", "inject", "judge")
+
+
+def _v6(conn):
+    """Журнал аудита: строка на каждое действие конвейера, в этой же базе.
+
+    Отдельная таблица, а не поле на существующих объектах схемы: строка аудита
+    несёт вход и выход шага, а не состояние записи, и не привязана первичным
+    ключом ни к одной из них — один факт проходит несколько шагов (разметка,
+    запись, забывание), и у каждого свой вход и выход, свой успех или отказ.
+    См. `storage.audit`.
+    """
+    conn.execute("""CREATE TABLE IF NOT EXISTS audit (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        ts TEXT NOT NULL, run_id TEXT, session_id TEXT, step TEXT NOT NULL,
+        ok INTEGER NOT NULL, input TEXT, output TEXT)""")
+    conn.execute('CREATE INDEX IF NOT EXISTS audit_run ON audit (run_id)')
+    conn.execute('CREATE INDEX IF NOT EXISTS audit_session ON audit (session_id)')
+    conn.execute('CREATE INDEX IF NOT EXISTS audit_step ON audit (step)')
+
+
+MIGRATIONS = (_v1, _v2, _v3, _v4, _v5, _v6)
 
 
 # Связь, которой факт достаёт свою обстановку. У самого факта в полях один
@@ -300,6 +329,39 @@ class Repository:
 
     def close(self):
         self.conn.close()
+
+    def _audit(self, step, input=None, output=None, session_id=None, ok=True):
+        """Строка аудита через уже открытое соединение репозитория.
+
+        Не зовёт `storage.audit.record`: та открывает свою базу по пути и
+        живёт слоем выше — а `lapse`/`fold` уже держат нужное соединение под
+        своим замком, и второе означало бы вторую фиксацию транзакции там, где
+        первая уже случилась. Формат строки тот же, что и у общего пути, см.
+        `storage.audit` — совпадение проверено `tests/test_audit_forget_fold.py`.
+
+        Имя шага сверяется с тем же `STEPS`, что и общий путь: опечатка здесь
+        так же не должна проходить молча, как и там. `self.lock` — свой, а не
+        унаследованный из вызова: `RLock` пускает тот же поток повторно, так
+        что запись остаётся безопасной и когда `lapse`/`fold` уже держат замок
+        снаружи, и если однажды кто-то позовёт её без него.
+        """
+        if step not in STEPS:
+            raise ValueError("нет такого шага аудита: %r, известны: %s"
+                             % (step, ", ".join(STEPS)))
+        try:
+            with self.lock, self.conn:
+                self.conn.execute(
+                    'INSERT INTO audit (ts, run_id, session_id, step, ok, input, output) '
+                    'VALUES (?, ?, ?, ?, ?, ?, ?)',
+                    (datetime.now(timezone.utc).isoformat(),
+                     os.environ.get("XMEM_RUN_ID") or "", session_id, step,
+                     1 if ok else 0,
+                     json.dumps(input, ensure_ascii=False, default=str)
+                     if input is not None else None,
+                     json.dumps(output, ensure_ascii=False, default=str)
+                     if output is not None else None))
+        except Exception:
+            pass    # аудит это наблюдение: его авария не имеет права уронить ход
 
     # --- запись -------------------------------------------------------------
 
@@ -650,12 +712,22 @@ class Repository:
             if dry:
                 return self.conn.execute(
                     'SELECT count(*) FROM "fact" WHERE %s' % where, (now,)).fetchone()[0]
+            # Читаем то, что вот-вот перекладываем — иначе аудиту нечего было бы
+            # сказать, кроме числа: «сколько» без «что именно» это та же немота,
+            # которую задача и просит устранить.
+            gone = [dict(row) for row in self.conn.execute(
+                'SELECT %s FROM "fact" WHERE %s' % (names, where), (now,))]
             moved = self.conn.execute(
                 'INSERT OR REPLACE INTO "lapsedfact" (%s, "lapsed_at") '
                 'SELECT %s, ? FROM "fact" WHERE %s' % (names, names, where),
                 (now, now)).rowcount
             self.conn.execute('DELETE FROM "fact" WHERE %s' % where, (now,))
             self.conn.commit()
+        self._audit("forget", input={"now": now},
+                   output={"moved": [{"fact_type": r["fact_type"],
+                                      "subject": r["subject"], "scope": r["scope"],
+                                      "content": r.get("content")} for r in gone]},
+                   ok=True)
         return moved
 
     # --- свёртка ------------------------------------------------------------
@@ -677,6 +749,7 @@ class Repository:
         """
         shared = [f.name for f in dataclasses.fields(models.Fact)]
         names = ", ".join('"%s"' % name for name in shared)
+        merges = []
         with self.lock:
             rows = [dict(row) for row in self.conn.execute('SELECT * FROM "fact"')]
             moved = 0
@@ -700,8 +773,12 @@ class Repository:
                         (row["fact_type"], row["subject"], row["scope"]))
                 self._mark(keep, dead)
                 self._rewire(dead, keep_key)
+                merges.append({"kept": keep_key, "merged": dead,
+                              "content": keep.get("content")})
             if not dry:
                 self.conn.commit()
+        if not dry:
+            self._audit("fold", input={"now": now}, output={"merges": merges}, ok=True)
         return moved
 
     def _mark(self, keep, dead):

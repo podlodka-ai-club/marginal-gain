@@ -1,0 +1,186 @@
+#!/usr/bin/env python3
+"""Журнал аудита: каждое действие конвейера — строкой в таблице той же базы.
+
+Зачем. Прогон отчитывался исходами и одним словом на ступень обрыва: «факт в
+БД» молчала, что именно модель разметила, что маппер отбросил и почему. Разбор
+задним числом читал транскрипт и переигрывал разбор заново (`eval.live`) — то
+есть исход не хранил своих оснований, их каждый раз приходилось воссоздавать.
+
+Здесь — наоборот. Каждое действие пишется в базу как есть, в момент, когда
+случилось, а не восстанавливается потом чтением архива. Строка несёт время,
+номер прогона (если он есть — вне замера действие само по себе), сессию, шаг,
+вход и выход. Отказ шага — такая же строка, как успех, с причиной в выходе:
+«ничего не найдено» это тоже действие, а не пустота.
+
+Пишется всегда, без рубильника: наблюдение не имеет права быть тем, что можно
+выключить, иначе на выключенном рубильнике разбор снова слепнет молча.
+
+Запись не имеет права уронить горячий путь или изменить его исход. Поэтому
+`record` никогда не бросает исключение наружу — она только наблюдает, и
+собственная авария наблюдения не должна стать аварией самого хода. Это и есть
+довод, по которому аудит не может быть проверен ключом «выключи и сравни»:
+выключателя у него нет и не будет, а чистота наблюдения проверяется иначе —
+подменой самой функции записи на заведомо ломающуюся и сравнением исхода
+пайплайна, см. `tests/test_audit.py`.
+"""
+import json
+import os
+import sqlite3
+import threading
+from datetime import datetime, timezone
+
+from storage import db as storage_db
+# Шаги цепочки — одна запись на оба писателя (сюда и в Repository._audit).
+# `storage/db.py` не может импортировать этот модуль обратно (см. его же
+# докстринг про кольцо storage.db ↔ storage.audit), поэтому имя живёт там, а
+# здесь только берётся: направление разрешено — audit уже зависит от db.
+from storage.db import STEPS
+
+_LOCAL = threading.local()
+
+
+def run_id():
+    """Номер прогона. Вне замера его нет — тогда поле пустое, а не выдуманное."""
+    return os.environ.get("XMEM_RUN_ID") or ""
+
+
+def _cache():
+    got = getattr(_LOCAL, "conns", None)
+    if got is None:
+        got = _LOCAL.conns = {}
+    return got
+
+
+def _connection(where=None):
+    """Своё соединение на поток и на путь к базе.
+
+    Аудит не отбирает соединение у хранилища: `storage.db.Repository` открывает
+    базу сама, и просить у неё общее означало бы протянуть аудиту доступ к
+    внутреннему состоянию чужого модуля. Своё соединение стоит одного лишнего
+    дескриптора на процесс — хуки живут один ход и закрываются вместе с ним.
+    Кладётся в кэш процесса, чтобы разбор одного эпизода не открывал базу на
+    каждый факт заново.
+    """
+    target = str(where) if where else str(storage_db.path())
+    cache = _cache()
+    conn = cache.get(target)
+    if conn is None:
+        conn = storage_db.connect(where)
+        # Своё соединение конкурирует с `Repository.conn` за один файл. Срок
+        # ожидания короткий и нарочно: запись стоит в горячем пути хука на
+        # чтение (`pipeline.suggest`, под `HOOK_SECONDS`), и долгая заявка на
+        # занятый файл там недопустима так же, как и где угодно ещё в этом
+        # хуке — молчаливый отказ по истечении короткого срока лучше, чем
+        # растянутое ожидание чужой блокировки.
+        conn.execute("PRAGMA busy_timeout = 200")
+        storage_db.migrate(conn)
+        cache[target] = conn
+    return conn
+
+
+def reset(where=None):
+    """Забыть кэшированное соединение. Нужно проверкам: своя база на каждую."""
+    cache = _cache()
+    target = str(where) if where else str(storage_db.path())
+    conn = cache.pop(target, None)
+    if conn is not None:
+        try:
+            conn.close()
+        except sqlite3.Error:
+            pass
+
+
+def _dump(value):
+    """Вход и выход — в текст, всегда через JSON, даже голую строку.
+
+    Строку когда-то клали как есть, без кавычек JSON — читалась глазами
+    в сыром SQL проще. Расплата обнаружилась ревью: `rows()` разбирает
+    сохранённый текст обратно тем же `json.loads` для всех типов разом, и
+    строка, которая сама выглядит валидным JSON («123», «null», «true»),
+    возвращалась бы не строкой, а числом, None или булевым — ровно то
+    искажение, которого аудит и заведён не допускать. Значит писать нужно
+    единообразно: тогда `json.loads` при чтении всегда попадает туда, откуда
+    вышел `json.dumps`, и двух путей для одного типа не остаётся.
+
+    `default=str` — не небрежность, а часть довода «запись не бросает»: объект
+    без представления в JSON (множество, чужой класс) не должен ронять строку
+    аудита из-за одного поля, которое эта строка и не обязана понимать глубже
+    текста.
+    """
+    if value is None:
+        return None
+    try:
+        return json.dumps(value, ensure_ascii=False, default=str)
+    except (TypeError, ValueError, RecursionError):
+        try:
+            return json.dumps(str(value), ensure_ascii=False)
+        except Exception:
+            return json.dumps("<не показано>")
+
+
+def record(step, input=None, output=None, session_id=None, ok=True, where=None,
+          at=None):
+    """Одна строка аудита. Никогда не бросает — авария наблюдения не роняет ход.
+
+    `ok` отделяет отказ от успеха тем же признаком, каким его увидел сам шаг, а
+    не догадкой снаружи по содержимому: пустой список кандидатов — это законный
+    успешный отказ («ничего не найдено»), и путать его с поломкой самой записи
+    нельзя.
+
+    Имя шага — исключение из общей терпимости. Оно проверяется и падает
+    `ValueError`-ом до всякой попытки писать: опечатка в имени, проглоченная
+    молча, значила бы для отчёта шаг, которого как будто не было вовсе, — а
+    это именно та слепота, ради которой аудит и заведён.
+    """
+    if step not in STEPS:
+        raise ValueError("нет такого шага аудита: %r, известны: %s"
+                         % (step, ", ".join(STEPS)))
+    try:
+        conn = _connection(where)
+        with conn:
+            conn.execute(
+                'INSERT INTO audit (ts, run_id, session_id, step, ok, input, output) '
+                'VALUES (?, ?, ?, ?, ?, ?, ?)',
+                (at or datetime.now(timezone.utc).isoformat(), run_id(),
+                 session_id, step, 1 if ok else 0, _dump(input), _dump(output)))
+    except Exception:
+        pass    # аудит это наблюдение: его авария не имеет права уронить ход
+
+
+def rows(where=None, run=None, step=None, session_id=None):
+    """Строки аудита, в порядке записи. Читает базу заново, а не кэш соединений.
+
+    Отчёт по журналу зовёт это из отдельного процесса — своего кэша соединений
+    у него нет и не должно быть, иначе он читал бы то состояние, что видел на
+    момент открытия, а не то, что там лежит сейчас.
+    """
+    conn = storage_db.connect(where)
+    try:
+        conn.execute("PRAGMA busy_timeout = 200")
+        storage_db.migrate(conn)
+        clauses, params = [], []
+        if run is not None:
+            clauses.append('"run_id" = ?')
+            params.append(run)
+        if step is not None:
+            clauses.append('"step" = ?')
+            params.append(step)
+        if session_id is not None:
+            clauses.append('"session_id" = ?')
+            params.append(session_id)
+        where_sql = (" WHERE " + " AND ".join(clauses)) if clauses else ""
+        out = []
+        for raw in conn.execute('SELECT * FROM audit%s ORDER BY id' % where_sql,
+                                params):
+            item = dict(raw)
+            for name in ("input", "output"):
+                text = item.get(name)
+                if text:
+                    try:
+                        item[name] = json.loads(text)
+                    except ValueError:
+                        pass         # осталось строкой — так и было записано
+            out.append(item)
+        return out
+    finally:
+        conn.close()
