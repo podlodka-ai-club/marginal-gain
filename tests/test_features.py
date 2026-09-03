@@ -16,7 +16,15 @@ from unittest import mock
 import numpy as np
 
 ROOT = Path(__file__).resolve().parent.parent
-sys.path.append(str(ROOT / "research" / "lab" / "x7"))
+
+# Стенд лежит вне репозитория: он гоняется на живом архиве, а архив наружу не
+# выкладывается. Проверки, которым нужен сам стенд, без него не выполнимы и
+# падали в любом чистом клоне тремя ошибками импорта. Пропускаем их по наличию
+# стенда, а не выбрасываем: с лабораторией на машине они снова работают.
+LAB = ROOT / "research" / "lab" / "x7"
+sys.path.append(str(LAB))
+HAS_LAB = (LAB / "feat.py").exists()
+needs_lab = unittest.skipUnless(HAS_LAB, "стенда research/lab/x7 нет в клоне")
 
 from domain import features
 from pipeline import understand
@@ -49,6 +57,7 @@ class Wiring(unittest.TestCase):
                          round(0.5 * 0.3 + 0.2 * (1 / 3.0), 3))
 
 
+@needs_lab
 class Stand(unittest.TestCase):
     def test_stand_calls_production_function(self):
         """Подменяем боевую функцию — столбец стенда обязан поехать за ней.
@@ -70,6 +79,7 @@ class Stand(unittest.TestCase):
             self.assertAlmostEqual(X[i, j], math.log1p(agg[k]["n"]))
 
 
+@needs_lab
 class Holdout(unittest.TestCase):
     def test_auc_matches_glossary(self):
         """Отложенное окно: признаки строго до 15.08, метка — всплыл ли узел до 26.08."""
