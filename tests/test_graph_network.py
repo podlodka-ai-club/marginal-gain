@@ -21,7 +21,11 @@
 ведёт тем же `db.Repository`: сравнивать надо шаг по графу, а не два разных
 поиска по двум разным наборам.
 """
-import contextlib, json, os, tempfile, unittest
+import contextlib
+import json
+import os
+import tempfile
+import unittest
 from pathlib import Path
 from unittest import mock
 

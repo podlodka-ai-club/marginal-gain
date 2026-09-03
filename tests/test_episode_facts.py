@@ -14,7 +14,13 @@
 заход по тому же архиву, дверь без структурной записи. Перечисляя края руками,
 перечислишь не все — а пропущенный край здесь стоит потерянной связи.
 """
-import contextlib, io, json, os, sqlite3, tempfile, unittest
+import contextlib
+import io
+import json
+import os
+import sqlite3
+import tempfile
+import unittest
 from pathlib import Path
 from unittest import mock
 

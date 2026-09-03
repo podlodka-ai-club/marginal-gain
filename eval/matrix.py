@@ -16,7 +16,10 @@
 
 Запуск: MEM_TRACE=1 python3 -m eval.matrix
 """
-import argparse, json, os, time
+import argparse
+import json
+import os
+import time
 from collections import defaultdict
 from pathlib import Path
 

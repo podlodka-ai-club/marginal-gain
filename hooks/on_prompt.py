@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """UserPromptSubmit hook: put the message plus its context into a local queue. No network, always exit 0."""
-import json, sys, os
+import json
+import sys
+import os
 from datetime import datetime, timezone
 from pathlib import Path
 

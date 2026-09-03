@@ -24,7 +24,8 @@
    (research-4, research-7); здесь добавляется источник сигнала, а не
    перебираются старые коэффициенты.
 """
-import os, unittest
+import os
+import unittest
 from unittest import mock
 
 from hypothesis import HealthCheck, given, settings, strategies as st

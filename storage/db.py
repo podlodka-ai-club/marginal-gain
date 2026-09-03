@@ -12,7 +12,12 @@
 
 Путь к файлу задаётся переменной XMEM_LOCAL_PATH.
 """
-import dataclasses, hashlib, json, os, sqlite3, threading
+import dataclasses
+import hashlib
+import json
+import os
+import sqlite3
+import threading
 from pathlib import Path
 
 from domain import context, folding, lifespan, models

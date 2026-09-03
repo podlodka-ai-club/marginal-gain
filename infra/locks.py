@@ -5,8 +5,8 @@
 перезаписывают. Два прохода разом — и проигравший откатывает продвижение
 победителя. Раз правило общее, замок общий тоже, а не переписан дважды.
 """
-import contextlib, fcntl
-from pathlib import Path
+import contextlib
+import fcntl
 
 from infra import config
 

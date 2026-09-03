@@ -23,7 +23,10 @@
 
 Запуск: python3 -m eval.goldenset
 """
-import argparse, hashlib, json, re
+import argparse
+import hashlib
+import json
+import re
 from collections import defaultdict
 from datetime import datetime, timezone
 from pathlib import Path

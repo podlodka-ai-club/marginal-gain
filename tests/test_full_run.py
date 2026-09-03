@@ -48,7 +48,16 @@
 живого состояния заслонял отсев служебных путей, а ожидание на ходу держало
 только одно ожидание в конце.
 """
-import json, os, shutil, signal, subprocess, sys, tempfile, time, unittest, uuid
+import json
+import os
+import shutil
+import signal
+import subprocess
+import sys
+import tempfile
+import time
+import unittest
+import uuid
 from pathlib import Path
 
 from hypothesis import HealthCheck, given, settings, strategies as st

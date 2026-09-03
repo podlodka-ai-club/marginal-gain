@@ -20,7 +20,16 @@
 
 Разбор журнала: python3 -m infra.telemetry --log <файл>
 """
-import argparse, contextvars, functools, inspect, json, os, re, threading, time, uuid
+import argparse
+import contextvars
+import functools
+import inspect
+import json
+import os
+import re
+import threading
+import time
+import uuid
 from collections import defaultdict
 from datetime import datetime, timezone
 from pathlib import Path

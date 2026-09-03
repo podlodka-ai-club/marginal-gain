@@ -23,8 +23,10 @@
 названным по `message_id`: соседние ответы и соседние сессии друг другу не
 мешают.
 """
-import argparse, json, os, sys, time
-from pathlib import Path
+import argparse
+import json
+import sys
+import time
 
 from domain import marks
 from infra import config

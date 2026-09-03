@@ -18,7 +18,12 @@
 краёв не перечислить — потолок, повтор пары в разных эпизодах, направленность
 редкого повода, идемпотентность повторного прохода.
 """
-import contextlib, itertools, json, os, sqlite3, tempfile, unittest
+import contextlib
+import json
+import os
+import sqlite3
+import tempfile
+import unittest
 from pathlib import Path
 from unittest import mock
 

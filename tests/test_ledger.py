@@ -22,7 +22,12 @@
 4. Ответа нет — это `unknown`, а не `no`. Молчание агента в отрицательный ответ
    не сваливается: доля пользы считается только там, где ответ был.
 """
-import contextlib, json, os, sqlite3, tempfile, unittest
+import contextlib
+import json
+import os
+import sqlite3
+import tempfile
+import unittest
 from pathlib import Path
 from unittest import mock
 
@@ -238,7 +243,6 @@ class TestEveryPassLeavesExactlyOneOutcome(unittest.TestCase):
 
     def test_a_pass_that_spoke_leaves_an_injection_and_no_silence(self):
         with tempfile.TemporaryDirectory() as tmp, store(tmp):
-            door = port.door()
             text, kept, got = suggest.attend(
                 "демо", session_id=TALK, door=Answering(fact_piece("файлы демо")),
                 hot=True)

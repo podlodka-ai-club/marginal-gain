@@ -17,7 +17,12 @@
 «ни одна ось не выдумывается», «порядок осей не значит ничего», «в срезе нет
 записей, которых нет в базе».
 """
-import contextlib, itertools, json, os, tempfile, unittest
+import contextlib
+import itertools
+import json
+import os
+import tempfile
+import unittest
 from pathlib import Path
 from unittest import mock
 
@@ -125,7 +130,7 @@ class TestASliceIsBuiltFromAxes(unittest.TestCase):
     @SLOW
     @given(shape=SHAPES)
     def test_a_slice_without_axes_is_the_whole_base(self, shape):
-        with tempfile.TemporaryDirectory() as tmp, store(tmp) as base:
+        with tempfile.TemporaryDirectory() as tmp, store(tmp):
             fill(archive(tmp, shape))
             door = port.door()
             everything = door.slice({})

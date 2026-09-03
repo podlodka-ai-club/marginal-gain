@@ -33,7 +33,10 @@
   * обойти моментом хоть одну выборку фактов       → TestEveryFactReadObeysTheMoment
   * вернуть путь к набору внутрь пакета eval       → TestTheStandardCommandFindsItsSet
 """
-import contextlib, os, tempfile, unittest
+import contextlib
+import os
+import tempfile
+import unittest
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from unittest import mock
@@ -44,9 +47,8 @@ os.environ.setdefault("XMEM_INSTANCE_ID", "test-instance")
 
 from domain import lifespan, models
 from eval import evaluate, goldenset, matrix
-from infra import config
 from pipeline import forget
-from storage import db, local, port
+from storage import local, port
 
 HERE = Path(__file__).resolve().parent.parent
 

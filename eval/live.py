@@ -86,7 +86,19 @@
     python3 -m eval.live --player replay          без модели и без трат
     python3 -m eval.live --arms both              с памятью и без, и разница
 """
-import argparse, fcntl, hashlib, json, os, re, shutil, signal, sqlite3, subprocess, sys, time, uuid
+import argparse
+import fcntl
+import hashlib
+import json
+import os
+import re
+import shutil
+import signal
+import sqlite3
+import subprocess
+import sys
+import time
+import uuid
 from collections import Counter, OrderedDict, namedtuple
 from datetime import datetime, timedelta, timezone
 from pathlib import Path

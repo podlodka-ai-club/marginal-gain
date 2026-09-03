@@ -16,7 +16,10 @@
 Проверки заданы свойствами: важно не «этот файл читается», а «любой чужой
 набор не читается, а свой возвращается тем же, чем был».
 """
-import json, os, tempfile, unittest
+import json
+import os
+import tempfile
+import unittest
 from pathlib import Path
 
 from hypothesis import given, settings, strategies as st

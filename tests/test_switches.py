@@ -11,7 +11,12 @@
 3. Состояние говорит, **откуда** взято значение. Переменная окружения сильнее
    файла, и молчание об этом уже стоило нам дня разбирательств.
 """
-import contextlib, json, os, subprocess, sys, tempfile, unittest
+import contextlib
+import json
+import os
+import subprocess
+import tempfile
+import unittest
 from pathlib import Path
 from unittest import mock
 

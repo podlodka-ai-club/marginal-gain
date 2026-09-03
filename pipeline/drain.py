@@ -10,7 +10,9 @@
 коснулись, а разбор идёт обычным проходом сохранения. Так у события остаётся
 единственный источник номера, и повторный заход ничего не задваивает.
 """
-import argparse, json, os
+import argparse
+import json
+import os
 from pathlib import Path
 
 from infra import config, locks

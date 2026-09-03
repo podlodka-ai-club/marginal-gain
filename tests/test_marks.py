@@ -12,7 +12,13 @@
    краснит маппер и ничего больше.
 5. Блок служебный. В том, что видит человек, его нет; в записи разговора есть.
 """
-import ast, json, os, subprocess, sys, tempfile, unittest
+import ast
+import json
+import os
+import subprocess
+import sys
+import tempfile
+import unittest
 from collections import Counter
 from pathlib import Path
 from unittest import mock
@@ -21,7 +27,7 @@ os.environ.setdefault("XMEM_INSTANCE_ID", "test-instance")
 
 from domain import marks, models
 from infra import config
-from pipeline import display, prompt, understand
+from pipeline import display, understand
 
 HERE = Path(__file__).resolve().parent.parent
 HOOKS = HERE / "hooks"

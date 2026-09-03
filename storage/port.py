@@ -33,7 +33,8 @@
 importlib.reload в matrix — где два сетевых пути перезагружали, а локальный
 забыли, и его кэш соединения жил насквозь через обе половины сравнения.
 """
-import os, subprocess
+import os
+import subprocess
 
 from infra import telemetry
 

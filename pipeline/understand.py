@@ -12,7 +12,9 @@
 в конце хода такому месту нет. Отметка своя у каждого хранилища — ровно по той
 же причине, что у сохранения, см. state_path.
 """
-import argparse, contextlib, json
+import argparse
+import contextlib
+import json
 from pathlib import Path
 
 from domain import features, ledger, lifespan, marks, models

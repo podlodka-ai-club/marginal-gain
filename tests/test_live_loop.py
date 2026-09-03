@@ -12,7 +12,12 @@
 конец хода зовётся каждый ход, и заход вхолостую обязан стоить ничего. Второй:
 хук действительно зовёт оба прохода, а не только то, что звал раньше.
 """
-import contextlib, json, os, re, sqlite3, tempfile, unittest
+import contextlib
+import json
+import os
+import sqlite3
+import tempfile
+import unittest
 from pathlib import Path
 from unittest import mock
 

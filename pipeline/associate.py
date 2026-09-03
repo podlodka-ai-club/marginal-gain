@@ -23,8 +23,9 @@
 хранилище число, которое меньше правды. Повторный проход отдаёт то же самое:
 ключ карточки — источник, цель и повод, и запись по нему идёт поверх.
 """
-import argparse, itertools, json
-from pathlib import Path
+import argparse
+import itertools
+import json
 
 from archive.transcripts import TRANSCRIPTS, episodes_from_file
 from domain import models

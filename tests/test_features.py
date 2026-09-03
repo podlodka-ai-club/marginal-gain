@@ -9,7 +9,9 @@
 Первый признак — n_log, частота, сглаженная логарифмом. В score_of та же величина
 уже участвует, но в виде repeat, с потолком на десяти вхождениях.
 """
-import math, sys, unittest
+import math
+import sys
+import unittest
 from pathlib import Path
 from unittest import mock
 
@@ -18,8 +20,8 @@ import numpy as np
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.append(str(ROOT / "research" / "lab" / "x7"))
 
-from domain import features
-from pipeline import understand
+from domain import features # noqa: E402
+from pipeline import understand # noqa: E402
 
 
 class Formula(unittest.TestCase):

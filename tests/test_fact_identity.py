@@ -17,7 +17,12 @@
 Мутация, на которую проверки обязаны краснеть: вернуть в подпись имя проекта
 (`archive/extract.edited_files`, `subject=project`).
 """
-import contextlib, json, os, sqlite3, tempfile, unittest
+import contextlib
+import json
+import os
+import sqlite3
+import tempfile
+import unittest
 from pathlib import Path
 from unittest import mock
 

@@ -8,15 +8,19 @@
 Импорт проверяем в отдельном процессе. В общем `sys.modules` половина проекта
 уже загружена соседними тестами, и любая проверка «что подтянулось» врёт.
 """
-import ast, os, subprocess, sys, unittest
+import ast
+import os
+import subprocess
+import sys
+import unittest
 from pathlib import Path
 from unittest import mock
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-from pipeline import save
-from storage import port
+from pipeline import save # noqa: E402
+from storage import port # noqa: E402
 
 
 def imported_by(module):
@@ -429,7 +433,8 @@ class TestFallbackByCapability(unittest.TestCase):
         По одной на файл значит, что путь наружу может смениться посреди
         прохода вместе с окружением, а половина разговоров уедет не туда.
         """
-        import tempfile, json as js
+        import tempfile
+        import json as js
         from pipeline import save
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
@@ -450,7 +455,8 @@ class TestFallbackByCapability(unittest.TestCase):
             self.assertEqual(door.write_objects.call_count, len(paths))
 
     def test_ingest_opens_the_door_once_when_none_is_given(self):
-        import tempfile, json as js
+        import tempfile
+        import json as js
         from pipeline import save
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

@@ -15,7 +15,12 @@
 Свойствами: важно не «в этом примере пришёл сосед», а «сосед всегда ниже
 источника, всегда один шаг, и дверь без обхода работает как раньше».
 """
-import contextlib, json, os, sqlite3, tempfile, unittest
+import contextlib
+import json
+import os
+import sqlite3
+import tempfile
+import unittest
 from pathlib import Path
 from unittest import mock
 
@@ -23,7 +28,6 @@ from hypothesis import HealthCheck, given, settings, strategies as st
 
 os.environ.setdefault("XMEM_INSTANCE_ID", "test-instance")
 
-from domain import models
 from pipeline import associate, suggest, understand
 from storage import local, port
 

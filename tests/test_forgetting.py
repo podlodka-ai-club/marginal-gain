@@ -27,7 +27,12 @@
   * удалять просроченное вместо переклада     → TestTheOverdueLeavesButStaysWhole
   * перестать продлевать срок при обращении   → TestAskingKeepsItAlive
 """
-import contextlib, json, os, sqlite3, tempfile, unittest
+import contextlib
+import json
+import os
+import sqlite3
+import tempfile
+import unittest
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from unittest import mock

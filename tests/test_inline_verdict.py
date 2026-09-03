@@ -30,7 +30,11 @@
    сигнал, что просьба разошлась со схемой; свои же служебные строки в ней
    означают шум ровно там, где нужен сигнал.
 """
-import contextlib, json, os, tempfile, unittest
+import contextlib
+import json
+import os
+import tempfile
+import unittest
 from pathlib import Path
 from unittest import mock
 
@@ -38,7 +42,7 @@ from hypothesis import HealthCheck, given, settings, strategies as st
 
 os.environ.setdefault("XMEM_INSTANCE_ID", "test-instance")
 
-from domain import ledger, marks, models
+from domain import ledger, marks
 from pipeline import display, prompt, suggest, understand
 from storage import local, port
 
@@ -322,7 +326,7 @@ class TestTheSummaryShowsEveryWayApart(unittest.TestCase):
     @given(talk=TALKS, at=STAMPS, key=st.sampled_from(["a|b|project"]),
            inline=VERDICTS, guess=VERDICTS)
     def test_both_ways_are_counted_and_named(self, talk, at, key, inline, guess):
-        with tape() as tmp:
+        with tape():
             ledger.injected(talk, at, [key], query="вопрос")
             ledger.helped(talk, at, inline, source="inline")
             ledger.helped(talk, at, guess, source="transcript")

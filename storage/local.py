@@ -11,7 +11,10 @@
 сами, и они детерминированы. Что не разобралось, ложится в `raw_text`: потерю
 входа надо видеть, а не угадывать по недостающим строкам.
 """
-import dataclasses, json, re, threading
+import dataclasses
+import json
+import re
+import threading
 from datetime import datetime, timezone
 
 from domain import lifespan, models
