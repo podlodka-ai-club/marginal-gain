@@ -28,7 +28,7 @@ from hypothesis import HealthCheck, given, settings, strategies as st
 
 os.environ.setdefault("XMEM_INSTANCE_ID", "test-instance")
 
-from pipeline import associate, suggest, understand
+from pipeline import associate, suggest, understand, voice
 from storage import local, port
 
 CWD = "/home/person/dev/demo"
@@ -170,7 +170,7 @@ class TestTheNeighbourComesAlong(unittest.TestCase):
                   "subject": "/x/db.py", "scope": "project", "content": "db"}
         got = suggest.near([(None, "db", source)], OneNeighbour())
         self.assertEqual([score for score, _, _ in got], [None])
-        self.assertNotIn("уверенность", suggest.render(got))
+        self.assertNotIn("уверенность", voice.render(got))
 
     @SLOW
     @given(shape=st.lists(st.lists(st.sampled_from(NAMES), min_size=2, max_size=4,

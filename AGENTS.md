@@ -15,6 +15,7 @@
 ./bin/xmem marks show      # показывать служебный блок на экране
 ./bin/xmem scheme xmd1     # схема разметки: просьба и маппер парой
 ./bin/xmem memory long     # режим памяти: сколько факт верен без обращений
+./bin/xmem voice directive # форма вброса: чем найденное подаётся агенту
 ```
 
 Окружение сильнее файла и потому сильнее команды — на один запуск:
@@ -25,6 +26,7 @@ XMEM_BACKEND=sdk …     # путь наружу
 XMEM_HIDE_MARKS=0 …    # показать служебный блок
 XMEM_MARKS=xmd1 …      # схема разметки
 XMEM_MEMORY=short …    # режим памяти: short, normal, long
+XMEM_VOICE=directive … # форма вброса: plain, directive, inline; реестр в pipeline/voice.py
 XMEM_HOOK_SECONDS=10   # срок чтения в горячем пути
 XMEM_STATE_DIR=…       # весь каталог состояния в сторону: так живёт прогон замера
 XMEM_ONLY=…            # граница обхода архива; пусто — весь. Ставит прогон замера

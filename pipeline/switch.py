@@ -30,6 +30,7 @@ from pathlib import Path
 
 from domain import lifespan, marks
 from infra import config
+from pipeline import voice
 
 ROOT = Path(__file__).resolve().parent.parent
 GATE = ROOT / "hooks" / "gate.sh"
@@ -192,7 +193,7 @@ class Listing(Switch):
 
 # Имена в порядке добавления, как в реестрах правил и схем. Проверка сверяется
 # с этим списком: запись без имени работать не должна.
-NAMES = ["live", "here", "backend", "scheme", "marks", "memory"]
+NAMES = ["live", "here", "backend", "scheme", "marks", "memory", "voice"]
 
 SWITCHES = {
     "live": Presence(
@@ -218,6 +219,13 @@ SWITCHES = {
         values=tuple(sorted(lifespan.MODES, key=lambda n: lifespan.MODES[n])),
         explain={name: "%d дней, дальше факт уходит в отложенное" % span
                  for name, span in lifespan.MODES.items()}),
+    "voice": Switch(
+        "форма вброса", "чем найденное подаётся агенту",
+        "XMEM_VOICE", "voice", config.DEFAULT_VOICE,
+        values=tuple(voice.SHIPPED),
+        explain={"plain": "справка блоком: факт, уверенность, обстановка",
+                 "directive": "указание вместо справки, без наших чисел",
+                 "inline": "одной строкой рядом с задачей"}),
 }
 
 

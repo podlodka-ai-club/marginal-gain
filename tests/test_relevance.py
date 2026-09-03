@@ -35,7 +35,7 @@ os.environ.setdefault("XMEM_INSTANCE_ID", "test-instance")
 
 from domain import context, models
 from domain.context import signals
-from pipeline import associate, suggest, understand
+from pipeline import associate, suggest, understand, voice
 from storage import local, port
 
 SLOW = settings(deadline=None, max_examples=20,
@@ -580,8 +580,8 @@ class TestTheFactTravelsWithItsContext(unittest.TestCase):
 
     def test_a_piece_without_a_situation_gets_no_invented_one(self):
         """Обстановки нет — и не приписываем: выдуманное выглядит измеренным."""
-        self.assertNotIn("обстановка", suggest.render([(None, "факт", None)]))
-        self.assertNotIn("уместность", suggest.render([(0.9, "факт", None)]))
+        self.assertNotIn("обстановка", voice.render([(None, "факт", None)]))
+        self.assertNotIn("уместность", voice.render([(0.9, "факт", None)]))
 
 
 class TestTheSituationCostsNothingToTake(unittest.TestCase):

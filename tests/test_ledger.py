@@ -36,7 +36,7 @@ from hypothesis import HealthCheck, given, settings, strategies as st
 os.environ.setdefault("XMEM_INSTANCE_ID", "test-instance")
 
 from domain import ledger, models
-from pipeline import suggest, understand
+from pipeline import suggest, understand, voice
 from storage import local, port
 
 TALK = "разговор-1"
@@ -205,7 +205,7 @@ class TestEveryPassLeavesExactlyOneOutcome(unittest.TestCase):
         Свали её на носитель — и колонка отказов начнёт расти от наших же
         ошибок, а разбивка по причинам, ради которой всё затевалось, соврёт.
         """
-        with tape(), mock.patch.object(suggest, "render",
+        with tape(), mock.patch.object(voice, "render",
                                        side_effect=TypeError("своя поломка")):
             _text, _kept, got = self.attend(fact_piece("файлы демо"))
             self.assertEqual(got, "pipeline_error")

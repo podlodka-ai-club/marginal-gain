@@ -96,6 +96,7 @@ from archive.extract import NOT_CODE
 from archive.transcripts import TRANSCRIPTS
 from domain import ledger, marks, query
 from eval import evaluate, pairs
+from pipeline import voice as voices
 from storage import db
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -240,7 +241,7 @@ class Sandbox:
     не открывается: путь к нему проверяется до первого действия, а не после.
     """
 
-    def __init__(self, root=None, live_hooks=True):
+    def __init__(self, root=None, live_hooks=True, voice=None):
         self.root = Path(root or DEFAULT_ROOT / uuid.uuid4().hex[:12]).expanduser()
         self.state = self.root / "state"
         self.db = self.root / "memory.db"
@@ -254,6 +255,19 @@ class Sandbox:
         # N+1, а цифра ползла бы от порядка пар.
         self.asking = self.root / "settings-asking.json"
         self.live_hooks = live_hooks
+        # Форма вброса, разобранная здесь и один раз. Дальше и ходы, и отчёт
+        # берут это готовое имя.
+        #
+        # Рубильник машины при этом не спрашивается — ровно как не
+        # спрашиваются схема разметки и режим памяти, которые прогон гасит в
+        # окружении ходов: не названа форма ключом, значит опорная, и цифра не
+        # зависит от того, что человек оставил себе в профиле или в файле.
+        #
+        # Спросить имя второй раз, в отчёте, тоже нельзя: отчёт читал бы свой
+        # каталог состояния, а ходы играли своим, и цифра уехала бы под чужим
+        # именем. Имя непустое всегда: пустое ход разобрал бы сам, по каталогу
+        # песочницы, где рубильника нет.
+        self.voice = voice if voice in voices.VOICES else voices.DEFAULT
         self.talks = []              # разговоры, заведённые этим прогоном
         self.groups = set()          # группы процессов, порождённые прогоном
         self.opened = False
@@ -322,6 +336,7 @@ class Sandbox:
             # пользователя, менял бы цифру молча.
             "XMEM_MARKS": "",
             "XMEM_MEMORY": "",
+            "XMEM_VOICE": self.voice,
             "XMEM_HIDE_MARKS": "hide",
             # Граница обхода архива. Разговоры прогона пишет харнесс, и пишет
             # он их в архив пользователя: увести их оттуда нечем, не отобрав у
@@ -1096,6 +1111,10 @@ class Report:
     def __init__(self, box, player, items):
         self.root = box.root
         self.player = player
+        # Форма, которой шли ходы, дословно из песочницы. Не спрашиваем её
+        # заново: спрошенная здесь, она пришла бы из рубильника этой машины, а
+        # ходы играли своим окружением. Цифра называлась бы чужим именем.
+        self.voice = box.voice
         self.pairs = items
         self.played, self.asked, self.trail = [], [], []
         self.settled_at = None
@@ -1124,6 +1143,7 @@ class Report:
             "  (отладочный: во второй сессии отвечает выдача памяти, "
             "цифру им снимать нельзя)")
         lines = ["проигрыватель: %s%s" % (self.player, aside),
+                 "форма вброса: %s" % self.voice,
                  "сыграно реплик: %d, задач поставлено: %d"
                  % (len(self.played), self.total),
                  "",
@@ -1185,12 +1205,16 @@ def talk_id():
 
 def run(pairs=None, root=None, player="replay", limit=None, only=None,
         keep=False, live_hooks=True, model=None, budget=None, quiet=2.0,
-        wait=None, echo=None, arm=None):
+        wait=None, echo=None, arm=None, voice=None):
     """Обе сессии каждой пары подряд, в своей песочнице. Отдаёт отчёт.
 
     `arm` — рука прогона: `memory` играет с нашим контуром, `bare` с
     выключенным. Названа рука — она и решает судьбу рубильника; не названа —
     решает `live_hooks`, как было.
+
+    `voice` — форма вброса: чем найденное подаётся агенту, реестр в
+    `pipeline.voice`. Не названа — опорная. Имя уходит и в окружение ходов, и в
+    отчёт: цифра без имени формы несравнима с другой цифрой.
 
     `wait` — сколько ждать фоновую половину хода. Не назван — умолчание
     `settled`, снятое замером на отладочном проигрывателе. Живому агенту его
@@ -1208,7 +1232,7 @@ def run(pairs=None, root=None, player="replay", limit=None, only=None,
         items = items[:limit]
     turns = script_of(items)
 
-    box = Sandbox(root, live_hooks=live_hooks).open()
+    box = Sandbox(root, live_hooks=live_hooks, voice=voice).open()
     made = PLAYERS[player](box, **({"model": model, "budget": budget}
                                    if player == Agent.name else {}))
     report = Report(box, player, items)
@@ -1363,6 +1387,9 @@ def parser():
                          "контуром, отрицательный контроль; both — обе и разница")
     ap.add_argument("--limit", type=int, help="взять только первые N пар")
     ap.add_argument("--only", help="только пары, чей id содержит эту строку")
+    ap.add_argument("--voice", choices=sorted(voices.VOICES),
+                    help="форма вброса: чем найденное подаётся агенту; "
+                         "по умолчанию %s" % voices.DEFAULT)
     ap.add_argument("--model", help="модель хода, например haiku")
     ap.add_argument("--budget", type=float, help="потолок трат на один ход, USD")
     ap.add_argument("--root", help="каталог песочницы; по умолчанию свой на прогон")
@@ -1407,7 +1434,7 @@ def main(argv=None):
                 played[arm] = run(pairs=items, root=root, player=args.player,
                                   limit=args.limit, only=args.only, keep=args.keep,
                                   model=args.model, budget=args.budget, arm=arm,
-                                  wait=args.wait,
+                                  wait=args.wait, voice=args.voice,
                                   echo=lambda line: print(line, flush=True))
         except UnsafeRun as bad:
             print(bad, file=sys.stderr)
