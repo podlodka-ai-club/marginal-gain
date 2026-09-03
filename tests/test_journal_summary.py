@@ -318,5 +318,106 @@ class TestOneBadPairDoesNotAbortTheWholeBatch(unittest.TestCase):
             self.assertIn("1 из 1", out.getvalue())
 
 
+# --- подстрочный only не должен клеветать на чужой чистый прогон --------------
+
+class TestASubstringCollisionDoesNotFalselyAccuseAnUnrelatedRun(unittest.TestCase):
+    """`only` матчится подстрокой (см. `run()`), но сам прогон мог не тронуть
+    запрошенную пару вовсе: «макбук» — подстрока и «старый-макбук», и
+    «новый-макбук», а сыгран был только один из них. Прогон, который эту
+    пару и не спрашивал, не «грязный» — его просто не о чем спросить.
+    """
+
+    def test_an_unrelated_run_with_a_colliding_only_is_silently_skipped(self):
+        row = a_journal_row(only="макбук",
+                            arm_pairs=[a_pair_entry(id="новый-макбук")])
+        summary = js.summarize([row], "старый-макбук")
+        self.assertEqual(summary["total"], 0)
+
+    def test_a_true_duplicate_inside_one_run_still_raises(self):
+        """Два одинаковых id пары в одном прогоне — уже настоящая порча
+        данных, не совпадение подстроки, и от неё сводка обязана отказаться
+        отдельным падением на эту пару, не молчанием.
+        """
+        row = a_journal_row(only="макбук",
+                            arm_pairs=[a_pair_entry(id="макбук"),
+                                      a_pair_entry(id="макбук")])
+        with self.assertRaises(ValueError):
+            js.summarize([row], "макбук")
+
+
+# --- журнал переживает битую последнюю строку целиком, не только json.loads --
+
+class TestTheJournalReadSurvivesATruncatedMultibyteTail(unittest.TestCase):
+    """Файл дописывается на ходу: конец может оборваться и посреди байтов
+    UTF-8 символа, не только посреди валидного JSON. `errors="replace"`,
+    как в `live.replies_of`, а не строгий разбор кодировки.
+    """
+
+    def test_a_line_cut_mid_character_does_not_crash_the_read(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "journal.jsonl"
+            good = a_journal_row(only="макбук", arm_pairs=[a_pair_entry(id="макбук")])
+            body = json.dumps(good, ensure_ascii=False) + "\n" + '{"only": "мак'
+            raw = body.encode("utf-8")[:-1]   # режем середину последнего символа
+            path.write_bytes(raw)
+            rows = js.rows_of(path)            # не должно бросить UnicodeDecodeError
+            self.assertEqual(rows, [good])
+
+    def test_a_non_dict_json_line_is_skipped(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "journal.jsonl"
+            good = a_journal_row(only="макбук", arm_pairs=[a_pair_entry(id="макбук")])
+            path.write_text(json.dumps([1, 2, 3]) + "\n"
+                            + json.dumps(good, ensure_ascii=False) + "\n",
+                            encoding="utf-8")
+            self.assertEqual(js.rows_of(path), [good])
+
+
+# --- отсутствующее поле пары не роняет соседей ---------------------------------
+
+class TestAMissingFieldOnOnePairDoesNotAbortItsNeighbour(unittest.TestCase):
+    """`break`/`outcome` читаются мягко: их нет — считаем, что ступень не
+    подтверждена и удача не засчитана, а не падаем `KeyError`-ом посреди
+    батча ради пары, которую даже не спрашивали.
+    """
+
+    def test_a_missing_break_key_counts_as_no_step_confirmed(self):
+        entry = {"id": "макбук", "aim": "apply", "outcome": live.APPLIED}
+        row = a_journal_row(only="макбук", arm_pairs=[entry])
+        summary = js.summarize([row], "макбук")
+        self.assertEqual(sum(summary["steps"].values()), 0)
+        self.assertEqual(summary["passed"], 1)
+
+    def test_a_missing_outcome_key_does_not_count_as_passed(self):
+        entry = {"id": "макбук", "aim": "apply", "break": ""}
+        row = a_journal_row(only="макбук", arm_pairs=[entry])
+        summary = js.summarize([row], "макбук")
+        self.assertEqual(summary["passed"], 0)
+
+    def test_main_still_reports_the_clean_sibling_pair(self):
+        broken = a_journal_row(
+            only="макбук", arm_pairs=[{"id": "макбук", "aim": "apply"}])
+        good = a_journal_row(only="город", arm_pairs=[a_pair_entry(id="город")])
+        import io
+        from contextlib import redirect_stdout
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "journal.jsonl"
+            with path.open("w", encoding="utf-8") as fh:
+                fh.write(json.dumps(broken, ensure_ascii=False) + "\n")
+                fh.write(json.dumps(good, ensure_ascii=False) + "\n")
+            out = io.StringIO()
+            with redirect_stdout(out):
+                js.main(["--journal", str(path), "--pair", "макбук", "--pair", "город"])
+        self.assertIn("город", out.getvalue())
+        self.assertIn("1 из 1", out.getvalue())
+
+
+# --- рука по умолчанию не расходится с eval.live --------------------------------
+
+class TestTheDefaultArmMatchesLive(unittest.TestCase):
+    def test_default_arm_is_the_same_constant_live_uses(self):
+        self.assertEqual(js.DEFAULT_ARM, live.DEFAULT_ARMS)
+
+
 if __name__ == "__main__":
     unittest.main()

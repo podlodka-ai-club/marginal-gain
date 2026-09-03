@@ -22,7 +22,7 @@ from pathlib import Path
 
 from eval import live
 
-DEFAULT_ARM = "memory"
+DEFAULT_ARM = live.DEFAULT_ARMS
 
 
 def rows_of(journal_path):
@@ -31,21 +31,26 @@ def rows_of(journal_path):
     Битую строку пропускаем, не роняем весь журнал: файл дописывается на
     ходу (`append_journal`, без переписи), и на живом прогоне последняя
     строка может оказаться половиной — тот же риск и тот же приём, что и в
-    `live.replies_of`.
+    `live.replies_of`: `errors="replace"`, а не строгий разбор кодировки,
+    потому что обрыв может прийтись и на середину байтов UTF-8-символа, не
+    только на середину валидного JSON.
     """
     path = Path(journal_path)
-    if not path.exists():
+    try:
+        lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
+    except OSError:
         return []
     out = []
-    with path.open(encoding="utf-8") as fh:
-        for line in fh:
-            line = line.strip()
-            if not line:
-                continue
-            try:
-                out.append(json.loads(line))
-            except ValueError:
-                continue
+    for line in lines:
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            row = json.loads(line)
+        except ValueError:
+            continue
+        if isinstance(row, dict):
+            out.append(row)
     return out
 
 
@@ -69,23 +74,28 @@ def runs_of(rows, pair_id, arm=DEFAULT_ARM):
 
 
 def pair_entries(runs, pair_id, arm=DEFAULT_ARM):
-    """Строка пары `pair_id` из каждого прогона — та, что реально играна.
+    """Строка пары `pair_id` из каждого прогона, который её реально играл.
 
-    Один урезанный прогон обязан дать ровно одну такую строку: `only`
-    сузил набор до этой пары, и второй в нём взяться неоткуда. Прогон, где
-    строки пары нет вовсе или их больше одной, — не тот прогон, который эта
-    сводка умеет считать, и роняется явно, а не молча пропускается: молчание
-    здесь дало бы заниженный знаменатель, а не честный.
+    `runs_of` находит прогоны подстрокой (тем же правилом, что и `run()`) и
+    поэтому может занести прогон, который эту пару не тронул вовсе — id
+    другой пары, тоже подошедший под ту же подстроку `--only`. Такой прогон
+    не грязный, ему просто нечего сказать про эту пару, и он молча
+    пропускается, без знаменателя.
+
+    А вот две строки одной и той же пары внутри одного прогона — уже
+    настоящая порча данных (набор пар не должен повторять id), и на ней
+    сводка обязана отказаться явно, а не тихо взять первую попавшуюся:
+    молчание дало бы случайную, а не честную цифру.
     """
     out = []
     for row in runs:
         matches = [entry for entry in row["arms"][arm]["pairs"]
                   if entry["id"] == pair_id]
-        if len(matches) != 1:
+        if len(matches) > 1:
             raise ValueError(
-                "прогон от %s несёт %d строк пары %r с рукой %s, ждали ровно 1"
+                "прогон от %s несёт %d строк пары %r с рукой %s, ждали не больше 1"
                 % (row.get("ts"), len(matches), pair_id, arm))
-        out.append(matches[0])
+        out.extend(matches)
     return out
 
 
@@ -126,6 +136,10 @@ def summarize(rows, pair_id, arm=DEFAULT_ARM):
     нечего»), и пустой `break` там значит «вопрос не задавался», не
     «доставила». Засчитать это как «прошла все четыре ступени» значило бы
     придумать пройденную доставку там, где её и не ждали.
+
+    `break` и `outcome` читаются мягко (`.get`): нет поля — ступень не
+    подтверждена и удача не засчитана, а не `KeyError` посреди батча ради
+    строки, которую можно честно посчитать «неизвестной».
     """
     runs = runs_of(rows, pair_id, arm=arm)
     entries = pair_entries(runs, pair_id, arm=arm)
@@ -133,10 +147,10 @@ def summarize(rows, pair_id, arm=DEFAULT_ARM):
     passed = 0
     for entry in entries:
         if entry.get("aim") != "avoid":
-            reached = steps_reached(entry["break"])
+            reached = steps_reached(entry.get("break"))
             for step in live.STEPS:
                 steps[step] += int(reached[step])
-        passed += int(entry["outcome"] == live.APPLIED)
+        passed += int(entry.get("outcome") == live.APPLIED)
     return {"total": len(entries), "steps": steps, "passed": passed}
 
 
