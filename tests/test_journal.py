@@ -223,6 +223,29 @@ class TestTheLineCarriesWhatMakesNumbersComparable(unittest.TestCase):
         entry = line["arms"]["memory"]["pairs"][0]
         self.assertEqual(entry["break"], live.break_of(probe))
 
+    @given(only=st.one_of(st.none(), st.text(
+        alphabet="абвгдежзийклмноп", min_size=1, max_size=8)))
+    @FAST
+    def test_a_curtailed_run_is_told_apart_from_a_full_one(self, only):
+        """`--only` сужает набор до одной пары, а строка журнала это молчала.
+
+        Без явного поля урезанный прогон (`--only`, обычно и одна рука)
+        неотличим в журнале от полного: `pairs_count` в шапке — размер
+        набора ДО фильтра (см. `set_of`/`main`), не того, что реально
+        сыграно. Смешавшись с полными прогонами, такие строки испортили бы
+        подсчёт «сколько из десяти» — знаменатель незаметно бы сместился.
+        """
+        played = OrderedDict(memory=FakeReport([a_row()]))
+        row = live.journal_row(played, player="claude", model="haiku",
+                               pairs_file="n.json", pairs_count=5, only=only)
+        self.assertEqual(row["only"], only)
+
+    def test_a_full_run_names_no_filter_by_default(self):
+        played = OrderedDict(memory=FakeReport([a_row()]))
+        row = live.journal_row(played, player="claude", model="haiku",
+                               pairs_file="n.json", pairs_count=5)
+        self.assertIsNone(row["only"])
+
     def test_arms_are_kept_apart_in_the_journal_too(self):
         played = OrderedDict(memory=FakeReport([a_row(ok=True, injected=True)],
                                                cost=0.12),
@@ -317,6 +340,28 @@ class TestMainAlwaysAppendsTheJournal(unittest.TestCase):
             self.assertEqual(gating, [],
                              "запись журнала спрятана за условием ключа: %s"
                              % gating)
+
+
+class TestMainThreadsOnlyIntoTheJournal(unittest.TestCase):
+    """`main` отдаёт журналу тот же `--only`, каким сузил набор, не молчит его.
+
+    Статическая проверка по той же причине, что и `TestMainAlwaysAppendsTheJournal`:
+    `main` поднимает стенд, живым прогоном в быстрой батарее его не поднять.
+    """
+
+    def test_main_calls_append_journal_with_only_by_keyword(self):
+        tree = ast.parse((ROOT / "eval" / "live.py").read_text(encoding="utf-8"))
+        main = next(node for node in ast.walk(tree)
+                   if isinstance(node, ast.FunctionDef) and node.name == "main")
+        calls = [node for node in ast.walk(main)
+                if isinstance(node, ast.Call)
+                and getattr(node.func, "id", None) == "journal_row"]
+        self.assertTrue(calls, "main() не зовёт journal_row вовсе")
+        passed = {kw.arg: ast.unparse(kw.value)
+                 for call in calls for kw in call.keywords}
+        self.assertIn("only", passed, "main() не передаёт only в journal_row")
+        self.assertIn("args.only", passed["only"],
+                      "only передан не тем значением, каким набор сужался")
 
 
 if __name__ == "__main__":

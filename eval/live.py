@@ -1440,12 +1440,18 @@ def pair_row(report, row):
             "outcome": bucket(row), "break": break_of(probe) if probe else ""}
 
 
-def journal_row(played, player, model, pairs_file, pairs_count):
+def journal_row(played, player, model, pairs_file, pairs_count, only=None):
     """Строка журнала одного прогона: всё, чем цифры отличаются друг от друга.
 
     Один вызов — одна строка, сколько бы рук ни играло: руки не складываются
     (`Bout`), и это правило действует и здесь — каждая рука своим полем внутри
     одной строки, а не отдельной строкой на руку.
+
+    `only` несёт тот же фильтр, каким `--only` сузил набор. `pairs_count` тут
+    не подмена: он — размер набора до фильтра (см. `set_of`), а не то, что
+    реально сыграно, и урезанный прогон на одну пару в нём неотличим от
+    полного. Без явного поля такая строка тихо смешалась бы со строками
+    полных прогонов и подвинула бы знаменатель «сколько из десяти».
     """
     arms = {}
     for arm, report in played.items():
@@ -1459,7 +1465,7 @@ def journal_row(played, player, model, pairs_file, pairs_count):
         "ts": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
         "model": model, "player": player, "voice": voice,
         "pairs_file": str(pairs_file) if pairs_file else None,
-        "pairs_count": pairs_count, "arms": arms,
+        "pairs_count": pairs_count, "only": only, "arms": arms,
     }
 
 
@@ -1579,7 +1585,7 @@ def main(argv=None):
         pairs_file = args.pairs or ("мост: %s + %s" % (args.cases, args.script))
         append_journal(journal_path, journal_row(
             played, player=args.player, model=args.model,
-            pairs_file=pairs_file, pairs_count=len(items)))
+            pairs_file=pairs_file, pairs_count=len(items), only=args.only))
         print("журнал -> %s" % journal_path)
     return code
 
