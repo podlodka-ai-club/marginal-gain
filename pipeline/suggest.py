@@ -11,7 +11,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from domain import context, ledger, lifespan, marks, models
-from domain.query import key as normal, words
+from domain.query import key as normal, stem, words
 from infra import config, telemetry
 from pipeline import prompt
 from storage import port
@@ -172,9 +172,15 @@ RAW_MATERIAL = ("Event",)
 # Вопросы, которые дословного как раз и просят. «Какой командой это чинили» —
 # это ровно событие, и отсеивать его нельзя: отсев режет случайное совпадение,
 # а не вид записи. Список собран руками, как и STOP.
-VERBATIM = ("команд", "запуск", "запусти", "выполн", "терминал", "консол",
-            "вывод", "показал", "ошибк", "traceback", "bash", "shell",
-            "command", "output", "error", "stderr", "stdout")
+#
+# Сводим его к основам, потому что слова вопроса приходят основами. Живая форма
+# длиннее своей основы («показал» против «показа», «запусти» против «запуст»),
+# и сравнение началом слова на ней молча ломалось: исключение переставало
+# срабатывать ровно там, ради чего заведено.
+VERBATIM = tuple(stem(word) for word in (
+    "команд", "запуск", "запусти", "выполн", "терминал", "консол",
+    "вывод", "показал", "ошибк", "traceback", "bash", "shell",
+    "command", "output", "error", "stderr", "stdout"))
 
 # Разделители, которых в обычном слове не бывает: они выдают имя — путь, файл,
 # проект, ветку. Просьбой о дословном имя не бывает никогда. Без этой оговорки

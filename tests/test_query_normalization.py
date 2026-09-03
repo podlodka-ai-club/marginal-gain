@@ -122,6 +122,16 @@ class TestWordFormsMeetInOneStem(unittest.TestCase):
             self.assertGreaterEqual(len(word), query.FLOOR,
                                     "обрывок %r прошёл порог слова" % word)
 
+    def test_a_word_whose_stem_collides_with_a_stop_word_survives(self):
+        """Служебное узнаётся по слову, а не по его основе.
+
+        `stem("надо")` это «над», а «над» стоит в списке предлогом. Спроси мы у
+        основы — «надо» молча пропало бы из каждого вопроса, где его написали,
+        и вместе с ним пропала бы находка.
+        """
+        self.assertIn("над", query.words("что надо сделать"),
+                      "слово выброшено за то, что его основа совпала со служебным")
+
     def test_a_pronoun_does_not_drag_the_whole_base(self):
         """Тот же порог примером: «они» и «эти» словами вопроса не становятся."""
         self.assertEqual(query.words("они эти мои"), [])

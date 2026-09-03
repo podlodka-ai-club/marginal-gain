@@ -468,6 +468,32 @@ class TestTheFactCountReadsTheBase(unittest.TestCase):
             self.assertEqual(alive, 1,
                              "запись %r спряталась от счёта фактов" % spelling)
 
+    @SLOW
+    @given(phrase=st.sampled_from([
+        "задавать вопросы по одному за раз",
+        "не использовать тире и дефисы в тексте",
+        "отвечать коротко, длинные ответы человек не читает",
+        "проверять факты, не выдумывать, не утверждать непроверенное",
+        "сначала показать план, править код после согласования"]))
+    def test_a_whole_phrase_from_the_set_still_counts(self, phrase):
+        """Ожидание бывает не основой, а целой фразой — все пять из eval-cases.
+
+        Прогони поле через стеммер, а фразу нет — и она не совпадёт ни с чем
+        никогда: «задавать вопросы» в поле станет «задава вопрос». Отчёт назвал
+        бы обрывом запись, которая лежит в базе дословно.
+        """
+        with tempfile.TemporaryDirectory() as tmp:
+            base = self.a_base(tmp, [("правило", "человек просит %s" % phrase)])
+            alive, _ = live.facts_with(base, [phrase])
+            self.assertEqual(alive, 1, "фраза %r не нашлась дословно" % phrase)
+
+    def test_a_short_expectation_is_not_thrown_away(self):
+        """Ожидание короче трёх букв — тоже ожидание: `v2`, `БД`, `go`."""
+        with tempfile.TemporaryDirectory() as tmp:
+            base = self.a_base(tmp, [("версия", "перешли на v2 в проекте")])
+            self.assertEqual(live.facts_with(base, ["v2"])[0], 1,
+                             "короткое ожидание выброшено разметкой")
+
     def test_the_stem_of_the_set_is_not_stemmed_again(self):
         """«Казан» не должен укоротиться до «каза» и найти «казак».
 

@@ -237,6 +237,31 @@ class TestOneRuleOnBothSides(unittest.TestCase):
                          suggest.incidental(record, query.words(one)),
                          "отсев судит форму %r иначе, чем %r" % (two, one))
 
+    @given(question=st.sampled_from([
+        "что показал агент", "что запустил тогда", "покажи вывод терминала",
+        "какой командой это чинили", "какая ошибка была"]))
+    def test_a_question_asking_for_the_verbatim_is_still_recognised(self, question):
+        """Список просьб о дословном сверяется с основами, а не со словами.
+
+        Слова вопроса приходят основами, а список собран из живых форм, и они
+        длиннее: «показал» против основы «показа», «запусти» против «запуст».
+        Сравнение началом слова на этом молча ломалось — и отсев выбрасывал
+        ровно те события, ради которых исключение и заведено.
+        """
+        self.assertTrue(suggest.asks_verbatim(question),
+                        "вопрос %r перестал считаться просьбой о дословном"
+                        % question)
+
+    def test_an_event_asked_about_by_its_command_reaches_the_agent(self):
+        """Тот же случай до конца: событие доходит, а не режется отсевом."""
+        record = {"object_type": "Event", "tool_name": "Bash", "project": "demo",
+                  "content": "pytest -q tests/"}
+        question = "какой командой это чинили"
+        self.assertFalse(
+            suggest.incidental(record, query.words(question),
+                               suggest.asks_verbatim(question)),
+            "событие срезано у вопроса, который просит дословного")
+
     def test_the_sift_keeps_an_event_the_search_found_by_its_key(self):
         """Отсев обязан узнать в поле ту же букву, какой поиск запись нашёл.
 

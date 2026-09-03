@@ -216,6 +216,10 @@ def migrate(conn):
 # сводит словоформу — тем самым правилом, каким размечен вопрос.
 KEY_SQL = "xkey"
 
+# Имя, под которым размеченное поле живёт внутри запроса. С подчёркиванием: имя
+# колонки продукта так начинаться не может, и столкнуться им не с чем.
+_KEY_AS = "_xkey_%d"
+
 
 def connect(where=None):
     target = Path(where) if where else path()
@@ -496,14 +500,23 @@ class Repository:
             # Прямое сравнение спотыкалось трижды: заглавная русская буква,
             # точка на конце предложения и чужая словоформа. Ключ снимает все
             # три сразу и на обеих сторонах одинаково.
-            where = " OR ".join('%s("%s") LIKE ? ESCAPE \'\\\'' % (KEY_SQL, name)
-                                for name in names for _ in terms)
+            #
+            # Ключ считается раз на поле, а не раз на слово вопроса. Разметка —
+            # питонья функция, и SQLite её вызовы не схлопывает: написанная в
+            # лоб, она разбирала бы содержимое строки заново под каждое слово.
+            # На промахе, где приходится прочесть всю таблицу, это была разница
+            # в порядок — а промах в горячем пути случай обычный.
+            keys = ", ".join('%s("%s") AS "%s"' % (KEY_SQL, name, _KEY_AS % number)
+                             for number, name in enumerate(names))
+            where = " OR ".join('"%s" LIKE ? ESCAPE \'\\\'' % (_KEY_AS % number)
+                                for number in range(len(names)) for _ in terms)
             params = list(source_params) + [like(term) for _ in names for term in terms]
             with self.lock:
                 rows = self.conn.execute(
-                    'SELECT %s FROM %s WHERE (%s) ORDER BY %s LIMIT %d'
-                    % (_columns(object_type), source, where, _order(object_type),
-                       CANDIDATES), params).fetchall()
+                    'SELECT %s FROM (SELECT %s, %s FROM %s) '
+                    'WHERE (%s) ORDER BY %s LIMIT %d'
+                    % (_columns(object_type), _columns(object_type), keys, source,
+                       where, _order(object_type), CANDIDATES), params).fetchall()
             for row in rows:
                 score = 0
                 for name, weight in fields:
