@@ -28,10 +28,10 @@ import itertools
 import json
 
 from archive.transcripts import TRANSCRIPTS, episodes_from_file
-from domain import audit, models
+from domain import models
 from infra import config
 from pipeline import understand
-from storage import port
+from storage import audit, port
 
 # Сколько фактов эпизода участвует в поводе same_episode. Число из ресёрча:
 # двенадцать самых длинных эпизодов архива без потолка дают 43% всех пар.

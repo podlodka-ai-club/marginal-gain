@@ -15,9 +15,9 @@ import argparse
 import json
 from pathlib import Path
 
-from domain import audit, models
+from domain import models
 from infra import config
-from storage import port
+from storage import audit, port
 from archive.transcripts import TRANSCRIPTS, read_new, when
 
 # Книжка учёта своя: что уже прочитано и доставлено. Разбор транскрипта

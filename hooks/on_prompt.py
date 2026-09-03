@@ -8,7 +8,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 try:
-    from domain import audit
+    from storage import audit
 except Exception:
     audit = None
 try:

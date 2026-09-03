@@ -22,7 +22,7 @@ from unittest import mock
 
 os.environ.setdefault("XMEM_INSTANCE_ID", "test-instance")
 
-from domain import audit
+from storage import audit
 from pipeline import save
 from storage import db, local
 

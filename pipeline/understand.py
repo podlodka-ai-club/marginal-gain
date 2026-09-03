@@ -17,10 +17,10 @@ import contextlib
 import json
 from pathlib import Path
 
-from domain import audit, features, ledger, lifespan, marks, models
+from domain import features, ledger, lifespan, marks, models
 from domain.measure import score_of, weight_of
 from infra import config, locks
-from storage import port
+from storage import audit, port
 from archive.transcripts import (TRANSCRIPTS, episodes_and_events,
                                  episodes_from_file, parse_time, when)
 from archive.extract import NOT_CODE, PREF_TOPICS, facts_of, fact_key

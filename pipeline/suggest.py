@@ -16,11 +16,11 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-from domain import audit, context, ledger, lifespan, marks, models
+from domain import context, ledger, lifespan, marks, models
 from domain.query import key as normal, stem, words
 from infra import config, telemetry
 from pipeline import prompt, voice
-from storage import port
+from storage import audit, port
 
 LOG = config.state_dir() / "suggest-log.jsonl"
 
@@ -917,8 +917,24 @@ def settle(files, door=None, log=None):
     # вставки, которой в хранилище нет, считать нельзя.
     for talk, at, verdict in marks:
         ledger.helped(talk, at, verdict, source=SETTLE_SOURCE)
+        _audit_judge(talk, at, verdict, SETTLE_SOURCE)
         got["logged"] += 1
     return got
+
+
+def _audit_judge(session_id, injected_at, verdict, source):
+    """«Оценка» — применена подсказка или нет и по какому признаку решено.
+
+    Признак — это и есть способ съёма (`source`): транскрипт, конец хода или
+    вопрос вместе с вбросом, три несклады­ваемых довода, см. ADR 0012. Вызов
+    один на оба способа съёма (`settle`, `harvest`), потому что вопрос
+    «применено или нет» у них общий, а признак — то немногое, чем они
+    различаются.
+    """
+    audit.record("judge", session_id=session_id,
+                input={"injection": ledger.key_of(session_id, injected_at),
+                       "source": source},
+                output={"verdict": verdict}, ok=(verdict == "yes"))
 
 
 # Способ съёма ответа для вопроса, заданного вместе с вбросом. Свой, а не
@@ -969,6 +985,7 @@ def harvest(files, log=None):
         if not parts or answered.get(parts) == verdict:
             continue
         ledger.helped(parts[0], parts[1], verdict, source=INLINE_SOURCE)
+        _audit_judge(parts[0], parts[1], verdict, INLINE_SOURCE)
         got["logged"] += 1
     return got
 

@@ -26,7 +26,8 @@ from hypothesis import HealthCheck, given, settings, strategies as st
 
 os.environ.setdefault("XMEM_INSTANCE_ID", "test-instance")
 
-from domain import audit, marks
+from storage import audit
+from domain import marks
 from pipeline import suggest, understand
 from storage import local, port
 

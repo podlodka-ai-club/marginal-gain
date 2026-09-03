@@ -178,16 +178,8 @@ def helped(session_id, injected_at, verdict, source="transcript", log=None, at=N
     if source not in SOURCES:
         raise LedgerError("нет такого способа съёма: %r, допустимо %s"
                           % (source, ", ".join(SOURCES)))
-    row = append("helped", log=log, at=at, verdict=verdict, source=source,
-                 session_id=session_id or "unknown", injected_at=injected_at)
-    # «Оценка» — применена подсказка или нет и по какому признаку решено.
-    # Признак — это и есть способ съёма (`source`): транскрипт, конец хода или
-    # вопрос вместе с вбросом, три несклады­ваемых довода, см. ADR 0012.
-    from domain import audit
-    audit.record("judge", session_id=session_id,
-                 input={"injection": key_of(session_id, injected_at), "source": source},
-                 output={"verdict": verdict}, ok=(verdict == "yes"))
-    return row
+    return append("helped", log=log, at=at, verdict=verdict, source=source,
+                  session_id=session_id or "unknown", injected_at=injected_at)
 
 
 def _found(found):

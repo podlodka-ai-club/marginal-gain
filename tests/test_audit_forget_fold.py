@@ -24,7 +24,8 @@ from hypothesis import HealthCheck, given, settings, strategies as st
 
 os.environ.setdefault("XMEM_INSTANCE_ID", "test-instance")
 
-from domain import audit, lifespan, models
+from storage import audit
+from domain import lifespan, models
 from pipeline import consolidate, forget, suggest, understand
 from storage import local, port
 

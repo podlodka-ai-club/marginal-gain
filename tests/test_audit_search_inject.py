@@ -24,7 +24,8 @@ from unittest import mock
 
 os.environ.setdefault("XMEM_INSTANCE_ID", "test-instance")
 
-from domain import audit, ledger
+from storage import audit
+from domain import ledger
 from pipeline import suggest, understand
 from storage import local, port
 

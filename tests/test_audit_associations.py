@@ -16,7 +16,8 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
-from domain import audit, models
+from storage import audit
+from domain import models
 from pipeline import associate, understand
 from storage import local, port
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Журнал аудита: ядро записи и чтения — `domain.audit`.
+"""Журнал аудита: ядро записи и чтения — `storage.audit`.
 
 Запуск: python3 -m unittest tests.test_audit -v
 
@@ -39,7 +39,7 @@ from hypothesis import HealthCheck, given, settings, strategies as st
 
 os.environ.setdefault("XMEM_INSTANCE_ID", "test-instance")
 
-from domain import audit
+from storage import audit
 from storage import db
 
 SLOW = settings(deadline=None, max_examples=25,

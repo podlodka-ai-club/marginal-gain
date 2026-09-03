@@ -18,6 +18,7 @@ import json
 import os
 import sqlite3
 import threading
+from datetime import datetime, timezone
 from pathlib import Path
 
 from domain import context, folding, lifespan, models
@@ -318,6 +319,30 @@ class Repository:
 
     def close(self):
         self.conn.close()
+
+    def _audit(self, step, input=None, output=None, session_id=None, ok=True):
+        """Строка аудита через уже открытое соединение репозитория.
+
+        Не зовёт `storage.audit.record`: та открывает свою базу по пути и
+        живёт слоем выше — а `lapse`/`fold` уже держат нужное соединение под
+        своим замком, и второе означало бы вторую фиксацию транзакции там, где
+        первая уже случилась. Формат строки тот же, что и у общего пути, см.
+        `storage.audit` — совпадение проверено `tests/test_audit_forget_fold.py`.
+        """
+        try:
+            with self.conn:
+                self.conn.execute(
+                    'INSERT INTO audit (ts, run_id, session_id, step, ok, input, output) '
+                    'VALUES (?, ?, ?, ?, ?, ?, ?)',
+                    (datetime.now(timezone.utc).isoformat(),
+                     os.environ.get("XMEM_RUN_ID") or "", session_id, step,
+                     1 if ok else 0,
+                     json.dumps(input, ensure_ascii=False, default=str)
+                     if input is not None else None,
+                     json.dumps(output, ensure_ascii=False, default=str)
+                     if output is not None else None))
+        except Exception:
+            pass    # аудит это наблюдение: его авария не имеет права уронить ход
 
     # --- запись -------------------------------------------------------------
 
@@ -679,12 +704,11 @@ class Repository:
                 (now, now)).rowcount
             self.conn.execute('DELETE FROM "fact" WHERE %s' % where, (now,))
             self.conn.commit()
-        from domain import audit
-        audit.record("forget", input={"now": now},
-                     output={"moved": [{"fact_type": r["fact_type"],
-                                        "subject": r["subject"], "scope": r["scope"],
-                                        "content": r.get("content")} for r in gone]},
-                     ok=True)
+        self._audit("forget", input={"now": now},
+                   output={"moved": [{"fact_type": r["fact_type"],
+                                      "subject": r["subject"], "scope": r["scope"],
+                                      "content": r.get("content")} for r in gone]},
+                   ok=True)
         return moved
 
     # --- свёртка ------------------------------------------------------------
@@ -735,9 +759,7 @@ class Repository:
             if not dry:
                 self.conn.commit()
         if not dry:
-            from domain import audit
-            audit.record("fold", input={"now": now}, output={"merges": merges},
-                         ok=True)
+            self._audit("fold", input={"now": now}, output={"merges": merges}, ok=True)
         return moved
 
     def _mark(self, keep, dead):
