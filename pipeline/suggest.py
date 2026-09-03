@@ -16,7 +16,7 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-from domain import context, ledger, lifespan, marks, models
+from domain import audit, context, ledger, lifespan, marks, models
 from domain.query import key as normal, stem, words
 from infra import config, telemetry
 from pipeline import prompt, voice
@@ -732,7 +732,22 @@ def note_injection(session_id, text, kept=(), door=None, at=None):
     return record
 
 
-def mute(reason, session_id, query, note=None, found=None):
+def _candidates_of(answer):
+    """Все кандидаты поиска с их оценкой — для аудита ступени «поиск».
+
+    Дёшево: `answer` уже лежит в памяти, здесь только разбор той же строки,
+    каким её уже разобрал `pieces` внутри `consult`. Отдельно, потому что
+    вызывающий (`mute`) видит только причину молчания, а не сам ответ
+    хранилища — причину и разбор ответа считают разные ступени.
+    """
+    out = []
+    for score, text, record in pieces(answer):
+        kind = record.get("object_type") if isinstance(record, dict) else None
+        out.append({"score": score, "kind": kind, "text": (text or "")[:200]})
+    return out
+
+
+def mute(reason, session_id, query, note=None, found=None, candidates=None):
     """Записать молчание и вернуть его причину. Одна дверь для всех отказов.
 
     Имя причины ставится там, где молчание случилось, а не догадкой снаружи:
@@ -741,9 +756,18 @@ def mute(reason, session_id, query, note=None, found=None):
     `found` — счёт кандидатов той же ступени. Не назван — поля в ленте не
     будет: отказ носителя и вышедший срок до поиска не доходят, и ноль у них
     означал бы «поиск сходил впустую», то есть указывал бы не на ту ступень.
+
+    `candidates` — то же самое, но для аудита ступени «поиск»: не только
+    сколько, а что именно и с каким весом. Не назван — значит заход оборвался
+    до того, как поиск вообще ответил (срок, отказ носителя), и разбирать
+    нечего — это тоже данные, а не пропуск.
     """
     ledger.silence(reason, session_id=session_id, query=query, note=note,
                    found=found)
+    audit.record("search", session_id=session_id, ok=False,
+                 input={"query": query},
+                 output={"reason": reason, "found": found,
+                         "note": note, "candidates": candidates or []})
     return reason
 
 
@@ -779,8 +803,13 @@ def attend(query, session_id=None, door=None, here=None, mode="single",
                             note="%s: %s" % (type(bad).__name__, bad))
     finally:
         cancel()
+    candidates = _candidates_of(_raw)
     if not text:
-        return "", [], mute(why or "not_found", session_id, query, found=found)
+        return "", [], mute(why or "not_found", session_id, query, found=found,
+                            candidates=candidates)
+    audit.record("search", session_id=session_id, ok=True,
+                 input={"query": query},
+                 output={"found": found, "candidates": candidates, "kept": len(kept)})
     at = at or datetime.now(timezone.utc).isoformat()
     if record:
         try:
@@ -802,7 +831,15 @@ def attend(query, session_id=None, door=None, here=None, mode="single",
         ask = prompt.used([ledger.key_of(session_id, at)])
     except Exception:
         ask = ""            # просьба это добавка, отменять подсказку она не вправе
-    return ("%s\n\n%s" % (text, ask) if ask else text), kept, None
+    out = ("%s\n\n%s" % (text, ask) if ask else text)
+    # «Вброс» — что именно подано агенту и какой формой. Форма здесь не
+    # называется отдельным полем: пайплайн знает у `voice` только точку входа
+    # `render` (см. `tests/test_voice.py::TestANewVoiceCostsOneFile`), а форма
+    # и так видна по очертанию самого текста — она затем, чтобы различаться на
+    # глаз. Имя формы, которым шёл прогон целиком, называет отчёт замера.
+    audit.record("inject", session_id=session_id, input={"kept": len(kept)},
+                 output={"text": out})
+    return out, kept, None
 
 
 def render_injection(record):
