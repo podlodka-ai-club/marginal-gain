@@ -19,7 +19,7 @@ from pathlib import Path
 from domain import context, ledger, lifespan, marks, models
 from domain.query import key as normal, stem, words
 from infra import config, telemetry
-from pipeline import prompt
+from pipeline import prompt, voice
 from storage import port
 
 LOG = config.state_dir() / "suggest-log.jsonl"
@@ -370,11 +370,6 @@ def place(items, here, door=None):
     return out
 
 
-def fit_of(record):
-    """Уместность куска, если её посчитали. Не посчитали — None, а не единица."""
-    return record.get("fit") if isinstance(record, dict) else None
-
-
 def passes(score, record, min_score=MIN_SCORE, min_fit=MIN_FIT):
     """Прошёл ли кусок порог. Порог судит произведение веса на уместность.
 
@@ -385,7 +380,7 @@ def passes(score, record, min_score=MIN_SCORE, min_fit=MIN_FIT):
 
     Уместности нет — обстановки хода не дали, — судим весом, как судили всегда.
     """
-    fit = fit_of(record)
+    fit = context.fit_of(record)
     if score is None:
         return fit is None or fit >= min_fit
     return score * (fit if fit is not None else 1.0) >= min_score
@@ -393,7 +388,7 @@ def passes(score, record, min_score=MIN_SCORE, min_fit=MIN_FIT):
 
 def rank(score, record):
     """Чем кусок сильнее. Тем же произведением, каким его судит порог."""
-    fit = fit_of(record)
+    fit = context.fit_of(record)
     if score is None:
         return fit if fit is not None else 0.0
     return score * (fit if fit is not None else 1.0)
@@ -467,31 +462,6 @@ def gate(items, min_score=MIN_SCORE, max_items=MAX_ITEMS, max_chars=MAX_CHARS,
         out.append((score, clean, record))
         size += room
     return out
-
-
-def render(kept):
-    """Формат под агента: сжатые утверждения, без обращений и предисловий.
-
-    Факт уходит вместе со своей обстановкой, а не голой строкой: модель должна
-    видеть, откуда факт и когда он верен, и решать сама. Строка обстановки
-    разобрана по осям — сырой словарь читать тяжелее, чем не иметь вовсе.
-
-    Ни обстановку, ни уместность не приписываем там, где их не считали:
-    выдуманное число выглядит измеренным.
-    """
-    lines = ["Из памяти прошлых разговоров:"]
-    for score, text, record in kept:
-        one = " ".join(text.split())
-        lines.append("- %s (уверенность %.2f)" % (one, score) if score is not None
-                     else "- %s" % one)
-        where = context.describe(record.get("situation")
-                                 if isinstance(record, dict) else None)
-        fit = fit_of(record)
-        if where:
-            lines.append("  обстановка: %s%s"
-                         % (where, "" if fit is None else
-                            " (уместность %.2f)" % fit))
-    return "\n".join(lines)
 
 
 # Затухание на шаг по графу. Сосед приходит не потому, что его спросили, а
@@ -630,7 +600,7 @@ def consult(query, mode="single", min_score=MIN_SCORE, door=None, here=None):
                     continue
                 kept.append((score, clean, record))
                 size += len(clean) + where
-    return render(kept), kept, answer, None, found
+    return voice.render(kept), kept, answer, None, found
 
 
 def suggest(query, mode="single", min_score=MIN_SCORE, door=None, here=None):

@@ -19,7 +19,7 @@ from eval import evaluate
 from eval import goldenset
 from domain import models
 from infra import telemetry
-from pipeline import suggest
+from pipeline import suggest, voice
 from storage import db
 from storage import port
 from storage import api
@@ -195,7 +195,7 @@ class TestThreshold(unittest.TestCase):
         """Запись без маркера доходит до агента: оценки нет, а факт есть."""
         kept = suggest.gate(suggest.pieces(self.FACTS))
         self.assertEqual(len(kept), 2)
-        self.assertIn("github.com", suggest.render(kept))
+        self.assertIn("github.com", voice.render(kept))
 
     def test_reader_prose_stays_silent(self):
         """«no matching files» это слова читателя, а не факт. Молчим."""
@@ -215,7 +215,7 @@ class TestThreshold(unittest.TestCase):
         """Запись без `content` не должна схлопываться: ветка лежит в поле."""
         answer = json.dumps({"answer": json.dumps([{"git_branch": "HEAD",
                                                     "project": "job-hunt"}])})
-        self.assertIn("HEAD", suggest.render(suggest.gate(suggest.pieces(answer))))
+        self.assertIn("HEAD", voice.render(suggest.gate(suggest.pieces(answer))))
 
     def test_scored_outrank_unscored(self):
         """Оценённое идёт первым: известная уверенность сильнее её отсутствия."""
@@ -237,11 +237,11 @@ class TestThreshold(unittest.TestCase):
             {"content": "короткий нужный факт"},
         ], ensure_ascii=False)}, ensure_ascii=False)
         self.assertIn("короткий нужный факт",
-                      suggest.render(suggest.gate(suggest.pieces(answer))))
+                      voice.render(suggest.gate(suggest.pieces(answer))))
 
     def test_unscored_line_has_no_confidence_tail(self):
         """Не приписываем уверенность там, где её не измеряли."""
-        self.assertNotIn("уверенность", suggest.render([(None, "факт", None)]))
+        self.assertNotIn("уверенность", voice.render([(None, "факт", None)]))
 
 
 class TestLocalStore(unittest.TestCase):
