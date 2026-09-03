@@ -28,7 +28,7 @@ import itertools
 import json
 
 from archive.transcripts import TRANSCRIPTS, episodes_from_file
-from domain import models
+from domain import audit, models
 from infra import config
 from pipeline import understand
 from storage import port
@@ -209,6 +209,11 @@ def deliver(items, door):
                                      source_fact=fact_of(key[0]),
                                      target_fact=fact_of(key[1])))
     door.write_objects(records, relations)
+    for key, rec in items:
+        source, target, cue = key
+        audit.record("link", input={"source": source, "target": target, "cue": cue},
+                     output={"weight": rec["weight"], "first_seen_at": rec.get("first"),
+                             "observed_at": rec.get("last")})
     return len(records)
 
 
