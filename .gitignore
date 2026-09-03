@@ -1,0 +1,9 @@
+# Собранное на прогоне, а не написанное руками. В репозитории ему делать
+# нечего: байт-код меняется на каждом запуске, и `git pull --rebase` у всех
+# упирается в «cannot pull with rebase: you have unstaged changes».
+__pycache__/
+*.pyc
+
+# То же самое, только от pytest и hypothesis: кэш сборки и база примеров.
+.pytest_cache/
+.hypothesis/
