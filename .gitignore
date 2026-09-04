@@ -7,3 +7,11 @@ __pycache__/
 # То же самое, только от pytest и hypothesis: кэш сборки и база примеров.
 .pytest_cache/
 .hypothesis/
+
+# База аудита прогонов замера (`eval.live`, `storage.audit`). Растёт с каждым
+# прогоном и не сводится в компактную историю, как `eval-runs.jsonl` — в
+# отличие от него в git не идёт, коммит раздул бы репозиторий бинарником.
+eval-audit.db
+eval-audit.db-wal
+eval-audit.db-shm
+eval-audit.db-journal

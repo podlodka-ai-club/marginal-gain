@@ -27,7 +27,7 @@ import sys
 from collections import OrderedDict
 from pathlib import Path
 
-from storage import audit, db
+from storage import audit
 
 
 def steps_report(where, run=None, session_id=None):
@@ -78,8 +78,9 @@ def text(grouped, run=None, full=True, limit=None):
 def parser():
     ap = argparse.ArgumentParser(prog="eval.audit_report",
                                  description=__doc__.splitlines()[0])
-    ap.add_argument("--db", help="путь к базе с таблицей audit; "
-                                 "по умолчанию %s" % db.DEFAULT_PATH)
+    ap.add_argument("--db", help="путь к базе с таблицей audit; по умолчанию "
+                                 "%s (см. storage.audit.path, XMEM_AUDIT_PATH)"
+                                 % audit.path())
     ap.add_argument("--run", help="только строки этого номера прогона")
     ap.add_argument("--session", help="только строки этой сессии")
     ap.add_argument("--full", action="store_true",

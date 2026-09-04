@@ -32,9 +32,13 @@
   4. Сессия 2 у каждой пары, каждая своя и чистая. Отвечает агент, а не выдача
      памяти: подсказка попадает к нему тем же хуком, что и в работе.
   5. Разбивка. Итог печатается не одним числом, а по исходам: применила,
-     ничего не нашла, нашла и срезали, отдала и не применил, приплела не по
-     делу. Исходы, под которые место оставлено, но которых мы пока не меряем,
-     печатаются прочерком и названы — молча отсутствующий исход неотличим от
+     ничего не нашла, нашла и срезали, дала не то, отдала и не применил,
+     приплела не по делу. «Дала не то» и «отдала и не применил» раньше были
+     одним ярлыком — тем, что вброс состоялся, а ожидаемого в ответе нет, — и
+     не различали, был ли нужный факт вообще во вбросе; разводит их признак
+     `expect_in_feed`, той же строчной проверкой, что судит ответ. Исходы, под
+     которые место оставлено, но которых мы пока не меряем, печатаются
+     прочерком и названы — молча отсутствующий исход неотличим от
      нулевого.
   6. Цепочка. По каждой паре печатается, где знание встало: разметка, факт в
      базе, кандидат поиска, вброс. Разбивка отвечает «сколько», цепочка — «где
@@ -97,7 +101,7 @@ from archive.transcripts import TRANSCRIPTS
 from domain import ledger, marks, query
 from eval import evaluate, pairs
 from pipeline import voice as voices
-from storage import db
+from storage import audit, db
 
 ROOT = Path(__file__).resolve().parent.parent
 HOOKS = ROOT / "hooks"
@@ -118,6 +122,13 @@ LIVE_STATE = Path.home() / ".local" / "state" / "memory-encoder"
 # обязан всегда, без ключа: то, что включается ключом, забудут включить.
 DEFAULT_JOURNAL = ROOT / "eval-runs.jsonl"
 
+# База аудита прогонов. Рядом с журналом, вне песочницы, по той же причине:
+# песочница одноразовая, а протокол шагов — то, ради чего непройденную пару
+# потом разбирают, — обязан её пережить (см. `storage.audit`). В git не идёт
+# (см. `.gitignore`): в отличие от журнала это не компактная сводимая
+# история, а бинарный файл, который растёт с каждым прогоном.
+DEFAULT_AUDIT_DB = ROOT / "eval-audit.db"
+
 # Три точки, те же и в том же порядке, что человек занимает по SETUP.md.
 POINTS = {
     "UserPromptSubmit": ["on_prompt_queue.sh", "on_prompt_read.sh"],
@@ -134,7 +145,15 @@ APPLIED = "применила"
 COINCIDED = "прошло без подсказки"
 NOT_FOUND = "память ничего не нашла"
 CUT = "нашла, срезали"
-UNUSED = "отдала, не применил"
+# Обе ниже раньше были одним ярлыком «отдала, не применил» — он значил только
+# «вброс состоялся, а ожидаемого в ответе нет», и не различал, был ли нужный
+# факт вообще во вбросе. Живой прогон это и спутал: паре «макбук» вбросили
+# диагональ экрана и дату вместо модели, а строка писала «вброс: да» рядом с
+# тем же ярлыком, что и у пары, которой факт дали верно, но агент не применил.
+# Признак `expect_in_feed` — той же строчной проверкой, что судит ответ
+# (`evaluate.judge`, вхождение подстроки без разбора смысла) — делит их:
+WRONG_FED = "дали не то"          # вброс был, ожидаемого в нём не было
+UNUSED = "отдала, не применил"    # вброс был и ожидаемое в нём было, ответ мимо
 INTRUDED = "приплела не по делу"
 BROKEN = "ход упал"
 
@@ -150,7 +169,7 @@ RESERVED = OrderedDict([
      "нужна сверка ответа с выдачей: утверждение, которого в выдаче не было"),
 ])
 
-OUTCOMES = (APPLIED, COINCIDED, NOT_FOUND, CUT, UNUSED, INTRUDED, BROKEN)
+OUTCOMES = (APPLIED, COINCIDED, NOT_FOUND, CUT, WRONG_FED, UNUSED, INTRUDED, BROKEN)
 BUCKETS = OUTCOMES + tuple(RESERVED)
 
 # Молчания, за которыми что-то нашлось. Порог и потолок — очевидные; ложная
@@ -181,6 +200,12 @@ def bucket(row):
     Удача делится надвое по тому, говорила ли память. Сошедшийся ответ на
     молчании памяти — совпадение, а не её работа, и цифра, куда его записали,
     меряет угадываемость набора.
+
+    Провал с вбросом делится надвое по `expect_in_feed`: дали не то, что
+    ожидалось (`False`), или дали то самое, а агент мимо (`True`/`None`).
+    `None` — отрицательная пара или случай, где признак не считали, — идёт в
+    «не применил», не в «дали не то»: это не менее строгий класс, а «нечего
+    сказать», и обвинять вброс без проверки нельзя.
     """
     if row.get("error"):
         return BROKEN
@@ -192,6 +217,8 @@ def bucket(row):
         # список покупок овсянку просто потому, что овсянка обычный завтрак.
         return APPLIED if row.get("injected") else COINCIDED
     if row.get("injected"):
+        if row.get("expect_in_feed") is False:
+            return WRONG_FED
         return UNUSED
     if row.get("reason") in CUT_REASONS:
         return CUT
@@ -247,13 +274,19 @@ class Sandbox:
     не открывается: путь к нему проверяется до первого действия, а не после.
     """
 
-    def __init__(self, root=None, live_hooks=True, voice=None):
+    def __init__(self, root=None, live_hooks=True, voice=None, audit_db=None):
         self.root = Path(root or DEFAULT_ROOT / uuid.uuid4().hex[:12]).expanduser()
         self.state = self.root / "state"
         self.db = self.root / "memory.db"
         self.places = self.root / "places"
         self.archive = self.root / "archive"
         self.settings = self.root / "settings.json"
+        # Аудит — не состояние песочницы, а протокол шагов. База фактов уходит
+        # со сносом песочницы, аудит обязан её пережить (см. `storage.audit`):
+        # у непройденной пары другого следа не остаётся. Путь поэтому не под
+        # `self.root` вовсе, а рядом с журналом прогонов, снаружи, и не сходит
+        # со сносом ни при каком исходе.
+        self.audit_db = Path(audit_db).expanduser() if audit_db else DEFAULT_AUDIT_DB
         # Настроек двое. На первом этапе заняты все три точки — память
         # наполняется ходом. На втором конец хода не занят вовсе: задача
         # ставится из того же места, где сказали, и её текст вместе с ответом
@@ -291,6 +324,26 @@ class Sandbox:
                 or here in LIVE_STATE.parents):
             raise UnsafeRun("песочница %s задевает живое состояние %s — прогон отказан"
                             % (here, LIVE_STATE))
+        # `.resolve()` без условия на `.exists()`: с Python 3.6 он нормализует
+        # путь и без файла на диске (`strict=False` по умолчанию), а условная
+        # версия (как у `here` выше, ради обратной совместимости с прежним
+        # поведением) пропускала бы относительный ещё не существующий путь
+        # неразрешённым — и сравнение с абсолютным `LIVE_STATE` молчало бы
+        # мимо. Аудиту, в отличие от корня, нечего сравнивать со старой формой:
+        # проверка новая целиком.
+        audit_here = self.audit_db.resolve()
+        if audit_here == LIVE_STATE or LIVE_STATE in audit_here.parents:
+            raise UnsafeRun(
+                "база аудита %s задевает живое состояние %s — прогон отказан"
+                % (audit_here, LIVE_STATE))
+        # База аудита обязана пережить снос песочницы (см. `storage.audit`,
+        # докстринг `Sandbox.__init__`): лечь ей внутрь `self.root` нельзя —
+        # `close()` сносит его целиком вместе со всем, что там лежит.
+        root_here = self.root.resolve()
+        if audit_here == root_here or root_here in audit_here.parents:
+            raise UnsafeRun(
+                "база аудита %s лежит внутри песочницы %s — снос убьёт то, что "
+                "обязано его пережить" % (audit_here, root_here))
         ground = "%s/" % self.places
         bad = [mark for mark in NOT_CODE if mark in ground]
         if bad:
@@ -337,6 +390,9 @@ class Sandbox:
             "PYTHONPATH": str(ROOT),
             "XMEM_STATE_DIR": str(self.state),
             "XMEM_LOCAL_PATH": str(self.db),
+            # Аудит — не в песочницу: она сносится, а протокол шагов обязан
+            # пережить снос (см. `storage.audit`, `DEFAULT_AUDIT_DB`).
+            "XMEM_AUDIT_PATH": str(self.audit_db),
             "XMEM_QUEUE_PATH": str(self.state / "queue.jsonl"),
             "XMEM_LEDGER": str(self.state / "ledger.jsonl"),
             "MEM_TRACE_LOG": str(self.state / "trace.jsonl"),
@@ -818,14 +874,40 @@ def verdict_of(box, talk):
     return injected, reason, found
 
 
-def given_to(box, talk):
-    """Что именно память отдала в этот разговор. Пусто — значит промолчала."""
-    repo = db.Repository(box.db)
-    try:
-        return "\n".join(row.get("injected_content") or ""
-                         for row in repo.injections(talk))
-    finally:
-        repo.close()
+def fed_text_of(box, talk):
+    """Что именно память отдала в этот разговор. Пусто — значит промолчала.
+
+    Читаем аудит (шаг `inject`), а не хранилище инъекций: аудит — отдельная,
+    постоянная база (`box.audit_db`, см. `storage.audit`), и переживает снос
+    песочницы, а хранилище инъекций сносится вместе с ней. Строка несёт то же
+    самое дословно — `pipeline.suggest.attend` пишет её туда в момент вброса,
+    без пересборки задним числом. Вбросов у захода может быть несколько —
+    берём последний по времени записи (`rows` отдаёт их по порядку записи).
+    """
+    rows = audit.rows(where=box.audit_db, session_id=talk, step="inject")
+    if not rows:
+        return ""
+    return (rows[-1].get("output") or {}).get("text") or ""
+
+
+def record_reply(box, talk, task, text):
+    """Дословный ответ второй сессии — в аудит, шагом `reply`.
+
+    Конец хода на второй сессии снят намеренно (см. `Sandbox.wiring`): задача
+    ставится из того же места, где сказали, и записывать в базу вопрос вместе
+    с ответом на него нельзя — пара N подсказала бы паре N+1. Значит писать
+    ответ в протокол шагов больше некому, кроме самого замера, — иначе аудит
+    непройденной пары не нёс бы того единственного, по чему человек и решает,
+    перефразировал агент факт или проигнорировал.
+
+    `run=box.run_id` — не полагаемся на `XMEM_RUN_ID` в окружении: эта
+    переменная называется только в словаре для чужих подпроцессов
+    (`Sandbox.env()`), а сам процесс замера её себе не выставляет. Без явного
+    номера строка этого шага осела бы с пустым `run_id` — неотличимая от
+    записи вне всякого прогона, хотя прогон у неё есть.
+    """
+    audit.record("reply", session_id=talk, input={"task": task},
+                output={"replies": [text]}, where=box.audit_db, run=box.run_id)
 
 
 # --- где обрыв --------------------------------------------------------------
@@ -1177,6 +1259,7 @@ class Report:
         # как и цифры разных форм вброса, — и по той же причине называется в
         # шапке отчёта, а не молчит.
         self.model = model
+        self.audit_db = box.audit_db
         self.pairs = items
         self.played, self.asked, self.trail = [], [], []
         self.settled_at = None
@@ -1207,6 +1290,7 @@ class Report:
         lines = ["проигрыватель: %s%s" % (self.player, aside),
                  "форма вброса: %s" % self.voice,
                  "модель: %s" % (self.model or "не назван"),
+                 "аудит: %s" % self.audit_db,
                  "сыграно реплик: %d, задач поставлено: %d"
                  % (len(self.played), self.total),
                  "",
@@ -1229,6 +1313,13 @@ class Report:
         if self.stalled:
             lines.append("не дождались фона на ходах: %s"
                          % ", ".join(str(n) for n in self.stalled))
+        wrong = [row for row in self.asked if bucket(row) == WRONG_FED]
+        if wrong:
+            lines.append("")
+            lines.append("дала не то:")
+            for row in wrong[:10]:
+                lines.append("  %-18s не хватило: %s"
+                             % (row["id"], ", ".join(row["missed"]) or "—"))
         missed = [row for row in self.asked if bucket(row) == UNUSED]
         if missed:
             lines.append("")
@@ -1268,7 +1359,7 @@ def talk_id():
 
 def run(pairs=None, root=None, player="replay", limit=None, only=None,
         keep=False, live_hooks=True, model=None, budget=None, quiet=2.0,
-        wait=None, echo=None, arm=None, voice=None):
+        wait=None, echo=None, arm=None, voice=None, audit_db=None):
     """Обе сессии каждой пары подряд, в своей песочнице. Отдаёт отчёт.
 
     `arm` — рука прогона: `memory` играет с нашим контуром, `bare` с
@@ -1295,7 +1386,7 @@ def run(pairs=None, root=None, player="replay", limit=None, only=None,
         items = items[:limit]
     turns = script_of(items)
 
-    box = Sandbox(root, live_hooks=live_hooks, voice=voice).open()
+    box = Sandbox(root, live_hooks=live_hooks, voice=voice, audit_db=audit_db).open()
     made = PLAYERS[player](box, **({"model": model, "budget": budget}
                                    if player == Agent.name else {}))
     report = Report(box, player, items, model=model)
@@ -1413,13 +1504,25 @@ def judge_one(box, pair, reply):
 
     `evaluate.judge` берётся целиком и нарочно: своя копия правил разъехалась бы
     с прежней цифрой, и сравнивать стало бы нечего. Из его вердикта здесь не
-    используется `found_in_answer` — он про ответ памяти, а отвечает теперь
-    агент; «нашла или не нашла» говорит лента, по имени причины.
+    используется `found_in_answer` в исходном смысле («нашла ли память сама») —
+    «нашла или не нашла» говорит лента, по имени причины. Но то же самое поле,
+    посчитанное над `known` (дословно тем, что ушло агенту), и есть признак
+    «нужный факт был во вбросе» — тем же самым сравнением, каким `hits` судит
+    ответ, а не своей копией: разойдись они, признак и исход мерили бы разными
+    линейками, и один не объяснял бы другой.
+
+    Признак не считается у отрицательной пары и у пары без `expect` вовсе —
+    там `bool(expect)` в `evaluate.judge` ложно по построению, а `False`
+    означало бы «дали не то», хотя спрашивать было не о чем. `None` в этом
+    поле и значит «не считали», а не «дали не то».
     """
     said = marks.strip(reply.text or "")
     injected, reason, found = verdict_of(box, reply.session_id)
-    known = given_to(box, reply.session_id)
+    record_reply(box, reply.session_id, pair["task"]["say"], said)
+    known = fed_text_of(box, reply.session_id)
     verdict = evaluate.judge(pair, said, known, reply.error, raw=known)
+    expect = pair.get("expect") or []
+    expect_in_feed = verdict["found_in_answer"] if expect else None
     return {"id": pair["id"], "kind": pair.get("kind", ""),
             "aim": pair.get("aim", "apply"),
             "session_id": reply.session_id, "at": time.time(),
@@ -1428,6 +1531,7 @@ def judge_one(box, pair, reply):
             "intruded": bool(verdict["false_hits"]),
             "hits": verdict["hits"], "missed": verdict["missed"],
             "false_hits": verdict["false_hits"], "answer": said,
+            "expect_in_feed": expect_in_feed,
             "error": reply.error}
 
 
@@ -1438,14 +1542,22 @@ def judge_one(box, pair, reply):
 # коммитом вместе с набором.
 
 def pair_row(report, row):
-    """Одна пара строкой журнала: id, aim, исход, ступень обрыва.
+    """Одна пара строкой журнала: id, aim, исход, ступень обрыва, признак вброса.
 
     Исход и ступень — те же, что печатает отчёт (`bucket`, `break_of`), не
     свой пересчёт: разъедься они, журнал говорил бы одно, а отчёт — другое.
+
+    `expect_in_feed` идёт рядом с исходом не для красоты: это и есть то, чем
+    `bucket` отличил «дали не то» от «отдала, не применил» для этой строки, и
+    старая цифра, читаемая без него, не может это различие восстановить —
+    только повторный прогон. Старые строки журнала этого поля не несут вовсе
+    (`.get` без него — не `KeyError`), и это не пробел, который надо заполнить
+    задним числом: признак родился с этой задачей, до неё различия не было.
     """
     probe = (report.probe or {}).get(row["id"])
     return {"id": row["id"], "aim": row.get("aim", "apply"),
-            "outcome": bucket(row), "break": break_of(probe) if probe else ""}
+            "outcome": bucket(row), "break": break_of(probe) if probe else "",
+            "expect_in_feed": row.get("expect_in_feed")}
 
 
 def journal_row(played, player, model, pairs_file, pairs_count,
@@ -1530,6 +1642,9 @@ def parser():
     ap.add_argument("--journal", help="куда дописать строку журнала прогона; "
                                       "пишется всегда, ключ меняет только путь "
                                       "(по умолчанию %s)" % DEFAULT_JOURNAL.name)
+    ap.add_argument("--audit-db", help="куда писать протокол шагов; переживает "
+                                       "снос песочницы, ключ меняет только путь "
+                                       "(по умолчанию %s)" % DEFAULT_AUDIT_DB.name)
     ap.add_argument("--wait", type=float,
                     help="сколько секунд ждать конца хода; по умолчанию %g, "
                          "живому агенту может понадобиться больше"
@@ -1570,6 +1685,7 @@ def main(argv=None):
                                   limit=args.limit, only=args.only, keep=args.keep,
                                   model=args.model, budget=args.budget, arm=arm,
                                   wait=args.wait, voice=args.voice,
+                                  audit_db=args.audit_db,
                                   echo=lambda line: print(line, flush=True))
         except UnsafeRun as bad:
             print(bad, file=sys.stderr)

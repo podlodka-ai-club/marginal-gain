@@ -236,6 +236,66 @@ class TestRunId(unittest.TestCase):
                 audit.record("search", where=base)
                 self.assertEqual(audit.rows(where=base)[0]["run_id"], "")
 
+    def test_an_explicit_run_overrides_the_environment(self):
+        """Вызывающий, у которого своего `XMEM_RUN_ID` в окружении нет и быть
+        не может (сам процесс замера, не его подпроцесс-ход — см.
+        `eval.live.record_reply`), обязан иметь способ назвать номер прогона
+        прямо, а не только через переменную.
+        """
+        with tempfile.TemporaryDirectory() as tmp, \
+             mock.patch.dict(os.environ, {"XMEM_RUN_ID": "run-from-env"}):
+            base = Path(tmp) / "memory.db"
+            audit.reset(base)
+            audit.record("search", where=base, run="run-explicit")
+            self.assertEqual(audit.rows(where=base)[0]["run_id"], "run-explicit")
+
+    def test_an_explicit_run_works_with_no_environment_variable_at_all(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            env = dict(os.environ)
+            env.pop("XMEM_RUN_ID", None)
+            with mock.patch.dict(os.environ, env, clear=True):
+                base = Path(tmp) / "memory.db"
+                audit.reset(base)
+                audit.record("search", where=base, run="run-explicit")
+                self.assertEqual(audit.rows(where=base)[0]["run_id"], "run-explicit")
+
+
+class TestAuditPath(unittest.TestCase):
+    """`path()`: `XMEM_AUDIT_PATH` сильнее умолчания, умолчание — база фактов.
+
+    Продукту нужно ровно это умолчание — одна база на факты и на аудит, как
+    было всегда. Отдельный путь нужен только там, где база фактов одноразовая
+    (замер, `eval.live`), и она обязана называть его явно через переменную, а
+    не полагаться, что аудит сам догадается разойтись с ней.
+    """
+
+    def test_the_env_var_overrides_the_default(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            custom = Path(tmp) / "своя-аудит-база.db"
+            with mock.patch.dict(os.environ, {"XMEM_AUDIT_PATH": str(custom)}):
+                self.assertEqual(audit.path(), custom)
+
+    def test_an_empty_env_var_falls_back_to_the_default(self):
+        with mock.patch.dict(os.environ, {"XMEM_AUDIT_PATH": ""}):
+            self.assertEqual(audit.path(), db.path())
+
+    def test_with_no_env_var_the_default_is_the_facts_database(self):
+        env = dict(os.environ)
+        env.pop("XMEM_AUDIT_PATH", None)
+        with mock.patch.dict(os.environ, env, clear=True):
+            self.assertEqual(audit.path(), db.path())
+
+    def test_a_row_written_with_the_env_var_set_lands_in_the_named_file(self):
+        """Не только имя функции совпадает — запись реально идёт по нему."""
+        with tempfile.TemporaryDirectory() as tmp:
+            custom = Path(tmp) / "отдельная.db"
+            audit.reset(custom)
+            with mock.patch.dict(os.environ, {"XMEM_AUDIT_PATH": str(custom)}):
+                audit.record("mark", input={"a": 1})
+                got = audit.rows()
+            self.assertEqual(len(got), 1)
+            self.assertTrue(custom.exists(), "запись ушла не в названный файл")
+
 
 class TestMigration(unittest.TestCase):
     def test_running_migrate_twice_keeps_one_table_and_data(self):

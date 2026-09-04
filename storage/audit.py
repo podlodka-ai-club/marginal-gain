@@ -15,6 +15,12 @@
 Пишется всегда, без рубильника: наблюдение не имеет права быть тем, что можно
 выключить, иначе на выключенном рубильнике разбор снова слепнет молча.
 
+Путь к базе аудита — своя настройка, `path()` (`XMEM_AUDIT_PATH`), а не путь
+базы фактов напрямую: по умолчанию они совпадают (так живёт продукт — одна
+база на обе таблицы), но замер (`eval.live`) держит их порознь. Его песочница
+одноразовая — база фактов уходит с ней, а протокол шагов обязан пережить снос,
+иначе непройденная пара разбирается по памяти, а не по записи.
+
 Запись не имеет права уронить горячий путь или изменить его исход. Поэтому
 `record` никогда не бросает исключение наружу — она только наблюдает, и
 собственная авария наблюдения не должна стать аварией самого хода. Это и есть
@@ -28,6 +34,7 @@ import os
 import sqlite3
 import threading
 from datetime import datetime, timezone
+from pathlib import Path
 
 from storage import db as storage_db
 # Шаги цепочки — одна запись на оба писателя (сюда и в Repository._audit).
@@ -42,6 +49,21 @@ _LOCAL = threading.local()
 def run_id():
     """Номер прогона. Вне замера его нет — тогда поле пустое, а не выдуманное."""
     return os.environ.get("XMEM_RUN_ID") or ""
+
+
+def path():
+    """Куда пишется аудит: `XMEM_AUDIT_PATH`, иначе та же база, что и факты.
+
+    Совпадение с базой фактов — умолчание для живой работы: `Repository._audit`
+    (записи «забыл»/«свернул») пишет через уже открытое соединение к своей базе
+    и своего пути не спрашивает, так что для неё это единственный дом.
+
+    Отдельный путь нужен там, где база фактов одноразовая, а протокол обязан
+    её пережить: замер (`eval.live`) сносит песочницу целиком вместе с её
+    базой, а аудит непройденных пар — то, ради чего его потом читают.
+    """
+    named = (os.environ.get("XMEM_AUDIT_PATH") or "").strip()
+    return Path(named) if named else storage_db.path()
 
 
 def _cache():
@@ -61,11 +83,11 @@ def _connection(where=None):
     Кладётся в кэш процесса, чтобы разбор одного эпизода не открывал базу на
     каждый факт заново.
     """
-    target = str(where) if where else str(storage_db.path())
+    target = str(where) if where else str(path())
     cache = _cache()
     conn = cache.get(target)
     if conn is None:
-        conn = storage_db.connect(where)
+        conn = storage_db.connect(where or path())
         # Своё соединение конкурирует с `Repository.conn` за один файл. Срок
         # ожидания короткий и нарочно: запись стоит в горячем пути хука на
         # чтение (`pipeline.suggest`, под `HOOK_SECONDS`), и долгая заявка на
@@ -81,7 +103,7 @@ def _connection(where=None):
 def reset(where=None):
     """Забыть кэшированное соединение. Нужно проверкам: своя база на каждую."""
     cache = _cache()
-    target = str(where) if where else str(storage_db.path())
+    target = str(where) if where else str(path())
     conn = cache.pop(target, None)
     if conn is not None:
         try:
@@ -119,7 +141,7 @@ def _dump(value):
 
 
 def record(step, input=None, output=None, session_id=None, ok=True, where=None,
-          at=None):
+          at=None, run=None):
     """Одна строка аудита. Никогда не бросает — авария наблюдения не роняет ход.
 
     `ok` отделяет отказ от успеха тем же признаком, каким его увидел сам шаг, а
@@ -131,6 +153,14 @@ def record(step, input=None, output=None, session_id=None, ok=True, where=None,
     `ValueError`-ом до всякой попытки писать: опечатка в имени, проглоченная
     молча, значила бы для отчёта шаг, которого как будто не было вовсе, — а
     это именно та слепота, ради которой аудит и заведён.
+
+    `run` — номер прогона в обход окружения. Хуки читают его из `XMEM_RUN_ID`
+    (`run_id()`) — им подставляет его `Sandbox.env()` в свой подпроцесс. Но
+    вызывающий из процесса самого замера (не подпроцесса хода) своего
+    `XMEM_RUN_ID` в `os.environ` не имеет вовсе — эта переменная там и не
+    называлась, только в словаре для чужих подпроцессов, — и без явного `run`
+    такая строка (например, ответ второй сессии, `eval.live.record_reply`)
+    осела бы с пустым `run_id`, неотличимая от строки вне всякого прогона.
     """
     if step not in STEPS:
         raise ValueError("нет такого шага аудита: %r, известны: %s"
@@ -141,7 +171,8 @@ def record(step, input=None, output=None, session_id=None, ok=True, where=None,
             conn.execute(
                 'INSERT INTO audit (ts, run_id, session_id, step, ok, input, output) '
                 'VALUES (?, ?, ?, ?, ?, ?, ?)',
-                (at or datetime.now(timezone.utc).isoformat(), run_id(),
+                (at or datetime.now(timezone.utc).isoformat(),
+                 run if run is not None else run_id(),
                  session_id, step, 1 if ok else 0, _dump(input), _dump(output)))
     except Exception:
         pass    # аудит это наблюдение: его авария не имеет права уронить ход
@@ -154,7 +185,7 @@ def rows(where=None, run=None, step=None, session_id=None):
     у него нет и не должно быть, иначе он читал бы то состояние, что видел на
     момент открытия, а не то, что там лежит сейчас.
     """
-    conn = storage_db.connect(where)
+    conn = storage_db.connect(where or path())
     try:
         conn.execute("PRAGMA busy_timeout = 200")
         storage_db.migrate(conn)
