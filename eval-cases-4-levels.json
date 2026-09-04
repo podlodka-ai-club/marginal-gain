@@ -1,0 +1,1293 @@
+{
+  "version": 3,
+  "kind": "cases",
+  "identity": "synthetic-eval-v1",
+  "built_at": "2026-09-02T08:49:07.581247+00:00",
+  "count": 80,
+  "split": "synthetic-2026-09-02",
+  "target": 80,
+  "difficulty_scale": {
+    "1": "direct recall: one unique fact, explicit wording",
+    "2": "paraphrase + one misleading alternative",
+    "3": "scope disambiguation and negative/silence tests",
+    "4": "dense near-duplicates with stale/conflicting distractors"
+  },
+  "items": [
+    {
+      "id": "l1-01-editor",
+      "kind": "direct_recall",
+      "difficulty": 1,
+      "query": "Какой редактор используется в проекте atlas?",
+      "expect": [
+        "TipTap"
+      ],
+      "forbid": [],
+      "tags": [
+        "exact",
+        "single-fact"
+      ]
+    },
+    {
+      "id": "l1-02-db",
+      "kind": "direct_recall",
+      "difficulty": 1,
+      "query": "Какая база данных используется в проекте atlas?",
+      "expect": [
+        "PostgreSQL"
+      ],
+      "forbid": [],
+      "tags": [
+        "exact",
+        "single-fact"
+      ]
+    },
+    {
+      "id": "l1-03-cache",
+      "kind": "direct_recall",
+      "difficulty": 1,
+      "query": "Что используется для кеша в проекте atlas?",
+      "expect": [
+        "Redis"
+      ],
+      "forbid": [],
+      "tags": [
+        "exact",
+        "single-fact"
+      ]
+    },
+    {
+      "id": "l1-04-tests",
+      "kind": "direct_recall",
+      "difficulty": 1,
+      "query": "Чем запускаются unit-тесты в atlas?",
+      "expect": [
+        "Vitest"
+      ],
+      "forbid": [],
+      "tags": [
+        "exact",
+        "single-fact"
+      ]
+    },
+    {
+      "id": "l1-05-e2e",
+      "kind": "direct_recall",
+      "difficulty": 1,
+      "query": "Чем запускаются e2e-тесты в atlas?",
+      "expect": [
+        "Playwright"
+      ],
+      "forbid": [],
+      "tags": [
+        "exact",
+        "single-fact"
+      ]
+    },
+    {
+      "id": "l1-06-ui",
+      "kind": "direct_recall",
+      "difficulty": 1,
+      "query": "Какая библиотека UI-компонентов используется в atlas?",
+      "expect": [
+        "shadcn/ui"
+      ],
+      "forbid": [],
+      "tags": [
+        "exact",
+        "single-fact"
+      ]
+    },
+    {
+      "id": "l1-07-styles",
+      "kind": "direct_recall",
+      "difficulty": 1,
+      "query": "Что используется для стилей в atlas?",
+      "expect": [
+        "Tailwind CSS"
+      ],
+      "forbid": [],
+      "tags": [
+        "exact",
+        "single-fact"
+      ]
+    },
+    {
+      "id": "l1-08-pkg",
+      "kind": "direct_recall",
+      "difficulty": 1,
+      "query": "Какой менеджер пакетов используется в atlas?",
+      "expect": [
+        "pnpm"
+      ],
+      "forbid": [],
+      "tags": [
+        "exact",
+        "single-fact"
+      ]
+    },
+    {
+      "id": "l1-09-api",
+      "kind": "direct_recall",
+      "difficulty": 1,
+      "query": "На чём написан backend atlas?",
+      "expect": [
+        "NestJS"
+      ],
+      "forbid": [],
+      "tags": [
+        "exact",
+        "single-fact"
+      ]
+    },
+    {
+      "id": "l1-10-web",
+      "kind": "direct_recall",
+      "difficulty": 1,
+      "query": "На чём работает frontend atlas?",
+      "expect": [
+        "Next.js"
+      ],
+      "forbid": [],
+      "tags": [
+        "exact",
+        "single-fact"
+      ]
+    },
+    {
+      "id": "l1-11-collab",
+      "kind": "direct_recall",
+      "difficulty": 1,
+      "query": "Что отвечает за синхронизацию совместного редактирования в atlas?",
+      "expect": [
+        "Hocuspocus"
+      ],
+      "forbid": [],
+      "tags": [
+        "exact",
+        "single-fact"
+      ]
+    },
+    {
+      "id": "l1-12-crdt",
+      "kind": "direct_recall",
+      "difficulty": 1,
+      "query": "Какая CRDT-библиотека используется в atlas?",
+      "expect": [
+        "Yjs"
+      ],
+      "forbid": [],
+      "tags": [
+        "exact",
+        "single-fact"
+      ]
+    },
+    {
+      "id": "l1-13-format",
+      "kind": "direct_recall",
+      "difficulty": 1,
+      "query": "Что используется для lint и форматирования в atlas?",
+      "expect": [
+        "Biome"
+      ],
+      "forbid": [],
+      "tags": [
+        "exact",
+        "single-fact"
+      ]
+    },
+    {
+      "id": "l1-14-query",
+      "kind": "direct_recall",
+      "difficulty": 1,
+      "query": "Что используется для server state на frontend atlas?",
+      "expect": [
+        "TanStack Query"
+      ],
+      "forbid": [],
+      "tags": [
+        "exact",
+        "single-fact"
+      ]
+    },
+    {
+      "id": "l1-15-mocks",
+      "kind": "direct_recall",
+      "difficulty": 1,
+      "query": "Что используется для API-моков в atlas?",
+      "expect": [
+        "MSW"
+      ],
+      "forbid": [],
+      "tags": [
+        "exact",
+        "single-fact"
+      ]
+    },
+    {
+      "id": "l1-16-docs",
+      "kind": "direct_recall",
+      "difficulty": 1,
+      "query": "Где ведётся документация UI-компонентов atlas?",
+      "expect": [
+        "Storybook"
+      ],
+      "forbid": [],
+      "tags": [
+        "exact",
+        "single-fact"
+      ]
+    },
+    {
+      "id": "l1-17-storage",
+      "kind": "direct_recall",
+      "difficulty": 1,
+      "query": "Где хранятся файлы atlas?",
+      "expect": [
+        "S3-compatible"
+      ],
+      "forbid": [],
+      "tags": [
+        "exact",
+        "single-fact"
+      ]
+    },
+    {
+      "id": "l1-18-auth",
+      "kind": "direct_recall",
+      "difficulty": 1,
+      "query": "Какие токены используются для авторизации atlas?",
+      "expect": [
+        "access",
+        "refresh"
+      ],
+      "forbid": [],
+      "tags": [
+        "exact",
+        "single-fact"
+      ]
+    },
+    {
+      "id": "l1-19-branch",
+      "kind": "direct_recall",
+      "difficulty": 1,
+      "query": "Как называется основная ветка atlas?",
+      "expect": [
+        "main"
+      ],
+      "forbid": [],
+      "tags": [
+        "exact",
+        "single-fact"
+      ]
+    },
+    {
+      "id": "l1-20-lang",
+      "kind": "direct_recall",
+      "difficulty": 1,
+      "query": "Какой основной язык frontend-кода atlas?",
+      "expect": [
+        "TypeScript"
+      ],
+      "forbid": [],
+      "tags": [
+        "exact",
+        "single-fact"
+      ]
+    },
+    {
+      "id": "l2-01-deploy",
+      "kind": "paraphrase",
+      "difficulty": 2,
+      "query": "Через какой CI/CD механизм borealis попадает в прод?",
+      "expect": [
+        "GitHub Actions"
+      ],
+      "forbid": [
+        "GitLab CI"
+      ],
+      "tags": [
+        "paraphrase",
+        "distractor"
+      ]
+    },
+    {
+      "id": "l2-02-port",
+      "kind": "paraphrase",
+      "difficulty": 2,
+      "query": "На каком порту поднимается HTTP API у borealis?",
+      "expect": [
+        "4317"
+      ],
+      "forbid": [
+        "4318"
+      ],
+      "tags": [
+        "paraphrase",
+        "distractor"
+      ]
+    },
+    {
+      "id": "l2-03-queue",
+      "kind": "paraphrase",
+      "difficulty": 2,
+      "query": "Какая очередь обрабатывает фоновые задачи borealis?",
+      "expect": [
+        "BullMQ"
+      ],
+      "forbid": [
+        "RabbitMQ"
+      ],
+      "tags": [
+        "paraphrase",
+        "distractor"
+      ]
+    },
+    {
+      "id": "l2-04-metrics",
+      "kind": "paraphrase",
+      "difficulty": 2,
+      "query": "Куда borealis отдаёт метрики?",
+      "expect": [
+        "Prometheus"
+      ],
+      "forbid": [
+        "Grafana"
+      ],
+      "tags": [
+        "paraphrase",
+        "distractor"
+      ]
+    },
+    {
+      "id": "l2-05-logs",
+      "kind": "paraphrase",
+      "difficulty": 2,
+      "query": "В каком формате пишет логи borealis?",
+      "expect": [
+        "JSON"
+      ],
+      "forbid": [
+        "plain text"
+      ],
+      "tags": [
+        "paraphrase",
+        "distractor"
+      ]
+    },
+    {
+      "id": "l2-06-region",
+      "kind": "paraphrase",
+      "difficulty": 2,
+      "query": "Какой AWS-регион основной у borealis?",
+      "expect": [
+        "eu-west-1"
+      ],
+      "forbid": [
+        "eu-central-1"
+      ],
+      "tags": [
+        "paraphrase",
+        "distractor"
+      ]
+    },
+    {
+      "id": "l2-07-ttl",
+      "kind": "paraphrase",
+      "difficulty": 2,
+      "query": "Какой TTL у кеша списка проектов borealis?",
+      "expect": [
+        "300"
+      ],
+      "forbid": [
+        "600"
+      ],
+      "tags": [
+        "paraphrase",
+        "distractor"
+      ]
+    },
+    {
+      "id": "l2-08-retry",
+      "kind": "paraphrase",
+      "difficulty": 2,
+      "query": "Сколько максимум ретраев у внешних запросов borealis?",
+      "expect": [
+        "3"
+      ],
+      "forbid": [
+        "5"
+      ],
+      "tags": [
+        "paraphrase",
+        "distractor"
+      ]
+    },
+    {
+      "id": "l2-09-timeout",
+      "kind": "paraphrase",
+      "difficulty": 2,
+      "query": "Сколько borealis ждёт внешний API до таймаута?",
+      "expect": [
+        "8"
+      ],
+      "forbid": [
+        "10"
+      ],
+      "tags": [
+        "paraphrase",
+        "distractor"
+      ]
+    },
+    {
+      "id": "l2-10-health",
+      "kind": "paraphrase",
+      "difficulty": 2,
+      "query": "Какой endpoint используется для health-check borealis?",
+      "expect": [
+        "/healthz"
+      ],
+      "forbid": [
+        "/health"
+      ],
+      "tags": [
+        "paraphrase",
+        "distractor"
+      ]
+    },
+    {
+      "id": "l2-11-prefix",
+      "kind": "paraphrase",
+      "difficulty": 2,
+      "query": "Какой общий префикс REST API у borealis?",
+      "expect": [
+        "/api/v2"
+      ],
+      "forbid": [
+        "/api/v1"
+      ],
+      "tags": [
+        "paraphrase",
+        "distractor"
+      ]
+    },
+    {
+      "id": "l2-12-orm",
+      "kind": "paraphrase",
+      "difficulty": 2,
+      "query": "Какой ORM используется в borealis для PostgreSQL?",
+      "expect": [
+        "Prisma"
+      ],
+      "forbid": [
+        "TypeORM"
+      ],
+      "tags": [
+        "paraphrase",
+        "distractor"
+      ]
+    },
+    {
+      "id": "l2-13-migration",
+      "kind": "paraphrase",
+      "difficulty": 2,
+      "query": "Какой командой применяются production-миграции borealis?",
+      "expect": [
+        "prisma migrate deploy"
+      ],
+      "forbid": [
+        "prisma db push"
+      ],
+      "tags": [
+        "paraphrase",
+        "distractor"
+      ]
+    },
+    {
+      "id": "l2-14-node",
+      "kind": "paraphrase",
+      "difficulty": 2,
+      "query": "Какая версия Node используется в production у borealis?",
+      "expect": [
+        "22"
+      ],
+      "forbid": [
+        "20"
+      ],
+      "tags": [
+        "paraphrase",
+        "distractor"
+      ]
+    },
+    {
+      "id": "l2-15-lock",
+      "kind": "paraphrase",
+      "difficulty": 2,
+      "query": "Какой lock-файл хранится в borealis?",
+      "expect": [
+        "pnpm-lock.yaml"
+      ],
+      "forbid": [
+        "package-lock.json"
+      ],
+      "tags": [
+        "paraphrase",
+        "distractor"
+      ]
+    },
+    {
+      "id": "l2-16-coverage",
+      "kind": "paraphrase",
+      "difficulty": 2,
+      "query": "Какой минимальный порог покрытия тестами в borealis?",
+      "expect": [
+        "80"
+      ],
+      "forbid": [
+        "70"
+      ],
+      "tags": [
+        "paraphrase",
+        "distractor"
+      ]
+    },
+    {
+      "id": "l2-17-worker",
+      "kind": "paraphrase",
+      "difficulty": 2,
+      "query": "Как запускается отдельный worker borealis?",
+      "expect": [
+        "pnpm worker:start"
+      ],
+      "forbid": [
+        "pnpm start"
+      ],
+      "tags": [
+        "paraphrase",
+        "distractor"
+      ]
+    },
+    {
+      "id": "l2-18-trace",
+      "kind": "paraphrase",
+      "difficulty": 2,
+      "query": "Что используется для distributed tracing borealis?",
+      "expect": [
+        "OpenTelemetry"
+      ],
+      "forbid": [
+        "Sentry"
+      ],
+      "tags": [
+        "paraphrase",
+        "distractor"
+      ]
+    },
+    {
+      "id": "l2-19-secret",
+      "kind": "paraphrase",
+      "difficulty": 2,
+      "query": "Откуда borealis получает production secrets?",
+      "expect": [
+        "AWS Secrets Manager"
+      ],
+      "forbid": [
+        ".env"
+      ],
+      "tags": [
+        "paraphrase",
+        "distractor"
+      ]
+    },
+    {
+      "id": "l2-20-cdn",
+      "kind": "paraphrase",
+      "difficulty": 2,
+      "query": "Через что пользователям раздаются статические файлы borealis?",
+      "expect": [
+        "CloudFront"
+      ],
+      "forbid": [
+        "nginx"
+      ],
+      "tags": [
+        "paraphrase",
+        "distractor"
+      ]
+    },
+    {
+      "id": "l3-01-db",
+      "kind": "scope_disambiguation",
+      "difficulty": 3,
+      "query": "Какая БД используется именно в cygnus?",
+      "expect": [
+        "PostgreSQL"
+      ],
+      "forbid": [
+        "MySQL"
+      ],
+      "tags": [
+        "cross-project",
+        "precision"
+      ]
+    },
+    {
+      "id": "l3-02-deploy",
+      "kind": "scope_disambiguation",
+      "difficulty": 3,
+      "query": "Как разворачивается production именно у cygnus?",
+      "expect": [
+        "Kubernetes"
+      ],
+      "forbid": [
+        "Docker Compose"
+      ],
+      "tags": [
+        "cross-project",
+        "precision"
+      ]
+    },
+    {
+      "id": "l3-03-auth",
+      "kind": "scope_disambiguation",
+      "difficulty": 3,
+      "query": "Какой identity provider у cygnus?",
+      "expect": [
+        "Keycloak"
+      ],
+      "forbid": [
+        "Auth0"
+      ],
+      "tags": [
+        "cross-project",
+        "precision"
+      ]
+    },
+    {
+      "id": "l3-04-search",
+      "kind": "scope_disambiguation",
+      "difficulty": 3,
+      "query": "Какой поисковый движок стоит в cygnus?",
+      "expect": [
+        "OpenSearch"
+      ],
+      "forbid": [
+        "Meilisearch"
+      ],
+      "tags": [
+        "cross-project",
+        "precision"
+      ]
+    },
+    {
+      "id": "l3-05-queue",
+      "kind": "scope_disambiguation",
+      "difficulty": 3,
+      "query": "Какой message broker используется в cygnus?",
+      "expect": [
+        "NATS"
+      ],
+      "forbid": [
+        "Kafka"
+      ],
+      "tags": [
+        "cross-project",
+        "precision"
+      ]
+    },
+    {
+      "id": "l3-06-monitoring",
+      "kind": "scope_disambiguation",
+      "difficulty": 3,
+      "query": "Чем визуализируют метрики cygnus?",
+      "expect": [
+        "Grafana"
+      ],
+      "forbid": [
+        "Datadog"
+      ],
+      "tags": [
+        "cross-project",
+        "precision"
+      ]
+    },
+    {
+      "id": "l3-07-errors",
+      "kind": "scope_disambiguation",
+      "difficulty": 3,
+      "query": "Куда отправляются ошибки приложения cygnus?",
+      "expect": [
+        "Sentry"
+      ],
+      "forbid": [
+        "Rollbar"
+      ],
+      "tags": [
+        "cross-project",
+        "precision"
+      ]
+    },
+    {
+      "id": "l3-08-feature",
+      "kind": "scope_disambiguation",
+      "difficulty": 3,
+      "query": "Какой сервис feature flags используется в cygnus?",
+      "expect": [
+        "Unleash"
+      ],
+      "forbid": [
+        "LaunchDarkly"
+      ],
+      "tags": [
+        "cross-project",
+        "precision"
+      ]
+    },
+    {
+      "id": "l3-09-mail",
+      "kind": "scope_disambiguation",
+      "difficulty": 3,
+      "query": "Через какой сервис cygnus отправляет email?",
+      "expect": [
+        "Postmark"
+      ],
+      "forbid": [
+        "SendGrid"
+      ],
+      "tags": [
+        "cross-project",
+        "precision"
+      ]
+    },
+    {
+      "id": "l3-10-object",
+      "kind": "scope_disambiguation",
+      "difficulty": 3,
+      "query": "Какое object storage используется в локальном окружении cygnus?",
+      "expect": [
+        "MinIO"
+      ],
+      "forbid": [
+        "Amazon S3"
+      ],
+      "tags": [
+        "cross-project",
+        "precision"
+      ]
+    },
+    {
+      "id": "l3-11-testdb",
+      "kind": "scope_disambiguation",
+      "difficulty": 3,
+      "query": "Как поднимается БД для integration tests в cygnus?",
+      "expect": [
+        "Testcontainers"
+      ],
+      "forbid": [
+        "SQLite"
+      ],
+      "tags": [
+        "cross-project",
+        "precision"
+      ]
+    },
+    {
+      "id": "l3-12-schema",
+      "kind": "scope_disambiguation",
+      "difficulty": 3,
+      "query": "Чем валидируют runtime-схемы в cygnus?",
+      "expect": [
+        "Zod"
+      ],
+      "forbid": [
+        "Joi"
+      ],
+      "tags": [
+        "cross-project",
+        "precision"
+      ]
+    },
+    {
+      "id": "l3-13-api",
+      "kind": "scope_disambiguation",
+      "difficulty": 3,
+      "query": "Какой основной API-стиль у cygnus?",
+      "expect": [
+        "GraphQL"
+      ],
+      "forbid": [
+        "REST"
+      ],
+      "tags": [
+        "cross-project",
+        "precision"
+      ]
+    },
+    {
+      "id": "l3-14-repo",
+      "kind": "scope_disambiguation",
+      "difficulty": 3,
+      "query": "Как организован репозиторий cygnus?",
+      "expect": [
+        "monorepo"
+      ],
+      "forbid": [
+        "polyrepo"
+      ],
+      "tags": [
+        "cross-project",
+        "precision"
+      ]
+    },
+    {
+      "id": "l3-15-build",
+      "kind": "scope_disambiguation",
+      "difficulty": 3,
+      "query": "Какой build orchestrator используется в cygnus?",
+      "expect": [
+        "Turborepo"
+      ],
+      "forbid": [
+        "Nx"
+      ],
+      "tags": [
+        "cross-project",
+        "precision"
+      ]
+    },
+    {
+      "id": "l3-16-ruby",
+      "kind": "negative_silence",
+      "difficulty": 3,
+      "query": "Какой Ruby-фреймворк используется в cygnus?",
+      "expect": [],
+      "forbid": [
+        "Rails",
+        "Sinatra"
+      ],
+      "tags": [
+        "negative",
+        "precision"
+      ]
+    },
+    {
+      "id": "l3-17-mobile",
+      "kind": "negative_silence",
+      "difficulty": 3,
+      "query": "Какой мобильный фреймворк используется в cygnus?",
+      "expect": [],
+      "forbid": [
+        "React Native",
+        "Flutter"
+      ],
+      "tags": [
+        "negative",
+        "precision"
+      ]
+    },
+    {
+      "id": "l3-18-warehouse",
+      "kind": "negative_silence",
+      "difficulty": 3,
+      "query": "Какое data warehouse используется в cygnus?",
+      "expect": [],
+      "forbid": [
+        "BigQuery",
+        "Snowflake"
+      ],
+      "tags": [
+        "negative",
+        "precision"
+      ]
+    },
+    {
+      "id": "l3-19-payments",
+      "kind": "negative_silence",
+      "difficulty": 3,
+      "query": "Какой платёжный провайдер используется в cygnus?",
+      "expect": [],
+      "forbid": [
+        "Stripe",
+        "Adyen"
+      ],
+      "tags": [
+        "negative",
+        "precision"
+      ]
+    },
+    {
+      "id": "l3-20-vector",
+      "kind": "negative_silence",
+      "difficulty": 3,
+      "query": "Какая vector database используется в cygnus?",
+      "expect": [],
+      "forbid": [
+        "Pinecone",
+        "Weaviate"
+      ],
+      "tags": [
+        "negative",
+        "precision"
+      ]
+    },
+    {
+      "id": "l4-01-port",
+      "kind": "adversarial_near_duplicate",
+      "difficulty": 4,
+      "query": "Какой порт PostgreSQL сейчас принят для draco?",
+      "expect": [
+        "5433"
+      ],
+      "forbid": [
+        "5432",
+        "5434"
+      ],
+      "tags": [
+        "near-duplicate",
+        "stale-distractors",
+        "high-precision"
+      ]
+    },
+    {
+      "id": "l4-02-model",
+      "kind": "adversarial_near_duplicate",
+      "difficulty": 4,
+      "query": "Какую модель использует основной дешёвый inference-путь draco?",
+      "expect": [
+        "gpt-4.1-mini"
+      ],
+      "forbid": [
+        "gpt-4o-mini",
+        "gpt-4.1"
+      ],
+      "tags": [
+        "near-duplicate",
+        "stale-distractors",
+        "high-precision"
+      ]
+    },
+    {
+      "id": "l4-03-bucket",
+      "kind": "adversarial_near_duplicate",
+      "difficulty": 4,
+      "query": "Как называется актуальный production bucket draco?",
+      "expect": [
+        "draco-prod-assets-v2"
+      ],
+      "forbid": [
+        "draco-prod-assets",
+        "draco-prod-assets-v1"
+      ],
+      "tags": [
+        "near-duplicate",
+        "stale-distractors",
+        "high-precision"
+      ]
+    },
+    {
+      "id": "l4-04-branch",
+      "kind": "adversarial_near_duplicate",
+      "difficulty": 4,
+      "query": "Какая ветка считается основной в draco?",
+      "expect": [
+        "trunk"
+      ],
+      "forbid": [
+        "main",
+        "master"
+      ],
+      "tags": [
+        "near-duplicate",
+        "stale-distractors",
+        "high-precision"
+      ]
+    },
+    {
+      "id": "l4-05-timeout",
+      "kind": "adversarial_near_duplicate",
+      "difficulty": 4,
+      "query": "Какой текущий таймаут inference-запроса в draco?",
+      "expect": [
+        "12 секунд"
+      ],
+      "forbid": [
+        "10 секунд",
+        "15 секунд"
+      ],
+      "tags": [
+        "near-duplicate",
+        "stale-distractors",
+        "high-precision"
+      ]
+    },
+    {
+      "id": "l4-06-threshold",
+      "kind": "adversarial_near_duplicate",
+      "difficulty": 4,
+      "query": "Какой min score используется для recall в draco?",
+      "expect": [
+        "0.72"
+      ],
+      "forbid": [
+        "0.70",
+        "0.75"
+      ],
+      "tags": [
+        "near-duplicate",
+        "stale-distractors",
+        "high-precision"
+      ]
+    },
+    {
+      "id": "l4-07-index",
+      "kind": "adversarial_near_duplicate",
+      "difficulty": 4,
+      "query": "Как называется актуальный индекс фактов draco?",
+      "expect": [
+        "memory_facts_v3"
+      ],
+      "forbid": [
+        "memory_facts",
+        "memory_facts_v2"
+      ],
+      "tags": [
+        "near-duplicate",
+        "stale-distractors",
+        "high-precision"
+      ]
+    },
+    {
+      "id": "l4-08-endpoint",
+      "kind": "adversarial_near_duplicate",
+      "difficulty": 4,
+      "query": "Какой endpoint поиска памяти используется draco?",
+      "expect": [
+        "/v3/memory/search"
+      ],
+      "forbid": [
+        "/v2/memory/search",
+        "/v3/search"
+      ],
+      "tags": [
+        "near-duplicate",
+        "stale-distractors",
+        "high-precision"
+      ]
+    },
+    {
+      "id": "l4-09-header",
+      "kind": "adversarial_near_duplicate",
+      "difficulty": 4,
+      "query": "Как называется HTTP header для memory scope в draco?",
+      "expect": [
+        "X-Memory-Scope"
+      ],
+      "forbid": [
+        "X-Scope",
+        "X-Memory-Project"
+      ],
+      "tags": [
+        "near-duplicate",
+        "stale-distractors",
+        "high-precision"
+      ]
+    },
+    {
+      "id": "l4-10-env",
+      "kind": "adversarial_near_duplicate",
+      "difficulty": 4,
+      "query": "Какая env-переменная задаёт лимит recall в draco?",
+      "expect": [
+        "MEMORY_RECALL_LIMIT"
+      ],
+      "forbid": [
+        "MEMORY_LIMIT",
+        "RECALL_LIMIT"
+      ],
+      "tags": [
+        "near-duplicate",
+        "stale-distractors",
+        "high-precision"
+      ]
+    },
+    {
+      "id": "l4-11-limit",
+      "kind": "adversarial_near_duplicate",
+      "difficulty": 4,
+      "query": "Сколько фактов максимум draco передаёт агенту после recall?",
+      "expect": [
+        "6"
+      ],
+      "forbid": [
+        "5",
+        "8"
+      ],
+      "tags": [
+        "near-duplicate",
+        "stale-distractors",
+        "high-precision"
+      ]
+    },
+    {
+      "id": "l4-12-ttl",
+      "kind": "adversarial_near_duplicate",
+      "difficulty": 4,
+      "query": "Какой TTL результата recall в draco?",
+      "expect": [
+        "900 секунд"
+      ],
+      "forbid": [
+        "600 секунд",
+        "1200 секунд"
+      ],
+      "tags": [
+        "near-duplicate",
+        "stale-distractors",
+        "high-precision"
+      ]
+    },
+    {
+      "id": "l4-13-table",
+      "kind": "adversarial_near_duplicate",
+      "difficulty": 4,
+      "query": "В какой таблице draco хранит версии фактов?",
+      "expect": [
+        "memory_fact_versions"
+      ],
+      "forbid": [
+        "memory_facts",
+        "memory_versions"
+      ],
+      "tags": [
+        "near-duplicate",
+        "stale-distractors",
+        "high-precision"
+      ]
+    },
+    {
+      "id": "l4-14-metric",
+      "kind": "adversarial_near_duplicate",
+      "difficulty": 4,
+      "query": "Как называется метрика precision recall в draco?",
+      "expect": [
+        "memory_recall_precision"
+      ],
+      "forbid": [
+        "memory_precision",
+        "recall_precision"
+      ],
+      "tags": [
+        "near-duplicate",
+        "stale-distractors",
+        "high-precision"
+      ]
+    },
+    {
+      "id": "l4-15-flag",
+      "kind": "adversarial_near_duplicate",
+      "difficulty": 4,
+      "query": "Каким feature flag включается advisor draco?",
+      "expect": [
+        "MEMORY_ADVISOR_ENABLED"
+      ],
+      "forbid": [
+        "ADVISOR_ENABLED",
+        "MEMORY_ENABLED"
+      ],
+      "tags": [
+        "near-duplicate",
+        "stale-distractors",
+        "high-precision"
+      ]
+    },
+    {
+      "id": "l4-16-topic",
+      "kind": "adversarial_near_duplicate",
+      "difficulty": 4,
+      "query": "Как называется актуальный event topic обновления факта в draco?",
+      "expect": [
+        "memory.fact.updated.v2"
+      ],
+      "forbid": [
+        "memory.fact.updated",
+        "memory.facts.updated.v2"
+      ],
+      "tags": [
+        "near-duplicate",
+        "stale-distractors",
+        "high-precision"
+      ]
+    },
+    {
+      "id": "l4-17-consumer",
+      "kind": "adversarial_near_duplicate",
+      "difficulty": 4,
+      "query": "Как называется consumer group advisor в draco?",
+      "expect": [
+        "memory-advisor-v2"
+      ],
+      "forbid": [
+        "memory-advisor",
+        "advisor-v2"
+      ],
+      "tags": [
+        "near-duplicate",
+        "stale-distractors",
+        "high-precision"
+      ]
+    },
+    {
+      "id": "l4-18-path",
+      "kind": "adversarial_near_duplicate",
+      "difficulty": 4,
+      "query": "Где лежит актуальная локальная SQLite база draco?",
+      "expect": [
+        "/var/lib/draco/memory-v3.sqlite"
+      ],
+      "forbid": [
+        "/var/lib/draco/memory.sqlite",
+        "/var/lib/draco/memory-v2.sqlite"
+      ],
+      "tags": [
+        "near-duplicate",
+        "stale-distractors",
+        "high-precision"
+      ]
+    },
+    {
+      "id": "l4-19-namespace",
+      "kind": "adversarial_near_duplicate",
+      "difficulty": 4,
+      "query": "Какой namespace используется memory-сервисом draco в production?",
+      "expect": [
+        "prod-memory-v2"
+      ],
+      "forbid": [
+        "prod-memory",
+        "prod-memory-v1"
+      ],
+      "tags": [
+        "near-duplicate",
+        "stale-distractors",
+        "high-precision"
+      ]
+    },
+    {
+      "id": "l4-20-schedule",
+      "kind": "adversarial_near_duplicate",
+      "difficulty": 4,
+      "query": "Во сколько запускается nightly compaction draco?",
+      "expect": [
+        "03:17 UTC"
+      ],
+      "forbid": [
+        "03:00 UTC",
+        "03:15 UTC"
+      ],
+      "tags": [
+        "near-duplicate",
+        "stale-distractors",
+        "high-precision"
+      ]
+    }
+  ]
+}

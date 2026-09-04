@@ -427,12 +427,22 @@ eval/       набор случаев и прогон замера              
 | `pipeline/drain.py` | потребитель очереди, дописывает разговоры в конце хода |
 | `eval/live.py` | прогон целиком одной командой: чистая база, живые ходы, чистая сессия |
 | `eval/pairs.py` | форма входа прогона: пары сессий, и мост к прежнему набору |
-| `eval/evaluate.py` | прежняя оценка: выдача памяти без агента |
-| `eval/goldenset.py` | сборка набора проверочных случаев из архива |
+| `eval/evaluate.py` | прежняя оценка: выдача памяти без агента, включая отбор `--difficulty` |
+| `eval/goldenset.py`, `eval/load_fixture.py` | сборка набора проверочных случаев и загрузка фикстуры |
 | `eval-cases.json`, `eval-fixture.json`, `eval-script.json` | сам набор: версия в заголовке, случаи в `items` |
+| `eval-cases-4-levels.json`, `eval-fixture-4-levels.json` | синтетический набор с уровнями сложности `1..4` |
 | `eval-pairs-example.json` | бытовой набор пар: показывает, что стенд не знает домена |
 | `hooks/` | подключение к точкам срабатывания |
 | `tests/` | батарея, включая проверку направления зависимостей |
+
+Локальный прогон synthetic eval без внешних лимитов:
+
+```bash
+export XMEM_BACKEND=local
+export XMEM_LOCAL_PATH=/tmp/xmem-eval-4-levels.db
+python3 -m eval.load_fixture
+python3 -m eval.evaluate --difficulty 4 --mode raw --min-score 0
+```
 
 ## Решения
 

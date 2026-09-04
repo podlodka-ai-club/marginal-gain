@@ -1,0 +1,2261 @@
+{
+  "version": 3,
+  "kind": "fixture",
+  "identity": "synthetic-eval-v1",
+  "built_at": "2026-09-02T08:49:07.581247+00:00",
+  "count": 150,
+  "split": "synthetic-2026-09-02",
+  "description": "Synthetic memory fixture with four difficulty levels.",
+  "items": [
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "atlas:editor",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Проект atlas использует редактор TipTap."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "atlas:db",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Проект atlas хранит основные данные в PostgreSQL."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "atlas:cache",
+            "scope": "project"
+          },
+          "values": {
+            "content": "В проекте atlas Redis используется только для кеша."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "atlas:tests",
+            "scope": "project"
+          },
+          "values": {
+            "content": "В проекте atlas unit-тесты запускаются через Vitest."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "atlas:e2e",
+            "scope": "project"
+          },
+          "values": {
+            "content": "В проекте atlas e2e-тесты запускаются через Playwright."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "atlas:ui",
+            "scope": "project"
+          },
+          "values": {
+            "content": "В проекте atlas UI-компоненты собираются на shadcn/ui."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "atlas:styles",
+            "scope": "project"
+          },
+          "values": {
+            "content": "В проекте atlas стили пишутся на Tailwind CSS."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "atlas:pkg",
+            "scope": "project"
+          },
+          "values": {
+            "content": "В проекте atlas менеджер пакетов — pnpm."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "atlas:api",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Backend проекта atlas написан на NestJS."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "atlas:web",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Frontend проекта atlas работает на Next.js."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "atlas:collab",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Совместное редактирование atlas синхронизируется через Hocuspocus."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "atlas:crdt",
+            "scope": "project"
+          },
+          "values": {
+            "content": "CRDT-слой проекта atlas построен на Yjs."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "atlas:format",
+            "scope": "project"
+          },
+          "values": {
+            "content": "В проекте atlas форматирование и lint выполняет Biome."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "atlas:query",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Для серверного состояния frontend atlas использует TanStack Query."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "atlas:mocks",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Для API-моков в atlas используется MSW."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "atlas:docs",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Документация компонентов atlas ведётся в Storybook."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "atlas:storage",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Файлы проекта atlas складываются в S3-compatible object storage."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "atlas:auth",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Авторизация atlas использует access и refresh token."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "atlas:branch",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Основная ветка проекта atlas называется main."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "atlas:lang",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Основной язык frontend-кода atlas — TypeScript."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "borealis:deploy",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Сервис borealis выкатывается в production через GitHub Actions."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "borealis:distractor:deploy",
+            "scope": "project"
+          },
+          "values": {
+            "content": "В старом прототипе borealis обсуждался вариант GitLab CI, но он не используется в текущей конфигурации."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "borealis:port",
+            "scope": "project"
+          },
+          "values": {
+            "content": "HTTP API проекта borealis слушает порт 4317."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "borealis:distractor:port",
+            "scope": "project"
+          },
+          "values": {
+            "content": "В старом прототипе borealis обсуждался вариант 4318, но он не используется в текущей конфигурации."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "borealis:queue",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Фоновые задания borealis выполняются через BullMQ."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "borealis:distractor:queue",
+            "scope": "project"
+          },
+          "values": {
+            "content": "В старом прототипе borealis обсуждался вариант RabbitMQ, но он не используется в текущей конфигурации."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "borealis:metrics",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Метрики borealis экспортируются в Prometheus."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "borealis:distractor:metrics",
+            "scope": "project"
+          },
+          "values": {
+            "content": "В старом прототипе borealis обсуждался вариант Grafana, но он не используется в текущей конфигурации."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "borealis:logs",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Логи borealis структурированы в JSON."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "borealis:distractor:logs",
+            "scope": "project"
+          },
+          "values": {
+            "content": "В старом прототипе borealis обсуждался вариант plain text, но он не используется в текущей конфигурации."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "borealis:region",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Основной production-регион borealis — eu-west-1."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "borealis:distractor:region",
+            "scope": "project"
+          },
+          "values": {
+            "content": "В старом прототипе borealis обсуждался вариант eu-central-1, но он не используется в текущей конфигурации."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "borealis:ttl",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Кеш borealis для списка проектов живёт 300 секунд."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "borealis:distractor:ttl",
+            "scope": "project"
+          },
+          "values": {
+            "content": "В старом прототипе borealis обсуждался вариант 600, но он не используется в текущей конфигурации."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "borealis:retry",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Внешние HTTP-запросы borealis повторяются максимум 3 раза."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "borealis:distractor:retry",
+            "scope": "project"
+          },
+          "values": {
+            "content": "В старом прототипе borealis обсуждался вариант 5, но он не используется в текущей конфигурации."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "borealis:timeout",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Таймаут внешнего API в borealis равен 8 секундам."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "borealis:distractor:timeout",
+            "scope": "project"
+          },
+          "values": {
+            "content": "В старом прототипе borealis обсуждался вариант 10, но он не используется в текущей конфигурации."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "borealis:health",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Health-check borealis доступен по пути /healthz."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "borealis:distractor:health",
+            "scope": "project"
+          },
+          "values": {
+            "content": "В старом прототипе borealis обсуждался вариант /health, но он не используется в текущей конфигурации."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "borealis:prefix",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Все REST endpoints borealis имеют префикс /api/v2."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "borealis:distractor:prefix",
+            "scope": "project"
+          },
+          "values": {
+            "content": "В старом прототипе borealis обсуждался вариант /api/v1, но он не используется в текущей конфигурации."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "borealis:orm",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Доступ к PostgreSQL в borealis реализован через Prisma."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "borealis:distractor:orm",
+            "scope": "project"
+          },
+          "values": {
+            "content": "В старом прототипе borealis обсуждался вариант TypeORM, но он не используется в текущей конфигурации."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "borealis:migration",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Миграции borealis выполняются командой prisma migrate deploy."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "borealis:distractor:migration",
+            "scope": "project"
+          },
+          "values": {
+            "content": "В старом прототипе borealis обсуждался вариант prisma db push, но он не используется в текущей конфигурации."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "borealis:node",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Production runtime borealis зафиксирован на Node.js 22."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "borealis:distractor:node",
+            "scope": "project"
+          },
+          "values": {
+            "content": "В старом прототипе borealis обсуждался вариант 20, но он не используется в текущей конфигурации."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "borealis:lock",
+            "scope": "project"
+          },
+          "values": {
+            "content": "В репозитории borealis коммитится pnpm-lock.yaml."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "borealis:distractor:lock",
+            "scope": "project"
+          },
+          "values": {
+            "content": "В старом прототипе borealis обсуждался вариант package-lock.json, но он не используется в текущей конфигурации."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "borealis:coverage",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Минимальный coverage threshold borealis — 80 процентов."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "borealis:distractor:coverage",
+            "scope": "project"
+          },
+          "values": {
+            "content": "В старом прототипе borealis обсуждался вариант 70, но он не используется в текущей конфигурации."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "borealis:worker",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Worker borealis запускается отдельным процессом командой pnpm worker:start."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "borealis:distractor:worker",
+            "scope": "project"
+          },
+          "values": {
+            "content": "В старом прототипе borealis обсуждался вариант pnpm start, но он не используется в текущей конфигурации."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "borealis:trace",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Distributed tracing borealis отправляется через OpenTelemetry."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "borealis:distractor:trace",
+            "scope": "project"
+          },
+          "values": {
+            "content": "В старом прототипе borealis обсуждался вариант Sentry, но он не используется в текущей конфигурации."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "borealis:secret",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Production secrets borealis берутся из AWS Secrets Manager."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "borealis:distractor:secret",
+            "scope": "project"
+          },
+          "values": {
+            "content": "В старом прототипе borealis обсуждался вариант .env, но он не используется в текущей конфигурации."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "borealis:cdn",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Публичные статические файлы borealis отдаются через CloudFront."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "borealis:distractor:cdn",
+            "scope": "project"
+          },
+          "values": {
+            "content": "В старом прототипе borealis обсуждался вариант nginx, но он не используется в текущей конфигурации."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "cygnus:db",
+            "scope": "project"
+          },
+          "values": {
+            "content": "В проекте cygnus для категории db используется PostgreSQL."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "orion:db",
+            "scope": "project"
+          },
+          "values": {
+            "content": "В проекте orion для категории db используется MySQL."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "cygnus:deploy",
+            "scope": "project"
+          },
+          "values": {
+            "content": "В проекте cygnus для категории deploy используется Kubernetes."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "orion:deploy",
+            "scope": "project"
+          },
+          "values": {
+            "content": "В проекте orion для категории deploy используется Docker Compose."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "cygnus:auth",
+            "scope": "project"
+          },
+          "values": {
+            "content": "В проекте cygnus для категории auth используется Keycloak."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "orion:auth",
+            "scope": "project"
+          },
+          "values": {
+            "content": "В проекте orion для категории auth используется Auth0."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "cygnus:search",
+            "scope": "project"
+          },
+          "values": {
+            "content": "В проекте cygnus для категории search используется OpenSearch."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "orion:search",
+            "scope": "project"
+          },
+          "values": {
+            "content": "В проекте orion для категории search используется Meilisearch."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "cygnus:queue",
+            "scope": "project"
+          },
+          "values": {
+            "content": "В проекте cygnus для категории queue используется NATS."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "orion:queue",
+            "scope": "project"
+          },
+          "values": {
+            "content": "В проекте orion для категории queue используется Kafka."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "cygnus:monitoring",
+            "scope": "project"
+          },
+          "values": {
+            "content": "В проекте cygnus для категории monitoring используется Grafana."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "orion:monitoring",
+            "scope": "project"
+          },
+          "values": {
+            "content": "В проекте orion для категории monitoring используется Datadog."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "cygnus:errors",
+            "scope": "project"
+          },
+          "values": {
+            "content": "В проекте cygnus для категории errors используется Sentry."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "orion:errors",
+            "scope": "project"
+          },
+          "values": {
+            "content": "В проекте orion для категории errors используется Rollbar."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "cygnus:feature",
+            "scope": "project"
+          },
+          "values": {
+            "content": "В проекте cygnus для категории feature используется Unleash."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "orion:feature",
+            "scope": "project"
+          },
+          "values": {
+            "content": "В проекте orion для категории feature используется LaunchDarkly."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "cygnus:mail",
+            "scope": "project"
+          },
+          "values": {
+            "content": "В проекте cygnus для категории mail используется Postmark."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "orion:mail",
+            "scope": "project"
+          },
+          "values": {
+            "content": "В проекте orion для категории mail используется SendGrid."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "cygnus:object",
+            "scope": "project"
+          },
+          "values": {
+            "content": "В проекте cygnus для категории object используется MinIO."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "orion:object",
+            "scope": "project"
+          },
+          "values": {
+            "content": "В проекте orion для категории object используется Amazon S3."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "cygnus:testdb",
+            "scope": "project"
+          },
+          "values": {
+            "content": "В проекте cygnus для категории testdb используется Testcontainers."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "orion:testdb",
+            "scope": "project"
+          },
+          "values": {
+            "content": "В проекте orion для категории testdb используется SQLite."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "cygnus:schema",
+            "scope": "project"
+          },
+          "values": {
+            "content": "В проекте cygnus для категории schema используется Zod."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "orion:schema",
+            "scope": "project"
+          },
+          "values": {
+            "content": "В проекте orion для категории schema используется Joi."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "cygnus:api",
+            "scope": "project"
+          },
+          "values": {
+            "content": "В проекте cygnus для категории api используется GraphQL."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "orion:api",
+            "scope": "project"
+          },
+          "values": {
+            "content": "В проекте orion для категории api используется REST."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "cygnus:repo",
+            "scope": "project"
+          },
+          "values": {
+            "content": "В проекте cygnus для категории repo используется monorepo."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "orion:repo",
+            "scope": "project"
+          },
+          "values": {
+            "content": "В проекте orion для категории repo используется polyrepo."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "cygnus:build",
+            "scope": "project"
+          },
+          "values": {
+            "content": "В проекте cygnus для категории build используется Turborepo."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "orion:build",
+            "scope": "project"
+          },
+          "values": {
+            "content": "В проекте orion для категории build используется Nx."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "draco:port:current",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Актуальная настройка проекта draco для port: 5433."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "draco:port:stale:1",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Устаревшая настройка проекта draco для port: 5432. Не использовать: значение заменено."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "draco:port:stale:2",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Устаревшая настройка проекта draco для port: 5434. Не использовать: значение заменено."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "draco:model:current",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Актуальная настройка проекта draco для model: gpt-4.1-mini."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "draco:model:stale:1",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Устаревшая настройка проекта draco для model: gpt-4o-mini. Не использовать: значение заменено."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "draco:model:stale:2",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Устаревшая настройка проекта draco для model: gpt-4.1. Не использовать: значение заменено."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "draco:bucket:current",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Актуальная настройка проекта draco для bucket: draco-prod-assets-v2."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "draco:bucket:stale:1",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Устаревшая настройка проекта draco для bucket: draco-prod-assets. Не использовать: значение заменено."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "draco:bucket:stale:2",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Устаревшая настройка проекта draco для bucket: draco-prod-assets-v1. Не использовать: значение заменено."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "draco:branch:current",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Актуальная настройка проекта draco для branch: trunk."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "draco:branch:stale:1",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Устаревшая настройка проекта draco для branch: main. Не использовать: значение заменено."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "draco:branch:stale:2",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Устаревшая настройка проекта draco для branch: master. Не использовать: значение заменено."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "draco:timeout:current",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Актуальная настройка проекта draco для timeout: 12 секунд."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "draco:timeout:stale:1",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Устаревшая настройка проекта draco для timeout: 10 секунд. Не использовать: значение заменено."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "draco:timeout:stale:2",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Устаревшая настройка проекта draco для timeout: 15 секунд. Не использовать: значение заменено."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "draco:threshold:current",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Актуальная настройка проекта draco для threshold: 0.72."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "draco:threshold:stale:1",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Устаревшая настройка проекта draco для threshold: 0.70. Не использовать: значение заменено."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "draco:threshold:stale:2",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Устаревшая настройка проекта draco для threshold: 0.75. Не использовать: значение заменено."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "draco:index:current",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Актуальная настройка проекта draco для index: memory_facts_v3."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "draco:index:stale:1",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Устаревшая настройка проекта draco для index: memory_facts. Не использовать: значение заменено."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "draco:index:stale:2",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Устаревшая настройка проекта draco для index: memory_facts_v2. Не использовать: значение заменено."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "draco:endpoint:current",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Актуальная настройка проекта draco для endpoint: /v3/memory/search."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "draco:endpoint:stale:1",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Устаревшая настройка проекта draco для endpoint: /v2/memory/search. Не использовать: значение заменено."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "draco:endpoint:stale:2",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Устаревшая настройка проекта draco для endpoint: /v3/search. Не использовать: значение заменено."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "draco:header:current",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Актуальная настройка проекта draco для header: X-Memory-Scope."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "draco:header:stale:1",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Устаревшая настройка проекта draco для header: X-Scope. Не использовать: значение заменено."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "draco:header:stale:2",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Устаревшая настройка проекта draco для header: X-Memory-Project. Не использовать: значение заменено."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "draco:env:current",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Актуальная настройка проекта draco для env: MEMORY_RECALL_LIMIT."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "draco:env:stale:1",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Устаревшая настройка проекта draco для env: MEMORY_LIMIT. Не использовать: значение заменено."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "draco:env:stale:2",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Устаревшая настройка проекта draco для env: RECALL_LIMIT. Не использовать: значение заменено."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "draco:limit:current",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Актуальная настройка проекта draco для limit: 6."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "draco:limit:stale:1",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Устаревшая настройка проекта draco для limit: 5. Не использовать: значение заменено."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "draco:limit:stale:2",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Устаревшая настройка проекта draco для limit: 8. Не использовать: значение заменено."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "draco:ttl:current",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Актуальная настройка проекта draco для ttl: 900 секунд."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "draco:ttl:stale:1",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Устаревшая настройка проекта draco для ttl: 600 секунд. Не использовать: значение заменено."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "draco:ttl:stale:2",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Устаревшая настройка проекта draco для ttl: 1200 секунд. Не использовать: значение заменено."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "draco:table:current",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Актуальная настройка проекта draco для table: memory_fact_versions."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "draco:table:stale:1",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Устаревшая настройка проекта draco для table: memory_facts. Не использовать: значение заменено."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "draco:table:stale:2",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Устаревшая настройка проекта draco для table: memory_versions. Не использовать: значение заменено."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "draco:metric:current",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Актуальная настройка проекта draco для metric: memory_recall_precision."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "draco:metric:stale:1",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Устаревшая настройка проекта draco для metric: memory_precision. Не использовать: значение заменено."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "draco:metric:stale:2",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Устаревшая настройка проекта draco для metric: recall_precision. Не использовать: значение заменено."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "draco:flag:current",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Актуальная настройка проекта draco для flag: MEMORY_ADVISOR_ENABLED."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "draco:flag:stale:1",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Устаревшая настройка проекта draco для flag: ADVISOR_ENABLED. Не использовать: значение заменено."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "draco:flag:stale:2",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Устаревшая настройка проекта draco для flag: MEMORY_ENABLED. Не использовать: значение заменено."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "draco:topic:current",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Актуальная настройка проекта draco для topic: memory.fact.updated.v2."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "draco:topic:stale:1",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Устаревшая настройка проекта draco для topic: memory.fact.updated. Не использовать: значение заменено."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "draco:topic:stale:2",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Устаревшая настройка проекта draco для topic: memory.facts.updated.v2. Не использовать: значение заменено."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "draco:consumer:current",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Актуальная настройка проекта draco для consumer: memory-advisor-v2."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "draco:consumer:stale:1",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Устаревшая настройка проекта draco для consumer: memory-advisor. Не использовать: значение заменено."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "draco:consumer:stale:2",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Устаревшая настройка проекта draco для consumer: advisor-v2. Не использовать: значение заменено."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "draco:path:current",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Актуальная настройка проекта draco для path: /var/lib/draco/memory-v3.sqlite."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "draco:path:stale:1",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Устаревшая настройка проекта draco для path: /var/lib/draco/memory.sqlite. Не использовать: значение заменено."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "draco:path:stale:2",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Устаревшая настройка проекта draco для path: /var/lib/draco/memory-v2.sqlite. Не использовать: значение заменено."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "draco:namespace:current",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Актуальная настройка проекта draco для namespace: prod-memory-v2."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "draco:namespace:stale:1",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Устаревшая настройка проекта draco для namespace: prod-memory. Не использовать: значение заменено."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "draco:namespace:stale:2",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Устаревшая настройка проекта draco для namespace: prod-memory-v1. Не использовать: значение заменено."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "draco:schedule:current",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Актуальная настройка проекта draco для schedule: 03:17 UTC."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "draco:schedule:stale:1",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Устаревшая настройка проекта draco для schedule: 03:00 UTC. Не использовать: значение заменено."
+          }
+        }
+      }
+    },
+    {
+      "object_mutation": {
+        "object_type": "Fact",
+        "create": {
+          "key": {
+            "fact_type": "project_state",
+            "subject": "draco:schedule:stale:2",
+            "scope": "project"
+          },
+          "values": {
+            "content": "Устаревшая настройка проекта draco для schedule: 03:15 UTC. Не использовать: значение заменено."
+          }
+        }
+      }
+    }
+  ]
+}
