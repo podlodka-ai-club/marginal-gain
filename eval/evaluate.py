@@ -16,10 +16,9 @@ import json
 import os
 import time
 from collections import defaultdict
-from pathlib import Path
 
 from domain import lifespan
-from eval import goldenset
+from eval import goldenset, levels
 from pipeline import suggest
 from infra import config, telemetry
 from storage import port
@@ -27,8 +26,7 @@ from storage import port
 # Набор лежит в корне репозитория, а не внутри пакета: его собирают, читают и
 # коммитят рядом с кодом. Путь абсолютный, потому что замер зовут и из корня, и
 # из хука, и из планировщика — текущий каталог у всех троих разный.
-ROOT = Path(__file__).resolve().parent.parent
-CASES = ROOT / "eval-cases.json"
+CASES = levels.DEFAULT_CASES
 RESULTS = config.state_dir() / "eval-results.jsonl"
 
 
@@ -115,6 +113,7 @@ def run_case(case, mode, min_score):
     verdict = judge(case, answer, known, error, raw=raw)
     return {
         "id": case["id"], "kind": case.get("kind", ""), "trace_id": tr.trace_id,
+        "difficulty": case.get("difficulty"),
         "query": case["query"], "ok": verdict["ok"],
         "found_in_answer": verdict["found_in_answer"],
         "false_find": verdict["false_find"], "sifted": cut,
@@ -128,16 +127,18 @@ def run_case(case, mode, min_score):
 
 def main():
     ap = argparse.ArgumentParser(description="Оценка памяти по золотому набору")
-    ap.add_argument("--cases", default=str(CASES))
+    ap.add_argument("--cases", default="")
     ap.add_argument("--only", help="только сценарии, чей id содержит эту строку")
     ap.add_argument("--kind", help="только этот вид случаев")
+    ap.add_argument("--difficulty", type=levels.parse_difficulty,
+                    help="уровень сложности: 4, 1,3 или 1-4")
     ap.add_argument("--mode", default="single", choices=["single", "raw", "xresponse"])
     ap.add_argument("--min-score", type=float, default=suggest.MIN_SCORE)
     ap.add_argument("--as-of", dest="as_of",
                     help="момент, на который считать сроки; по умолчанию из набора")
     args = ap.parse_args()
 
-    path = Path(args.cases)
+    path = levels.cases_path(args.cases, args.difficulty)
     if not path.exists():
         print("нет файла сценариев %s — собери его: python3 -m eval.goldenset" % path)
         return
@@ -154,10 +155,7 @@ def main():
     # из подсказки и из хука, и им про момент знать нечего.
     at = pin(args.as_of or goldenset.as_of(meta))
     print(state_line(at))
-    if args.only:
-        cases = [c for c in cases if args.only in c["id"]]
-    if args.kind:
-        cases = [c for c in cases if c.get("kind") == args.kind]
+    cases = levels.filter_cases(cases, args.only, args.kind, args.difficulty)
     if not cases:
         print("ни один случай не подошёл под отбор")
         return
@@ -223,6 +221,19 @@ def summary(rows):
     for kind in sorted(by_kind):
         total, ok, lost = by_kind[kind]
         lines.append("%-20s %8d %8d %16d" % (kind, total, ok, lost))
+    if any(r.get("difficulty") is not None for r in rows):
+        by_level = defaultdict(lambda: [0, 0, 0])
+        for r in rows:
+            rec = by_level[r.get("difficulty") or "без уровня"]
+            rec[0] += 1
+            rec[1] += r["ok"]
+            rec[2] += r["found_in_answer"] and not r["ok"]
+        lines.append("")
+        lines.append("%-20s %8s %8s %16s"
+                     % ("сложность", "всего", "прошло", "ответила, срезан"))
+        for level in sorted(by_level, key=str):
+            total, ok, lost = by_level[level]
+            lines.append("%-20s %8d %8d %16d" % (level, total, ok, lost))
     passed = sum(r["ok"] for r in rows)
     failed = sum(1 for r in rows if r["error"])
     answered = [r for r in rows if r["found_in_answer"]]
