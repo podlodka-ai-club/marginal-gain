@@ -101,7 +101,7 @@ from archive.transcripts import TRANSCRIPTS
 from domain import ledger, marks, query
 from eval import evaluate, pairs
 from pipeline import voice as voices
-from storage import db
+from storage import audit, db
 
 ROOT = Path(__file__).resolve().parent.parent
 HOOKS = ROOT / "hooks"
@@ -121,6 +121,13 @@ LIVE_STATE = Path.home() / ".local" / "state" / "memory-encoder"
 # набором. Ключ `--journal` меняет только этот путь — писать журнал прогон
 # обязан всегда, без ключа: то, что включается ключом, забудут включить.
 DEFAULT_JOURNAL = ROOT / "eval-runs.jsonl"
+
+# База аудита прогонов. Рядом с журналом, вне песочницы, по той же причине:
+# песочница одноразовая, а протокол шагов — то, ради чего непройденную пару
+# потом разбирают, — обязан её пережить (см. `storage.audit`). В git не идёт
+# (см. `.gitignore`): в отличие от журнала это не компактная сводимая
+# история, а бинарный файл, который растёт с каждым прогоном.
+DEFAULT_AUDIT_DB = ROOT / "eval-audit.db"
 
 # Три точки, те же и в том же порядке, что человек занимает по SETUP.md.
 POINTS = {
@@ -267,13 +274,19 @@ class Sandbox:
     не открывается: путь к нему проверяется до первого действия, а не после.
     """
 
-    def __init__(self, root=None, live_hooks=True, voice=None):
+    def __init__(self, root=None, live_hooks=True, voice=None, audit_db=None):
         self.root = Path(root or DEFAULT_ROOT / uuid.uuid4().hex[:12]).expanduser()
         self.state = self.root / "state"
         self.db = self.root / "memory.db"
         self.places = self.root / "places"
         self.archive = self.root / "archive"
         self.settings = self.root / "settings.json"
+        # Аудит — не состояние песочницы, а протокол шагов. База фактов уходит
+        # со сносом песочницы, аудит обязан её пережить (см. `storage.audit`):
+        # у непройденной пары другого следа не остаётся. Путь поэтому не под
+        # `self.root` вовсе, а рядом с журналом прогонов, снаружи, и не сходит
+        # со сносом ни при каком исходе.
+        self.audit_db = Path(audit_db).expanduser() if audit_db else DEFAULT_AUDIT_DB
         # Настроек двое. На первом этапе заняты все три точки — память
         # наполняется ходом. На втором конец хода не занят вовсе: задача
         # ставится из того же места, где сказали, и её текст вместе с ответом
@@ -311,6 +324,11 @@ class Sandbox:
                 or here in LIVE_STATE.parents):
             raise UnsafeRun("песочница %s задевает живое состояние %s — прогон отказан"
                             % (here, LIVE_STATE))
+        audit_here = self.audit_db.resolve() if self.audit_db.exists() else self.audit_db
+        if audit_here == LIVE_STATE or LIVE_STATE in audit_here.parents:
+            raise UnsafeRun(
+                "база аудита %s задевает живое состояние %s — прогон отказан"
+                % (audit_here, LIVE_STATE))
         ground = "%s/" % self.places
         bad = [mark for mark in NOT_CODE if mark in ground]
         if bad:
@@ -357,6 +375,9 @@ class Sandbox:
             "PYTHONPATH": str(ROOT),
             "XMEM_STATE_DIR": str(self.state),
             "XMEM_LOCAL_PATH": str(self.db),
+            # Аудит — не в песочницу: она сносится, а протокол шагов обязан
+            # пережить снос (см. `storage.audit`, `DEFAULT_AUDIT_DB`).
+            "XMEM_AUDIT_PATH": str(self.audit_db),
             "XMEM_QUEUE_PATH": str(self.state / "queue.jsonl"),
             "XMEM_LEDGER": str(self.state / "ledger.jsonl"),
             "MEM_TRACE_LOG": str(self.state / "trace.jsonl"),
@@ -838,14 +859,34 @@ def verdict_of(box, talk):
     return injected, reason, found
 
 
-def given_to(box, talk):
-    """Что именно память отдала в этот разговор. Пусто — значит промолчала."""
-    repo = db.Repository(box.db)
-    try:
-        return "\n".join(row.get("injected_content") or ""
-                         for row in repo.injections(talk))
-    finally:
-        repo.close()
+def fed_text_of(box, talk):
+    """Что именно память отдала в этот разговор. Пусто — значит промолчала.
+
+    Читаем аудит (шаг `inject`), а не хранилище инъекций: аудит — отдельная,
+    постоянная база (`box.audit_db`, см. `storage.audit`), и переживает снос
+    песочницы, а хранилище инъекций сносится вместе с ней. Строка несёт то же
+    самое дословно — `pipeline.suggest.attend` пишет её туда в момент вброса,
+    без пересборки задним числом. Вбросов у захода может быть несколько —
+    берём последний по времени записи (`rows` отдаёт их по порядку записи).
+    """
+    rows = audit.rows(where=box.audit_db, session_id=talk, step="inject")
+    if not rows:
+        return ""
+    return (rows[-1].get("output") or {}).get("text") or ""
+
+
+def record_reply(box, talk, task, text):
+    """Дословный ответ второй сессии — в аудит, шагом `reply`.
+
+    Конец хода на второй сессии снят намеренно (см. `Sandbox.wiring`): задача
+    ставится из того же места, где сказали, и записывать в базу вопрос вместе
+    с ответом на него нельзя — пара N подсказала бы паре N+1. Значит писать
+    ответ в протокол шагов больше некому, кроме самого замера, — иначе аудит
+    непройденной пары не нёс бы того единственного, по чему человек и решает,
+    перефразировал агент факт или проигнорировал.
+    """
+    audit.record("reply", session_id=talk, input={"task": task},
+                output={"replies": [text]}, where=box.audit_db)
 
 
 # --- где обрыв --------------------------------------------------------------
@@ -1197,6 +1238,7 @@ class Report:
         # как и цифры разных форм вброса, — и по той же причине называется в
         # шапке отчёта, а не молчит.
         self.model = model
+        self.audit_db = box.audit_db
         self.pairs = items
         self.played, self.asked, self.trail = [], [], []
         self.settled_at = None
@@ -1227,6 +1269,7 @@ class Report:
         lines = ["проигрыватель: %s%s" % (self.player, aside),
                  "форма вброса: %s" % self.voice,
                  "модель: %s" % (self.model or "не назван"),
+                 "аудит: %s" % self.audit_db,
                  "сыграно реплик: %d, задач поставлено: %d"
                  % (len(self.played), self.total),
                  "",
@@ -1295,7 +1338,7 @@ def talk_id():
 
 def run(pairs=None, root=None, player="replay", limit=None, only=None,
         keep=False, live_hooks=True, model=None, budget=None, quiet=2.0,
-        wait=None, echo=None, arm=None, voice=None):
+        wait=None, echo=None, arm=None, voice=None, audit_db=None):
     """Обе сессии каждой пары подряд, в своей песочнице. Отдаёт отчёт.
 
     `arm` — рука прогона: `memory` играет с нашим контуром, `bare` с
@@ -1322,7 +1365,7 @@ def run(pairs=None, root=None, player="replay", limit=None, only=None,
         items = items[:limit]
     turns = script_of(items)
 
-    box = Sandbox(root, live_hooks=live_hooks, voice=voice).open()
+    box = Sandbox(root, live_hooks=live_hooks, voice=voice, audit_db=audit_db).open()
     made = PLAYERS[player](box, **({"model": model, "budget": budget}
                                    if player == Agent.name else {}))
     report = Report(box, player, items, model=model)
@@ -1454,7 +1497,8 @@ def judge_one(box, pair, reply):
     """
     said = marks.strip(reply.text or "")
     injected, reason, found = verdict_of(box, reply.session_id)
-    known = given_to(box, reply.session_id)
+    record_reply(box, reply.session_id, pair["task"]["say"], said)
+    known = fed_text_of(box, reply.session_id)
     verdict = evaluate.judge(pair, said, known, reply.error, raw=known)
     expect = pair.get("expect") or []
     expect_in_feed = verdict["found_in_answer"] if expect else None
@@ -1577,6 +1621,9 @@ def parser():
     ap.add_argument("--journal", help="куда дописать строку журнала прогона; "
                                       "пишется всегда, ключ меняет только путь "
                                       "(по умолчанию %s)" % DEFAULT_JOURNAL.name)
+    ap.add_argument("--audit-db", help="куда писать протокол шагов; переживает "
+                                       "снос песочницы, ключ меняет только путь "
+                                       "(по умолчанию %s)" % DEFAULT_AUDIT_DB.name)
     ap.add_argument("--wait", type=float,
                     help="сколько секунд ждать конца хода; по умолчанию %g, "
                          "живому агенту может понадобиться больше"
@@ -1617,6 +1664,7 @@ def main(argv=None):
                                   limit=args.limit, only=args.only, keep=args.keep,
                                   model=args.model, budget=args.budget, arm=arm,
                                   wait=args.wait, voice=args.voice,
+                                  audit_db=args.audit_db,
                                   echo=lambda line: print(line, flush=True))
         except UnsafeRun as bad:
             print(bad, file=sys.stderr)

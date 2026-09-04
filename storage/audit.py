@@ -15,6 +15,12 @@
 Пишется всегда, без рубильника: наблюдение не имеет права быть тем, что можно
 выключить, иначе на выключенном рубильнике разбор снова слепнет молча.
 
+Путь к базе аудита — своя настройка, `path()` (`XMEM_AUDIT_PATH`), а не путь
+базы фактов напрямую: по умолчанию они совпадают (так живёт продукт — одна
+база на обе таблицы), но замер (`eval.live`) держит их порознь. Его песочница
+одноразовая — база фактов уходит с ней, а протокол шагов обязан пережить снос,
+иначе непройденная пара разбирается по памяти, а не по записи.
+
 Запись не имеет права уронить горячий путь или изменить его исход. Поэтому
 `record` никогда не бросает исключение наружу — она только наблюдает, и
 собственная авария наблюдения не должна стать аварией самого хода. Это и есть
@@ -28,6 +34,7 @@ import os
 import sqlite3
 import threading
 from datetime import datetime, timezone
+from pathlib import Path
 
 from storage import db as storage_db
 # Шаги цепочки — одна запись на оба писателя (сюда и в Repository._audit).
@@ -42,6 +49,21 @@ _LOCAL = threading.local()
 def run_id():
     """Номер прогона. Вне замера его нет — тогда поле пустое, а не выдуманное."""
     return os.environ.get("XMEM_RUN_ID") or ""
+
+
+def path():
+    """Куда пишется аудит: `XMEM_AUDIT_PATH`, иначе та же база, что и факты.
+
+    Совпадение с базой фактов — умолчание для живой работы: `Repository._audit`
+    (записи «забыл»/«свернул») пишет через уже открытое соединение к своей базе
+    и своего пути не спрашивает, так что для неё это единственный дом.
+
+    Отдельный путь нужен там, где база фактов одноразовая, а протокол обязан
+    её пережить: замер (`eval.live`) сносит песочницу целиком вместе с её
+    базой, а аудит непройденных пар — то, ради чего его потом читают.
+    """
+    named = (os.environ.get("XMEM_AUDIT_PATH") or "").strip()
+    return Path(named) if named else storage_db.path()
 
 
 def _cache():
@@ -61,11 +83,11 @@ def _connection(where=None):
     Кладётся в кэш процесса, чтобы разбор одного эпизода не открывал базу на
     каждый факт заново.
     """
-    target = str(where) if where else str(storage_db.path())
+    target = str(where) if where else str(path())
     cache = _cache()
     conn = cache.get(target)
     if conn is None:
-        conn = storage_db.connect(where)
+        conn = storage_db.connect(where or path())
         # Своё соединение конкурирует с `Repository.conn` за один файл. Срок
         # ожидания короткий и нарочно: запись стоит в горячем пути хука на
         # чтение (`pipeline.suggest`, под `HOOK_SECONDS`), и долгая заявка на
@@ -81,7 +103,7 @@ def _connection(where=None):
 def reset(where=None):
     """Забыть кэшированное соединение. Нужно проверкам: своя база на каждую."""
     cache = _cache()
-    target = str(where) if where else str(storage_db.path())
+    target = str(where) if where else str(path())
     conn = cache.pop(target, None)
     if conn is not None:
         try:
@@ -154,7 +176,7 @@ def rows(where=None, run=None, step=None, session_id=None):
     у него нет и не должно быть, иначе он читал бы то состояние, что видел на
     момент открытия, а не то, что там лежит сейчас.
     """
-    conn = storage_db.connect(where)
+    conn = storage_db.connect(where or path())
     try:
         conn.execute("PRAGMA busy_timeout = 200")
         storage_db.migrate(conn)

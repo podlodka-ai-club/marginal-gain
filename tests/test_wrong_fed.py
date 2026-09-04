@@ -40,7 +40,6 @@
   * упасть на строке журнала без нового поля                      → TestOldJournalRowsStillWork
 """
 import os
-import sqlite3
 import tempfile
 import unittest
 from collections import OrderedDict
@@ -53,7 +52,7 @@ os.environ.setdefault("XMEM_INSTANCE_ID", "test-instance")
 
 from domain import ledger
 from eval import live
-from storage import db
+from storage import audit
 
 FAST = settings(deadline=None, max_examples=100)
 
@@ -71,15 +70,10 @@ def a_row(id="пара", aim="apply", ok=False, injected=True, intruded=False,
     return row
 
 
-def seed_injection(base, session_id, content, at="2026-01-01T00:00:00+00:00"):
-    """Кладёт запись о вбросе прямо в базу — то, что читает `given_to`."""
-    conn = db.connect(base)
-    db.migrate(conn)
-    conn.execute(
-        'INSERT INTO memoryinjection (session_id, injected_at, injected_content) '
-        'VALUES (?, ?, ?)', (session_id, at, content))
-    conn.commit()
-    conn.close()
+def seed_injection(audit_db, session_id, content):
+    """Кладёт шаг `inject` в аудит — то, что читает `fed_text_of`."""
+    audit.record("inject", session_id=session_id, input={"kept": 1},
+                output={"text": content}, where=audit_db)
 
 
 def mark_injected(state_dir, session_id, at="2026-01-01T00:00:00Z"):
@@ -161,12 +155,12 @@ class TestExpectInFeedMatchesWhatReachedTheAgent(unittest.TestCase):
     """Свойство 2. Признак смотрит на вброшенный текст, не на ответ агента."""
 
     def _judge(self, tmp, expect, fed_text, said="неважно что ответил агент"):
-        base = Path(tmp) / "memory.db"
-        seed_injection(base, "talk-1", fed_text)
+        audit_db = Path(tmp) / "audit.db"
+        seed_injection(audit_db, "talk-1", fed_text)
         state = Path(tmp) / "state"
         state.mkdir()
         mark_injected(state, "talk-1")
-        box = mock.Mock(db=base, state=state)
+        box = mock.Mock(audit_db=audit_db, state=state)
         pair = {"id": "p", "aim": "apply", "task": {"say": "вопрос"},
                "expect": expect, "forbid": []}
         reply = live.Reply(text=said, session_id="talk-1", cost=0.0, error=None)
