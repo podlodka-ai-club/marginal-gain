@@ -147,6 +147,35 @@ class TestEachDefectIsCaught(unittest.TestCase):
             pairs.validate(broken)
 
 
+class TestMattersFieldIsOptional(unittest.TestCase):
+    """`matters` — условие релевантности факта. Необязательное, старые пары живы.
+
+    Мутации, на которых обязана покраснеть:
+      * `validate` требует `matters` у каждой пары  → test_a_pair_without_matters_still_passes
+      * `validate` принимает пустую строку/не-строку → test_a_blank_matters_is_rejected
+    """
+
+    @given(pair=VALID_PAIR)
+    @FAST
+    def test_a_pair_without_matters_still_passes(self, pair):
+        self.assertNotIn("matters", pair)
+        self.assertEqual(pair, pairs.validate(dict(pair)))
+
+    @given(pair=VALID_PAIR,
+           note=st.text(min_size=1, max_size=40).filter(lambda s: s.strip()))
+    @FAST
+    def test_a_pair_with_matters_passes_and_keeps_it(self, pair, note):
+        with_note = dict(pair, matters=note)
+        self.assertEqual(with_note, pairs.validate(with_note))
+
+    @given(pair=VALID_PAIR, blank=st.sampled_from(("", "   ", 7, [])))
+    @FAST
+    def test_a_blank_matters_is_rejected(self, pair, blank):
+        broken = dict(pair, matters=blank)
+        with self.assertRaises(pairs.PairSetError):
+            pairs.validate(broken)
+
+
 class TestEmptyTellIsOnlyOkForAvoid(unittest.TestCase):
     """Пустая сессия 1 — легальный случай ровно у отрицательной пары."""
 
