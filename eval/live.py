@@ -1165,19 +1165,27 @@ LABEL_OF_AIM = {"apply": "полнота", "avoid": "точность"}
 AimShare = namedtuple("AimShare", "aim passed total ratio")
 
 
-def aim_passed(row, aim):
-    """Успех одной строки под меру своей цели.
+def outcomes_counted_for(aim):
+    """Исходы, которые считаются удачей под эту цель. Один источник правды.
 
     `apply` меряет применение: вброс был и дошёл до ответа (`APPLIED`).
     `avoid` меряет удержание: запрещённого в ответе нет — не важно, нашёлся
     ли повод его приплести (`APPLIED`) или приплетать было решительно нечего
-    (`COINCIDED`). Обе ветки — те же самые «ok»-ветки `bucket()`; разошлась бы
-    эта строка с `bucket()` в понимании удачи — доля мерила бы не то, что
-    печатает отчёт про ту же пару.
+    (`COINCIDED`). Обе ветки — те же самые «ok»-ветки `bucket()`.
+
+    Названо исходами (`APPLIED`/`COINCIDED`), а не строкой: `aim_passed`
+    спрашивает через `bucket(row)` по сырой строке прогона, а
+    `journal_summary.summarize` — по уже посчитанному `outcome` в журнале,
+    где сырой строки давно нет. Разойдись правило по двум копиям — точка на
+    экране прогона и сводка по журналу стали бы расходиться в том, какая
+    пара «прошла», и ничего бы не покраснело.
     """
-    if aim == "avoid":
-        return bucket(row) in (APPLIED, COINCIDED)
-    return bucket(row) == APPLIED
+    return (APPLIED, COINCIDED) if aim == "avoid" else (APPLIED,)
+
+
+def aim_passed(row, aim):
+    """Успех одной строки под меру своей цели — см. `outcomes_counted_for`."""
+    return bucket(row) in outcomes_counted_for(aim)
 
 
 def share_of_aim(report, aim):

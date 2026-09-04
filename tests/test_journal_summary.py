@@ -20,16 +20,20 @@
    может расти по ходу цепочки: `разметка >= факт в БД >= кандидат >= вброс`.
 3. Пустой `break` засчитывает все четыре ступени; названный обрыв засчитывает
    строго ступени до него и ни одной после.
-4. Все счётчики — от 0 до общего числа прогонов пары, `passed` — честное
-   число `outcome == APPLIED`, тот же критерий, что у `Report.passed`.
+4. Все счётчики — от 0 до общего числа прогонов пары. `passed` считается по
+   `live.outcomes_counted_for(aim)` — том же источнике правды, по которому
+   `live.aim_passed` (и `Bout.window_line`) судит удачу: у `apply`-пары
+   строго `outcome == APPLIED`, у `avoid`-пары — `APPLIED` или `COINCIDED`
+   (см. `TestPassedCountRespectsAim` ниже).
 
 Мутации, на которых проверки обязаны краснеть:
   * не фильтровать по `only`, взять все строки, где есть пара нужного id
                                                         → TestOnlyCurtailedRunsCount
   * не фильтровать по руке (`arm`)                      → TestOnlyCurtailedRunsCount
   * засчитывать ступень после обрыва как пройденную      → TestStepsReached
-  * взять любой другой `outcome` вместо точного `APPLIED` для `passed`
+  * взять любой другой `outcome` вместо точного `APPLIED` для `apply`-пары
                                                         → TestPassedCount
+  * не засчитывать `COINCIDED` удачей `avoid`-паре       → TestPassedCountRespectsAim
 """
 import json
 import os

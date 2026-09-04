@@ -128,12 +128,13 @@ def summarize(rows, pair_id, arm=DEFAULT_ARM):
     """Сводка одной пары: сколько прогонов, по каждой ступени и по итогу.
 
     Возвращает `{"total": N, "steps": {ступень: сколько прошли}, "passed": M}`.
-    `passed` — та же удача, что печатает `Bout.window_line` под своей целью
-    (`live.aim_passed`): у `apply` строго `outcome == APPLIED`, у `avoid` —
-    `APPLIED` или `COINCIDED`, обе ветки, где приплетать было нечего или не
-    приплела. Пара сама несёт `aim` неизменным во всех своих строках; читаем
-    его из каждой строки, а не спрашиваем набор снаружи — сводка живёт одним
-    журналом.
+    `passed` считается по `live.outcomes_counted_for(aim)` — тому же
+    единственному источнику правды, по которому `live.aim_passed` (и
+    `Bout.window_line` через него) решает, прошла ли пара под свою цель. У
+    `apply` это строго `APPLIED`, у `avoid` — `APPLIED` или `COINCIDED`, обе
+    ветки, где приплетать было нечего или не приплела. Пара сама несёт `aim`
+    неизменным во всех своих строках; читаем его из каждой строки, а не
+    спрашиваем набор снаружи — сводка живёт одним журналом.
 
     Отрицательная пара (`aim == "avoid"`) не идёт в счёт ступеней: `break_of`
     вовсе не спрашивает у неё обрыв («у отрицательной пары ждать в базе
@@ -155,10 +156,8 @@ def summarize(rows, pair_id, arm=DEFAULT_ARM):
             reached = steps_reached(entry.get("break"))
             for step in live.STEPS:
                 steps[step] += int(reached[step])
-        outcome = entry.get("outcome")
-        ok = outcome in (live.APPLIED, live.COINCIDED) if avoid \
-            else outcome == live.APPLIED
-        passed += int(ok)
+        aim = "avoid" if avoid else "apply"
+        passed += int(entry.get("outcome") in live.outcomes_counted_for(aim))
     return {"total": len(entries), "steps": steps, "passed": passed}
 
 
