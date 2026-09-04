@@ -141,7 +141,7 @@ def _dump(value):
 
 
 def record(step, input=None, output=None, session_id=None, ok=True, where=None,
-          at=None):
+          at=None, run=None):
     """Одна строка аудита. Никогда не бросает — авария наблюдения не роняет ход.
 
     `ok` отделяет отказ от успеха тем же признаком, каким его увидел сам шаг, а
@@ -153,6 +153,14 @@ def record(step, input=None, output=None, session_id=None, ok=True, where=None,
     `ValueError`-ом до всякой попытки писать: опечатка в имени, проглоченная
     молча, значила бы для отчёта шаг, которого как будто не было вовсе, — а
     это именно та слепота, ради которой аудит и заведён.
+
+    `run` — номер прогона в обход окружения. Хуки читают его из `XMEM_RUN_ID`
+    (`run_id()`) — им подставляет его `Sandbox.env()` в свой подпроцесс. Но
+    вызывающий из процесса самого замера (не подпроцесса хода) своего
+    `XMEM_RUN_ID` в `os.environ` не имеет вовсе — эта переменная там и не
+    называлась, только в словаре для чужих подпроцессов, — и без явного `run`
+    такая строка (например, ответ второй сессии, `eval.live.record_reply`)
+    осела бы с пустым `run_id`, неотличимая от строки вне всякого прогона.
     """
     if step not in STEPS:
         raise ValueError("нет такого шага аудита: %r, известны: %s"
@@ -163,7 +171,8 @@ def record(step, input=None, output=None, session_id=None, ok=True, where=None,
             conn.execute(
                 'INSERT INTO audit (ts, run_id, session_id, step, ok, input, output) '
                 'VALUES (?, ?, ?, ?, ?, ?, ?)',
-                (at or datetime.now(timezone.utc).isoformat(), run_id(),
+                (at or datetime.now(timezone.utc).isoformat(),
+                 run if run is not None else run_id(),
                  session_id, step, 1 if ok else 0, _dump(input), _dump(output)))
     except Exception:
         pass    # аудит это наблюдение: его авария не имеет права уронить ход

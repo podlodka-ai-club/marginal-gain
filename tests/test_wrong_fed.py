@@ -160,7 +160,7 @@ class TestExpectInFeedMatchesWhatReachedTheAgent(unittest.TestCase):
         state = Path(tmp) / "state"
         state.mkdir()
         mark_injected(state, "talk-1")
-        box = mock.Mock(audit_db=audit_db, state=state)
+        box = mock.Mock(audit_db=audit_db, state=state, run_id="test-run")
         pair = {"id": "p", "aim": "apply", "task": {"say": "вопрос"},
                "expect": expect, "forbid": []}
         reply = live.Reply(text=said, session_id="talk-1", cost=0.0, error=None)

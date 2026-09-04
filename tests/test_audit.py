@@ -236,6 +236,29 @@ class TestRunId(unittest.TestCase):
                 audit.record("search", where=base)
                 self.assertEqual(audit.rows(where=base)[0]["run_id"], "")
 
+    def test_an_explicit_run_overrides_the_environment(self):
+        """Вызывающий, у которого своего `XMEM_RUN_ID` в окружении нет и быть
+        не может (сам процесс замера, не его подпроцесс-ход — см.
+        `eval.live.record_reply`), обязан иметь способ назвать номер прогона
+        прямо, а не только через переменную.
+        """
+        with tempfile.TemporaryDirectory() as tmp, \
+             mock.patch.dict(os.environ, {"XMEM_RUN_ID": "run-from-env"}):
+            base = Path(tmp) / "memory.db"
+            audit.reset(base)
+            audit.record("search", where=base, run="run-explicit")
+            self.assertEqual(audit.rows(where=base)[0]["run_id"], "run-explicit")
+
+    def test_an_explicit_run_works_with_no_environment_variable_at_all(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            env = dict(os.environ)
+            env.pop("XMEM_RUN_ID", None)
+            with mock.patch.dict(os.environ, env, clear=True):
+                base = Path(tmp) / "memory.db"
+                audit.reset(base)
+                audit.record("search", where=base, run="run-explicit")
+                self.assertEqual(audit.rows(where=base)[0]["run_id"], "run-explicit")
+
 
 class TestAuditPath(unittest.TestCase):
     """`path()`: `XMEM_AUDIT_PATH` сильнее умолчания, умолчание — база фактов.

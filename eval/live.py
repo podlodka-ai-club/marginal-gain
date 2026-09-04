@@ -324,11 +324,26 @@ class Sandbox:
                 or here in LIVE_STATE.parents):
             raise UnsafeRun("песочница %s задевает живое состояние %s — прогон отказан"
                             % (here, LIVE_STATE))
-        audit_here = self.audit_db.resolve() if self.audit_db.exists() else self.audit_db
+        # `.resolve()` без условия на `.exists()`: с Python 3.6 он нормализует
+        # путь и без файла на диске (`strict=False` по умолчанию), а условная
+        # версия (как у `here` выше, ради обратной совместимости с прежним
+        # поведением) пропускала бы относительный ещё не существующий путь
+        # неразрешённым — и сравнение с абсолютным `LIVE_STATE` молчало бы
+        # мимо. Аудиту, в отличие от корня, нечего сравнивать со старой формой:
+        # проверка новая целиком.
+        audit_here = self.audit_db.resolve()
         if audit_here == LIVE_STATE or LIVE_STATE in audit_here.parents:
             raise UnsafeRun(
                 "база аудита %s задевает живое состояние %s — прогон отказан"
                 % (audit_here, LIVE_STATE))
+        # База аудита обязана пережить снос песочницы (см. `storage.audit`,
+        # докстринг `Sandbox.__init__`): лечь ей внутрь `self.root` нельзя —
+        # `close()` сносит его целиком вместе со всем, что там лежит.
+        root_here = self.root.resolve()
+        if audit_here == root_here or root_here in audit_here.parents:
+            raise UnsafeRun(
+                "база аудита %s лежит внутри песочницы %s — снос убьёт то, что "
+                "обязано его пережить" % (audit_here, root_here))
         ground = "%s/" % self.places
         bad = [mark for mark in NOT_CODE if mark in ground]
         if bad:
@@ -884,9 +899,15 @@ def record_reply(box, talk, task, text):
     ответ в протокол шагов больше некому, кроме самого замера, — иначе аудит
     непройденной пары не нёс бы того единственного, по чему человек и решает,
     перефразировал агент факт или проигнорировал.
+
+    `run=box.run_id` — не полагаемся на `XMEM_RUN_ID` в окружении: эта
+    переменная называется только в словаре для чужих подпроцессов
+    (`Sandbox.env()`), а сам процесс замера её себе не выставляет. Без явного
+    номера строка этого шага осела бы с пустым `run_id` — неотличимая от
+    записи вне всякого прогона, хотя прогон у неё есть.
     """
     audit.record("reply", session_id=talk, input={"task": task},
-                output={"replies": [text]}, where=box.audit_db)
+                output={"replies": [text]}, where=box.audit_db, run=box.run_id)
 
 
 # --- где обрыв --------------------------------------------------------------

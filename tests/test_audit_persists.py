@@ -150,6 +150,71 @@ class TestCheckGuardsTheAuditDbToo(unittest.TestCase):
                                audit_db=Path(tmp) / "audit.db")
             box.check()   # не должно бросить
 
+    def test_an_audit_db_inside_the_sandbox_root_is_refused(self):
+        """Аудит обязан пережить снос — лечь внутрь `root` ему нельзя: `close()`
+        сносит `self.root` целиком, вместе со всем, что там лежит."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "sandbox"
+            box = live.Sandbox(root=root, audit_db=root / "audit.db")
+            with self.assertRaises(live.UnsafeRun) as caught:
+                box.check()
+            self.assertIn("аудит", str(caught.exception))
+
+    def test_the_sandbox_root_itself_as_audit_db_is_refused(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp) / "sandbox"
+            box = live.Sandbox(root=root, audit_db=root)
+            with self.assertRaises(live.UnsafeRun) as caught:
+                box.check()
+            self.assertIn("аудит", str(caught.exception))
+
+    def test_a_relative_not_yet_existing_audit_db_inside_live_state_is_refused(self):
+        """Относительный путь, которого ещё нет на диске, обязан разрешиться до
+        абсолютного и пройти ту же проверку — иначе живое состояние молча
+        проскакивает мимо, пока за него не отвечает ни один существующий файл.
+
+        Условная версия (`.resolve()` только если файл уже есть, как раньше
+        было и для `audit_db`) сравнивала бы здесь неразрешённый относительный
+        путь с абсолютным `LIVE_STATE` — и не совпало бы никогда.
+
+        `LIVE_STATE` подменён своим временным каталогом: настоящее живое
+        состояние пользователя эта проверка трогать не имеет права даже
+        `mkdir`-ом, не то что записью.
+        """
+        with tempfile.TemporaryDirectory() as fake_home:
+            # `.resolve()` сразу: `tempfile` на macOS отдаёт путь через
+            # `/var/folders/...`, а `/var` — симлинк на `/private/var`.
+            # Не разреши его здесь — и `Path.cwd()` внутри `resolve()` ниже
+            # вернёт уже расправленный путь, который не совпадёт с этим же
+            # каталогом, взятым как есть: тест сравнивал бы два имени одного
+            # и того же места и красил бы себя, а не код.
+            fake_live_state = (Path(fake_home) / "live-state").resolve()
+            fake_live_state.mkdir(parents=True)
+            was = os.getcwd()
+            os.chdir(fake_live_state)
+            try:
+                with mock.patch.object(live, "LIVE_STATE", fake_live_state), \
+                     tempfile.TemporaryDirectory() as tmp:
+                    box = live.Sandbox(root=Path(tmp) / "sandbox",
+                                       audit_db=Path("ещё-не-созданный/audit.db"))
+                    with self.assertRaises(live.UnsafeRun) as caught:
+                        box.check()
+                    self.assertIn("аудит", str(caught.exception))
+            finally:
+                os.chdir(was)
+
+    def test_a_relative_not_yet_existing_audit_db_elsewhere_is_fine(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            was = os.getcwd()
+            os.chdir(tmp)
+            try:
+                root = Path(tmp) / "sandbox"
+                box = live.Sandbox(root=root, audit_db=Path("ещё-нет/audit.db"))
+                box.check()   # не должно бросить — путь свежий и снаружи LIVE_STATE
+                self.assertFalse((Path(tmp) / "ещё-нет" / "audit.db").exists())
+            finally:
+                os.chdir(was)
+
 
 # --- 5. ответ второй сессии — шагом `reply` ----------------------------------
 
@@ -160,7 +225,7 @@ class TestTheSecondSessionAnswerIsAudited(unittest.TestCase):
         audit_db = Path(tmp) / "audit.db"
         state = Path(tmp) / "state"
         state.mkdir()
-        box = mock.Mock(audit_db=audit_db, state=state)
+        box = mock.Mock(audit_db=audit_db, state=state, run_id="test-run")
         pair = {"id": "макбук", "aim": "apply", "task": {"say": "какой у меня ноутбук?"},
                "expect": ["M5"], "forbid": []}
         reply = live.Reply(text=said, session_id="talk-x", cost=0.0, error=None)
@@ -173,6 +238,16 @@ class TestTheSecondSessionAnswerIsAudited(unittest.TestCase):
             self.assertEqual(len(rows), 1)
             self.assertIn("MacBook Pro M5",
                           rows[0]["output"]["replies"][0])
+
+    def test_the_row_carries_the_run_id_explicitly(self):
+        """`XMEM_RUN_ID` в окружении процесса замера не называется вовсе — оно
+        только в словаре для чужих подпроцессов (`Sandbox.env()`). Без явного
+        `run=box.run_id` этот шаг осел бы с пустым `run_id`, неотличимый от
+        строки вне всякого прогона, хотя прогон у неё есть.
+        """
+        with tempfile.TemporaryDirectory() as tmp:
+            rows = self._reply_rows(tmp)
+            self.assertEqual(rows[0]["run_id"], "test-run")
 
     def test_the_answer_is_readable_text_not_an_opaque_blob(self):
         """Человек должен прочитать ответ глазами, не расшифровывать формат."""
@@ -210,7 +285,7 @@ class TestTheOutcomeClassIsRecoverableFromTheAuditAlone(unittest.TestCase):
             state.mkdir()
             from domain import ledger
             ledger.injected("s", "2026-01-01T00:00:00Z", log=state / "ledger.jsonl")
-            box = mock.Mock(audit_db=audit_db, state=state)
+            box = mock.Mock(audit_db=audit_db, state=state, run_id="test-run")
             pair = {"id": "макбук", "aim": "apply", "task": {"say": "?"},
                    "expect": ["M5"], "forbid": []}
             reply = live.Reply(text="у тебя 14-дюймовый экран", session_id="s",
@@ -231,7 +306,7 @@ class TestTheOutcomeClassIsRecoverableFromTheAuditAlone(unittest.TestCase):
             state.mkdir()
             from domain import ledger
             ledger.injected("s", "2026-01-01T00:00:00Z", log=state / "ledger.jsonl")
-            box = mock.Mock(audit_db=audit_db, state=state)
+            box = mock.Mock(audit_db=audit_db, state=state, run_id="test-run")
             pair = {"id": "макбук", "aim": "apply", "task": {"say": "?"},
                    "expect": ["M5"], "forbid": []}
             reply = live.Reply(text="у тебя хороший ноутбук", session_id="s",

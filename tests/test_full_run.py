@@ -144,8 +144,15 @@ class Base(unittest.TestCase):
     def setUp(self):
         self.root = sandbox_root()
         self.sets = self.root.parent / (self.root.name + "-sets")
+        # Аудит теперь своя, постоянная база (`Sandbox.audit_db`), вне
+        # каталога песочницы по умолчанию — не названа явно, легла бы в
+        # настоящий `eval-audit.db` репозитория и наследила бы там при каждом
+        # прогоне проверок. Своя, тут же убираемая, держит её в песочнице
+        # проверки, а не в рабочем дереве разработчика.
+        self.audit_db = self.root.parent / (self.root.name + "-audit.db")
         self.addCleanup(shutil.rmtree, self.root, ignore_errors=True)
         self.addCleanup(shutil.rmtree, self.sets, ignore_errors=True)
+        self.addCleanup(lambda: self.audit_db.unlink(missing_ok=True))
 
     def leaked(self):
         """Следы прогона в живом состоянии. Ищем по пути его песочницы.
@@ -419,7 +426,8 @@ class TestTheBaseStartsEmpty(Base):
                  for pair in filling]
         items = filling + probe
 
-        first = live.run(pairs=items, player="replay", root=self.root, quiet=0.0)
+        first = live.run(pairs=items, player="replay", root=self.root, quiet=0.0,
+                         audit_db=self.audit_db)
         won = [row for row in first.asked
                if not row["id"].endswith("-щуп")
                and live.bucket(row) == live.APPLIED]
@@ -433,7 +441,8 @@ class TestTheBaseStartsEmpty(Base):
         # собой. Ноль оставляют нарочно — разбирать обрыв иначе не по чему.
         self.assertFalse(first.root.exists(), "песочница осталась на диске")
 
-        second = live.run(pairs=items, player="replay", root=self.root, quiet=0.0)
+        second = live.run(pairs=items, player="replay", root=self.root, quiet=0.0,
+                          audit_db=self.audit_db)
         self.assertEqual(first.passed, second.passed,
                          "два прогона одного набора дали разные цифры: %d и %d"
                          % (first.passed, second.passed))
@@ -444,7 +453,7 @@ class TestTheBaseStartsEmpty(Base):
         empty = self.sets / "probe.json"
         pairs.dump(empty, probe)
         clean = live.run(pairs=a_load(empty), player="replay",
-                         root=self.root, quiet=0.0)
+                         root=self.root, quiet=0.0, audit_db=self.audit_db)
         self.assertEqual([], [row for row in clean.asked if row["injected"]],
                          "третий прогон получил подсказку из базы прошлых")
         self.assertEqual([], self.leaked(), "прогон наследил в живом состоянии")
@@ -453,7 +462,8 @@ class TestTheBaseStartsEmpty(Base):
         # по рукам, печать итога. Набор тот же пустой — ходов он не играет, и
         # проверка стоит секунды.
         self.assertEqual(0, live.main(["--pairs", str(empty), "--player", "replay",
-                                       "--root", str(self.root / "команда")]),
+                                       "--root", str(self.root / "команда"),
+                                       "--audit-db", str(self.audit_db)]),
                          "штатная команда не отработала")
 
 
@@ -480,7 +490,8 @@ class TestMemoryArrivesThroughTheHooks(Base):
         items = a_load(cases)
 
         hushed = live.run(pairs=items, player="replay", root=self.root / "глухой",
-                          keep=True, live_hooks=False, quiet=0.0)
+                          keep=True, live_hooks=False, quiet=0.0,
+                          audit_db=self.audit_db)
         repo = db.Repository(hushed.root / "memory.db")
         try:
             self.assertEqual([], repo.search("альфа"),
@@ -489,7 +500,8 @@ class TestMemoryArrivesThroughTheHooks(Base):
             repo.close()
 
         report = live.run(pairs=items, player="replay", root=self.root / "живой",
-                          keep=True, live_hooks=True, quiet=0.0)
+                          keep=True, live_hooks=True, quiet=0.0,
+                          audit_db=self.audit_db)
         repo = db.Repository(report.root / "memory.db")
         try:
             self.assertTrue(repo.search("альфа"),
@@ -672,7 +684,8 @@ class TestTheWaitGivesUpOnTime(Base):
 
         live.settled = watched
         try:
-            live.run(pairs=[], player="replay", root=self.root, wait=77.0)
+            live.run(pairs=[], player="replay", root=self.root, wait=77.0,
+                    audit_db=self.audit_db)
         finally:
             live.settled = real
         self.assertEqual([77.0], seen,
@@ -817,7 +830,7 @@ class TestTheSecondStageDoesNotWrite(Base):
         cases = a_set(self.sets, {"альфа": names(2), "бета": names(2)})
         items = a_load(cases)
         report = live.run(pairs=items, player="replay",
-                          root=self.root, keep=True)
+                          root=self.root, keep=True, audit_db=self.audit_db)
         self.addCleanup(shutil.rmtree, report.root, ignore_errors=True)
         repo = db.Repository(report.root / "memory.db")
         try:
