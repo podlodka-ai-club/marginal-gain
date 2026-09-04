@@ -1149,6 +1149,52 @@ def in_window(share):
     return share is not None and share >= THRESHOLD
 
 
+# --- две доли: полнота и точность --------------------------------------------
+#
+# Одна доля смешивала разное: пара, которой нужно вставить факт (`apply`), и
+# пара, которой нужно его придержать (`avoid`), считались одним и тем же
+# «применила». Задранная точность подтягивала общий счёт за пары, которые
+# ничего не проверяли, кроме молчания там, где приплести было неоткуда, — и
+# наоборот. Порог 70% на смешанной доле такую подмену не ловит, порог на
+# каждой доле порознь — ловит.
+
+# Подпись доли под свою цель: apply и avoid читаются людьми по-разному, хотя
+# считаются одной и той же функцией.
+LABEL_OF_AIM = {"apply": "полнота", "avoid": "точность"}
+
+AimShare = namedtuple("AimShare", "aim passed total ratio")
+
+
+def aim_passed(row, aim):
+    """Успех одной строки под меру своей цели.
+
+    `apply` меряет применение: вброс был и дошёл до ответа (`APPLIED`).
+    `avoid` меряет удержание: запрещённого в ответе нет — не важно, нашёлся
+    ли повод его приплести (`APPLIED`) или приплетать было решительно нечего
+    (`COINCIDED`). Обе ветки — те же самые «ok»-ветки `bucket()`; разошлась бы
+    эта строка с `bucket()` в понимании удачи — доля мерила бы не то, что
+    печатает отчёт про ту же пару.
+    """
+    if aim == "avoid":
+        return bucket(row) in (APPLIED, COINCIDED)
+    return bucket(row) == APPLIED
+
+
+def share_of_aim(report, aim):
+    """Доля руки под одну цель пары. Пар этой цели не было — доли нет, а не ноль.
+
+    Смешивать `apply` и `avoid` в одном отношении значило бы разрешить
+    задранной точности прикрыть провал полноты (или наоборот) — раздел на две
+    доли и завёлся затем, чтобы этого не могло случиться незаметно.
+    """
+    rows = [row for row in report.asked if row.get("aim", "apply") == aim]
+    total = len(rows)
+    if not total:
+        return None
+    passed = sum(1 for row in rows if aim_passed(row, aim))
+    return AimShare(aim, passed, total, passed / total)
+
+
 # --- руки -------------------------------------------------------------------
 #
 # Рука — это один прогон одного и того же набора при одной настройке контура.
@@ -1228,19 +1274,29 @@ class Bout:
         return "\n".join(out).rstrip()
 
     def window_line(self):
-        """Доля руки с памятью и вердикт по ней: в окне или ниже порога.
+        """Полнота и точность руки с памятью, вердикт по каждой порознь.
 
         Только рука с памятью: голая — отрицательный контроль, её цифра к
-        порогу отношения не имеет и вердикт менять не должна.
+        порогу отношения не имеет и вердикт менять не должна. Порог 70%
+        проверяется на каждой доле отдельно — одна не прикрывает другую
+        (см. `share_of_aim`), и строка называет обе, даже когда пар одной из
+        целей не было вовсе.
         """
         report = self.reports["memory"]
-        share = share_of(report)
         pct = "%d%%" % round(THRESHOLD * 100)
-        if share is None:
-            return "доля руки с памятью: пар не было — порог %s не проверить" % pct
-        verdict = "в окне" if in_window(share) else "ниже порога"
-        return ("доля руки с памятью: %d из %d = %.0f%% — %s (порог %s)"
-               % (report.passed, report.total, share * 100, verdict, pct))
+        lines = []
+        for aim in pairs.AIMS:
+            label = LABEL_OF_AIM[aim]
+            share = share_of_aim(report, aim)
+            if share is None:
+                lines.append("%s руки с памятью: пар не было — порог %s не проверить"
+                             % (label, pct))
+                continue
+            verdict = "в окне" if in_window(share.ratio) else "ниже порога"
+            lines.append("%s руки с памятью: %d из %d = %.0f%% — %s (порог %s)"
+                         % (label, share.passed, share.total, share.ratio * 100,
+                            verdict, pct))
+        return "\n".join(lines)
 
 
 # --- отчёт ------------------------------------------------------------------
@@ -1575,14 +1631,26 @@ def journal_row(played, player, model, pairs_file, pairs_count,
     в нём неотличим от полного. Без явных полей такая строка тихо смешалась
     бы со строками полных прогонов и подвинула бы знаменатель «сколько из
     десяти».
+
+    Рядом со старой смешанной долей (`"share"`, `apply` и `avoid` пар вместе)
+    строка несёт обе доли порознь, `"apply"` и `"avoid"`, каждая своим
+    `passed`/`total`/`share` — той же формы, что и старое поле, и тем же
+    `None` вместо нуля, если пар этой цели в прогоне не было.
     """
     arms = {}
     for arm, report in played.items():
+        by_aim = {}
+        for aim in pairs.AIMS:
+            share = share_of_aim(report, aim)
+            by_aim[aim] = {"passed": share.passed if share else 0,
+                          "total": share.total if share else 0,
+                          "share": share.ratio if share else None}
         arms[arm] = {
             "passed": report.passed, "total": report.total,
             "share": share_of(report), "cost_usd": report.cost,
             "pairs": [pair_row(report, row) for row in report.asked],
         }
+        arms[arm].update(by_aim)
     voice = next(iter(played.values())).voice if played else None
     return {
         "ts": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),

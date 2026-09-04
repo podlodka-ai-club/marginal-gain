@@ -128,8 +128,12 @@ def summarize(rows, pair_id, arm=DEFAULT_ARM):
     """Сводка одной пары: сколько прогонов, по каждой ступени и по итогу.
 
     Возвращает `{"total": N, "steps": {ступень: сколько прошли}, "passed": M}`.
-    `passed` — то же «засчитана», что в отчёте прогона: `bucket(row) == APPLIED`
-    (`Report.passed`), не свой пересчёт удачи.
+    `passed` — та же удача, что печатает `Bout.window_line` под своей целью
+    (`live.aim_passed`): у `apply` строго `outcome == APPLIED`, у `avoid` —
+    `APPLIED` или `COINCIDED`, обе ветки, где приплетать было нечего или не
+    приплела. Пара сама несёт `aim` неизменным во всех своих строках; читаем
+    его из каждой строки, а не спрашиваем набор снаружи — сводка живёт одним
+    журналом.
 
     Отрицательная пара (`aim == "avoid"`) не идёт в счёт ступеней: `break_of`
     вовсе не спрашивает у неё обрыв («у отрицательной пары ждать в базе
@@ -146,11 +150,15 @@ def summarize(rows, pair_id, arm=DEFAULT_ARM):
     steps = OrderedDict((step, 0) for step in live.STEPS)
     passed = 0
     for entry in entries:
-        if entry.get("aim") != "avoid":
+        avoid = entry.get("aim") == "avoid"
+        if not avoid:
             reached = steps_reached(entry.get("break"))
             for step in live.STEPS:
                 steps[step] += int(reached[step])
-        passed += int(entry.get("outcome") == live.APPLIED)
+        outcome = entry.get("outcome")
+        ok = outcome in (live.APPLIED, live.COINCIDED) if avoid \
+            else outcome == live.APPLIED
+        passed += int(ok)
     return {"total": len(entries), "steps": steps, "passed": passed}
 
 

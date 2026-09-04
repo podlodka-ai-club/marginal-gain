@@ -662,13 +662,32 @@ class TestTheArmsAreCountedApart(unittest.TestCase):
         self.assertEqual(live.hooks_of_arm("bare"), False)
 
 
+def _a_row(id, ok):
+    return {"id": id, "aim": "apply", "ok": ok, "injected": ok,
+           "intruded": False, "error": None, "reason": None}
+
+
 class FakeReport:
-    """Отчёт руки, из которого нужны только цифры."""
+    """Отчёт руки: `passed` строк применили факт из `total`, все цели `apply`.
+
+    Ряды нужны, а не только счёт: `Bout.window_line` считает долю по
+    `report.asked` (`live.share_of_aim`), и фейку нужно то же сырьё, что несёт
+    настоящий отчёт.
+    """
 
     def __init__(self, passed, total):
-        self.passed, self.total = passed, total
+        self.asked = ([_a_row("p%d" % i, True) for i in range(passed)]
+                     + [_a_row("f%d" % i, False) for i in range(total - passed)])
         self.root = Path("/тут/песочница")
         self.probe = {}
+
+    @property
+    def passed(self):
+        return sum(1 for row in self.asked if live.bucket(row) == live.APPLIED)
+
+    @property
+    def total(self):
+        return len(self.asked)
 
     def text(self):
         return "итог: %d из %d" % (self.passed, self.total)

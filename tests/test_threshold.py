@@ -40,11 +40,32 @@ ROOT = Path(__file__).resolve().parent.parent
 FAST = settings(deadline=None, max_examples=100)
 
 
+def a_row(id, ok):
+    return {"id": id, "aim": "apply", "ok": ok, "injected": ok,
+           "intruded": False, "error": None, "reason": None}
+
+
 class FakeReport:
+    """Рука: `passed` строк применили факт, `total - passed` — нет. Все `apply`.
+
+    Ряды строятся, а не хранятся отдельным полем: `Bout.window_line` теперь
+    считает долю по `report.asked` (`live.share_of_aim`), и фейку нужно нести
+    то же самое сырьё, что несёт настоящий отчёт, а не подставное число.
+    """
+
     def __init__(self, passed, total):
-        self.passed, self.total = passed, total
+        self.asked = ([a_row("p%d" % i, True) for i in range(passed)]
+                     + [a_row("f%d" % i, False) for i in range(total - passed)])
         self.root = Path("/тут/песочница")
         self.probe = {}
+
+    @property
+    def passed(self):
+        return sum(1 for row in self.asked if live.bucket(row) == live.APPLIED)
+
+    @property
+    def total(self):
+        return len(self.asked)
 
     def text(self):
         return "итог: %d из %d" % (self.passed, self.total)

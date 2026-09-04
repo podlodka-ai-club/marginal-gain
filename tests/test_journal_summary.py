@@ -175,6 +175,42 @@ class TestPassedCount(unittest.TestCase):
         self.assertLessEqual(summary["passed"], summary["total"])
 
 
+# --- passed у отрицательной пары: то же правило, что у полноты/точности ------
+
+class TestPassedCountRespectsAim(unittest.TestCase):
+    """`summarize` считает удачу той же меркой, что и `live.aim_passed`.
+
+    У `apply` считается только `APPLIED`. У `avoid` — и `APPLIED`, и
+    `COINCIDED`: обе ветки, где приплетать было нечего или не приплела,
+    удержание состоялось. Старая мерка (только `APPLIED`) недосчитывала
+    отрицательные пары без соблазна почти всегда — они честно молчат
+    (`COINCIDED`), «применила» с вбросом там редкость.
+    """
+
+    @given(outcomes=st.lists(OUTCOMES, min_size=0, max_size=12))
+    @FAST
+    def test_avoid_passed_counts_applied_and_coincided(self, outcomes):
+        entries = [a_pair_entry(id="забор", aim="avoid", outcome=o)
+                  for o in outcomes]
+        rows = [a_journal_row(only="забор", arm_pairs=[e]) for e in entries]
+        summary = js.summarize(rows, "забор")
+        want = sum(1 for o in outcomes if o in (live.APPLIED, live.COINCIDED))
+        self.assertEqual(summary["passed"], want)
+
+    def test_avoid_intruded_is_not_passed(self):
+        entry = a_pair_entry(id="забор", aim="avoid", outcome=live.INTRUDED)
+        row = a_journal_row(only="забор", arm_pairs=[entry])
+        summary = js.summarize([row], "забор")
+        self.assertEqual(summary["passed"], 0)
+
+    def test_apply_coincided_is_still_not_passed(self):
+        """Полноте совпадение без вброса не в зачёт — это правило не тронуто."""
+        entry = a_pair_entry(id="макбук", aim="apply", outcome=live.COINCIDED)
+        row = a_journal_row(only="макбук", arm_pairs=[entry])
+        summary = js.summarize([row], "макбук")
+        self.assertEqual(summary["passed"], 0)
+
+
 # --- пример, взятый из настоящей строки журнала --------------------------------
 
 class TestAKnownExample(unittest.TestCase):
@@ -410,6 +446,31 @@ class TestAMissingFieldOnOnePairDoesNotAbortItsNeighbour(unittest.TestCase):
                 js.main(["--journal", str(path), "--pair", "макбук", "--pair", "город"])
         self.assertIn("город", out.getvalue())
         self.assertIn("1 из 1", out.getvalue())
+
+
+# --- старая строка журнала без новых полей не роняет сводку --------------------
+
+class TestAnOldJournalLineWithoutTheNewFieldsStillSummarizes(unittest.TestCase):
+    """Строка, записанная до раздела доли надвое, не несёт ни `arms.*.apply`,
+    ни `arms.*.avoid` — только общие `passed`/`total`/`share`. Сводка читает
+    только `pairs` внутри руки (`id`, `aim`, `outcome`, `break`), которые были
+    в строке и до этой задачи, и обязана прочесть такую строку как обычно, а
+    не упасть на отсутствующих полях.
+    """
+
+    def test_a_pre_split_line_summarizes_without_crashing(self):
+        old_row = {
+            "ts": "2026-01-01T00:00:00Z", "model": "haiku", "player": "claude",
+            "voice": "opora", "pairs_file": "n.json", "pairs_count": 1,
+            "only": "макбук", "limit": None,
+            "arms": {"memory": {"passed": 0, "total": 1, "share": 0.0,
+                                "cost_usd": 0.01,
+                                "pairs": [a_pair_entry(id="макбук",
+                                                       outcome=live.UNUSED)]}},
+        }
+        summary = js.summarize([old_row], "макбук")
+        self.assertEqual(summary["total"], 1)
+        self.assertEqual(summary["passed"], 0)
 
 
 # --- рука по умолчанию не расходится с eval.live --------------------------------
