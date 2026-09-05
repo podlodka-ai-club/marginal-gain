@@ -24,6 +24,10 @@
    угадывание не засчитывается.
 4. Ожидания и запреты — куски слов, а не фразы: одно слово без пробелов, и
    вхождение ловит любую падежную форму.
+4a. Факт достижим поиском по словам задачи: у каждой реплики первой сессии
+   есть общее слово с задачей второй. Поиск в базе идёт словами вопроса
+   (`storage.db.Repository.search`), и запись без общего слова не находится
+   вовсе — прогон покажет «память ничего не нашла», хотя факт лежит в базе.
 5. Семь прежних пар на месте, id уникальны, конверт считает столько же, сколько
    в списке.
 
@@ -33,6 +37,7 @@
     перестали исключать друг друга
   * критерий стал проходить на нейтральном списке → TestGuessingCannotPass
   * ожидание записали целой фразой или словоформой→ TestCriteriaAreWordStems
+  * факт переписали так, что поиск его не достаёт → TestTheFactIsReachableFromTheTask
   * прежнюю пару выкинули или переименовали       → TestTheOldSevenAreStillThere
 """
 import os
@@ -43,6 +48,7 @@ from hypothesis import given, settings, strategies as st
 
 os.environ.setdefault("XMEM_INSTANCE_ID", "test-instance")
 
+from domain import query
 from eval import evaluate, pairs
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -233,6 +239,31 @@ class TestCriteriaAreWordStems(Base):
                 self.assertIn(token.lower(), said.lower(),
                               "%s: форма %r не ловится куском %r"
                               % (id_, form, token))
+
+
+class TestTheFactIsReachableFromTheTask(Base):
+    """У каждой реплики есть общее слово с задачей — иначе поиск её не достанет.
+
+    Стоило прогона: «Я вегетарианец: мяса и рыбы не ем совсем» и «Составь
+    список покупок на неделю» не делят ни одного слова, и запись, честно
+    лежащая в базе, в выдачу не попала ни разу. Снаружи это выглядело как
+    слабая память, а было непроходимой парой.
+
+    Сравниваем той же парой функций, какой сравнивает сама база: слова вопроса
+    через `query.words`, содержимое записи через `query.key`. Своя копия
+    правила разъехалась бы с поиском молча.
+    """
+
+    def test_every_line_shares_a_word_with_the_task(self):
+        for id_, pair in self.triple.items():
+            asked = set(query.words(pair["task"]["say"]))
+            self.assertTrue(asked, "%s: в задаче не осталось слов поиска" % id_)
+            for turn in pair["tell"]:
+                said = set(query.key(turn["say"]).split())
+                self.assertTrue(
+                    asked & said,
+                    "%s: реплика %r не делит с задачей ни одного слова — "
+                    "поиск её не достанет" % (id_, turn["say"]))
 
 
 class TestTheOldSevenAreStillThere(unittest.TestCase):
