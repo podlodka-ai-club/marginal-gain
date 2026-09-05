@@ -71,9 +71,18 @@ def judge(case, answer, known, error, raw=None):
     случайно попавшее внутрь команды в событии, записывалось в «нашли» и
     навсегда оставалось необъяснимой потерей. Одно правило на обе стороны,
     иначе «нашли» и «отдали» меряют разные миры.
+
+    Категории (`vocab`, разрешённые загрузчиком набора из имён в закрытые
+    словари, см. `eval.pairs`) судятся здесь же и тем же вхождением строки, а
+    не своим правилом: разойдись они, «было в ответе мясо» отвечало бы одной
+    линейкой, а «было ожидаемое» — другой. Категория ожидается хотя бы одним
+    своим словом и запрещается ни одним.
     """
     expect = case.get("expect") or []
     forbid = case.get("forbid") or []
+    vocab = case.get("vocab") or {}
+    wanted_kinds = vocab.get("expect") or {}
+    banned_kinds = vocab.get("forbid") or {}
     low_sent = answer.lower()
     low_known = (known or "").lower()
     low_raw = (raw if raw is not None else known or "").lower()
@@ -84,19 +93,41 @@ def judge(case, answer, known, error, raw=None):
     known_hits = [e for e in expect if e.lower() in low_known]
     raw_hits = [e for e in expect if e.lower() in low_raw]
     false_hits = [f for f in forbid if f.lower() in low_sent]
-    ok = error is None and not false_hits and (bool(expect) and len(hits) == len(expect)
-                                               or bool(forbid) and not expect)
-    found = bool(expect) and len(known_hits) == len(expect)
+    # Категория ожидается «хотя бы одним словом», запрещается «ни одним».
+    # Название категории и есть то, чего не хватило или что приплелось: слово
+    # из закрытого словаря говорит, чем именно категория себя показала.
+    hit_kinds = [name for name, words in wanted_kinds.items()
+                 if any(w.lower() in low_sent for w in words)]
+    known_kinds = [name for name, words in wanted_kinds.items()
+                   if any(w.lower() in low_known for w in words)]
+    raw_kinds = [name for name, words in wanted_kinds.items()
+                 if any(w.lower() in low_raw for w in words)]
+    false_hits += [w for words in banned_kinds.values() for w in words
+                   if w.lower() in low_sent]
+    missed = ([e for e in expect if e not in hits]
+              + [name for name in wanted_kinds if name not in hit_kinds])
+    # «Есть чего ждать» и «есть что запрещать» — две отдельные величины: пара
+    # без ожиданий вовсе это «промолчи», и она проходит молчанием. Категории
+    # входят в обе на равных с отдельными словами, иначе пара, судящая только
+    # категориями, читалась бы как «промолчи» и проходила бы чем угодно.
+    wanted = bool(expect) or bool(wanted_kinds)
+    banned = bool(forbid) or bool(banned_kinds)
+    ok = error is None and not false_hits and (
+        (wanted and not missed) or (banned and not wanted))
+    found = wanted and not ([e for e in expect if e not in known_hits]
+                            + [n for n in wanted_kinds if n not in known_kinds])
+    found_raw = wanted and not ([e for e in expect if e not in raw_hits]
+                                + [n for n in wanted_kinds if n not in raw_kinds])
     return {
         "ok": bool(ok),
-        "found_in_answer": found,
+        "found_in_answer": bool(found),
         # Ложная находка: в сыром ответе слово есть, знанием оно не является.
         # Требуем, чтобы не уцелело ничего: случай, где одно ожидаемое слово
         # пережило отсев, а второе нет, — не мусор, а потеря на извлечении, и
         # записывать его в мусор значит завышать долю отсеянного.
-        "false_find": (bool(expect) and not found and not known_hits
-                       and len(raw_hits) == len(expect)),
-        "hits": hits, "missed": [e for e in expect if e not in hits],
+        "false_find": bool(wanted and not found and not known_hits
+                           and not known_kinds and found_raw),
+        "hits": hits + hit_kinds, "missed": missed,
         "false_hits": false_hits,
     }
 

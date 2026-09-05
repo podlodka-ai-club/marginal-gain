@@ -38,6 +38,10 @@
                                             по умолчанию — место первой сессии
       "expect": ["овсян"],                  что обязано быть в ответе
       "forbid": ["арахис"],                 чего в ответе быть не должно
+      "expect_kinds": ["животное неплотское"],  категория, хотя бы одно слово
+                                            из которой обязано быть в ответе
+      "forbid_kinds": ["животная плоть"],   категория, ни одного слова из
+                                            которой в ответе быть не должно
       "matters": "спрашивают список покупок" необязательно: при каком условии
                                             факт вообще становится значимым для
                                             ответа. Стендом не читается — заметка
@@ -45,6 +49,19 @@
                                             и место, куда положить условие, а не
                                             держать его в голове
     }
+
+Категория — это имя и закрытый список кусков слов; списки лежат в конверте
+набора один раз (`kinds`) и общие для всех пар, которые их называют. Пара
+называет имя, а не слова: перечень из двух-трёх угаданных слов на вопрос «было
+в ответе мясо» не отвечает — запрет `фарш` пропускает индейку и говядину, и
+пара засчитывается пройденной по недосмотру. Имя разрешает в слова загрузчик
+(`load`), кладя разрешённое в саму пару полем `vocab`; судья про конверт не
+знает, а словарь остаётся в одном месте.
+
+Словарь категории собирается один раз от смысла категории и проверяется на
+полноту фактическими ответами. Дописать в него слово после того, как прогон не
+сошёлся, — подгонка теста под результат: набор после неё не меряет ничего. Не
+сошлось при полном словаре — виновата пара, а не словарь.
 
 `expect` и `forbid` проверяются вхождением строки, и это надо помнить, когда
 пишешь пару. Запрет ловит слово и в отрицании: агент, честно применивший
@@ -90,13 +107,42 @@ KIND = "pairs"
 
 AIMS = ("apply", "avoid")
 
+# Поля пары, называющие категории, и то, как разрешённое кладётся в пару.
+KIND_FIELDS = (("expect_kinds", "expect"), ("forbid_kinds", "forbid"))
+VOCAB = "vocab"
+
 
 class PairSetError(RuntimeError):
     """Набор пар собран не по этой форме. Читать его — мерить не то."""
 
 
-def validate(item):
-    """Одна пара. Ошибку называем полем, а не «неверный формат»."""
+def _kind_names(item, field):
+    """Имена категорий поля. Пустого списка и не-строк здесь быть не может.
+
+    Отсутствие поля и пустой список — разные вещи: первое значит «категорий не
+    называем», второе значит «называем, но ни одной», то есть запрет, который
+    ничего не запрещает, или ожидание, которого нечем не сбыться.
+    """
+    if field not in item:
+        return []
+    names = item[field]
+    if not isinstance(names, list) or not names:
+        raise PairSetError("%s: %s это непустой список имён категорий, а пришло %r"
+                           % (item.get("id"), field, names))
+    for name in names:
+        if not isinstance(name, str) or not name.strip():
+            raise PairSetError("%s: имя категории в %s — непустая строка, а пришло %r"
+                               % (item.get("id"), field, name))
+    return names
+
+
+def validate(item, kinds=None):
+    """Одна пара. Ошибку называем полем, а не «неверный формат».
+
+    `kinds` — словари категорий из конверта. Имя, которого там нет, — ошибка
+    формы, а не пустая категория: опечатка, проглоченная молча, стала бы
+    запретом, который ничего не запрещает, и пара прошла бы по недосмотру.
+    """
     if not isinstance(item, dict):
         raise PairSetError("пара должна быть записью, а не %s" % type(item).__name__)
     if not item.get("id"):
@@ -126,19 +172,54 @@ def validate(item):
     matters = item.get("matters")
     if matters is not None and not (isinstance(matters, str) and matters.strip()):
         raise PairSetError("%s: matters, если есть, непустая строка" % item["id"])
+    for field, _ in KIND_FIELDS:
+        for name in _kind_names(item, field):
+            if kinds is not None and name not in kinds:
+                raise PairSetError(
+                    "%s: категория %r не названа в конверте набора; известны: %s"
+                    % (item["id"], name, ", ".join(sorted(kinds)) or "ни одной"))
     return item
 
 
-def envelope(items, **meta):
+def resolve(item, kinds):
+    """Имена категорий пары — в закрытые словари, полем `vocab`.
+
+    Одно место, где имя превращается в слова. Судья получает уже разрешённое и
+    про конверт не знает — ровно как не знает про него сейчас; а словарь
+    остаётся в конверте одной записью, и правка его не расходится по парам.
+    """
+    got = {}
+    for field, side in KIND_FIELDS:
+        got[side] = {name: list(kinds[name]) for name in item.get(field) or []}
+    if not any(got.values()):
+        return item
+    return dict(item, **{VOCAB: got})
+
+
+def bare(item):
+    """Пара без разрешённого словаря: то, что кладётся в файл.
+
+    Разрешённое в файл не пишется — иначе словарь размножится по парам, и
+    правка одной копии разойдётся с остальными молча.
+    """
+    if VOCAB not in item:
+        return item
+    return {name: value for name, value in item.items() if name != VOCAB}
+
+
+def envelope(items, kinds=None, **meta):
     body = {"version": VERSION, "kind": KIND, "count": len(items)}
     body.update(meta)
-    body["items"] = [validate(dict(item)) for item in items]
+    if kinds:
+        body["kinds"] = {name: list(words) for name, words in kinds.items()}
+    body["items"] = [validate(bare(dict(item)), kinds=kinds) for item in items]
     return body
 
 
-def dump(path, items, **meta):
+def dump(path, items, kinds=None, **meta):
     Path(path).write_text(
-        json.dumps(envelope(items, **meta), ensure_ascii=False, indent=2) + "\n",
+        json.dumps(envelope(items, kinds=kinds, **meta),
+                   ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8")
 
 
@@ -159,9 +240,12 @@ def load(path):
     if body.get("count") != len(items):
         raise PairSetError("%s: в конверте %s пар, в списке %d — файл оборван"
                            % (where.name, body.get("count"), len(items)))
+    kinds = body.get("kinds") or {}
+    out = []
     for item in items:
-        validate(item)
-    return body, items
+        validate(item, kinds=kinds)
+        out.append(resolve(item, kinds))
+    return body, out
 
 
 # --- мост к золотому набору -------------------------------------------------
