@@ -8,11 +8,21 @@
 о чём не помня, и он сойдётся с ожиданием случайно (так и вышло на первом живом
 прогоне с овсянкой, см. `COINCIDED` в `eval/live.py`).
 
-Тройка это закрывает. Задача у трёх пар дословно одна, а память разная:
-вегетарианец, веган, мясоед. Правильные ответы исключают друг друга — список,
-верный для одной версии, для двух других неверен. Значит попасть надо не в
-«разумный ответ», а в конкретную версию из трёх, и угадать нельзя: угадывание
-даёт один ответ на все три и проваливает как минимум две.
+Тройка это сужает. Задача у трёх пар дословно одна, а память разная:
+вегетарианец, веган, мясоед. Ответы версий делят друг друга: список, верный
+для одной, для двух других неверен, и **один ответ не закрывает две версии**.
+Значит попасть надо трижды, каждый раз в свою.
+
+Чего тройка не обещает: что случайный список не пройдёт ни одной версии.
+Критерий мясоеда — «животная плоть есть, растительного белка нет», и обычный
+мясной список ему удовлетворяет сам собой. Это меряется прогоном голой руки, а
+не выводится из формы набора.
+
+Судят три пары **категориями**, а не перечнем угаданных слов: запрет на `фарш`
+пропускает индейку и говядину, и пара зачлась бы пройденной по недосмотру.
+Категорий три, ось деления — животное против растительного, а внутри животного
+плоть отделена от молочного с яйцами: ровно на этой границе и расходятся веган
+с вегетарианцем. Словарь лежит в конверте набора один раз, см. `eval/pairs.py`.
 
 Свойства:
 
@@ -20,23 +30,24 @@
    а реплики первой сессии и место у каждой свои.
 2. Ответ, собранный из меню одной версии, проходит её критерий и проваливает
    критерии двух других — в обе стороны, для всех шести упорядоченных пар.
-3. Нейтральный список (ничего диетического) не проходит ни одну из трёх:
-   угадывание не засчитывается.
-4. Ожидания и запреты — куски слов, а не фразы: одно слово без пробелов, и
-   вхождение ловит любую падежную форму.
-4a. Факт достижим поиском по словам задачи: у каждой реплики первой сессии
-   есть общее слово с задачей второй. Поиск в базе идёт словами вопроса
+3. Ни один ответ, какой список ни собери, не закрывает две версии сразу.
+4. Критерий — категории: отдельных слов у трёх пар нет вовсе, слова категорий
+   куски слов, ловят любую падежную форму и не ловятся серединой чужого слова,
+   а категории не пересекаются.
+5. Факт достижим поиском по словам задачи: у каждой реплики первой сессии есть
+   общее слово с задачей второй. Поиск в базе идёт словами вопроса
    (`storage.db.Repository.search`), и запись без общего слова не находится
    вовсе — прогон покажет «память ничего не нашла», хотя факт лежит в базе.
-5. Семь прежних пар на месте, id уникальны, конверт считает столько же, сколько
-   в списке.
+6. Семь прежних пар на месте, id уникальны, конверт считает столько же,
+   сколько в списке.
 
 Мутации, на которых проверки обязаны краснеть:
   * задачу одной из трёх переписали              → TestTripleIsInTheSet
-  * ожидание/запрет ослабили так, что версии      → TestVersionsAreMutuallyExclusive
-    перестали исключать друг друга
-  * критерий стал проходить на нейтральном списке → TestGuessingCannotPass
-  * ожидание записали целой фразой или словоформой→ TestCriteriaAreWordStems
+  * категорию у пары подменили или сняли          → TestVersionsAreMutuallyExclusive
+  * границы категорий размыли так, что один ответ → TestNoAnswerPassesTwoVersions
+    проходит две версии
+  * критерий вернули к перечню угаданных слов     → TestCriteriaAreClosedKinds
+  * слово категории ловится серединой чужого      → TestCriteriaAreClosedKinds
   * факт переписали так, что поиск его не достаёт → TestTheFactIsReachableFromTheTask
   * прежнюю пару выкинули или переименовали       → TestTheOldSevenAreStillThere
 """
@@ -56,6 +67,11 @@ HOUSEHOLD = ROOT / "eval-pairs-example.json"
 
 FAST = settings(deadline=None, max_examples=100)
 
+FLESH = "животная плоть"
+DAIRY = "животное неплотское"
+PLANT = "растительный белок"
+KIND_NAMES = (FLESH, DAIRY, PLANT)
+
 VEGETARIAN = "питание-вегетарианец"
 VEGAN = "питание-веган"
 CARNIVORE = "питание-мясоед"
@@ -67,41 +83,35 @@ OLD_SEVEN = ("завтрак", "город", "забор", "макбук", "ов
 
 # Меню версии: из чего человек этой версии составил бы список покупок. Здесь,
 # а не в наборе: набор несёт критерий, меню — то, чем критерий проверяется.
-# Ни одно меню не содержит слов, которых эта версия не купила бы.
+# Первым в каждом меню стоит то, чем версия себя и показывает.
 MENU = {
-    # Тофу в вегетарианском меню стоит нарочно: вегетарианец его покупает, и
-    # без него проверка не увидела бы, чем именно версия вегана отличает свой
-    # ответ от соседнего.
-    VEGETARIAN: ["творог", "творога", "яйца", "сыр", "молоко", "гречка",
-                 "овощи", "хлеб", "тофу"],
-    VEGAN: ["тофу", "нут", "чечевица", "гречка", "овощи", "хлеб",
+    # Бобовые и орехи в вегетарианском меню стоят нарочно: вегетарианец их
+    # покупает, растительный белок ему не запрещён, и без них проверка не
+    # увидела бы, чем именно версия вегана отличает свой ответ от соседнего.
+    VEGETARIAN: ["творог", "сыр", "яйца", "молоко", "хлеб", "гречка",
+                 "овощи", "чечевица", "орехи"],
+    VEGAN: ["тофу", "нут", "чечевица", "хлеб", "овощи", "гречка",
             "овсяное питьё"],
-    CARNIVORE: ["фарш", "фарша", "индейка", "индейки", "говядина", "гречка",
-                "овощи", "творог"],
+    CARNIVORE: ["фарш", "индейка", "говядина", "курица", "хлеб", "овощи",
+                "гречка", "картофель"],
 }
 
-# Список, который пишет агент без памяти. Слова взяты не из головы, а из
-# снятых прогонов голой руки (`eval-triple-answers.json`): обычный недельный
-# список это хлеб, яйца, молоко, творог, курица, говядина, рыба и овощи.
-NEUTRAL = ["хлеб", "яйца", "молоко", "сыр", "творог", "рыба", "картофель",
-           "морковь", "гречка", "яблоки", "чай", "фарш"]
+# Продукты без белка: общая часть любого списка, исход сама по себе не решает.
+PLAIN = ["хлеб", "овощи", "гречка", "картофель", "яблоки", "чай", "соль",
+         "макароны", "рис", "сахар"]
 
-# Мясо в списке без памяти было всегда — во всех снятых ответах голой руки.
-# Поэтому оно есть в каждом сгенерированном списке: убери его, и «нейтральный»
-# список перестанет быть тем, что пишет агент, а станет тем, что удобно тесту.
-NEUTRAL_ALWAYS = ("курица", "говядина")
+# Слова из тех же снятых ответов, белком не являющиеся. Ни одно слово
+# категории не имеет права поймать ни одно из них: короткая основа «кур» ловит
+# куркуму, «греч» — грецкий орех, и мясо находится там, где его нет.
+COLLIDERS = ("куркума", "кукуруза", "картофель", "морковь", "макароны",
+             "макаронные", "капуста", "крупа", "консервированные",
+             "замороженные", "специи", "сахар", "соль", "сухофрукты",
+             "помидоры", "огурцы", "петрушка", "укроп", "чеснок", "яблоки",
+             "апельсины", "бананы", "варенье", "печенье", "хлеб", "чай",
+             "кофе", "рис", "гречка", "овсяные", "зелень", "перец", "минут")
 
-# Слова, вокруг которых построены критерии, во всех формах, какие встретятся в
-# ответе. Кусок слова обязан ловиться в каждой: запиши критерий словоформой —
-# и «творог» в ответе не совпадёт с ожиданием «творогом».
-FORMS = {
-    "творог": ("творог", "творога", "творогу", "творогом", "твороге"),
-    "тофу": ("тофу",),
-    "фарш": ("фарш", "фарша", "фаршу", "фаршем", "фарше"),
-    "индейка": ("индейка", "индейки", "индейку", "индейкой", "индейке"),
-    "курица": ("курица", "курицы", "курицу", "курицей", "куриное",
-               "куриные", "куриная", "курином"),
-}
+# Падежные хвосты: кусок слова обязан ловить своё слово в любой форме.
+ENDINGS = ("", "а", "у", "ом", "е", "и", "ами", "ой", "ые")
 
 
 def triple_of(items):
@@ -162,10 +172,21 @@ class TestTripleIsInTheSet(Base):
                                  "%s и %s говорят одно и то же" % (one, other))
 
     def test_every_version_lives_in_its_own_place(self):
-        """Общее место склеило бы три противоречащих факта в одной выдаче."""
+        """Общее место склеило бы три противоречащих факта в одной выдаче.
+
+        Имя места ещё и уезжает в путь каталога хода, а путь агент видит: место
+        «еда-вег» рука без памяти читала как «вегетарианец» и «угадывала».
+        """
         places = [pair["tell"][0]["place"] for pair in self.triple.values()]
         self.assertEqual(len(places), len(set(places)),
                          "версии стоят в одном месте: %s" % places)
+        for id_, pair in self.triple.items():
+            where = pair["tell"][0]["place"].lower()
+            for kind, words in (pair.get("vocab") or {}).get("expect", {}).items():
+                for word in words:
+                    self.assertNotIn(word, where,
+                                     "%s: имя места выдаёт ответ: %r"
+                                     % (id_, where))
 
     def test_every_version_says_why_its_fact_matters(self):
         for id_, pair in self.triple.items():
@@ -181,7 +202,7 @@ class TestVersionsAreMutuallyExclusive(Base):
     def test_an_answer_from_one_menu_passes_only_its_own_version(self, data):
         mine = data.draw(st.sampled_from(TRIPLE))
         pair = self.triple[mine]
-        answer = data.draw(a_list_from(MENU[mine], must=pair["expect"]))
+        answer = data.draw(a_list_from(MENU[mine], must=MENU[mine][:1]))
         self.assertTrue(passes(pair, answer),
                         "%s не принял свой же ответ: %s" % (mine, answer))
         for other in TRIPLE:
@@ -193,52 +214,115 @@ class TestVersionsAreMutuallyExclusive(Base):
                 % (mine, other, answer))
 
 
-class TestGuessingCannotPass(Base):
-    """Разумный список без памяти не проходит ни одну из трёх версий."""
+class TestNoAnswerPassesTwoVersions(Base):
+    """Один ответ не закрывает две версии — какой список ни собери.
 
-    @given(answer=a_list_from(NEUTRAL, must=NEUTRAL_ALWAYS))
+    Это и есть «угадать нельзя» в проверяемом виде. Сильного утверждения
+    «любой список без памяти не проходит ни одной версии» здесь нет и быть не
+    может: критерий мясоеда — «плоть есть, растительного белка нет», и обычный
+    мясной список ему удовлетворяет. Что держится — версии делят ответы между
+    собой, и один ответ на все три не годится.
+
+    Слова берём из всех трёх меню и общей части разом, любыми смесями: правило
+    обязано держаться на смесях, а не только на трёх аккуратных списках.
+    """
+
+    @given(answer=a_list_from(sum(MENU.values(), []) + PLAIN))
     @FAST
-    def test_a_neutral_shopping_list_fails_every_version(self, answer):
+    def test_at_most_one_version_accepts_an_answer(self, answer):
+        took = [id_ for id_, pair in self.triple.items() if passes(pair, answer)]
+        self.assertLessEqual(len(took), 1,
+                             "один ответ закрыл версии %s: %s" % (took, answer))
+
+
+class TestCriteriaAreClosedKinds(Base):
+    """Критерий тройки — именованные категории, а не перечень угаданных слов."""
+
+    def setUp(self):
+        super().setUp()
+        self.kinds = pairs.load(HOUSEHOLD)[0].get("kinds") or {}
+
+    def test_the_three_pairs_judge_by_kinds_only(self):
         for id_, pair in self.triple.items():
-            self.assertFalse(passes(pair, answer),
-                             "%s прошла на списке без памяти: %s" % (id_, answer))
+            self.assertEqual([], pair.get("expect") or [],
+                             "%s судит ещё и отдельными словами" % id_)
+            self.assertEqual([], pair.get("forbid") or [],
+                             "%s судит ещё и отдельными словами" % id_)
+            self.assertTrue(pair.get("expect_kinds"), "%s ничего не ждёт" % id_)
+            self.assertTrue(pair.get("forbid_kinds"),
+                            "%s ничего не запрещает" % id_)
 
+    def test_the_axis_is_animal_against_plant(self):
+        """Три категории и разделение пар по ним — как решено оператором."""
+        self.assertEqual(sorted(KIND_NAMES), sorted(self.kinds))
+        want = {
+            VEGETARIAN: ([DAIRY], [FLESH]),
+            VEGAN: ([PLANT], sorted([FLESH, DAIRY])),
+            CARNIVORE: ([FLESH], [PLANT]),
+        }
+        for id_, (expect, forbid) in want.items():
+            pair = self.triple[id_]
+            self.assertEqual(expect, sorted(pair["expect_kinds"]), id_)
+            self.assertEqual(forbid, sorted(pair["forbid_kinds"]), id_)
 
-class TestCriteriaAreWordStems(Base):
-    """Ожидания и запреты — куски слов: проверка вхождением строки работает."""
-
-    def tokens(self):
+    def test_the_vocabulary_lives_in_the_envelope_once(self):
+        self.assertTrue(self.kinds, "словаря в конверте нет")
         for id_, pair in self.triple.items():
-            for token in (pair.get("expect") or []) + (pair.get("forbid") or []):
-                yield id_, token
+            self.assertIn("vocab", pair, "%s: словарь не разрешён" % id_)
 
-    def test_no_token_is_a_phrase(self):
-        for id_, token in self.tokens():
-            self.assertNotIn(" ", token, "%s: ожидание фразой: %r" % (id_, token))
-            self.assertTrue(token.isalpha(),
-                            "%s: в куске слова не только буквы: %r" % (id_, token))
+    def test_no_word_of_a_kind_is_a_phrase(self):
+        for name, words in self.kinds.items():
+            self.assertTrue(words, "категория %r пуста" % name)
+            for word in words:
+                self.assertNotIn(" ", word,
+                                 "%s: слово фразой: %r" % (name, word))
+                self.assertTrue(word.isalpha(),
+                                "%s: в куске слова не только буквы: %r"
+                                % (name, word))
 
-    @given(before=st.text(max_size=12), after=st.text(max_size=12))
+    @given(ending=st.sampled_from(ENDINGS))
     @FAST
-    def test_every_token_catches_its_word_in_every_form(self, before, after):
-        """Кусок слова ловит слово в любом падеже и в любом окружении.
+    def test_every_kind_word_catches_its_own_inflections(self, ending):
+        """Кусок ловит своё слово в любом падеже и не ловится серединой чужого.
 
-        Спрашиваем не про сам кусок (это совпало бы с собой и на словоформе), а
-        про слово, которое он обязан поймать: критерий, записанный «творогом»,
-        мимо «творога» в ответе пройдёт молча.
+        Вторая половина важнее первой: основы категорий коротки, и «нут» в
+        «минут» — это мясо там, где его нет.
         """
-        for id_, token in self.tokens():
-            named = [stem for stem, forms in FORMS.items()
-                     if all(token.lower() in form.lower() for form in forms)]
-            self.assertEqual(
-                1, len(named),
-                "%s: кусок %r не ловит ни одно слово целиком во всех формах "
-                "(подошло: %s)" % (id_, token, named))
-            for form in FORMS[named[0]]:
-                said = "%sВзять %s в магазине.%s" % (before, form, after)
-                self.assertIn(token.lower(), said.lower(),
-                              "%s: форма %r не ловится куском %r"
-                              % (id_, form, token))
+        for name, words in self.kinds.items():
+            for word in words:
+                form = word + ending
+                self.assertTrue(
+                    evaluate._in_kind(word, "купить %s в магазине" % form),
+                    "%s: форма %r не ловится куском %r" % (name, form, word))
+                self.assertFalse(
+                    evaluate._in_kind(word, "купить за%s в магазине" % form),
+                    "%s: кусок %r прочли серединой слова" % (name, word))
+
+    @given(collider=st.sampled_from(COLLIDERS))
+    @FAST
+    def test_no_kind_word_catches_a_word_that_is_not_protein(self, collider):
+        """Короткая основа не имеет права ловить соседнее слово из того же списка.
+
+        Список взят из тех же снятых ответов: это продукты, которые модель
+        реально писала и которые белком не являются. Дописать в категорию
+        основу «кур» — значит найти мясо в куркуме, и никакая проверка формы
+        этого не увидит.
+        """
+        for name, words in self.kinds.items():
+            for word in words:
+                self.assertFalse(
+                    evaluate._in_kind(word, "купить %s в магазине" % collider),
+                    "%s: кусок %r поймал %r" % (name, word, collider))
+
+    def test_the_kinds_do_not_overlap(self):
+        """Слово принадлежит одной категории: иначе ось деления не ось."""
+        seen = {}
+        for name, words in self.kinds.items():
+            for word in words:
+                self.assertNotIn(word, seen,
+                                 "%r стоит и в %r, и в %r"
+                                 % (word, seen.get(word), name))
+                seen[word] = name
 
 
 class TestTheFactIsReachableFromTheTask(Base):
@@ -273,6 +357,15 @@ class TestTheOldSevenAreStillThere(unittest.TestCase):
         present = {item["id"] for item in load_items()}
         missing = [id_ for id_ in OLD_SEVEN if id_ not in present]
         self.assertEqual([], missing, "прежняя пара пропала: %s" % missing)
+
+    def test_the_old_pairs_judge_by_words_as_before(self):
+        """Категорий у прежних пар нет: по ним снята история цифр в журнале."""
+        for item in load_items():
+            if item["id"] in TRIPLE:
+                continue
+            self.assertNotIn("expect_kinds", item, item["id"])
+            self.assertNotIn("forbid_kinds", item, item["id"])
+            self.assertNotIn("vocab", item, item["id"])
 
     def test_pair_ids_are_unique(self):
         ids = [item["id"] for item in load_items()]
