@@ -18,14 +18,24 @@
 1. У каждой из трёх версий есть строка в журнале, и обе доли — полнота и
    точность — в ней записаны как есть, а не выведены задним числом.
 2. Рука без памяти ни на одной из трёх не проходит.
-3. Ответы трёх версий различаются по существу: набор категорий, которые в
-   ответе действительно встретились, у трёх версий разный. Это про содержание
-   списка, а не про формулировку.
+3. Ответы трёх версий различаются по существу: набор слов закрытого словаря,
+   которые в ответе действительно встретились, у трёх версий разный. Это про
+   содержание списка, а не про формулировку.
+4. Животная плоть стоит ровно там, где её велела память: у мясоеда есть, у
+   вегетарианца и вегана нет ни одного слова из категории.
+
+Что этими прогонами не сошлось и сознательно не исправлено. Веган не прошёл
+свой критерий: в его списке «растительное молоко» и «молочные заменители», а
+запрет животного неплотского ловит `молок` и `молочн` вхождением строки и
+отличить растительное молоко от коровьего не может. Дописать исключение в
+словарь после несошедшегося прогона — подгонка теста под результат, после неё
+набор не меряет ничего. Поэтому исход записан как есть: две версии из трёх.
 
 Мутации, на которых проверки обязаны краснеть:
   * строку журнала по версии подделали или потеряли → TestTheJournalHasEachVersion
   * рука без памяти прошла, а мы этого не заметили  → TestTheBareArmPassesNothing
   * два ответа сошлись по существу                  → TestTheThreeAnswersDiffer
+  * мясо оказалось не у той версии                  → TestTheThreeAnswersDiffer
 """
 import json
 import os
@@ -61,13 +71,6 @@ def journal():
 def answers():
     body = json.loads(ANSWERS.read_text(encoding="utf-8"))
     return body, {(row["id"], row["arm"]): row for row in body["items"]}
-
-
-def profile(kinds, text):
-    """Какие категории в ответе действительно встретились. Существо, не слова."""
-    low = (text or "").lower()
-    return frozenset(name for name, words in kinds.items()
-                     if any(evaluate._in_kind(word, low) for word in words))
 
 
 class TestTheJournalHasEachVersion(unittest.TestCase):
@@ -148,7 +151,20 @@ class TestTheThreeAnswersDiffer(unittest.TestCase):
 
     def setUp(self):
         self.kinds = pairs.load(HOUSEHOLD)[0]["kinds"]
+        self.known = pairs_by_id()
         self.body, self.rows = answers()
+
+    def words_in(self, text):
+        """Какие слова закрытого словаря в ответе действительно встретились.
+
+        Спрашиваем слова, а не имена категорий: «растительное молоко» и
+        «творог, сыр, яйца» дают одно и то же имя категории, а по существу это
+        разные списки. Имя отвечает на вопрос «была ли категория», слово — на
+        вопрос «чем именно».
+        """
+        low = (text or "").lower()
+        return frozenset(word for words in self.kinds.values() for word in words
+                         if evaluate._in_kind(word, low))
 
     def test_the_answers_are_to_one_and_the_same_task(self):
         asked = {row["task"] for row in self.body["items"]}
@@ -161,10 +177,11 @@ class TestTheThreeAnswersDiffer(unittest.TestCase):
                 self.assertTrue(row and row["answer"].strip(),
                                 "нет ответа %s/%s" % (id_, arm))
 
-    def test_the_memory_answers_hold_different_kinds(self):
+    def test_the_memory_answers_hold_different_products(self):
         seen = {}
         for id_ in TRIPLE:
-            got = profile(self.kinds, self.rows[(id_, "memory")]["answer"])
+            got = self.words_in(self.rows[(id_, "memory")]["answer"])
+            self.assertTrue(got, "%s: в ответе ни одного белкового слова" % id_)
             for other, was in seen.items():
                 self.assertNotEqual(
                     was, got,
@@ -172,12 +189,34 @@ class TestTheThreeAnswersDiffer(unittest.TestCase):
                     % (other, id_, sorted(got)))
             seen[id_] = got
 
+    def test_flesh_stands_exactly_where_the_memory_put_it(self):
+        """Мясо есть у того, кому память велела есть мясо, и только у него.
+
+        Самое прямое, что можно спросить у трёх ответов на одну задачу: разошлись
+        ли они по тому, ради чего заведены. Спрашиваем не судью целиком (он
+        считает ещё и молочное, на котором веган и не сошёлся), а одну
+        категорию — ту, вокруг которой три версии и построены.
+        """
+        for id_ in TRIPLE:
+            pair = self.known[id_]
+            flesh = self.kinds["животная плоть"]
+            low = self.rows[(id_, "memory")]["answer"].lower()
+            got = [w for w in flesh if evaluate._in_kind(w, low)]
+            if "животная плоть" in (pair.get("expect_kinds") or []):
+                self.assertTrue(got, "%s: память велела есть мясо, а его нет" % id_)
+            else:
+                self.assertEqual([], got,
+                                 "%s: память запретила мясо, а оно в списке: %s"
+                                 % (id_, got))
+
     def test_memory_moves_the_answer_away_from_the_bare_one(self):
         """У версии, где память сработала, состав ответа сдвинулся."""
         moved = [id_ for id_ in TRIPLE
-                 if profile(self.kinds, self.rows[(id_, "memory")]["answer"])
-                 != profile(self.kinds, self.rows[(id_, "bare")]["answer"])]
-        self.assertTrue(moved, "ни на одной версии память состав не сдвинула")
+                 if self.words_in(self.rows[(id_, "memory")]["answer"])
+                 != self.words_in(self.rows[(id_, "bare")]["answer"])]
+        self.assertEqual(sorted(TRIPLE), sorted(moved),
+                         "состав не сдвинулся у версий: %s"
+                         % sorted(set(TRIPLE) - set(moved)))
 
 
 if __name__ == "__main__":
