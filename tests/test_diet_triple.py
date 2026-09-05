@@ -240,7 +240,9 @@ class TestCriteriaAreClosedKinds(Base):
 
     def setUp(self):
         super().setUp()
-        self.kinds = pairs.load(HOUSEHOLD)[0].get("kinds") or {}
+        raw = pairs.load(HOUSEHOLD)[0].get("kinds") or {}
+        self.kinds = {name: pairs.words_of(kind) for name, kind in raw.items()}
+        self.unless = {name: pairs.unless_of(kind) for name, kind in raw.items()}
 
     def test_the_three_pairs_judge_by_kinds_only(self):
         for id_, pair in self.triple.items():
@@ -311,8 +313,39 @@ class TestCriteriaAreClosedKinds(Base):
         for name, words in self.kinds.items():
             for word in words:
                 self.assertFalse(
-                    evaluate._in_kind(word, "купить %s в магазине" % collider),
+                    evaluate._in_kind(word, "купить %s в магазине" % collider,
+                                      tuple(self.unless[name])),
                     "%s: кусок %r поймал %r" % (name, word, collider))
+
+    def test_a_plant_made_product_is_not_read_as_animal(self):
+        """«Растительное молоко» и «мясные заменители» — не животный продукт.
+
+        Основа слова этого не различает, поэтому у животных категорий стоят
+        отменяющие основы. Без них веган проваливал свой критерий на верном
+        ответе — так и вышло на первом прогоне.
+        """
+        for said in ("растительное молоко", "соевое молоко",
+                     "молочные заменители", "растительное мясо",
+                     "веганский сыр", "панировочные сухари"):
+            for name in ("животная плоть", "животное неплотское"):
+                got = [w for w in self.kinds[name]
+                       if evaluate._in_kind(w, "купить %s" % said,
+                                            tuple(self.unless[name]))]
+                self.assertEqual([], got,
+                                 "%s: %r прочли как животный продукт (%s)"
+                                 % (name, said, got))
+
+    def test_the_plain_animal_word_still_counts(self):
+        """Отмена не отменяет обычное: молоко, творог и курица на месте."""
+        for said, name in (("молоко", "животное неплотское"),
+                           ("творог", "животное неплотское"),
+                           ("яйца", "животное неплотское"),
+                           ("курица", "животная плоть"),
+                           ("говядина", "животная плоть")):
+            got = [w for w in self.kinds[name]
+                   if evaluate._in_kind(w, "купить %s" % said,
+                                        tuple(self.unless[name]))]
+            self.assertTrue(got, "%s: %r больше не ловится" % (name, said))
 
     def test_the_kinds_do_not_overlap(self):
         """Слово принадлежит одной категории: иначе ось деления не ось."""

@@ -12,6 +12,7 @@
 Замер включается переменной: MEM_TRACE=1 python3 -m eval.evaluate
 """
 import argparse
+import functools
 import json
 import os
 import re
@@ -59,7 +60,13 @@ def state_line(as_of):
             "сроки на %s" % (got["facts"], got["lapsed"], got["alive"], at))
 
 
-def _in_kind(word, text):
+@functools.lru_cache(maxsize=64)
+def _tokens(text):
+    """Слова текста по порядку. Считаются один раз на текст, а не на основу."""
+    return tuple(re.findall(r"[^\W\d_]+", text.lower(), re.UNICODE))
+
+
+def _in_kind(word, text, unless=()):
     """Слово категории в тексте: совпадение с начала слова, а не подстрокой.
 
     Категория — закрытый словарь основ, и основы у неё короткие: «нут», «мяс»,
@@ -67,12 +74,39 @@ def _in_kind(word, text):
     находит мясо там, где его нет, и делает это молча. Начало слова снимает
     ровно этот класс, оставляя падежи: «нут», «нута», «нутом» — те же.
 
-    Отдельные слова `expect`/`forbid` этого правила не знают и знать не должны:
-    по ним считана история цифр семи прежних пар, и сдвинь мы правило — старая
-    цифра стала бы несравнима с новой, выглядя точно так же.
+    `unless` — отменяющие основы категории. Совпадение не считается, если само
+    слово или его сосед слева или справа начинается с отменяющей основы:
+    «растительное молоко» и «молочные заменители» животным продуктом не
+    являются, хотя основа `молок` в них есть. Дальше соседа отмена не
+    действует — иначе одно слово в начале списка сняло бы весь запрет разом.
+
+    Отдельные слова `expect`/`forbid` ни того, ни другого правила не знают и
+    знать не должны: по ним считана история цифр семи прежних пар, и сдвинь мы
+    правило — старая цифра стала бы несравнима с новой, выглядя точно так же.
     """
-    return re.search(r"(?<![^\W\d_])%s" % re.escape(word.lower()),
-                     text, re.UNICODE) is not None
+    tokens = _tokens(text)
+    stem = word.lower()
+    for at, token in enumerate(tokens):
+        if not token.startswith(stem):
+            continue
+        near = tokens[max(0, at - 1):at + 2]
+        if any(other.startswith(cancel) for other in near for cancel in unless):
+            continue
+        return True
+    return False
+
+
+def _kind_words(kind, text):
+    """Слова категории, которые в тексте действительно встретились."""
+    from eval import pairs
+    unless = tuple(pairs.unless_of(kind))
+    return [word for word in pairs.words_of(kind)
+            if _in_kind(word, text, unless)]
+
+
+def _kind_seen(kind, text):
+    """Показала ли категория себя хоть одним словом."""
+    return bool(_kind_words(kind, text))
 
 
 def judge(case, answer, known, error, raw=None):
@@ -113,14 +147,14 @@ def judge(case, answer, known, error, raw=None):
     # Категория ожидается «хотя бы одним словом», запрещается «ни одним».
     # Название категории и есть то, чего не хватило или что приплелось: слово
     # из закрытого словаря говорит, чем именно категория себя показала.
-    hit_kinds = [name for name, words in wanted_kinds.items()
-                 if any(_in_kind(w, low_sent) for w in words)]
-    known_kinds = [name for name, words in wanted_kinds.items()
-                   if any(_in_kind(w, low_known) for w in words)]
-    raw_kinds = [name for name, words in wanted_kinds.items()
-                 if any(_in_kind(w, low_raw) for w in words)]
-    false_hits += [w for words in banned_kinds.values() for w in words
-                   if _in_kind(w, low_sent)]
+    hit_kinds = [name for name, kind in wanted_kinds.items()
+                 if _kind_seen(kind, low_sent)]
+    known_kinds = [name for name, kind in wanted_kinds.items()
+                   if _kind_seen(kind, low_known)]
+    raw_kinds = [name for name, kind in wanted_kinds.items()
+                 if _kind_seen(kind, low_raw)]
+    false_hits += [word for kind in banned_kinds.values()
+                   for word in _kind_words(kind, low_sent)]
     missed = ([e for e in expect if e not in hits]
               + [name for name in wanted_kinds if name not in hit_kinds])
     # «Есть чего ждать» и «есть что запрещать» — две отдельные величины: пара

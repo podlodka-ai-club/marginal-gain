@@ -150,7 +150,9 @@ class TestTheThreeAnswersDiffer(unittest.TestCase):
     """Ответы трёх версий различаются по существу, а не по формулировке."""
 
     def setUp(self):
-        self.kinds = pairs.load(HOUSEHOLD)[0]["kinds"]
+        raw = pairs.load(HOUSEHOLD)[0]["kinds"]
+        self.kinds = {name: (pairs.words_of(kind), tuple(pairs.unless_of(kind)))
+                      for name, kind in raw.items()}
         self.known = pairs_by_id()
         self.body, self.rows = answers()
 
@@ -163,8 +165,9 @@ class TestTheThreeAnswersDiffer(unittest.TestCase):
         вопрос «чем именно».
         """
         low = (text or "").lower()
-        return frozenset(word for words in self.kinds.values() for word in words
-                         if evaluate._in_kind(word, low))
+        return frozenset(word for words, unless in self.kinds.values()
+                         for word in words
+                         if evaluate._in_kind(word, low, unless))
 
     def test_the_answers_are_to_one_and_the_same_task(self):
         asked = {row["task"] for row in self.body["items"]}
@@ -199,9 +202,9 @@ class TestTheThreeAnswersDiffer(unittest.TestCase):
         """
         for id_ in TRIPLE:
             pair = self.known[id_]
-            flesh = self.kinds["животная плоть"]
+            flesh, unless = self.kinds["животная плоть"]
             low = self.rows[(id_, "memory")]["answer"].lower()
-            got = [w for w in flesh if evaluate._in_kind(w, low)]
+            got = [w for w in flesh if evaluate._in_kind(w, low, unless)]
             if "животная плоть" in (pair.get("expect_kinds") or []):
                 self.assertTrue(got, "%s: память велела есть мясо, а его нет" % id_)
             else:

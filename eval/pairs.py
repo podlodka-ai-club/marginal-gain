@@ -58,6 +58,14 @@
 (`load`), кладя разрешённое в саму пару полем `vocab`; судья про конверт не
 знает, а словарь остаётся в одном месте.
 
+Категория может назвать и **отменяющие** основы: тогда она записана не списком,
+а парой `{"words": [...], "unless": [...]}`. Совпадение не считается, если само
+слово или его сосед слева или справа начинается с отменяющей основы:
+«растительное молоко» и «молочные заменители» животным продуктом не являются,
+хотя основа `молок` в них есть. Это не исключение под конкретный ответ, а та же
+ось категории — животное против растительного, — досказанная там, где основа
+слова её не различает.
+
 Словарь категории собирается один раз от смысла категории и проверяется на
 полноту фактическими ответами. Дописать в него слово после того, как прогон не
 сошёлся, — подгонка теста под результат: набор после неё не меряет ничего. Не
@@ -110,6 +118,20 @@ AIMS = ("apply", "avoid")
 # Поля пары, называющие категории, и то, как разрешённое кладётся в пару.
 KIND_FIELDS = (("expect_kinds", "expect"), ("forbid_kinds", "forbid"))
 VOCAB = "vocab"
+
+
+def words_of(kind):
+    """Слова категории. Категория — список основ или запись со списком."""
+    if isinstance(kind, dict):
+        return list(kind.get("words") or [])
+    return list(kind or [])
+
+
+def unless_of(kind):
+    """Отменяющие основы категории. У списка их нет вовсе."""
+    if isinstance(kind, dict):
+        return list(kind.get("unless") or [])
+    return []
 
 
 class PairSetError(RuntimeError):
@@ -191,7 +213,9 @@ def resolve(item, kinds):
     """
     got = {}
     for field, side in KIND_FIELDS:
-        got[side] = {name: list(kinds[name]) for name in item.get(field) or []}
+        got[side] = {name: {"words": words_of(kinds[name]),
+                            "unless": unless_of(kinds[name])}
+                     for name in item.get(field) or []}
     if not any(got.values()):
         return item
     return dict(item, **{VOCAB: got})
@@ -212,7 +236,9 @@ def envelope(items, kinds=None, **meta):
     body = {"version": VERSION, "kind": KIND, "count": len(items)}
     body.update(meta)
     if kinds:
-        body["kinds"] = {name: list(words) for name, words in kinds.items()}
+        body["kinds"] = {name: (dict(kind) if isinstance(kind, dict)
+                                else list(kind))
+                         for name, kind in kinds.items()}
     body["items"] = [validate(bare(dict(item)), kinds=kinds) for item in items]
     return body
 
