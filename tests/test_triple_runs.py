@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Снятые прогоны тройки: журнал и дословные ответы обеих рук.
+"""Снятые прогоны версий про питание: журнал и дословные ответы обеих рук.
 
 Запуск: python3 -m pytest tests/test_triple_runs.py -q
 
@@ -18,18 +18,15 @@
 1. У каждой из трёх версий есть строка в журнале, и обе доли — полнота и
    точность — в ней записаны как есть, а не выведены задним числом.
 2. Рука без памяти ни на одной из трёх не проходит.
-3. Ответы трёх версий различаются по существу: набор слов закрытого словаря,
-   которые в ответе действительно встретились, у трёх версий разный. Это про
+3. Ответы версий различаются по существу: набор слов закрытого словаря,
+   которые в ответе действительно встретились, у версий разный. Это про
    содержание списка, а не про формулировку.
 4. Животная плоть стоит ровно там, где её велела память: у мясоеда есть, у
    вегетарианца и вегана нет ни одного слова из категории.
 
-Что этими прогонами не сошлось и сознательно не исправлено. Веган не прошёл
-свой критерий: в его списке «растительное молоко» и «молочные заменители», а
-запрет животного неплотского ловит `молок` и `молочн` вхождением строки и
-отличить растительное молоко от коровьего не может. Дописать исключение в
-словарь после несошедшегося прогона — подгонка теста под результат, после неё
-набор не меряет ничего. Поэтому исход записан как есть: две версии из трёх.
+Здесь не проверяется, что рука с памятью прошла: это цифра прогона, и она
+записана в журнал как есть. Проверяется то, без чего цифра ничего не значит —
+что голая рука не прошла и что ответы версий разошлись по составу.
 
 Мутации, на которых проверки обязаны краснеть:
   * строку журнала по версии подделали или потеряли → TestTheJournalHasEachVersion
@@ -51,7 +48,7 @@ HOUSEHOLD = ROOT / "eval-pairs-example.json"
 ANSWERS = ROOT / "eval-triple-answers.json"
 JOURNAL = ROOT / "eval-runs.jsonl"
 
-TRIPLE = ("питание-вегетарианец", "питание-веган", "питание-мясоед")
+VERSIONS = ("питание-веган", "питание-мясоед")
 ARMS = ("memory", "bare")
 
 
@@ -86,19 +83,19 @@ class TestTheJournalHasEachVersion(unittest.TestCase):
                        for pair in arm.get("pairs", []))]
 
     def test_every_version_has_a_run_of_its_own(self):
-        for id_ in TRIPLE:
+        for id_ in VERSIONS:
             mine = [row for row in self.rows_with(id_) if row.get("only") == id_]
             self.assertTrue(mine, "по версии %s своего прогона нет" % id_)
 
     def test_every_run_of_a_version_carries_both_arms(self):
-        for id_ in TRIPLE:
+        for id_ in VERSIONS:
             row = [r for r in self.rows_with(id_) if r.get("only") == id_][-1]
             self.assertEqual(sorted(ARMS), sorted(row["arms"]),
                              "%s: снята не всякая рука" % id_)
 
     def test_both_shares_are_written_as_they_came(self):
         """Полнота и точность стоят в строке порознь, каждая своим счётом."""
-        for id_ in TRIPLE:
+        for id_ in VERSIONS:
             row = [r for r in self.rows_with(id_) if r.get("only") == id_][-1]
             for arm, got in row["arms"].items():
                 for aim in pairs.AIMS:
@@ -110,7 +107,7 @@ class TestTheJournalHasEachVersion(unittest.TestCase):
                                  "%s/%s: пара в доле не одна" % (id_, arm))
 
     def test_the_model_of_the_run_is_named(self):
-        for id_ in TRIPLE:
+        for id_ in VERSIONS:
             row = [r for r in self.rows_with(id_) if r.get("only") == id_][-1]
             self.assertEqual("haiku", row.get("model"), id_)
             self.assertEqual("claude", row.get("player"), id_)
@@ -127,7 +124,7 @@ class TestTheBareArmPassesNothing(unittest.TestCase):
 
     def test_the_journal_says_the_bare_arm_took_nothing(self):
         rows = journal()
-        for id_ in TRIPLE:
+        for id_ in VERSIONS:
             row = [r for r in rows if r.get("only") == id_][-1]
             for got in row["arms"]["bare"]["pairs"]:
                 if got["id"] != id_:
@@ -139,7 +136,7 @@ class TestTheBareArmPassesNothing(unittest.TestCase):
     def test_the_recorded_bare_answer_fails_its_own_criterion(self):
         known = pairs_by_id()
         _, rows = answers()
-        for id_ in TRIPLE:
+        for id_ in VERSIONS:
             row = rows[(id_, "bare")]
             verdict = evaluate.judge(known[id_], row["answer"], "", None)
             self.assertFalse(verdict["ok"],
@@ -174,7 +171,7 @@ class TestTheThreeAnswersDiffer(unittest.TestCase):
         self.assertEqual(1, len(asked), "задача у снимков разная: %s" % asked)
 
     def test_every_version_and_arm_is_on_record(self):
-        for id_ in TRIPLE:
+        for id_ in VERSIONS:
             for arm in ARMS:
                 row = self.rows.get((id_, arm))
                 self.assertTrue(row and row["answer"].strip(),
@@ -182,7 +179,7 @@ class TestTheThreeAnswersDiffer(unittest.TestCase):
 
     def test_the_memory_answers_hold_different_products(self):
         seen = {}
-        for id_ in TRIPLE:
+        for id_ in VERSIONS:
             got = self.words_in(self.rows[(id_, "memory")]["answer"])
             self.assertTrue(got, "%s: в ответе ни одного белкового слова" % id_)
             for other, was in seen.items():
@@ -200,7 +197,7 @@ class TestTheThreeAnswersDiffer(unittest.TestCase):
         считает ещё и молочное, на котором веган и не сошёлся), а одну
         категорию — ту, вокруг которой три версии и построены.
         """
-        for id_ in TRIPLE:
+        for id_ in VERSIONS:
             pair = self.known[id_]
             flesh, unless = self.kinds["животная плоть"]
             low = self.rows[(id_, "memory")]["answer"].lower()
@@ -214,12 +211,12 @@ class TestTheThreeAnswersDiffer(unittest.TestCase):
 
     def test_memory_moves_the_answer_away_from_the_bare_one(self):
         """У версии, где память сработала, состав ответа сдвинулся."""
-        moved = [id_ for id_ in TRIPLE
+        moved = [id_ for id_ in VERSIONS
                  if self.words_in(self.rows[(id_, "memory")]["answer"])
                  != self.words_in(self.rows[(id_, "bare")]["answer"])]
-        self.assertEqual(sorted(TRIPLE), sorted(moved),
+        self.assertEqual(sorted(VERSIONS), sorted(moved),
                          "состав не сдвинулся у версий: %s"
-                         % sorted(set(TRIPLE) - set(moved)))
+                         % sorted(set(VERSIONS) - set(moved)))
 
 
 if __name__ == "__main__":

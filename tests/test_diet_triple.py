@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Тройка про питание: одна задача, три версии памяти, три несовместимых ответа.
+"""Питание: одна задача, разные версии памяти, несовместимые ответы.
 
 Запуск: python3 -m pytest tests/test_diet_triple.py -q
 
@@ -8,12 +8,18 @@
 о чём не помня, и он сойдётся с ожиданием случайно (так и вышло на первом живом
 прогоне с овсянкой, см. `COINCIDED` в `eval/live.py`).
 
-Тройка это сужает. Задача у трёх пар дословно одна, а память разная:
-вегетарианец, веган, мясоед. Ответы версий делят друг друга: список, верный
-для одной, для двух других неверен, и **один ответ не закрывает две версии**.
-Значит попасть надо трижды, каждый раз в свою.
+Здесь это сужено. Задача у пар дословно одна, а память разная: веган и мясоед.
+Ответы версий делят друг друга: список, верный для одной, для другой неверен, и
+**один ответ не закрывает обе версии**. Значит попасть надо дважды, каждый раз
+в свою.
 
-Чего тройка не обещает: что случайный список не пройдёт ни одной версии.
+Версий заводилось три; вегетарианец снят. Обычный недельный список без всякой
+памяти оказывался вегетарианским в двух прогонах из шести — то есть пара
+проходила угадыванием у трети голых рук и мерила не память, а базовое поведение
+модели. Веган и мясоед жёстче: тофу и фарш случайно в одном списке не выпадают,
+и голая рука не прошла ни одну из них ни разу.
+
+Чего этот набор не обещает: что случайный список не пройдёт ни одной версии.
 Критерий мясоеда — «животная плоть есть, растительного белка нет», и обычный
 мясной список ему удовлетворяет сам собой. Это меряется прогоном голой руки, а
 не выводится из формы набора.
@@ -26,12 +32,12 @@
 
 Свойства:
 
-1. Три пары есть в наборе, у всех `aim: apply`, задача у всех дословно одна,
+1. Обе пары есть в наборе, у всех `aim: apply`, задача у всех дословно одна,
    а реплики первой сессии и место у каждой свои.
 2. Ответ, собранный из меню одной версии, проходит её критерий и проваливает
-   критерии двух других — в обе стороны, для всех шести упорядоченных пар.
+   критерий соседней — в обе стороны.
 3. Ни один ответ, какой список ни собери, не закрывает две версии сразу.
-4. Критерий — категории: отдельных слов у трёх пар нет вовсе, слова категорий
+4. Критерий — категории: отдельных слов у пар нет вовсе, слова категорий
    куски слов, ловят любую падежную форму и не ловятся серединой чужого слова,
    а категории не пересекаются.
 5. Факт достижим поиском по словам задачи: у каждой реплики первой сессии есть
@@ -72,12 +78,11 @@ DAIRY = "животное неплотское"
 PLANT = "растительный белок"
 KIND_NAMES = (FLESH, DAIRY, PLANT)
 
-VEGETARIAN = "питание-вегетарианец"
 VEGAN = "питание-веган"
 CARNIVORE = "питание-мясоед"
-TRIPLE = (VEGETARIAN, VEGAN, CARNIVORE)
+VERSIONS = (VEGAN, CARNIVORE)
 
-# Прежний набор: семь пар, вокруг которых тройка добавляется.
+# Прежний набор: семь пар, вокруг которых версии добавляются.
 OLD_SEVEN = ("завтрак", "город", "забор", "макбук", "овсянка-ужин",
              "макбук-не-в-тему", "кровь")
 
@@ -85,11 +90,6 @@ OLD_SEVEN = ("завтрак", "город", "забор", "макбук", "ов
 # а не в наборе: набор несёт критерий, меню — то, чем критерий проверяется.
 # Первым в каждом меню стоит то, чем версия себя и показывает.
 MENU = {
-    # Бобовые и орехи в вегетарианском меню стоят нарочно: вегетарианец их
-    # покупает, растительный белок ему не запрещён, и без них проверка не
-    # увидела бы, чем именно версия вегана отличает свой ответ от соседнего.
-    VEGETARIAN: ["творог", "сыр", "яйца", "молоко", "хлеб", "гречка",
-                 "овощи", "чечевица", "орехи"],
     VEGAN: ["тофу", "нут", "чечевица", "хлеб", "овощи", "гречка",
             "овсяное питьё"],
     CARNIVORE: ["фарш", "индейка", "говядина", "курица", "хлеб", "овощи",
@@ -114,8 +114,8 @@ COLLIDERS = ("куркума", "кукуруза", "картофель", "мор
 ENDINGS = ("", "а", "у", "ом", "е", "и", "ами", "ой", "ые")
 
 
-def triple_of(items):
-    return {item["id"]: item for item in items if item["id"] in TRIPLE}
+def versions_of(items):
+    return {item["id"]: item for item in items if item["id"] in VERSIONS}
 
 
 def load_items():
@@ -138,14 +138,14 @@ class Base(unittest.TestCase):
     """Тройка целиком — предусловие каждой проверки ниже.
 
     Без него класс, перебирающий версии циклом, зеленел бы на пустом словаре:
-    выкини тройку из набора — и «у всех трёх aim: apply» проходит, потому что
-    трёх нет вовсе.
+    выкини версии из набора — и «у всех aim: apply» проходит, потому что их
+    нет вовсе.
     """
 
     def setUp(self):
-        self.triple = triple_of(load_items())
-        self.assertEqual(sorted(TRIPLE), sorted(self.triple),
-                         "тройка неполна, проверять нечего: %s"
+        self.triple = versions_of(load_items())
+        self.assertEqual(sorted(VERSIONS), sorted(self.triple),
+                         "версии неполны, проверять нечего: %s"
                          % sorted(self.triple))
 
 
@@ -164,8 +164,8 @@ class TestTripleIsInTheSet(Base):
     def test_the_facts_of_the_three_versions_do_not_overlap(self):
         lines = {id_: {turn["say"] for turn in pair["tell"]}
                  for id_, pair in self.triple.items()}
-        for one in TRIPLE:
-            for other in TRIPLE:
+        for one in VERSIONS:
+            for other in VERSIONS:
                 if one == other:
                     continue
                 self.assertEqual(set(), lines[one] & lines[other],
@@ -200,12 +200,12 @@ class TestVersionsAreMutuallyExclusive(Base):
     @given(data=st.data())
     @FAST
     def test_an_answer_from_one_menu_passes_only_its_own_version(self, data):
-        mine = data.draw(st.sampled_from(TRIPLE))
+        mine = data.draw(st.sampled_from(VERSIONS))
         pair = self.triple[mine]
         answer = data.draw(a_list_from(MENU[mine], must=MENU[mine][:1]))
         self.assertTrue(passes(pair, answer),
                         "%s не принял свой же ответ: %s" % (mine, answer))
-        for other in TRIPLE:
+        for other in VERSIONS:
             if other == mine:
                 continue
             self.assertFalse(
@@ -236,7 +236,7 @@ class TestNoAnswerPassesTwoVersions(Base):
 
 
 class TestCriteriaAreClosedKinds(Base):
-    """Критерий тройки — именованные категории, а не перечень угаданных слов."""
+    """Критерий версий — именованные категории, а не перечень угаданных слов."""
 
     def setUp(self):
         super().setUp()
@@ -258,7 +258,6 @@ class TestCriteriaAreClosedKinds(Base):
         """Три категории и разделение пар по ним — как решено оператором."""
         self.assertEqual(sorted(KIND_NAMES), sorted(self.kinds))
         want = {
-            VEGETARIAN: ([DAIRY], [FLESH]),
             VEGAN: ([PLANT], sorted([FLESH, DAIRY])),
             CARNIVORE: ([FLESH], [PLANT]),
         }
@@ -394,7 +393,7 @@ class TestTheOldSevenAreStillThere(unittest.TestCase):
     def test_the_old_pairs_judge_by_words_as_before(self):
         """Категорий у прежних пар нет: по ним снята история цифр в журнале."""
         for item in load_items():
-            if item["id"] in TRIPLE:
+            if item["id"] in VERSIONS:
                 continue
             self.assertNotIn("expect_kinds", item, item["id"])
             self.assertNotIn("forbid_kinds", item, item["id"])
@@ -406,7 +405,7 @@ class TestTheOldSevenAreStillThere(unittest.TestCase):
 
     def test_the_envelope_counts_what_the_list_holds(self):
         body, items = pairs.load(HOUSEHOLD)
-        self.assertEqual(len(OLD_SEVEN) + len(TRIPLE), body["count"])
+        self.assertEqual(len(OLD_SEVEN) + len(VERSIONS), body["count"])
         self.assertEqual(body["count"], len(items))
 
 
