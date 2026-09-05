@@ -232,9 +232,27 @@ def bare(item):
     return {name: value for name, value in item.items() if name != VOCAB}
 
 
+def kinds_of(items):
+    """Словари категорий, разрешённые в сами пары. Круг чтения и записи.
+
+    Записать прочитанный набор, не назвав `kinds` заново, значило бы получить
+    файл, где пары называют категории, которых в конверте больше нет: `load`
+    такой файл отвергает. Собираем их обратно из разрешённого — там они лежат
+    в целости, и второго источника правды не заводится.
+    """
+    got = {}
+    for item in items:
+        for side in ((item.get(VOCAB) or {}).values()):
+            for name, kind in side.items():
+                got.setdefault(name, kind)
+    return got
+
+
 def envelope(items, kinds=None, **meta):
     body = {"version": VERSION, "kind": KIND, "count": len(items)}
     body.update(meta)
+    if kinds is None:
+        kinds = kinds_of(items)
     if kinds:
         body["kinds"] = {name: (dict(kind) if isinstance(kind, dict)
                                 else list(kind))

@@ -1515,6 +1515,20 @@ def run(pairs=None, root=None, player="replay", limit=None, only=None,
     return report
 
 
+def wanted_words(pair):
+    """Слова, по которым спрашивается цепочка: отдельные и слова категорий.
+
+    Пара может ждать категорию, а не слово (`vocab`, см. `eval.pairs`), и тогда
+    `expect` у неё пуст. Спроси мы только его — у таких пар ступень обрыва
+    молчала бы всегда: «фактов: —» и пустой обрыв рядом с непройденной парой,
+    то есть ровно та слепота, ради которой цепочку и завели.
+    """
+    words = list(pair.get("expect") or [])
+    for kind in ((pair.get("vocab") or {}).get("expect") or {}).values():
+        words += pairs.words_of(kind)
+    return words
+
+
 def safe_half(box, pair, talks):
     """Первые две ступени цепочки, но без права уронить прогон.
 
@@ -1528,7 +1542,7 @@ def safe_half(box, pair, talks):
     except Exception:
         return {"marked": False, "units": 0, "dropped": Counter(),
                 "facts": None, "lapsed": 0,
-                "expected": bool(pair.get("expect")), "ok": False,
+                "expected": bool(wanted_words(pair)), "ok": False,
                 "candidates": None, "injected": False, "reason": None}
 
 
@@ -1544,9 +1558,9 @@ def first_half(box, pair, talks):
         if got:
             seen.append(transcript_of(*got))
     probe = marking(seen)
-    alive, lapsed = facts_with(box.db, pair.get("expect"))
+    alive, lapsed = facts_with(box.db, wanted_words(pair))
     probe.update({"facts": alive, "lapsed": lapsed,
-                  "expected": bool(pair.get("expect")), "ok": False,
+                  "expected": bool(wanted_words(pair)), "ok": False,
                   "candidates": None, "injected": False, "reason": None})
     return probe
 

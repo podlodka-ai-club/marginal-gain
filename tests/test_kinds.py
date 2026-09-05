@@ -156,6 +156,29 @@ class TestNamesResolveToWords(unittest.TestCase):
         again, _, _ = self.round_trip(back)
         self.assertEqual(raw, again)
 
+    def test_writing_a_loaded_set_without_naming_kinds_still_loads(self):
+        """Записать прочитанное, не называя словарь заново, — законно.
+
+        Иначе получается файл, где пары называют категории, которых в конверте
+        нет, и следующий `load` его отвергает: круг чтения и записи разрывался
+        бы молча, а замечает это только тот, кто в этот файл заглянет.
+
+        Побайтового равенства двух файлов здесь не требуется и быть не может:
+        словарь пересобирается из разрешённого, то есть приходит в одной форме
+        (`words`/`unless`) и без категорий, которых не назвала ни одна пара.
+        Требуется, чтобы пары судились тем же самым.
+        """
+        item = a_pair(expect_kinds=["неплотское"], forbid_kinds=["плоть"])
+        with tempfile.TemporaryDirectory() as tmp:
+            first = Path(tmp) / "первый.json"
+            second = Path(tmp) / "второй.json"
+            pairs.dump(first, [item], kinds=KINDS)
+            was = pairs.load(first)[1]
+            pairs.dump(second, was)
+            again = pairs.load(second)[1]
+            self.assertEqual([p[pairs.VOCAB] for p in was],
+                             [p[pairs.VOCAB] for p in again])
+
 
 class TestForbiddenKindCatchesEveryWord(unittest.TestCase):
     """Запрет категории ловит любое слово из неё, а не то, что вспомнили."""
@@ -290,6 +313,23 @@ class TestAKindCanCancelItself(unittest.TestCase):
         verdict = evaluate.judge(self.item(), "Список: хлеб, %s." % said_as,
                                  "", None)
         self.assertFalse(verdict["ok"], "%r не поймали" % said_as)
+
+    @given(order=st.sampled_from((
+            "молоко, растительное масло, хлеб",
+            "растительное масло, молоко, хлеб",
+            "- Молоко\n- Растительное масло",
+            "- Растительное масло\n- Молоко")))
+    @FAST
+    def test_cancelling_does_not_cross_a_punctuation_mark(self, order):
+        """Соседняя строка списка — другая покупка, а не уточнение к этой.
+
+        Считай мы соседство по плоскому потоку слов — «растительное» из
+        следующего пункта отменяло бы настоящее коровье молоко в предыдущем, и
+        исход пары зависел бы от порядка строк в ответе.
+        """
+        verdict = evaluate.judge(self.item(), "Список: %s." % order, "", None)
+        self.assertFalse(verdict["ok"],
+                         "молоко отменили из соседнего пункта: %r" % order)
 
     def test_cancelling_reaches_one_word_and_no_further(self):
         """Отмена — про соседа, а не про весь список."""
