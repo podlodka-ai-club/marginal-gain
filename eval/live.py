@@ -1575,7 +1575,8 @@ def judge_one(box, pair, reply):
     ответ, а не своей копией: разойдись они, признак и исход мерили бы разными
     линейками, и один не объяснял бы другой.
 
-    Признак не считается у отрицательной пары и у пары без `expect` вовсе —
+    Признак не считается у отрицательной пары и у пары, которая ничего не
+    ждёт вовсе, — ни словом, ни категорией:
     там `bool(expect)` в `evaluate.judge` ложно по построению, а `False`
     означало бы «дали не то», хотя спрашивать было не о чем. `None` в этом
     поле и значит «не считали», а не «дали не то».
@@ -1585,7 +1586,10 @@ def judge_one(box, pair, reply):
     record_reply(box, reply.session_id, pair["task"]["say"], said)
     known = fed_text_of(box, reply.session_id)
     verdict = evaluate.judge(pair, said, known, reply.error, raw=known)
-    expect = pair.get("expect") or []
+    # Ждать пара может словами и категориями (`vocab`, см. `eval.pairs`).
+    # Спрашиваем обе: судись пара одними категориями, признак молчал бы, и
+    # «дали не то» от «отдала, не применил» прогон бы не отличил.
+    expect = (pair.get("expect") or []) or (pair.get("vocab") or {}).get("expect")
     expect_in_feed = verdict["found_in_answer"] if expect else None
     return {"id": pair["id"], "kind": pair.get("kind", ""),
             "aim": pair.get("aim", "apply"),

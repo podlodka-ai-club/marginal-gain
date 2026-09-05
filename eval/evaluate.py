@@ -14,6 +14,7 @@
 import argparse
 import json
 import os
+import re
 import time
 from collections import defaultdict
 from pathlib import Path
@@ -58,6 +59,22 @@ def state_line(as_of):
             "сроки на %s" % (got["facts"], got["lapsed"], got["alive"], at))
 
 
+def _in_kind(word, text):
+    """Слово категории в тексте: совпадение с начала слова, а не подстрокой.
+
+    Категория — закрытый словарь основ, и основы у неё короткие: «нут», «мяс»,
+    «боб». Голая подстрока ловит их в «минут», «замяться» и «оба», то есть
+    находит мясо там, где его нет, и делает это молча. Начало слова снимает
+    ровно этот класс, оставляя падежи: «нут», «нута», «нутом» — те же.
+
+    Отдельные слова `expect`/`forbid` этого правила не знают и знать не должны:
+    по ним считана история цифр семи прежних пар, и сдвинь мы правило — старая
+    цифра стала бы несравнима с новой, выглядя точно так же.
+    """
+    return re.search(r"(?<![^\W\d_])%s" % re.escape(word.lower()),
+                     text, re.UNICODE) is not None
+
+
 def judge(case, answer, known, error, raw=None):
     """Разбор одного результата. Упавший случай пройденным не считается.
 
@@ -97,13 +114,13 @@ def judge(case, answer, known, error, raw=None):
     # Название категории и есть то, чего не хватило или что приплелось: слово
     # из закрытого словаря говорит, чем именно категория себя показала.
     hit_kinds = [name for name, words in wanted_kinds.items()
-                 if any(w.lower() in low_sent for w in words)]
+                 if any(_in_kind(w, low_sent) for w in words)]
     known_kinds = [name for name, words in wanted_kinds.items()
-                   if any(w.lower() in low_known for w in words)]
+                   if any(_in_kind(w, low_known) for w in words)]
     raw_kinds = [name for name, words in wanted_kinds.items()
-                 if any(w.lower() in low_raw for w in words)]
+                 if any(_in_kind(w, low_raw) for w in words)]
     false_hits += [w for words in banned_kinds.values() for w in words
-                   if w.lower() in low_sent]
+                   if _in_kind(w, low_sent)]
     missed = ([e for e in expect if e not in hits]
               + [name for name in wanted_kinds if name not in hit_kinds])
     # «Есть чего ждать» и «есть что запрещать» — две отдельные величины: пара

@@ -25,8 +25,13 @@
    теряет и ничего не размножает.
 4. Ожидание категории — «хотя бы одно слово из неё», запрет категории —
    «ни одного слова из неё».
+4a. Слово категории совпадает с начала слова, а не подстрокой: «нут» — это
+   «нута» и «нутом», но не «минут». Основы категории коротки, и голая
+   подстрока находила бы мясо там, где его нет.
 5. Пара без категорий судится ровно как раньше: тот же исход, что у пары,
    у которой поля категорий вовсе нет.
+6. Пара, судящая одними категориями, — законная: исход у неё определён, и
+   признак «нужное было во вбросе» у неё считается, а не молчит.
 
 Мутации, на которых проверки обязаны краснеть:
   * `validate` пропускает неизвестное имя категории  → TestUnknownKindIsRejected
@@ -183,6 +188,61 @@ class TestExpectedKindWantsAnyWord(unittest.TestCase):
         verdict = evaluate.judge(self.item(), said("хлеб", *words), "", None)
         self.assertFalse(verdict["ok"])
         self.assertIn("растительное", verdict["missed"])
+
+
+class TestAKindWordMatchesFromTheWordStart(unittest.TestCase):
+    """Основа категории — начало слова, а не любое место в нём."""
+
+    def item(self, kind):
+        return a_pair(expect=[], forbid=[], forbid_kinds=[kind],
+                      vocab={"expect": {}, "forbid": {kind: KINDS[kind]}})
+
+    @given(word=st.sampled_from(KINDS["плоть"]),
+           head=st.text(alphabet="абвгдежзи", min_size=1, max_size=5))
+    @FAST
+    def test_a_kind_word_inside_another_word_does_not_trip(self, word, head):
+        verdict = evaluate.judge(self.item("плоть"),
+                                 said("хлеб", head + word), "", None)
+        self.assertTrue(verdict["ok"],
+                        "%r прочли как %r" % (head + word, word))
+
+    @given(word=st.sampled_from(KINDS["плоть"]),
+           tail=st.sampled_from(("", "а", "ой", "ые", "у")))
+    @FAST
+    def test_the_same_word_at_a_word_start_does_trip(self, word, tail):
+        verdict = evaluate.judge(self.item("плоть"),
+                                 said("хлеб", word + tail), "", None)
+        self.assertFalse(verdict["ok"])
+
+
+class TestAPairMayJudgeByKindsAlone(unittest.TestCase):
+    """Категорий достаточно: ни отдельных слов, ни пустого исхода.
+
+    Пара, у которой весь критерий — категории, обязана проходить проверку формы
+    и обязана считать признак «ожидаемое было во вбросе». Читайся она как «ни
+    expect, ни forbid», набор бы её не принял вовсе; молчи признак — прогон не
+    отличил бы «дали не то» от «отдала, не применил».
+    """
+
+    def test_kinds_alone_define_an_outcome(self):
+        item = a_pair(expect=[], forbid=[], expect_kinds=["растительное"],
+                      forbid_kinds=["плоть"])
+        self.assertEqual(item, pairs.validate(dict(item), kinds=KINDS))
+
+    def test_a_pair_with_nothing_at_all_is_still_rejected(self):
+        with self.assertRaises(pairs.PairSetError):
+            pairs.validate(a_pair(expect=[], forbid=[]), kinds=KINDS)
+
+    @given(word=st.sampled_from(KINDS["растительное"]))
+    @FAST
+    def test_the_feed_is_measured_by_kinds_too(self, word):
+        item = a_pair(expect=[], forbid=[], expect_kinds=["растительное"],
+                      vocab={"expect": {"растительное": KINDS["растительное"]},
+                             "forbid": {}})
+        fed = evaluate.judge(item, said("хлеб"), said(word), None)
+        self.assertTrue(fed["found_in_answer"], "категорию во вбросе не увидели")
+        empty = evaluate.judge(item, said("хлеб"), said("хлеб"), None)
+        self.assertFalse(empty["found_in_answer"])
 
 
 class TestPairsWithoutKindsJudgeAsBefore(unittest.TestCase):

@@ -166,8 +166,9 @@ def validate(item, kinds=None):
     task = item.get("task")
     if not isinstance(task, dict) or not (task.get("say") or "").strip():
         raise PairSetError("%s: нет задачи для сессии 2" % item["id"])
-    if not (item.get("expect") or item.get("forbid")):
-        raise PairSetError("%s: ни expect, ни forbid — исход не определён"
+    if not (item.get("expect") or item.get("forbid")
+            or item.get("expect_kinds") or item.get("forbid_kinds")):
+        raise PairSetError("%s: ни слова, ни категории — исход не определён"
                            % item["id"])
     matters = item.get("matters")
     if matters is not None and not (isinstance(matters, str) and matters.strip()):
