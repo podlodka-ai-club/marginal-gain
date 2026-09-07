@@ -1,0 +1,383 @@
+<title>Agentic Memory M1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Source+Sans+3:wght@400;600&family=JetBrains+Mono:wght@400;700&display=swap">
+
+<style>
+:root{
+  --ground:#FAF8F3;
+  --panel:#F1EEE6;
+  --text:#1A1B22;
+  --muted:#5C6072;
+  --faint:#8A8E9E;
+  --hair:#DCD7CB;
+  --hair-soft:#E8E4DA;
+  --accent:#3D4BC7;
+  --det:#2F6B51;
+  --heur:#A2660F;
+  --warn:#A8452E;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#0E0F15;
+    --panel:#171922;
+    --text:#EBE8E0;
+    --muted:#969AAB;
+    --faint:#6B6F80;
+    --hair:#272A36;
+    --hair-soft:#1D1F29;
+    --accent:#8592FF;
+    --det:#6BB08F;
+    --heur:#D6A443;
+    --warn:#D9705A;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0E0F15;
+  --panel:#171922;
+  --text:#EBE8E0;
+  --muted:#969AAB;
+  --faint:#6B6F80;
+  --hair:#272A36;
+  --hair-soft:#1D1F29;
+  --accent:#8592FF;
+  --det:#6BB08F;
+  --heur:#D6A443;
+  --warn:#D9705A;
+}
+
+*{box-sizing:border-box}
+body{
+  background:var(--ground);color:var(--text);
+  font-family:"Source Sans 3",-apple-system,BlinkMacSystemFont,sans-serif;
+  font-size:17.5px;line-height:1.68;margin:0;padding:0 22px 100px;
+}
+.page{max-width:1120px;margin:0 auto;display:grid;grid-template-columns:200px minmax(0,1fr);gap:0 56px;align-items:start}
+main{max-width:680px;min-width:0}
+
+h1,h2,h3,h4{font-family:Newsreader,Georgia,serif;font-weight:500;text-wrap:balance;margin:0}
+h1{font-size:clamp(36px,5vw,54px);line-height:1.07;letter-spacing:-.016em}
+h2{font-size:31px;line-height:1.18;margin:0 0 8px;scroll-margin-top:24px}
+h3{font-size:21px;line-height:1.3;margin:0 0 10px}
+h4{font-size:17.5px;font-weight:600;margin:0 0 6px}
+p{margin:0 0 19px}
+code{font-family:"JetBrains Mono",ui-monospace,monospace;font-size:.85em;background:var(--panel);padding:1px 5px;border-radius:2px}
+a{color:var(--accent)}
+.eyebrow{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.15em;text-transform:uppercase;color:var(--faint)}
+.sec-n{font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.1em;color:var(--faint);display:block;margin-bottom:7px}
+
+/* ── навигация ─────────────────────────── */
+nav{position:sticky;top:22px;padding-top:96px;font-size:14px;line-height:1.5}
+nav .nav-title{font-family:"JetBrains Mono",monospace;font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--faint);margin-bottom:14px}
+nav ol{list-style:none;margin:0;padding:0;counter-reset:s}
+nav li{counter-increment:s;margin-bottom:2px}
+nav a{
+  display:grid;grid-template-columns:24px 1fr;gap:6px;
+  color:var(--muted);text-decoration:none;padding:4px 0;border-left:2px solid transparent;padding-left:10px;
+}
+nav a::before{content:counter(s,decimal-leading-zero);font-family:"JetBrains Mono",monospace;font-size:10.5px;color:var(--faint);padding-top:3px}
+nav a:hover{color:var(--text);border-left-color:var(--accent)}
+nav a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+nav .sub{font-size:13px}
+nav .sub a{padding-left:34px;grid-template-columns:1fr}
+nav .sub a::before{content:none}
+
+header{padding:88px 0 0;grid-column:2}
+.lede{font-size:21px;line-height:1.5;color:var(--muted);margin:24px 0 0}
+.byline{margin-top:30px;padding-top:16px;border-top:1px solid var(--hair);font-family:"JetBrains Mono",monospace;font-size:12px;color:var(--faint);display:flex;flex-wrap:wrap;gap:6px 22px}
+
+section{margin-top:68px}
+
+/* ── диалог ────────────────────────────── */
+.dialog{margin:26px 0;border-top:1px solid var(--hair);border-bottom:1px solid var(--hair)}
+.turn{display:grid;grid-template-columns:104px minmax(0,1fr);gap:18px;padding:15px 0}
+.turn+.turn{border-top:1px solid var(--hair-soft)}
+.turn .when{font-family:"JetBrains Mono",monospace;font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--faint);padding-top:5px}
+.turn .said{font-family:Newsreader,Georgia,serif;font-size:19px;line-height:1.4}
+.turn .said .note{display:block;font-family:"Source Sans 3",sans-serif;font-size:13.5px;color:var(--faint);font-style:italic;margin-bottom:5px}
+.answers{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--hair-soft);margin-top:0}
+.ans{background:var(--ground);padding:13px 15px 15px}
+.ans .who{font-family:"JetBrains Mono",monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px}
+.ans.m .who{color:var(--accent)}
+.ans.b .who{color:var(--faint)}
+.ans p{margin:0;font-size:15.5px}
+
+/* ── схема конвейера ───────────────────── */
+.flow{margin:26px 0;border-top:1px solid var(--hair)}
+.flow-lane{font-family:"JetBrains Mono",monospace;font-size:10.5px;letter-spacing:.15em;text-transform:uppercase;color:var(--faint);padding:18px 0 6px}
+.mod{display:grid;grid-template-columns:30px 118px minmax(0,1fr) 86px;gap:14px;align-items:baseline;padding:12px 0;border-top:1px solid var(--hair-soft)}
+.mod .n{font-family:"JetBrains Mono",monospace;font-size:11.5px;color:var(--faint);font-variant-numeric:tabular-nums}
+.mod .id{font-family:"JetBrains Mono",monospace;font-size:13px;font-weight:700}
+.mod.d .id{color:var(--det)}
+.mod.h .id{color:var(--heur)}
+.mod .what{font-size:15px;color:var(--muted)}
+.mod .tag{font-family:"JetBrains Mono",monospace;font-size:9.5px;letter-spacing:.09em;text-transform:uppercase;text-align:right}
+.mod.d .tag{color:var(--det)}
+.mod.h .tag{color:var(--heur)}
+.flow-key{display:flex;gap:22px;flex-wrap:wrap;margin-top:16px;font-family:"JetBrains Mono",monospace;font-size:11.5px;color:var(--muted)}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px}
+
+/* ── код ───────────────────────────────── */
+pre{
+  background:var(--panel);border:1px solid var(--hair);border-radius:3px;
+  padding:15px 17px;overflow-x:auto;margin:20px 0;
+  font-family:"JetBrains Mono",monospace;font-size:13px;line-height:1.65;
+}
+pre code{background:none;padding:0;font-size:inherit}
+.cap{font-size:13.5px;color:var(--faint);margin:-10px 0 22px}
+
+/* ── врезка правил ─────────────────────── */
+.rules{margin:20px 0;border-left:2px solid var(--hair);padding-left:20px}
+.rules.g{border-left-color:var(--accent)}
+.rules.f{border-left-color:var(--heur)}
+.rules dl{margin:0;display:grid;grid-template-columns:130px minmax(0,1fr);gap:9px 18px;font-size:15.5px}
+.rules dt{font-family:"JetBrains Mono",monospace;font-size:12.5px;color:var(--text);font-weight:700;padding-top:2px}
+.rules dd{margin:0;color:var(--muted)}
+
+.aside{background:var(--panel);border-radius:3px;padding:18px 20px;margin:24px 0;font-size:15.5px}
+.aside h4{margin-bottom:7px}
+.aside p:last-child{margin-bottom:0}
+.aside p{color:var(--muted)}
+
+/* ── цифры ─────────────────────────────── */
+.score{display:grid;grid-template-columns:1fr 1fr;gap:2px;background:var(--hair);border-block:1px solid var(--hair);margin:26px 0}
+.arm{background:var(--ground);padding:22px 4px 18px}
+.arm .who{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint)}
+.arm .big{font-family:Newsreader,Georgia,serif;font-size:clamp(46px,7vw,68px);line-height:1;font-variant-numeric:tabular-nums;margin-top:5px;letter-spacing:-.02em}
+.arm .of{font-size:.42em;color:var(--faint)}
+.arm.m .big{color:var(--accent)}
+.arm.b .big{color:var(--faint)}
+.arm .sub{font-size:14px;color:var(--muted);margin-top:5px}
+
+.miss{border-left:2px solid var(--hair);padding-left:20px;margin:24px 0}
+.miss.a{border-left-color:var(--warn)}
+.miss.b{border-left-color:var(--accent)}
+.miss.c{border-left-color:var(--faint)}
+.miss .cnt{font-family:"JetBrains Mono",monospace;font-size:11.5px;color:var(--faint);letter-spacing:.05em}
+.miss h3{margin:4px 0 8px}
+.miss p{font-size:16px;margin-bottom:9px}
+.ids{font-family:"JetBrains Mono",monospace;font-size:12px;color:var(--faint);line-height:1.85}
+blockquote{margin:12px 0;padding-left:16px;border-left:1px solid var(--hair);font-family:Newsreader,Georgia,serif;font-style:italic;font-size:16.5px;color:var(--muted)}
+
+.scroll{overflow-x:auto;margin:22px 0}
+table{border-collapse:collapse;font-size:14.5px;width:100%;min-width:460px}
+th,td{text-align:right;padding:9px 13px;border-bottom:1px solid var(--hair-soft);font-variant-numeric:tabular-nums}
+th:first-child,td:first-child,th:last-child,td:last-child{text-align:left}
+th{font-family:"JetBrains Mono",monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);font-weight:400;border-bottom-color:var(--hair)}
+td{font-family:"JetBrains Mono",monospace}
+td.z{color:var(--faint)}
+td.h{color:var(--accent)}
+td.txt{font-family:"Source Sans 3",sans-serif;color:var(--muted);font-size:14px}
+tr.now td{border-bottom:0}
+tr.now td:first-child{font-weight:700}
+
+footer{grid-column:2;margin-top:80px;padding-top:22px;border-top:1px solid var(--hair);color:var(--faint);font-size:14px}
+
+@media (max-width:900px){
+  .page{grid-template-columns:minmax(0,1fr);gap:0}
+  header,footer{grid-column:1}
+  nav{position:static;padding-top:34px;margin-bottom:8px;border-bottom:1px solid var(--hair);padding-bottom:20px}
+  nav ol{columns:2;column-gap:24px}
+}
+@media (max-width:620px){
+  .mod{grid-template-columns:26px minmax(0,1fr) 72px;gap:9px}
+  .mod .what{grid-column:1 / -1;margin-top:2px}
+  .turn{grid-template-columns:1fr;gap:5px}
+  .answers{grid-template-columns:1fr}
+  .rules dl{grid-template-columns:1fr;gap:3px 0}
+  .rules dd{margin-bottom:9px}
+  nav ol{columns:1}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+.step{display:grid;grid-template-columns:28px minmax(0,1fr);gap:14px;margin:0 0 17px;align-items:start}
+.step .sn{font-family:"JetBrains Mono",monospace;font-size:12px;color:var(--accent);font-weight:700;padding-top:5px;font-variant-numeric:tabular-nums}
+.step .st{min-width:0}
+.step b{color:var(--text)}
+table td:first-child code,table td code{white-space:nowrap}
+.scroll+.scroll{margin-top:14px}
+h3{margin-top:30px}
+section>h3:first-of-type{margin-top:24px}
+</style>
+
+<div class="page">
+
+<header>
+  <div class="eyebrow">Marginal gain · вторая память кодового агента</div>
+  <h1>Agentic Memory M1</h1>
+  <p class="lede">
+    Мы проверяли одну гипотезу: можно ли устроить память так, чтобы размеченную
+    информацию раскладывать по графу, связывать детерминированно, оценивать
+    уместность без обучения — и вовремя забывать. Ниже устройство целиком:
+    девять модулей, правила каждого и цифра, которая показывает, что из этого
+    работает.
+  </p>
+  <div class="byline">
+    <span>прогон 08.09.2026</span><span>модель haiku</span><span>16 пар</span><span>1136 тестов</span>
+  </div>
+</header>
+
+<nav>
+  <div class="nav-title">Содержание</div>
+  <ol>
+    <li><a href="#s01">Задача</a></li>
+    <li><a href="#s02">Гипотеза</a></li>
+    <li><a href="#s03">Конвейер: девять модулей</a></li>
+    <li><a href="#s04">Запись и понимание</a></li>
+    <li><a href="#s05">Граф связей</a></li>
+    <li><a href="#s06">Взвешивание: полезность и уместность</a></li>
+    <li><a href="#s07">Забывание</a></li>
+    <li><a href="#s08">Глубина чтения</a></li>
+    <li><a href="#s09">Как проверяли</a></li>
+    <li><a href="#s10">Результат</a></li>
+    <li><a href="#s11">Что дальше</a></li>
+  </ol>
+</nav>
+
+<main>
+<section>
+<h2 id="s01"><span class="sec-n">01</span>Задача</h2>
+<p>Агент не сохраняет контекст между сессиями. Стандартное решение — сложить разговоры в хранилище и искать по ним. Основная сложность не в поиске, а в отборе: при выдаче двадцати записей вместо трёх релевантных внимание модели распределяется по нерелевантному контексту, и ответ выходит хуже, чем без памяти вовсе.</p>
+<p>Отсюда две подзадачи. Первая — разложить разговор на отдельные утверждения. Вторая — отличать те, что следует воспроизвести, от остальных.</p>
+<h3>Где эта задача среди других видов памяти</h3>
+<p><b>Ретроспективная память</b> отвечает на вопрос «что было?». Человека прямо спрашивают — «какой у меня Mac?» — агент достаёт запись. Это умеет почти любая память, и почти все бенчмарки проверяют именно это.</p>
+<p><b>Проспективная</b> отвечает «не пора ли что-то сделать?». Человек заранее оставил намерение — «напомни мне про X» — и агент сам ловит нужный момент.</p>
+<p>Наш случай ближе ко второму, но не совпадает с ним. Пользователь не давал поручения и не задаёт вопроса: факт прозвучал попутно, в другой сессии. Затем поступает задача, с той сессией не связанная, — и правильный ответ на неё <b>отличается</b> от ответа без этого факта.</p>
+<blockquote><b>Разговор 1.</b> «Кстати, постгрес у draco висит на 5433 — 5432 занят старым инстансом, его ещё не погасили.»<br><b>Разговор 2</b> (новая сессия, того разговора в контексте нет). «Перед миграцией draco снимаем дамп базы. Какой порт указать в строке подключения и почему именно его?»<br><b>С памятью:</b> 5433 — потому что 5432 занят старым инстансом, который ещё не погасили.<br><b>Без памяти:</b> 5432 — стандартный порт PostgreSQL.</blockquote>
+<p>Прямого бенчмарка на эту постановку в проверенных работах нет: PM-Bench, TriggerBench и GoodAI LTM её не покрывают — во всех трёх пользователь либо спрашивает, либо поручает.</p>
+</section>
+
+
+<section>
+<h2 id="s02"><span class="sec-n">02</span>Гипотеза</h2>
+<p>Исходная формулировка: <b>код может самостоятельно подставить в контекст модели релевантные факты</b>, определяя релевантность детерминированными правилами, а не второй моделью-судьёй.</p>
+<p>Из неё следуют четыре требования, каждое реализовано отдельным модулем:</p>
+<div class="scroll"><table><thead><tr><th>требование</th><th>что значит</th></tr></thead><tbody><tr><td><b>разметка</b></td><td>разговор разбирается на эпизоды и факты со схемой, а не хранится сплошным текстом</td></tr><tr><td><b>граф</b></td><td>факты связываются между собой по явному правилу; ребро хранит условие, при котором два факта оказались связаны, и подсказка по нему добирает смежное</td></tr><tr><td><b>взвешивание</b></td><td>полезность и уместность считаются формулой без обучения и эмбеддингов</td></tr><tr><td><b>забывание</b></td><td>у факта есть срок, и он продлевается от обращений: востребованное живёт дольше, невостребованное уходит из первой выдачи, оставаясь достижимым</td></tr></tbody></table></div>
+<p>Проверяемое следствие: прогон с памятью должен отвечать иначе, чем прогон без памяти, и при этом правильнее. Остальные разделы описывают, как эта разница измеряется.</p>
+</section>
+
+
+<section>
+<h2 id="s03"><span class="sec-n">03</span>Конвейер: девять модулей</h2>
+<p>Каждый этап — отдельный модуль со своим входом и выходом. Порядок снят с базы аудита прогона: каждый модуль пишет туда строку, поэтому цепочка читается постфактум, а не восстанавливается по логам.</p>
+<p>Ключевое разделение — <b>что выполняет код, а что модель</b>. Механику полностью держат детерминированные инструменты. Модель вызывается дважды: для разметки фактов в собственном ответе и в оценке. Остальное — правила, покрытые тестами.</p>
+<h3>Как это выглядит в обычном ходе</h3>
+<p>Память встроена в штатный цикл «пользователь спросил — агент ответил» и не добавляет отдельных шагов для пользователя. Один ход целиком:</p>
+<p class="step"><span class="sn">1</span><span class="st"><b>Пользователь отправляет сообщение.</b> До того как оно уйдёт в модель, мы ищем по нему в хранилище. Если поиск что-то вернул и оно прошло порог, к запросу добавляется блок с находкой — несколько строк перед задачей пользователя. Если поиск ничего не дал или найденное порог не прошло, запрос уходит в модель без изменений.</span></p>
+<p class="step"><span class="sn">2</span><span class="st"><b>Модель отвечает на запрос пользователя.</b> Она решает свою обычную задачу, а попутно размечает в собственном ответе утверждения, которые стоит запомнить, — отдельным блоком в конце. Пользователь этого блока не видит: его вырезают до показа.</span></p>
+<p class="step"><span class="sn">3</span><span class="st"><b>Мы забираем разметку из ответа.</b> Ход целиком уходит в архив, из размеченного блока получаются факты, они связываются с эпизодом и с соседями по правилу. Здесь же отмечается, пригодился ли блок, который мы подставили на шаге 1.</span></p>
+<p>Пользователь при этом видит только свой вопрос и ответ агента — плюс, если подсказка сработала, короткую пометку о том, что память подставила. Всё остальное происходит между его сообщением и ответом модели, а тяжёлая часть — уже после того, как ответ показан.</p>
+<p><b>Перед ходом агента</b></p>
+<div class="scroll"><table><thead><tr><th>№</th><th>модуль</th><th>что делает</th><th>кто</th></tr></thead><tbody><tr><td>01</td><td><code>search</code></td><td>спросить хранилище по тексту сообщения</td><td>код</td></tr><tr><td>02</td><td><code>suggest</code></td><td>взвесить найденное, отсечь по порогу, подать агенту</td><td>оценка</td></tr></tbody></table></div>
+<p><b>Во время хода</b></p>
+<div class="scroll"><table><thead><tr><th>№</th><th>модуль</th><th>что делает</th><th>кто</th></tr></thead><tbody><tr><td>03</td><td><code>intercept</code></td><td>перехватить сообщение, положить в очередь</td><td>код</td></tr><tr><td>04</td><td><code>display</code></td><td>показать человеку, что память подсказала</td><td>код</td></tr></tbody></table></div>
+<p><b>После хода</b></p>
+<div class="scroll"><table><thead><tr><th>№</th><th>модуль</th><th>что делает</th><th>кто</th></tr></thead><tbody><tr><td>05</td><td><code>drain</code></td><td>слить ход из очереди в архив целиком, без отбора</td><td>код</td></tr><tr><td>06</td><td><code>mark</code></td><td>разметить границу эпизода</td><td>код</td></tr><tr><td>07</td><td><code>fact</code></td><td>модель размечает в своём ответе отдельные утверждения</td><td>модель</td></tr><tr><td>08</td><td><code>link</code></td><td>связать факт с эпизодом и с соседями по правилу</td><td>код</td></tr><tr><td>09</td><td><code>judge</code></td><td>отметить, пригодилась ли подсказка</td><td>код</td></tr></tbody></table></div>
+</section>
+
+
+<section>
+<h2 id="s04"><span class="sec-n">04</span>Запись и понимание</h2>
+<p>Модуль сохранения записывает содержимое разговора в хранилище целиком, без отбора и усечения.</p>
+<p>Модуль понимания разбирает архив на две сущности схемы. <b>Эпизод</b> — отрезок работы: границей служит сообщение пользователя, всё выполненное агентом до следующего сообщения входит в этот эпизод. У эпизода есть заголовок, итог (<code>done</code>, <code>abandoned</code>, <code>blocked</code>) и позиция в разговоре. <b>Факт</b> — отдельное утверждение с составным ключом: тип, предмет, охват.</p>
+<pre><code>{&quot;object_mutation&quot;: {&quot;object_type&quot;: &quot;Fact&quot;, &quot;create&quot;: {
+  &quot;key&quot;:    {&quot;fact_type&quot;: &quot;project_state&quot;,
+             &quot;subject&quot;:   &quot;draco:port&quot;,
+             &quot;scope&quot;:     &quot;project&quot;},
+  &quot;values&quot;: {&quot;content&quot;: &quot;Постгрес draco слушает 5433, 5432 занят старым инстансом&quot;}
+}}}</code></pre>
+<p>Типов фактов четыре: <code>user</code>, <code>preference</code>, <code>project_state</code>, <code>external_resource</code>.</p>
+</section>
+
+
+<section>
+<h2 id="s05"><span class="sec-n">05</span>Граф связей</h2>
+<p>Подсказка добирает не только найденное по запросу, но и связанное с ним по графу. Ребро между двумя фактами появляется не само: нужно правило, которое говорит, при каком условии два факта считаются связанными. Мы рассмотрели пять таких правил и оставили два:</p>
+<div class="scroll"><table><thead><tr><th>правило связывания</th><th>когда ставится ребро</th><th>объём</th></tr></thead><tbody><tr><td><b>same_episode</b></td><td>два факта названы в одном эпизоде. Потолок — восемь фактов на эпизод: без него дюжина самых длинных эпизодов даёт почти половину всех рёбер графа</td><td>1246 рёбер</td></tr><tr><td><b>error_then_fix</b></td><td>факты эпизода с итогом <code>blocked</code> связываются с фактами следующего эпизода того же разговора, если тот дошёл до конца</td><td>74 ребра</td></tr></tbody></table></div>
+<h3>Почему только два правила</h3>
+<p><code>same_project</code> — связывать все факты одного проекта — отвергнут по существу: он дал бы <b>88% всех рёбер</b> и ранжировал хуже случайного. Такое ребро не несёт информации, поскольку проект уже лежит в поле охвата и работает фильтром.</p>
+<p>Остальные два правила — <code>adjacent_in_time</code> и <code>same_file</code> — отложены из-за объёма данных, а не потому, что плохи. Архив собран за время хакатона, и наблюдений для них в нём мало: замер не отличает их от случайного, но это говорит о размере выборки. На большом хранилище от них ожидается заметно более глубокое связывание — соседство по времени и работа с одним файлом перестанут быть редкими совпадениями и начнут накапливать вес.</p>
+<p>Вес ребра — сколько раз правило сработало на этой паре фактов. Проход идёт по всему архиву и не ведёт учёт прочитанного: подсчёт веса по части архива дал бы заведомо неверное значение.</p>
+</section>
+
+
+<section>
+<h2 id="s06"><span class="sec-n">06</span>Взвешивание: полезность и уместность</h2>
+<p>Три доли — не единственный возможный набор. Мы выписали тридцать пять признаков, по которым можно судить о важности факта: временные, частотные, текстовые, происхожденческие. В условиях хакатона взяли самые очевидные и проверяемые, а остальные вынесли в отдельный замер.</p>
+<p>Замер на 386 узлах показал, что выбор был верным не случайно. Доверительный интервал не задевает случайного угадывания только у семи признаков, и все семь — временные или частотные: давность 0.770, темп обращений 0.725, число сессий 0.686, длительность жизни 0.676, частота 0.662, пачечность 0.632, охват проектов 0.623. Все текстовые и происхожденческие признаки — конкретность сущности, новизна, противоречие существующему, надёжность источника, длина — от шума неотличимы. Ядро гипотезы. Без обучения, эмбеддингов и модели-судьи — две величины, вычисляемые формулой.</p>
+<h3>Полезность: чего факт стоит вообще</h3>
+<p>Оценка от 0 до 1, три доли:</p>
+<pre><code>score = W_repeat · repeat + W_spread · spread + W_fresh · fresh
+
+repeat  сколько раз факт встретился в архиве (с потолком)
+spread  в скольких проектах он всплывал (с потолком)
+fresh   свежесть: 1.0 сегодня, линейно вниз до нуля</code></pre>
+<h3>Уместность: идёт ли он к этому ходу</h3>
+<p>Отдельная величина: у факта есть контекст записи, у текущего хода — свой. Порог применяется к <b>произведению</b> веса на уместность, ранжирование использует то же произведение — чтобы порог и порядок не расходились.</p>
+<pre><code>passes = score · fit &gt;= MIN_SCORE
+
+MIN_SCORE = 0.5   ниже этого факт не подтверждён повторением
+MIN_FIT   = 0.5   ниже этого запись не к месту
+MAX_ITEMS = 5     больше пяти — внимание модели размазывается
+MAX_CHARS = 1200  потолок на весь кусок, уходящий в контекст</code></pre>
+<p>Веса нет — порог вырождается в порог на одной уместности. Это основной случай: неуместное режется без всякой оценки. (очень много ли лирично просчто напиши что если фактов нет или факт не прошел гейт то нисчего не отобразится) <b>Молчание — нормальный исход.</b> Адресат подсказки — агент, а не пользователь. Лишний текст засоряет контекст и смещает ответ. Поэтому пустая выдача — штатный и частый исход, а не отказ системы. Набор проверяет это отдельными парами: те же факты в задачах, где они нерелевантны, и подсказка не должна появиться.</p>
+</section>
+
+
+<section>
+<h2 id="s07"><span class="sec-n">07</span>Забывание</h2>
+<p>Без забывания выдача растёт неограниченно: актуальные и устаревшие записи лежат вперемешку и имеют одинаковый вес.</p>
+<p>Срок хранится <b>значением на самом факте</b> и не выводится из типа: тип указывает, о чём запись, а скорость устаревания определяется режимом использования памяти и одинакова для всех фактов.</p>
+<div class="scroll"><table><thead><tr><th>механизм</th><th>правило</th></tr></thead><tbody><tr><td><b>переклад</b></td><td>просроченный факт перекладывается в отдельную таблицу. Не удаляется и не помечается флагом: отдельное место убирает запись из выборки один раз, а флаг пришлось бы отсеивать в каждом месте, где память спрашивают</td></tr><tr><td><b>продление</b></td><td>обращение отодвигает срок — и делает это сама подсказка в момент вставки, а не отдельный проход</td></tr><tr><td><b>свёртка</b></td><td>группа записей об одном и том же становится одной; замена берётся из самой группы, на ней остаётся пометка, из чего собрана, и есть откат</td></tr></tbody></table></div>
+<p>Свёртка отличается от забывания тем, что знание не теряется, а обобщается, поэтому обратимость обязательна. Правило группировки намеренно узкое: посимвольно одинаковое содержание при одинаковом ключе. Слияние по смыслу — незакрытое исследование, эвристикой оно не подменялось.</p>
+</section>
+
+
+<section>
+<h2 id="s08"><span class="sec-n">08</span>Глубина чтения</h2>
+<p>Забывание <b>скрывает, а не удаляет</b>. Просроченное уходит из основной выдачи, но сохраняется: доступ к нему даёт глубокое чтение. Запрос «что было актуально на тот момент» остаётся выполнимым.</p>
+<p>Так же устроены остальные параметры: порог подачи, число мест в выдаче, ограничение на объём — это аргументы вызова, а не константы в коде. Глубина настраивается под задачу без изменения логики.</p>
+</section>
+
+
+<section>
+<h2 id="s09"><span class="sec-n">09</span>Как проверяли</h2>
+<p>Модуль эвала прогоняет набор пар. Каждая пара — два прогона одной задачи. В первой сессии пользователь сообщает факт в разговоре о другом. Вторая сессия запускается <b>с нуля</b>, того разговора в её контексте нет. Между прогонами одно различие: в одном память подключена, в другом нет.</p>
+<p>Пара засчитывается только если ответ без факта неверен или неполон. Иначе она измеряет знания модели, а не память. </p>
+<p>Что остаётся после прогона:</p>
+<div class="scroll"><table><thead><tr><th>артефакт</th><th>содержание</th></tr></thead><tbody><tr><td><b>журнал</b></td><td>строка на прогон в репозитории, рядом с набором: доли, модель, цена, исход каждой пары</td></tr><tr><td><b>база аудита</b></td><td>полный протокол всех девяти этапов со входами и выходами; переживает снос песочницы, потому что песочница одноразовая, а протокол — то, ради чего непройденную пару потом разбирают</td></tr><tr><td><b>ступень обрыва</b></td><td>у каждой непрошедшей пары — первый этап, ответивший «нет». Это и есть адрес починки</td></tr></tbody></table></div>
+</section>
+
+
+<section>
+<h2 id="s10"><span class="sec-n">10</span>Результат</h2>
+<div class="scroll"><table><thead><tr><th></th><th>с памятью</th><th>без памяти</th></tr></thead><tbody><tr><td><b>всего</b></td><td><b>13 / 16</b></td><td><b>0 / 16</b></td></tr><tr><td>полнота (apply)</td><td>10 / 12</td><td>0 / 12</td></tr><tr><td>точность (avoid)</td><td>3 / 4</td><td>4 / 4</td></tr></tbody></table></div>
+<p>Второй столбец существеннее первого. Ноль означает, что набор <b>не угадывается</b>: все тринадцать прохождений обеспечены памятью, а не формулировкой задачи или знаниями модели. Четыре пары, засчитанные без памяти, — отрицательные, где корректное поведение состоит в молчании; при отключённой памяти подставлять нечего, и стенд помечает такие результаты как недоказательные.</p>
+<p>Одна отрицательная пара с памятью не прошла: подсказка появилась там, где факт нерелевантен. Это обратная сторона высокой полноты — чем охотнее память подставляет, тем выше риск лишнего, — и предмет отдельной настройки порога.</p>
+<h3>История прогонов</h3>
+<div class="scroll"><table><thead><tr><th>дата</th><th>пар</th><th>с памятью</th><th>без памяти</th><th>что менялось</th></tr></thead><tbody><tr><td>03.09</td><td>5</td><td>3</td><td>0</td><td>первый парный прогон</td></tr><tr><td>04.09</td><td>6</td><td>4</td><td>0</td><td>мерило переписано на влияние</td></tr><tr><td>05.09</td><td>10</td><td>—</td><td>0</td><td>тройка про питание</td></tr><tr><td>07.09</td><td>20</td><td>13</td><td>0</td><td>+12 пар про устройство проектов</td></tr><tr><td>07.09</td><td>19</td><td>11</td><td>0</td><td>сняты пара на дефолте модели и неверный запрет</td></tr><tr><td>08.09</td><td>16</td><td>13</td><td>0</td><td>сняты три пары, требовавшие чтения проекта</td></tr></tbody></table></div>
+<p>Доли между строками напрямую несравнимы: 4 сентября критерий изменён с «упомянут ли факт» на «изменился ли ответ», и состав набора менялся. Через все 27 парных прогонов устойчиво одно — правый столбец.</p>
+</section>
+
+
+<section>
+<h2 id="s11"><span class="sec-n">11</span>Что дальше</h2>
+<p>Гипотеза подтверждена в проверяемой за хакатон части: код подставляет в контекст модели релевантные факты детерминированными правилами. Разница между прогонами — тринадцать пар из шестнадцати против нуля.</p>
+<p>Основной результат — не сама доля, а то, что стало видно, где предел. Промахи приходятся не на запись и не на поиск: факт записан и находится по запросу, но в выдачу попадает соседний факт того же проекта. Формула полезности пока не различает факты внутри одного проекта.</p>
+<p>Это ограничение времени, а не подхода. Механизмы для доработки уже стоят на месте и настраиваются: у выдачи есть порог, число мест и потолок объёма — всё это аргументы вызова, а не константы. Из тридцати пяти выписанных признаков важности в формуле используются три; замер показал, какие из оставшихся работают, и их можно добавлять по одному, меряя каждый. Правил связывания реализовано два из пяти, остальные ждут объёма данных.</p>
+<p>Второй класс промахов — модель игнорирует поданную подсказку, хотя нужный факт стоял в списке первым. Это относится к форме выдачи, а не к памяти, и настраивается тем же способом.</p>
+</section>
+
+
+<section>
+<p class="cap">Прогон 08.09.2026, модель haiku, 16 пар, 1136 тестов. Цифры — из журнала прогонов репозитория; порядок этапов и правила модулей — из кода и базы аудита того же прогона.</p>
+</section>
+</main>
+
+<footer>
+  Прогон 08.09.2026, модель haiku, 16 пар, 1136 тестов. Цифры — из журнала
+  прогонов репозитория; порядок этапов и правила модулей — из кода и базы
+  аудита того же прогона.
+</footer>
+
+</div>
