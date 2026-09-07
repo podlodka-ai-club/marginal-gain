@@ -69,6 +69,19 @@ TASK = a_turn()
 NAMES = st.lists(WORD, min_size=1, max_size=3)
 
 
+def _drop_forbid_inside_expect(pair):
+    """Запрет, севший внутрь ожидания, из годной пары выбрасывается.
+
+    Такая пара непроходима по построению и `validate` её отвергает (см.
+    `eval.pairs`), а здесь строится заведомо годная. Выбрасываем, а не
+    отсеиваем фильтром: ожидание и запрет идут из одной строковой стратегии,
+    и на коротких примерах совпадение частое — фильтр съел бы примеры.
+    """
+    return dict(pair, forbid=[f for f in pair["forbid"]
+                              if not any(f.lower() in e.lower()
+                                         for e in pair["expect"])])
+
+
 def a_valid_pair(aim):
     tell = NONEMPTY_TELL if aim == "apply" else st.one_of(st.just([]), NONEMPTY_TELL)
     return st.builds(
@@ -79,7 +92,7 @@ def a_valid_pair(aim):
         task=TASK,
         expect=st.one_of(NAMES, st.just([])),
         forbid=st.one_of(NAMES, st.just([])),
-    ).filter(lambda p: p["expect"] or p["forbid"])
+    ).map(_drop_forbid_inside_expect).filter(lambda p: p["expect"] or p["forbid"])
 
 
 VALID_PAIR = st.sampled_from(pairs.AIMS).flatmap(a_valid_pair)

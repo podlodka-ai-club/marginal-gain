@@ -890,7 +890,14 @@ class TestThePairSetIsData(unittest.TestCase):
         tell=st.lists(said, min_size=1, max_size=3),
         task=said,
         expect=st.lists(said, min_size=1, max_size=2),
-        forbid=st.lists(said, max_size=2))
+        forbid=st.lists(said, max_size=2),
+    # Запрет, случайно совпавший с куском ожидания, — непроходимая пара, и
+    # `validate` её отвергает (см. `eval.pairs`). Здесь строится заведомо
+    # годная пара, поэтому такой запрет выбрасывается, а не отсеивается
+    # фильтром: отсев на коротком алфавите съел бы половину примеров.
+    ).map(lambda item: dict(
+        item, forbid=[f for f in item["forbid"]
+                      if not any(f.lower() in e.lower() for e in item["expect"])]))
 
     @given(item=pair)
     @SLOW
