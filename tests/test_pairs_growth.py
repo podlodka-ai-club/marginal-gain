@@ -1,15 +1,22 @@
 #!/usr/bin/env python3
-"""Набор вырос с восьми пар до девятнадцати. Что именно выросло — здесь.
+"""Набор вырос с восьми пар до девятнадцати, затем очищен до шестнадцати.
 
 Запуск: python3 -m pytest tests/test_pairs_growth.py -q
 
 Восьми пар мало: из тройки про питание выжила одна, и цифра с такого набора
-скачет от пары к паре. Одиннадцать новых написаны по фактам из фикстуры коллеги
-про вымышленные проекты atlas, borealis и draco — только по сильным, тем, где у
-агента есть уверенный неверный дефолт, который факт перебивает.
+скачет от пары к паре. Одиннадцать новых были написаны по фактам из фикстуры
+коллеги про вымышленные проекты atlas, borealis и draco — только по сильным,
+тем, где у агента есть уверенный неверный дефолт, который факт перебивает.
 
-`нода-borealis` из набора снята: прогон без памяти её проходил — Node.js 22 и
-есть текущая LTS, руке хватало дефолта. Пара мерила дефолт модели, а не память.
+Из набора сняты четыре пары, каждая — отдельной задачей и по разбору ответов, а
+не по тому, проходит ли пара:
+
+  * `нода-borealis` — прогон без памяти её проходил: Node.js 22 и есть текущая
+    LTS, руке хватало дефолта. Пара мерила дефолт модели, а не память.
+  * `линт-atlas`, `пакеты-atlas`, `секреты-borealis` — задача просила собрать
+    артефакт (шаг CI, Dockerfile, чек-лист) по репозиторию, которого в
+    песочнице нет. Файловых инструментов во второй сессии нет, и рука вместо
+    ответа переспрашивает — промах не памяти, а формулировки.
 
 Растёт набор дописыванием, и у роста два риска, которых json-файл не заметит:
 прежние восемь правятся заодно с новыми (по ним снята история цифр в журнале),
@@ -19,18 +26,19 @@
 
 Свойства:
 
-1. В наборе девятнадцать пар, и счётчик конверта сходится со списком.
-2. Восемь прежних пар на месте, одиннадцать новых доехали, id не повторяются.
+1. В наборе шестнадцать пар, и счётчик конверта сходится со списком.
+2. Восемь прежних пар на месте, восемь оставшихся новых на месте, id не
+   повторяются.
 3. У каждой новой пары сказано, почему факт решает исход (`matters`).
 4. Каждая новая пара положительная и чего-то ждёт: без факта ответ обязан
    стать неверным, а не просто другим по формулировке.
-5. `нода-borealis` из набора снята и обратно не вернулась.
+5. Ни одна из четырёх снятых пар в набор не вернулась.
 
 Мутации, на которых проверки обязаны краснеть:
-  * пара из набора пропала или набор не вырос → TestTheSetGrewToNineteen
-  * новую пару завели без `matters`           → TestTheSetGrewToNineteen
-  * новую пару завели одним запретом          → TestTheSetGrewToNineteen
-  * `нода-borealis` вернули в набор            → TestTheSetGrewToNineteen
+  * пара из набора пропала или набор не той длины → TestTheSetSettledAtSixteen
+  * новую пару завели без `matters`               → TestTheSetSettledAtSixteen
+  * новую пару завели одним запретом              → TestTheSetSettledAtSixteen
+  * снятую пару вернули в набор                    → TestTheSetSettledAtSixteen
 """
 import os
 import unittest
@@ -48,17 +56,17 @@ HOUSEHOLD = ROOT / "eval-pairs-example.json"
 OLD = ("завтрак", "город", "забор", "макбук", "овсянка-ужин",
        "макбук-не-в-тему", "кровь", "питание-веган")
 
-# Одиннадцать новых: две написаны оператором, девять — по фактам фикстуры.
-# `нода-borealis` была двенадцатой и снята — прогон без памяти её проходил.
-NEW = ("порт-draco", "ветка-draco", "секреты-borealis", "префикс-borealis",
-       "готовность-borealis", "линт-atlas", "пакеты-atlas", "воркер-borealis",
-       "лок-borealis", "тесты-atlas", "миграции-borealis")
+# Восемь новых, оставшихся после чистки: две написаны оператором, шесть — по
+# фактам фикстуры.
+NEW = ("порт-draco", "ветка-draco", "префикс-borealis", "готовность-borealis",
+       "воркер-borealis", "лок-borealis", "тесты-atlas", "миграции-borealis")
 
-# Пара, снятая как мерившая дефолт модели, а не память.
-DROPPED = "нода-borealis"
+# Пары, снятые из набора. `нода-borealis` мерила дефолт модели; остальные три
+# просили собрать артефакт по несуществующему репозиторию.
+DROPPED = ("нода-borealis", "линт-atlas", "пакеты-atlas", "секреты-borealis")
 
 
-class TestTheSetGrewToNineteen(unittest.TestCase):
+class TestTheSetSettledAtSixteen(unittest.TestCase):
 
     def setUp(self):
         self.body, self.items = pairs.load(HOUSEHOLD)
@@ -67,20 +75,25 @@ class TestTheSetGrewToNineteen(unittest.TestCase):
     def test_the_envelope_counts_what_the_list_holds(self):
         self.assertEqual(len(self.items), self.body["count"])
 
-    def test_the_set_holds_nineteen_pairs(self):
-        self.assertEqual(19, len(self.items))
+    def test_the_set_holds_sixteen_pairs(self):
+        self.assertEqual(16, len(self.items))
 
     def test_the_eight_earlier_pairs_are_all_still_here(self):
         missing = [id_ for id_ in OLD if id_ not in self.by_id]
         self.assertEqual([], missing, "пропала прежняя пара: %s" % missing)
 
-    def test_the_eleven_new_pairs_are_all_here(self):
+    def test_the_eight_remaining_new_pairs_are_all_here(self):
         missing = [id_ for id_ in NEW if id_ not in self.by_id]
         self.assertEqual([], missing, "новая пара не доехала: %s" % missing)
 
-    def test_the_dropped_pair_is_gone(self):
-        self.assertNotIn(DROPPED, self.by_id,
-                         "%s вернулась в набор, а мерила дефолт модели" % DROPPED)
+    def test_the_set_is_exactly_old_plus_new(self):
+        self.assertEqual(sorted(OLD + NEW),
+                         sorted(item["id"] for item in self.items),
+                         "состав набора разошёлся с ожидаемым")
+
+    def test_no_dropped_pair_came_back(self):
+        back = [id_ for id_ in DROPPED if id_ in self.by_id]
+        self.assertEqual([], back, "снятая пара вернулась в набор: %s" % back)
 
     def test_no_pair_is_named_twice(self):
         self.assertEqual(len(self.items), len({item["id"] for item in self.items}))
