@@ -282,9 +282,15 @@ class TestTheOldSevenAreStillThere(unittest.TestCase):
         self.assertEqual(len(ids), len(set(ids)), "id повторяются: %s" % ids)
 
     def test_the_envelope_counts_what_the_list_holds(self):
+        """Счётчик конверта сходится со списком, сколько бы набор ни вырос.
+
+        Точного числа здесь больше нет: набор растёт новыми парами, и сверка с
+        восьмёркой краснела бы на каждом росте, ничего про питание не меряя.
+        Что прежние пары на месте, говорит тест выше.
+        """
         body, items = pairs.load(HOUSEHOLD)
-        self.assertEqual(len(OLD_SEVEN) + 1, body["count"])
         self.assertEqual(body["count"], len(items))
+        self.assertGreaterEqual(body["count"], len(OLD_SEVEN) + 1)
 
 
 if __name__ == "__main__":
