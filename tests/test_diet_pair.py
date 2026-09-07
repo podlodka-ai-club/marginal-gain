@@ -43,7 +43,10 @@
    общее слово с задачей второй. Поиск в базе идёт словами вопроса
    (`storage.db.Repository.search`), и запись без общего слова не находится
    вовсе — прогон покажет «память ничего не нашла», хотя факт лежит в базе.
-7. Семь прежних пар на месте, категорий у них нет, id уникальны.
+7. Семь прежних пар на месте, id уникальны. Категорий у них нет — кроме
+   `макбук`: она судит своей категорией (второго рабочего ноутбука нет),
+   заведённой отдельной задачей, и к оси «животное против растительного»
+   отношения не имеет.
 
 Мутации, на которых проверки обязаны краснеть:
   * критерий вернули к перечню угаданных слов      → TestCriteriaAreClosedKinds
@@ -52,7 +55,8 @@
   * отмену растительного сняли                     → TestCriteriaAreClosedKinds
   * место пары называет ответ                      → TestThePairIsInTheSet
   * факт переписали так, что поиск его не достаёт  → TestTheFactIsReachableFromTheTask
-  * прежней паре дописали категорию                → TestTheOldSevenAreStillThere
+  * прежней паре (кроме `макбук`) дописали категорию → TestTheOldSevenAreStillThere
+  * на оси питания оказалась чужая категория        → TestCriteriaAreClosedKinds
 """
 import os
 import unittest
@@ -73,9 +77,16 @@ FAST = settings(deadline=None, max_examples=100)
 FLESH = "животная плоть"
 DAIRY = "животное неплотское"
 PLANT = "растительный белок"
-KIND_NAMES = (FLESH, DAIRY, PLANT)
+DIET_KIND_NAMES = (FLESH, DAIRY, PLANT)
+
+# Пара `макбук` тоже судит категорией (второго рабочего ноутбука нет), и её
+# словарь лежит в том же конверте. К оси «животное против растительного» он
+# отношения не имеет — держим отдельно, чтобы проверки про питание про него
+# не спотыкались, а проверки формы словаря его всё же покрывали.
+LAPTOP_KIND = "единственный ноутбук"
 
 VEGAN = "питание-веган"
+MACBOOK = "макбук"
 
 # Прежний набор: семь пар, вокруг которых версия добавляется.
 OLD_SEVEN = ("завтрак", "город", "забор", "макбук", "овсянка-ужин",
@@ -166,7 +177,9 @@ class TestCriteriaAreClosedKinds(Base):
         self.assertEqual(sorted([FLESH, DAIRY]), sorted(self.pair["forbid_kinds"]))
 
     def test_the_axis_is_animal_against_plant(self):
-        self.assertEqual(sorted(KIND_NAMES), sorted(self.kinds))
+        """Ось питания — ровно три категории; рядом с ними только словарь `макбук`."""
+        axis = sorted(name for name in self.kinds if name != LAPTOP_KIND)
+        self.assertEqual(sorted(DIET_KIND_NAMES), axis)
 
     def test_the_vocabulary_lives_in_the_envelope_once(self):
         self.assertTrue(self.kinds, "словаря в конверте нет")
@@ -269,9 +282,14 @@ class TestTheOldSevenAreStillThere(unittest.TestCase):
         self.assertEqual([], missing, "прежняя пара пропала: %s" % missing)
 
     def test_the_old_pairs_judge_by_words_as_before(self):
-        """Категорий у прежних пар нет: по ним снята история цифр в журнале."""
+        """Категорий у прежних пар нет: по ним снята история цифр в журнале.
+
+        Исключения два и оба заведены отдельными задачами: `питание-веган` (ось
+        животное/растительное) и `макбук` (второго рабочего ноутбука нет). Все
+        прочие судят словами, как судили.
+        """
         for item in load_items():
-            if item["id"] == VEGAN:
+            if item["id"] in (VEGAN, MACBOOK):
                 continue
             self.assertNotIn("expect_kinds", item, item["id"])
             self.assertNotIn("forbid_kinds", item, item["id"])
